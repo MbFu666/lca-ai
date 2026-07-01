@@ -346,24 +346,40 @@ async function loadLib(name) {
 
   /* ───────── HERO ───────── */
   .hero {
-    padding: 64px 0 36px;
+    padding: 80px 0 48px;
     display: grid;
     grid-template-columns: 1fr 360px;
     gap: 60px;
     align-items: end;
+    position: relative;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    left: -100px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, var(--jade-bg) 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: -1;
+    opacity: 0.6;
   }
   .eyebrow {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     font-family: var(--mono);
     font-size: 11px;
     letter-spacing: .15em;
     text-transform: uppercase;
     color: var(--jade-deep);
     background: var(--jade-bg);
-    padding: 5px 12px;
+    padding: 6px 14px;
     border-radius: 30px;
-    margin-bottom: 22px;
-    font-weight: 500;
+    margin-bottom: 24px;
+    font-weight: 600;
+    border: 1px solid var(--jade-soft);
   }
   h1 {
     font-family: var(--sans);
@@ -377,6 +393,19 @@ async function loadLib(name) {
     font-style: normal;
     color: var(--jade);
     font-weight: 700;
+    position: relative;
+  }
+  h1 em::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: var(--jade-soft);
+    border-radius: 4px;
+    z-index: -1;
+    opacity: 0.5;
   }
 
   /* ───────── COMPOSER ───────── */
@@ -384,11 +413,20 @@ async function loadLib(name) {
     margin-top: 40px;
     background: var(--bg);
     border: 1px solid var(--rule);
-    border-radius: 14px;
+    border-radius: 16px;
     padding: 8px 8px 16px;
     box-shadow:
-      0 1px 0 rgba(14,46,39,0.02),
-      0 24px 48px -28px rgba(14,46,39,0.18);
+      0 1px 2px rgba(14,46,39,0.04),
+      0 4px 8px rgba(14,46,39,0.02),
+      0 24px 48px -28px rgba(14,46,39,0.15);
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  .composer:focus-within {
+    border-color: var(--jade);
+    box-shadow:
+      0 0 0 3px var(--jade-bg),
+      0 4px 8px rgba(14,46,39,0.02),
+      0 24px 48px -28px rgba(14,46,39,0.15);
   }
   .composer-inner { padding: 18px 22px 6px; }
 
@@ -396,23 +434,28 @@ async function loadLib(name) {
     display: flex;
     gap: 4px;
     margin-bottom: 14px;
+    padding: 4px;
+    background: var(--bg-soft);
+    border-radius: 10px;
+    width: fit-content;
   }
   .modes button {
     background: none;
-    border: 1px solid transparent;
+    border: none;
     font-family: var(--sans);
     font-size: 13px;
     color: var(--ink-mute);
-    padding: 7px 14px;
+    padding: 8px 16px;
     cursor: pointer;
-    border-radius: 30px;
+    border-radius: 8px;
     font-weight: 500;
-    transition: all .15s;
+    transition: all .2s ease;
   }
   .modes button em { font-style: normal; color: var(--jade); margin-right: 4px; }
   .modes button.active {
     color: var(--ink);
-    background: var(--jade-bg);
+    background: var(--bg);
+    box-shadow: 0 1px 3px rgba(14,46,39,0.1);
   }
   .modes button:hover:not(.active) { color: var(--ink-soft); }
 
@@ -428,7 +471,8 @@ async function loadLib(name) {
     color: var(--ink);
     resize: none;
     min-height: 76px;
-    padding: 8px 0;
+    padding: 12px 0;
+    transition: color 0.2s;
   }
   #productInput::placeholder {
     color: var(--ink-mute);
@@ -454,17 +498,19 @@ async function loadLib(name) {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 7px 12px;
+    padding: 7px 14px;
     border: 1px solid var(--rule);
     border-radius: 30px;
-    transition: all .15s;
+    transition: all .2s ease;
     font-weight: 500;
     color: var(--ink-soft);
+    background: var(--bg);
   }
   .upload:hover {
     border-color: var(--jade);
     color: var(--jade-deep);
     background: var(--jade-bg);
+    transform: translateY(-1px);
   }
   .upload input { display: none; }
   .upload-name {
@@ -477,10 +523,10 @@ async function loadLib(name) {
   }
 
   #submitBtn {
-    background: var(--jade);
+    background: linear-gradient(135deg, var(--jade) 0%, var(--jade-dark) 100%);
     color: white;
     border: none;
-    padding: 10px 22px;
+    padding: 12px 28px;
     font-family: var(--sans);
     font-size: 14px;
     font-weight: 600;
@@ -489,13 +535,28 @@ async function loadLib(name) {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: all .15s;
+    transition: all .2s ease;
     box-shadow: 0 4px 12px -4px rgba(20,201,151,0.4);
+    position: relative;
+    overflow: hidden;
+  }
+  #submitBtn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+  }
+  #submitBtn:hover:not(:disabled)::before {
+    left: 100%;
   }
   #submitBtn:hover:not(:disabled) {
-    background: var(--jade-dark);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px -4px rgba(20,201,151,0.5);
+    background: linear-gradient(135deg, var(--jade-dark) 0%, var(--jade-deep) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px -4px rgba(20,201,151,0.5);
   }
   #submitBtn:disabled { opacity: .5; cursor: not-allowed; }
   #submitBtn .arrow { font-size: 14px; transition: transform .2s; }
@@ -522,17 +583,19 @@ async function loadLib(name) {
     background: var(--bg-soft);
     border: 1px solid var(--rule);
     border-radius: 30px;
-    padding: 6px 13px;
+    padding: 6px 14px;
     font-size: 12px;
     color: var(--ink-soft);
     cursor: pointer;
-    transition: all .15s;
+    transition: all .2s ease;
     font-weight: 500;
   }
   .examples button:hover {
     border-color: var(--jade);
     color: var(--jade-deep);
     background: var(--jade-bg);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(20,201,151,0.2);
   }
 
   /* Drop zone */
@@ -906,17 +969,18 @@ async function loadLib(name) {
     background: white;
     border: 1px solid var(--rule);
     border-top: 3px solid var(--c-color, var(--jade));
-    border-radius: 8px;
-    padding: 12px 16px;
+    border-radius: 10px;
+    padding: 14px 18px;
     min-width: 180px;
     max-width: 220px;
     cursor: pointer;
-    transition: all .15s;
+    transition: all .2s ease;
     position: relative;
+    box-shadow: 0 2px 6px rgba(14,46,39,0.04);
   }
   .stage-card:hover {
-    box-shadow: 0 6px 16px -8px rgba(14,46,39,0.18);
-    transform: translateY(-1px);
+    box-shadow: 0 8px 24px -8px rgba(14,46,39,0.15);
+    transform: translateY(-3px);
   }
   .stage-card.selected {
     background: var(--jade-bg);
@@ -999,13 +1063,15 @@ async function loadLib(name) {
     background: white;
     border: 1px solid var(--rule);
     border-left: 3px solid var(--c-color, var(--ink-mute));
-    border-radius: 6px;
-    padding: 10px 12px;
+    border-radius: 8px;
+    padding: 12px 14px;
     cursor: pointer;
-    transition: all .15s;
+    transition: all .2s ease;
+    box-shadow: 0 1px 4px rgba(14,46,39,0.03);
   }
   .proc-card:hover {
-    box-shadow: 0 4px 10px -6px rgba(14,46,39,0.15);
+    box-shadow: 0 4px 12px -4px rgba(14,46,39,0.12);
+    transform: translateX(2px);
   }
   .proc-card.selected {
     background: var(--jade-bg);
@@ -1400,8 +1466,14 @@ async function loadLib(name) {
   .res-card {
     background: white;
     border: 1px solid var(--rule);
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 24px 26px;
+    transition: all .2s ease;
+    box-shadow: 0 2px 8px rgba(14,46,39,0.04);
+  }
+  .res-card:hover {
+    box-shadow: 0 4px 16px rgba(14,46,39,0.08);
+    transform: translateY(-2px);
   }
   .res-card-head {
     display: flex;
@@ -1553,9 +1625,22 @@ async function loadLib(name) {
   .ai-section {
     background: white;
     border: 1px solid var(--rule);
-    border-radius: 12px;
-    padding: 26px 30px;
+    border-radius: 14px;
+    padding: 28px 32px;
     margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(14,46,39,0.04);
+    position: relative;
+    overflow: hidden;
+  }
+  .ai-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--jade) 0%, var(--jade-deep) 100%);
+    border-radius: 14px 0 0 14px;
   }
   .ai-badge {
     display: inline-flex;
@@ -1654,19 +1739,21 @@ async function loadLib(name) {
   /* ───────── FOOTER ───────── */
   footer {
     margin-top: 64px;
-    padding-top: 22px;
+    padding: 24px 0;
     border-top: 1px solid var(--rule);
     display: flex;
     justify-content: space-between;
+    align-items: center;
     flex-wrap: wrap;
     gap: 12px;
-    font-size: 12px;
+    font-size: 13px;
     color: var(--ink-mute);
   }
   footer a {
     color: var(--jade-deep);
     text-decoration: none;
     font-weight: 600;
+    transition: color 0.2s;
   }
   footer a:hover { color: var(--jade-dark); }
 
@@ -2361,8 +2448,8 @@ async function loadLib(name) {
     background: white;
     border: 1px solid var(--rule);
     border-right: none;
-    border-radius: 14px 0 0 14px;
-    box-shadow: -16px 0 40px -20px rgba(14,46,39,0.12);
+    border-radius: 16px 0 0 16px;
+    box-shadow: -8px 0 24px -8px rgba(14,46,39,0.1);
     z-index: 40;
     display: flex;
     flex-direction: column;
@@ -2667,18 +2754,22 @@ async function loadLib(name) {
     right: 24px;
     width: 56px; height: 56px;
     border-radius: 50%;
-    background: var(--jade);
+    background: linear-gradient(135deg, var(--jade) 0%, var(--jade-dark) 100%);
     color: white;
     border: none;
     cursor: pointer;
-    box-shadow: 0 12px 28px -10px rgba(20,201,151,0.6);
+    box-shadow: 0 8px 24px -4px rgba(20,201,151,0.5);
     font-size: 22px;
     z-index: 39;
     display: none;
-    transition: all .15s;
+    transition: all .2s ease;
   }
   .agent-fab.show { display: inline-flex; align-items: center; justify-content: center; }
-  .agent-fab:hover { background: var(--jade-dark); transform: translateY(-2px); }
+  .agent-fab:hover { 
+    background: linear-gradient(135deg, var(--jade-dark) 0%, var(--jade-deep) 100%);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 12px 32px -4px rgba(20,201,151,0.6);
+  }
 
   /* ═══════════════════════════════════════════════
        MODAL OVERLAY (Edit Model, Excel preview)
@@ -3216,17 +3307,18 @@ async function loadLib(name) {
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%) translateY(100px);
-    background: var(--ink);
+    background: linear-gradient(135deg, var(--ink) 0%, #1a3a32 100%);
     color: white;
-    padding: 12px 24px;
-    border-radius: 10px;
+    padding: 14px 28px;
+    border-radius: 12px;
     font-size: 14px;
     font-weight: 500;
     z-index: 300;
     opacity: 0;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     pointer-events: none;
     white-space: nowrap;
+    box-shadow: 0 8px 24px -8px rgba(0,0,0,0.3);
   }
   .toast.show {
     opacity: 1;
