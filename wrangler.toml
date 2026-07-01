@@ -1,8 +1,0 @@
-name = "lca-ai"
-compatibility_date = "2024-01-01"
-
-[site]
-bucket = "./"
-
-[vars]
-# LCA_WORKER_URL = "https://lca-ai-proxy.workers.dev"
