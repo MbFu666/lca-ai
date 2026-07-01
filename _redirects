@@ -1,0 +1,7 @@
+# Static files - serve directly
+/manifest.json  /manifest.json  200
+/sw.js          /sw.js          200
+/json-worker.js /json-worker.js 200
+
+# SPA fallback - all other routes
+/*              /index.html     200
