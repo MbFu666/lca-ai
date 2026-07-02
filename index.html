@@ -3670,6 +3670,36 @@ async function loadLib(name) {
 </style>
 </head>
 <body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="mesh-grid"></div>
+  <div class="aurora"></div>
+  <div class="pulse-ring"></div>
+  <div class="pulse-ring"></div>
+  <div class="pulse-ring"></div>
+  <div class="wave-line"></div>
+  <div class="wave-line"></div>
+  <div class="wave-line"></div>
+  <div class="sparkle"></div>
+  <div class="sparkle"></div>
+  <div class="sparkle"></div>
+  <div class="sparkle"></div>
+  <div class="sparkle"></div>
+  <div class="sparkle"></div>
+  <div class="sparkle"></div>
+  <div class="sparkle"></div>
+  <div class="sparkle"></div>
+  <div class="sparkle"></div>
+  <div class="floating-dot"></div>
+  <div class="floating-dot"></div>
+  <div class="floating-dot"></div>
+  <div class="floating-dot"></div>
+  <div class="floating-dot"></div>
+  <div class="floating-dot"></div>
+  <div class="floating-dot"></div>
+  <canvas id="particles-canvas"></canvas>
+
   <!-- Live Wallpaper Elements -->
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
@@ -8045,6 +8075,295 @@ h1 em {
   0%, 100% { top: 6px; opacity: 1; }
   50% { top: 18px; opacity: 0.3; }
 }
+﻿
+/* ═══════════════════════════════════════════════════════
+   LIVE WALLPAPER SYSTEM
+   ═══════════════════════════════════════════════════════ */
+
+/* ─── Animated Gradient Background ───────────────────── */
+body {
+  background: linear-gradient(135deg, #0a0a0f 0%, #0d1117 50%, #0a0f14 100%);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse 800px 600px at 20% 30%, rgba(20,185,129,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 600px 400px at 80% 70%, rgba(99,102,241,0.1) 0%, transparent 60%),
+    radial-gradient(ellipse 500px 500px at 50% 50%, rgba(236,72,153,0.05) 0%, transparent 60%);
+  z-index: -2;
+  animation: bgShift 25s ease-in-out infinite alternate;
+}
+
+@keyframes bgShift {
+  0% { 
+    background: 
+      radial-gradient(ellipse 800px 600px at 20% 30%, rgba(20,185,129,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 600px 400px at 80% 70%, rgba(99,102,241,0.1) 0%, transparent 60%),
+      radial-gradient(ellipse 500px 500px at 50% 50%, rgba(236,72,153,0.05) 0%, transparent 60%);
+  }
+  50% { 
+    background: 
+      radial-gradient(ellipse 700px 500px at 60% 20%, rgba(20,185,129,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse 800px 300px at 20% 80%, rgba(99,102,241,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 400px 600px at 80% 40%, rgba(236,72,153,0.08) 0%, transparent 60%);
+  }
+  100% { 
+    background: 
+      radial-gradient(ellipse 600px 700px at 80% 60%, rgba(20,185,129,0.1) 0%, transparent 60%),
+      radial-gradient(ellipse 700px 400px at 30% 30%, rgba(99,102,241,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 600px 400px at 60% 80%, rgba(236,72,153,0.06) 0%, transparent 60%);
+  }
+}
+
+/* ─── Floating Orbs ──────────────────────────────────── */
+.orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(40px);
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.5;
+  will-change: transform;
+}
+
+.orb-1 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(20,185,129,0.4) 0%, transparent 70%);
+  top: 10%;
+  right: 10%;
+  animation: orbFloat1 20s ease-in-out infinite;
+}
+
+.orb-2 {
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(99,102,241,0.35) 0%, transparent 70%);
+  bottom: 15%;
+  left: 15%;
+  animation: orbFloat2 25s ease-in-out infinite;
+}
+
+.orb-3 {
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(236,72,153,0.25) 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  animation: orbFloat3 18s ease-in-out infinite;
+}
+
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-40px, 50px) scale(1.1); }
+  66% { transform: translate(30px, -30px) scale(0.9); }
+}
+
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(50px, -40px) scale(0.9); }
+  66% { transform: translate(-30px, 30px) scale(1.1); }
+}
+
+@keyframes orbFloat3 {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  33% { transform: translate(-40%, -60%) scale(1.15); }
+  66% { transform: translate(-60%, -40%) scale(0.85); }
+}
+
+/* ─── Animated Mesh Grid ─────────────────────────────── */
+.mesh-grid {
+  position: fixed;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(20,185,129,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20,185,129,0.04) 1px, transparent 1px);
+  background-size: 80px 80px;
+  z-index: -1;
+  pointer-events: none;
+  animation: gridMove 40s linear infinite;
+}
+
+@keyframes gridMove {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(80px, 80px); }
+}
+
+/* ─── Sparkle Particles ──────────────────────────────── */
+.sparkle {
+  position: fixed;
+  width: 3px;
+  height: 3px;
+  background: #20b981;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+  box-shadow: 0 0 6px rgba(20,185,129,0.6);
+}
+
+.sparkle:nth-child(1) { left: 8%; top: 15%; animation: sparkleAnim 5s ease-in-out infinite 0s; }
+.sparkle:nth-child(2) { left: 25%; top: 45%; animation: sparkleAnim 6s ease-in-out infinite 1s; }
+.sparkle:nth-child(3) { left: 45%; top: 20%; animation: sparkleAnim 7s ease-in-out infinite 2s; }
+.sparkle:nth-child(4) { left: 65%; top: 65%; animation: sparkleAnim 5.5s ease-in-out infinite 0.5s; }
+.sparkle:nth-child(5) { left: 85%; top: 35%; animation: sparkleAnim 6.5s ease-in-out infinite 1.5s; }
+.sparkle:nth-child(6) { left: 15%; top: 75%; animation: sparkleAnim 5s ease-in-out infinite 2.5s; }
+.sparkle:nth-child(7) { left: 55%; top: 85%; animation: sparkleAnim 6s ease-in-out infinite 3s; }
+.sparkle:nth-child(8) { left: 75%; top: 10%; animation: sparkleAnim 7s ease-in-out infinite 0.7s; }
+.sparkle:nth-child(9) { left: 35%; top: 90%; animation: sparkleAnim 5.5s ease-in-out infinite 1.7s; }
+.sparkle:nth-child(10) { left: 92%; top: 70%; animation: sparkleAnim 6.5s ease-in-out infinite 2.2s; }
+
+@keyframes sparkleAnim {
+  0%, 100% { opacity: 0; transform: scale(0); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+/* ─── Floating Dots ──────────────────────────────────── */
+.floating-dot {
+  position: fixed;
+  width: 2px;
+  height: 2px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.floating-dot:nth-child(1) { left: 5%; animation: floatDot 15s linear infinite 0s; }
+.floating-dot:nth-child(2) { left: 20%; animation: floatDot 20s linear infinite 2s; }
+.floating-dot:nth-child(3) { left: 35%; animation: floatDot 18s linear infinite 4s; }
+.floating-dot:nth-child(4) { left: 50%; animation: floatDot 22s linear infinite 1s; }
+.floating-dot:nth-child(5) { left: 65%; animation: floatDot 16s linear infinite 3s; }
+.floating-dot:nth-child(6) { left: 80%; animation: floatDot 19s linear infinite 5s; }
+.floating-dot:nth-child(7) { left: 95%; animation: floatDot 21s linear infinite 2s; }
+
+@keyframes floatDot {
+  0% { top: 100vh; opacity: 0; }
+  10% { opacity: 0.5; }
+  90% { opacity: 0.5; }
+  100% { top: -10vh; opacity: 0; }
+}
+
+/* ─── Wave Lines ─────────────────────────────────────── */
+.wave-line {
+  position: fixed;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(20,185,129,0.2), transparent);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.wave-line:nth-child(1) { top: 20%; animation: waveMove 8s ease-in-out infinite; }
+.wave-line:nth-child(2) { top: 50%; animation: waveMove 10s ease-in-out infinite 2s; }
+.wave-line:nth-child(3) { top: 80%; animation: waveMove 12s ease-in-out infinite 4s; }
+
+@keyframes waveMove {
+  0%, 100% { transform: translateX(-100%) scaleY(1); opacity: 0; }
+  50% { transform: translateX(100%) scaleY(2); opacity: 0.5; }
+}
+
+/* ─── Hexagon Grid Pattern ───────────────────────────── */
+.hex-pattern {
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='52'%3E%3Cpath d='M30 0l30 17.32v17.32l-30 17.32L0 34.64V17.32z' fill='none' stroke='rgba(20,185,129,0.03)' stroke-width='1'/%3E%3C/svg%3E");
+  background-size: 60px 52px;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.5;
+  animation: hexRotate 60s linear infinite;
+}
+
+@keyframes hexRotate {
+  0% { transform: rotate(0deg) scale(1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+/* ─── Aurora Effect ──────────────────────────────────── */
+.aurora {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.aurora::before,
+.aurora::after {
+  content: '';
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  top: -25%;
+  left: -25%;
+  background: 
+    conic-gradient(from 0deg at 50% 50%, 
+      transparent 0deg, 
+      rgba(20,185,129,0.1) 60deg, 
+      transparent 120deg,
+      rgba(99,102,241,0.08) 180deg,
+      transparent 240deg,
+      rgba(236,72,153,0.05) 300deg,
+      transparent 360deg
+    );
+  animation: auroraRotate 30s linear infinite;
+  filter: blur(60px);
+}
+
+.aurora::after {
+  animation: auroraRotate 45s linear infinite reverse;
+  opacity: 0.5;
+}
+
+@keyframes auroraRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ─── Pulse Rings ────────────────────────────────────── */
+.pulse-ring {
+  position: fixed;
+  border: 1px solid rgba(20,185,129,0.2);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.pulse-ring:nth-child(1) {
+  width: 200px;
+  height: 200px;
+  top: 30%;
+  left: 20%;
+  animation: pulseExpand 4s ease-out infinite;
+}
+
+.pulse-ring:nth-child(2) {
+  width: 150px;
+  height: 150px;
+  top: 60%;
+  right: 25%;
+  animation: pulseExpand 5s ease-out infinite 1s;
+}
+
+.pulse-ring:nth-child(3) {
+  width: 180px;
+  height: 180px;
+  bottom: 20%;
+  left: 40%;
+  animation: pulseExpand 6s ease-out infinite 2s;
+}
+
+@keyframes pulseExpand {
+  0% { transform: scale(0.5); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
 </style>
     </head>
     <body>
@@ -8335,6 +8654,84 @@ document.addEventListener('DOMContentLoaded', function() {
           ctx.moveTo(particles[i].x, particles[i].y);
           ctx.lineTo(particles[j].x, particles[j].y);
           ctx.strokeStyle = 'rgba(20, 201, 151, ' + (0.1 * (1 - dist / 150)) + ')';
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+    
+    requestAnimationFrame(animate);
+  }
+  
+  window.addEventListener('resize', resize);
+  init();
+  animate();
+})();
+
+</script>
+
+<script>
+// Particles Animation
+(function() {
+  var canvas = document.getElementById('particles-canvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var particles = [];
+  var particleCount = 60;
+  
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  
+  function createParticle() {
+    return {
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.random() * 2 + 0.5,
+      speedX: (Math.random() - 0.5) * 0.4,
+      speedY: (Math.random() - 0.5) * 0.4,
+      opacity: Math.random() * 0.4 + 0.1
+    };
+  }
+  
+  function init() {
+    resize();
+    particles = [];
+    for (var i = 0; i < particleCount; i++) {
+      particles.push(createParticle());
+    }
+  }
+  
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    particles.forEach(function(p) {
+      p.x += p.speedX;
+      p.y += p.speedY;
+      
+      if (p.x < 0) p.x = canvas.width;
+      if (p.x > canvas.width) p.x = 0;
+      if (p.y < 0) p.y = canvas.height;
+      if (p.y > canvas.height) p.y = 0;
+      
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(20, 185, 129, ' + p.opacity + ')';
+      ctx.fill();
+    });
+    
+    for (var i = 0; i < particles.length; i++) {
+      for (var j = i + 1; j < particles.length; j++) {
+        var dx = particles[i].x - particles[j].x;
+        var dy = particles[i].y - particles[j].y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = 'rgba(20, 185, 129, ' + (0.15 * (1 - dist / 120)) + ')';
           ctx.lineWidth = 0.5;
           ctx.stroke();
         }
