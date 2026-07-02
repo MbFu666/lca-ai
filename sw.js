@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lca-ai-v2';
+const CACHE_NAME = 'lca-ai-v3';
 const urlsToCache = [
   '/',
   '/index.html',
