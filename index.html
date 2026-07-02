@@ -7049,7 +7049,254 @@ async function downloadWord(d) {
         .legend-item { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
         .legend-color { width: 12px; height: 12px; display: inline-block; }
         .footer { color: #93A0A6; font-size: 10px; margin-top: 30px; border-top: 1px solid #E5E8EB; padding-top: 10px; }
-      </style>
+      ﻿
+/* ═══════════════════════════════════════════════════════
+   ANIMATIONS & MICRO-INTERACTIONS
+   ═══════════════════════════════════════════════════════ */
+
+/* Hero fade-in on load */
+.hero {
+  animation: heroFadeIn 0.8s ease-out;
+}
+
+@keyframes heroFadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Eyebrow slide in */
+.eyebrow {
+  animation: slideDown 0.5s ease-out 0.2s both;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* H1 reveal */
+h1 {
+  animation: textReveal 0.6s ease-out 0.3s both;
+}
+
+@keyframes textReveal {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Composer entrance */
+.composer {
+  animation: composerSlide 0.7s ease-out 0.4s both;
+}
+
+@keyframes composerSlide {
+  from { opacity: 0; transform: translateY(30px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Submit button pulse */
+#submitBtn {
+  animation: buttonPulse 2s ease-in-out infinite;
+}
+
+@keyframes buttonPulse {
+  0%, 100% { box-shadow: 0 4px 15px -3px rgba(20,201,151,0.4); }
+  50% { box-shadow: 0 4px 25px -3px rgba(20,201,151,0.6); }
+}
+
+/* Stage cards stagger animation */
+.stage-card {
+  animation: cardFadeIn 0.5s ease-out both;
+}
+.stage-card:nth-child(1) { animation-delay: 0.1s; }
+.stage-card:nth-child(2) { animation-delay: 0.2s; }
+.stage-card:nth-child(3) { animation-delay: 0.3s; }
+.stage-card:nth-child(4) { animation-delay: 0.4s; }
+.stage-card:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes cardFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Process cards stagger */
+.proc-card {
+  animation: procFadeIn 0.4s ease-out both;
+}
+.proc-card:nth-child(1) { animation-delay: 0.15s; }
+.proc-card:nth-child(2) { animation-delay: 0.25s; }
+
+@keyframes procFadeIn {
+  from { opacity: 0; transform: translateX(-15px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Res hero animation */
+.res-hero {
+  animation: resHeroIn 0.6s ease-out;
+}
+
+@keyframes resHeroIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Donut chart animation */
+.donut canvas {
+  animation: donutSpin 0.8s ease-out;
+}
+
+@keyframes donutSpin {
+  from { opacity: 0; transform: rotate(-90deg) scale(0.8); }
+  to { opacity: 1; transform: rotate(0) scale(1); }
+}
+
+/* Ranking bars fill animation */
+.rank-bar-fill {
+  animation: barFill 1s ease-out 0.3s both;
+}
+
+@keyframes barFill {
+  from { width: 0; }
+}
+
+/* Res cards stagger */
+.res-card {
+  animation: resCardIn 0.5s ease-out both;
+}
+.res-card:nth-child(1) { animation-delay: 0.1s; }
+.res-card:nth-child(2) { animation-delay: 0.2s; }
+
+@keyframes resCardIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* AI section animation */
+.ai-section {
+  animation: aiFadeIn 0.6s ease-out 0.3s both;
+}
+
+@keyframes aiFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Agent FAB bounce */
+.agent-fab.show {
+  animation: fabBounce 0.5s ease-out;
+}
+
+@keyframes fabBounce {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* Toast slide up */
+.toast.show {
+  animation: toastSlide 0.4s ease-out;
+}
+
+@keyframes toastSlide {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* Modal entrance */
+.modal-mask.show .modal {
+  animation: modalIn 0.3s ease-out;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Agent slide in */
+.agent.show {
+  animation: agentSlideIn 0.3s ease-out;
+}
+
+@keyframes agentSlideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/* Smooth scroll indicator */
+@keyframes scrollIndicator {
+  0%, 100% { opacity: 0.5; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(5px); }
+}
+
+/* Flow connector animation */
+.flow-connector {
+  animation: connectorGrow 0.5s ease-out 0.3s both;
+}
+
+@keyframes connectorGrow {
+  from { height: 0; opacity: 0; }
+  to { height: 22px; opacity: 1; }
+}
+
+/* Button hover shine effect */
+.cs-actions button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.cs-actions button {
+  position: relative;
+  overflow: hidden;
+}
+
+.cs-actions button:hover::after {
+  left: 100%;
+}
+
+/* Donut legend rows stagger */
+.donut-legend-row {
+  animation: legendFade 0.4s ease-out both;
+}
+.donut-legend-row:nth-child(1) { animation-delay: 0.1s; }
+.donut-legend-row:nth-child(2) { animation-delay: 0.2s; }
+.donut-legend-row:nth-child(3) { animation-delay: 0.3s; }
+.donut-legend-row:nth-child(4) { animation-delay: 0.4s; }
+.donut-legend-row:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes legendFade {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Pulse animation for loading */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.loader-status::before {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Gradient text animation */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.res-hero-num .value {
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+}
+</style>
     </head>
     <body>
       <h1>LCA Report: ${escape(d.product_title || '-')}</h1>
@@ -7184,6 +7431,98 @@ themeToggle.addEventListener('click', () => {
    ============================================================ */
 applyLanguage('zh');
 initJsonWorker();
+﻿/* ============================================================
+   DOMContentLoaded — Full initialization
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('[LCA] Initializing...');
+  applyLanguage('zh');
+  
+  var savedTheme = localStorage.getItem('lca-theme');
+  var themeToggle = document.getElementById('themeToggle');
+  if (savedTheme === 'dark') {
+    document.documentElement.classList.add('dark');
+    if (themeToggle) themeToggle.textContent = String.fromCodePoint(0x2600, 0xFE0F);
+  }
+  if (themeToggle) {
+    themeToggle.addEventListener('click', function() {
+      document.documentElement.classList.toggle('dark');
+      var isDark = document.documentElement.classList.contains('dark');
+      themeToggle.textContent = isDark ? String.fromCodePoint(0x2600, 0xFE0F) : String.fromCodePoint(0x1F319);
+      localStorage.setItem('lca-theme', isDark ? 'dark' : 'light');
+    });
+  }
+  
+  document.querySelectorAll('.lang button').forEach(function(b) {
+    b.addEventListener('click', function() { applyLanguage(b.dataset.lang); });
+  });
+  
+  document.getElementById('submitBtn').addEventListener('click', run);
+  document.getElementById('productInput').addEventListener('keydown', function(e) {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') run();
+  });
+  
+  document.getElementById('backToHome').addEventListener('click', function() {
+    document.getElementById('pageResults').classList.remove('show');
+    document.getElementById('pageHome').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  
+  document.addEventListener('click', function(e) {
+    var stepBtn = e.target.closest('.cs-step');
+    if (stepBtn) switchStep(stepBtn.dataset.step);
+    var viewBtn = e.target.closest('.cs-view button');
+    if (viewBtn) switchView(viewBtn.dataset.view);
+  });
+  
+  document.getElementById('exportExcel').addEventListener('click', function() { if (lastReport) downloadExcel(lastReport, currentLang, fmtNum); });
+  document.getElementById('exportWord').addEventListener('click', function() { if (lastReport) downloadWord(lastReport, currentLang, fmtNum, total); });
+  document.getElementById('exportJson').addEventListener('click', function() { if (lastReport) downloadJson(lastReport); });
+  document.getElementById('exportPdf').addEventListener('click', function() { exportPdf(fmtNum, total); });
+  document.getElementById('exportPrint').addEventListener('click', function() { window.print(); });
+  
+  document.getElementById('agentClose').addEventListener('click', function() {
+    document.getElementById('agent').classList.remove('show');
+    document.getElementById('agentFab').classList.add('show');
+  });
+  document.getElementById('agentFab').addEventListener('click', function() {
+    document.getElementById('agent').classList.add('show');
+    document.getElementById('agentFab').classList.remove('show');
+  });
+  document.getElementById('agentSend').addEventListener('click', function() {
+    var msg = document.getElementById('agentMsg').value.trim();
+    if (typeof agentChatMode !== 'undefined' && agentChatMode) { sendChatMessage(msg); } else { applyAgentAnswers(); }
+  });
+  
+  document.querySelectorAll('.modes button').forEach(function(b) {
+    b.addEventListener('click', function() {
+      document.querySelectorAll('.modes button').forEach(function(x) { x.classList.remove('active'); });
+      b.classList.add('active');
+      currentMode = b.dataset.mode;
+    });
+  });
+  
+  var examples = [
+    { l: '\u9ED1\u9EA6\u9762\u5305, 1 kg', v: '1 kg \u6CE2\u5170\u70D8\u7119\u7684\u9ED1\u9EA6\u9762\u5305\uFF0C\u725B\u76AE\u7EB8\u5305\u88C5' },
+    { l: 'T\u6064, 200g', v: '1 \u4EF6 200g \u68C9\u8D28 T \u6064\uFF0C\u5B5F\u52A0\u62C9\u56FD\u751F\u4EA7' },
+    { l: '1 kWh \u7164\u7535', v: '1 kWh \u6765\u81EA\u7164\u706B\u7535\u5382\u7684\u7535\u529B' },
+    { l: '\u725B\u5976, 1L', v: '1 \u5347 2.5% \u725B\u5976\uFF0C\u767D\u4FC4\u7F57\u65AF\u7267\u573A' }
+  ];
+  var host = document.getElementById('exampleChips');
+  if (host) {
+    examples.forEach(function(ex) {
+      var b = document.createElement('button');
+      b.textContent = ex.l;
+      b.addEventListener('click', function() {
+        document.getElementById('productInput').value = ex.v;
+        document.getElementById('productInput').focus();
+      });
+      host.appendChild(b);
+    });
+  }
+  
+  console.log('[LCA] Init complete');
+});
 </script>
 
 </body>
