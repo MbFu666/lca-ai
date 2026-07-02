@@ -7296,6 +7296,294 @@ h1 {
   background-size: 200% 200%;
   animation: gradientShift 3s ease infinite;
 }
+﻿
+/* ═══════════════════════════════════════════════════════
+   ADDITIONAL ANIMATIONS
+   ═══════════════════════════════════════════════════════ */
+
+/* Smooth number counter effect */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.res-hero-num .value {
+  animation: countUp 0.8s ease-out 0.5s both;
+}
+
+/* Gradient border animation on composer focus */
+.composer {
+  position: relative;
+  overflow: hidden;
+}
+
+.composer::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--jade, #14C997), var(--jade-dark, #0FB386), var(--jade, #14C997));
+  background-size: 200% 100%;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.composer:focus-within::after {
+  opacity: 1;
+  animation: shimmer 2s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Floating labels animation */
+.detail-eyebrow {
+  animation: labelFloat 0.3s ease-out;
+}
+
+@keyframes labelFloat {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Card hover lift with shadow */
+.flow-root {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.flow-root:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 20px 40px -10px rgba(20,201,151,0.3);
+}
+
+/* Stage card ripple effect on click */
+.stage-card:active {
+  transform: scale(0.98);
+  transition: transform 0.1s;
+}
+
+/* Process card slide animation */
+.proc-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.proc-card:hover {
+  transform: translateX(8px);
+  box-shadow: 0 4px 12px -2px rgba(14,46,39,0.15);
+}
+
+/* Donut legend hover effect */
+.donut-legend-row {
+  transition: all 0.2s ease;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.donut-legend-row:hover {
+  background: var(--bg-soft, #f8f9fa);
+  transform: translateX(4px);
+}
+
+/* Ranking bar hover effect */
+.rank-row {
+  transition: all 0.2s ease;
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+
+.rank-row:hover {
+  background: var(--bg-soft, #f8f9fa);
+}
+
+/* AI badge pulse */
+.ai-badge {
+  animation: badgePulse 3s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% { box-shadow: 0 2px 8px rgba(20,201,151,0.3); }
+  50% { box-shadow: 0 2px 16px rgba(20,201,151,0.5); }
+}
+
+/* Note items stagger */
+.note li {
+  animation: noteItem 0.4s ease-out both;
+}
+.note li:nth-child(1) { animation-delay: 0.1s; }
+.note li:nth-child(2) { animation-delay: 0.2s; }
+.note li:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes noteItem {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Loading dots animation */
+.loader-status::after {
+  content: '...';
+  animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0% { content: '.'; }
+  25% { content: '..'; }
+  50% { content: '...'; }
+  75% { content: ''; }
+}
+
+/* Agent message appear */
+.chat-bubble {
+  animation: messageAppear 0.3s ease-out;
+}
+
+@keyframes messageAppear {
+  from { opacity: 0; transform: translateY(10px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Option button press effect */
+.agent-opt:active {
+  transform: scale(0.97);
+  transition: transform 0.1s;
+}
+
+/* Modal backdrop blur */
+.modal-mask.show {
+  animation: backdropBlur 0.3s ease;
+}
+
+@keyframes backdropBlur {
+  from { backdrop-filter: blur(0); }
+  to { backdrop-filter: blur(8px); }
+}
+
+/* Toast icon bounce */
+.toast.show::before {
+  content: '✓';
+  display: inline-block;
+  margin-right: 8px;
+  animation: iconBounce 0.5s ease;
+}
+
+@keyframes iconBounce {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+/* Scrollbar fade */
+::-webkit-scrollbar {
+  transition: opacity 0.3s;
+}
+
+body:hover ::-webkit-scrollbar-thumb {
+  background: var(--ink-mute, #93A0A6);
+}
+
+/* Focus ring animation */
+:focus-visible {
+  animation: focusRing 0.2s ease;
+}
+
+@keyframes focusRing {
+  from { outline-offset: 4px; }
+  to { outline-offset: 2px; }
+}
+
+/* Hero gradient animation */
+.hero::before {
+  animation: heroGlow 8s ease-in-out infinite alternate;
+}
+
+@keyframes heroGlow {
+  0% { opacity: 0.5; transform: translateX(-50%) scale(1); }
+  100% { opacity: 0.8; transform: translateX(-50%) scale(1.1); }
+}
+
+/* Button text shimmer */
+#submitBtn span {
+  position: relative;
+  z-index: 1;
+}
+
+/* Res meta items stagger */
+.res-meta > div {
+  animation: metaItem 0.5s ease-out both;
+}
+.res-meta > div:nth-child(1) { animation-delay: 0.1s; }
+.res-meta > div:nth-child(2) { animation-delay: 0.15s; }
+.res-meta > div:nth-child(3) { animation-delay: 0.2s; }
+.res-meta > div:nth-child(4) { animation-delay: 0.25s; }
+.res-meta > div:nth-child(5) { animation-delay: 0.3s; }
+
+@keyframes metaItem {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Report strip slide in */
+.report-strip {
+  animation: stripSlide 0.4s ease-out;
+}
+
+@keyframes stripSlide {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Step indicator glow */
+.cs-step.active .num {
+  animation: stepGlow 2s ease-in-out infinite;
+}
+
+@keyframes stepGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(20,201,151,0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(20,201,151,0); }
+}
+
+/* Back button hover arrow */
+.crumbs .back:hover::after {
+  content: '→';
+  position: absolute;
+  right: -20px;
+  animation: arrowSlide 0.3s ease;
+}
+
+@keyframes arrowSlide {
+  from { opacity: 0; right: -10px; }
+  to { opacity: 1; right: -20px; }
+}
+
+/* Detail panel entrance */
+.detail-float.show {
+  animation: detailSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes detailSlide {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Edit button glow */
+.cs-actions button.primary::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(135deg, var(--jade, #14C997), var(--jade-dark, #0FB386));
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.cs-actions button.primary:hover::before {
+  opacity: 0.5;
+}
 </style>
     </head>
     <body>
