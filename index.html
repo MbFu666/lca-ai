@@ -6433,6 +6433,9 @@ function renderReport(d) {
   $('#pageResults').classList.add('show');
   // Показываем кнопку AI-агента только на странице отчёта
   $('#agentFab').classList.add('show');
+  // Открываем панель AI-агента с вопросами
+  $('#agent').classList.add('show');
+  renderAgent();
   setTimeout(() => $('#pageResults').scrollIntoView({behavior:'smooth', block:'start'}), 80);
 }
 
@@ -7338,11 +7341,10 @@ async function applyAgentAnswers() {
 // Open/close
 $('#agentClose').addEventListener('click', () => {
   $('#agent').classList.remove('show');
-  $('#agentFab').classList.remove('show');
+  // На странице отчёта FAB остаётся видимым
 });
 $('#agentFab').addEventListener('click', () => {
   $('#agent').classList.add('show');
-  $('#agentFab').classList.add('show');
 });
 
 // Chat mode toggle
@@ -8270,11 +8272,9 @@ document.addEventListener('DOMContentLoaded', function() {
   
   document.getElementById('agentClose').addEventListener('click', function() {
     document.getElementById('agent').classList.remove('show');
-    document.getElementById('agentFab').classList.remove('show');
   });
   document.getElementById('agentFab').addEventListener('click', function() {
     document.getElementById('agent').classList.add('show');
-    document.getElementById('agentFab').classList.add('show');
   });
   // Скрываем FAB на главной странице
   if (document.getElementById('pageHome') && !document.getElementById('pageHome').classList.contains('hidden')) {
