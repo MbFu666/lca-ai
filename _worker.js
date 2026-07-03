@@ -3,11 +3,11 @@ const MAINTENANCE_MODE = true; // false = выключить техобслуж�
 const YOUR_IP = "1.58.73.217";
 
 const MAINTENANCE_HTML = `<!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LCA·AI — Технические работы</title>
+    <title>LCA·AI — Technical work</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -46,8 +46,8 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
 <body>
     <div class="container">
         <div class="icon">\u{1F527}</div>
-        <h1>\u0412\u0435\u0434\u0443\u0442\u0441\u044F \u0442\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u0438\u0435 \u0440\u0430\u0431\u043E\u0442\u044B</h1>
-        <p>\u0421\u0438\u0441\u0442\u0435\u043C\u0430 \u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u0430 \u0434\u043B\u044F \u043F\u0440\u043E\u0432\u0435\u0434\u0435\u043D\u0438\u044F \u043E\u0431\u0441\u043B\u0443\u0436\u0438\u0432\u0430\u043D\u0438\u044F.<br>\u041C\u044B \u0441\u043A\u043E\u0440\u043E \u0432\u0435\u0440\u043D\u0451\u043C\u0441\u044F!</p>
+        <h1>Scheduled Maintenance</h1>
+        <p>The system is temporarily unavailable for maintenance.<br>We'll be back soon!</p>
         <div class="loader-dots"><span></span><span></span><span></span></div>
         <div style="margin-top:48px"><span class="brand"><span class="dot"></span>LCA\u00B7AI</span></div>
     </div>
