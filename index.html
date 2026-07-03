@@ -2761,12 +2761,10 @@ async function loadLib(name) {
     box-shadow: 0 8px 24px -4px rgba(20,201,151,0.5);
     font-size: 22px;
     z-index: 39;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    display: none;
     transition: all .2s ease;
   }
-  .agent-fab.show { display: none; }
+  .agent-fab.show { display: inline-flex; align-items: center; justify-content: center; }
   .agent-fab:hover { 
     background: linear-gradient(135deg, var(--jade-dark) 0%, var(--jade-deep) 100%);
     transform: translateY(-3px) scale(1.05);
@@ -6433,6 +6431,8 @@ function renderReport(d) {
   // Переключаемся на страницу результатов
   $('#pageHome').classList.add('hidden');
   $('#pageResults').classList.add('show');
+  // Показываем кнопку AI-агента только на странице отчёта
+  $('#agentFab').classList.remove('show');
   setTimeout(() => $('#pageResults').scrollIntoView({behavior:'smooth', block:'start'}), 80);
 }
 
@@ -6960,6 +6960,9 @@ document.addEventListener('click', e => {
     // Возвращаемся на домашнюю страницу
     $('#pageResults').classList.remove('show');
     $('#pageHome').classList.remove('hidden');
+    // Скрываем AI-агента на главной
+    $('#agent').classList.remove('show');
+    $('#agentFab').classList.remove('show');
     // Сбрасываем состояние агента
     agentQuestions = [];
     agentRefinements = '';
@@ -8259,10 +8262,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (viewBtn) switchView(viewBtn.dataset.view);
   });
   
-  document.getElementById('exportExcel').addEventListener('click', function() { if (lastReport) downloadExcel(lastReport, currentLang, fmtNum); });
-  document.getElementById('exportWord').addEventListener('click', function() { if (lastReport) downloadWord(lastReport, currentLang, fmtNum, total); });
+  document.getElementById('exportExcel').addEventListener('click', function() { if (lastReport) { buildExcelPreview(lastReport); showModal('modalExcel'); } });
+  document.getElementById('exportWord').addEventListener('click', function() { if (lastReport) showWordPreview(lastReport); });
   document.getElementById('exportJson').addEventListener('click', function() { if (lastReport) downloadJson(lastReport); });
-  document.getElementById('exportPdf').addEventListener('click', function() { exportPdf(fmtNum, total); });
+  document.getElementById('exportPdf').addEventListener('click', function() { showPdfPreview(); });
   document.getElementById('exportPrint').addEventListener('click', function() { window.print(); });
   
   document.getElementById('agentClose').addEventListener('click', function() {
@@ -8273,6 +8276,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('agent').classList.add('show');
     document.getElementById('agentFab').classList.add('show');
   });
+  // Скрываем FAB на главной странице
+  if (document.getElementById('pageHome') && !document.getElementById('pageHome').classList.contains('hidden')) {
+    document.getElementById('agentFab').classList.remove('show');
+  }
   document.getElementById('agentSend').addEventListener('click', function() {
     var msg = document.getElementById('agentMsg').value.trim();
     if (typeof agentChatMode !== 'undefined' && agentChatMode) { sendChatMessage(msg); } else { applyAgentAnswers(); }
