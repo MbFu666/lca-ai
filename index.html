@@ -8198,42 +8198,32 @@ async function downloadWord(d) {
 }
 
 /* ============================================================
-   Theme Toggle
+   Theme Toggle + Auto-detect
    ============================================================ */
-const themeToggle = document.getElementById('themeToggle');
-const savedTheme = localStorage.getItem('lca-theme');
-
-if (savedTheme === 'dark') {
-  document.documentElement.classList.add('dark');
-  themeToggle.textContent = '☀️';
-}
-
-themeToggle.addEventListener('click', () => {
-  document.documentElement.classList.toggle('dark');
-  const isDark = document.documentElement.classList.contains('dark');
-  themeToggle.textContent = isDark ? '☀️' : '🌙';
-  localStorage.setItem('lca-theme', isDark ? 'dark' : 'light');
-});
+// Удалён дублирующий обработчик — основной в DOMContentLoaded ниже
 
 /* ============================================================
    Init
    ============================================================ */
-applyLanguage('zh');
 initJsonWorker();
-﻿/* ============================================================
+/* ============================================================
    DOMContentLoaded — Full initialization
    ============================================================ */
 document.addEventListener('DOMContentLoaded', function() {
   console.log('[LCA] Initializing...');
-  applyLanguage('zh');
-  
+
   var savedTheme = localStorage.getItem('lca-theme');
   var themeToggle = document.getElementById('themeToggle');
+
+  // Автоопределение тёмной темы: localStorage > системные настройки
   if (savedTheme === 'dark') {
     document.documentElement.classList.add('dark');
-    if (themeToggle) themeToggle.textContent = String.fromCodePoint(0x2600, 0xFE0F);
+  } else if (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.documentElement.classList.add('dark');
   }
   if (themeToggle) {
+    var isDark = document.documentElement.classList.contains('dark');
+    themeToggle.textContent = isDark ? String.fromCodePoint(0x2600, 0xFE0F) : String.fromCodePoint(0x1F319);
     themeToggle.addEventListener('click', function() {
       document.documentElement.classList.toggle('dark');
       var isDark = document.documentElement.classList.contains('dark');
@@ -8241,9 +8231,23 @@ document.addEventListener('DOMContentLoaded', function() {
       localStorage.setItem('lca-theme', isDark ? 'dark' : 'light');
     });
   }
-  
+
+  // Автоопределение языка: localStorage > браузерный > zh по умолчанию
+  var savedLang = localStorage.getItem('lca-lang');
+  if (savedLang) {
+    applyLanguage(savedLang);
+  } else {
+    var browserLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
+    if (browserLang.startsWith('ru')) applyLanguage('ru');
+    else if (browserLang.startsWith('en')) applyLanguage('en');
+    else applyLanguage('zh');
+  }
+
   document.querySelectorAll('.lang button').forEach(function(b) {
-    b.addEventListener('click', function() { applyLanguage(b.dataset.lang); });
+    b.addEventListener('click', function() {
+      applyLanguage(b.dataset.lang);
+      localStorage.setItem('lca-lang', b.dataset.lang);
+    });
   });
   
   document.getElementById('submitBtn').addEventListener('click', run);
