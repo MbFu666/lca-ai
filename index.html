@@ -5696,6 +5696,28 @@ let isAgentRefining = false; // флаг режима уточнений чер�
 const $  = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
 
+/* ── Modal helpers ── */
+function showModal(id) {
+  const mask = document.getElementById(id);
+  if (mask) mask.classList.add('show');
+}
+function closeModal(id) {
+  const mask = document.getElementById(id);
+  if (mask) mask.classList.remove('show');
+}
+// Close modal on overlay click or [data-close] button
+document.addEventListener('click', e => {
+  const closeBtn = e.target.closest('[data-close]');
+  if (closeBtn) {
+    const mask = closeBtn.closest('.modal-mask');
+    if (mask) mask.classList.remove('show');
+    return;
+  }
+  if (e.target.classList.contains('modal-mask')) {
+    e.target.classList.remove('show');
+  }
+});
+
 /* ============================================================
    History — сохранение истории расчётов в localStorage
    ============================================================ */
