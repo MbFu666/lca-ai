@@ -2761,10 +2761,12 @@ async function loadLib(name) {
     box-shadow: 0 8px 24px -4px rgba(20,201,151,0.5);
     font-size: 22px;
     z-index: 39;
-    display: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     transition: all .2s ease;
   }
-  .agent-fab.show { display: inline-flex; align-items: center; justify-content: center; }
+  .agent-fab.show { display: none; }
   .agent-fab:hover { 
     background: linear-gradient(135deg, var(--jade-dark) 0%, var(--jade-deep) 100%);
     transform: translateY(-3px) scale(1.05);
@@ -7090,7 +7092,7 @@ let agentExtraNote = '';
 async function generateAgentQuestions(d) {
   // Открываем панель и показываем спиннер
   $('#agent').classList.add('show');
-  $('#agentFab').classList.remove('show');
+  $('#agentFab').classList.add('show');
   $('#agent').setAttribute('aria-hidden', 'false');
   $('#agentBody').innerHTML =
     `<div class="agent-empty">${I18N[currentLang].agent_loading}</div>`;
@@ -7311,11 +7313,11 @@ async function applyAgentAnswers() {
 // Open/close
 $('#agentClose').addEventListener('click', () => {
   $('#agent').classList.remove('show');
-  $('#agentFab').classList.add('show');
+  $('#agentFab').classList.remove('show');
 });
 $('#agentFab').addEventListener('click', () => {
   $('#agent').classList.add('show');
-  $('#agentFab').classList.remove('show');
+  $('#agentFab').classList.add('show');
 });
 
 // Chat mode toggle
@@ -8243,11 +8245,11 @@ document.addEventListener('DOMContentLoaded', function() {
   
   document.getElementById('agentClose').addEventListener('click', function() {
     document.getElementById('agent').classList.remove('show');
-    document.getElementById('agentFab').classList.add('show');
+    document.getElementById('agentFab').classList.remove('show');
   });
   document.getElementById('agentFab').addEventListener('click', function() {
     document.getElementById('agent').classList.add('show');
-    document.getElementById('agentFab').classList.remove('show');
+    document.getElementById('agentFab').classList.add('show');
   });
   document.getElementById('agentSend').addEventListener('click', function() {
     var msg = document.getElementById('agentMsg').value.trim();
