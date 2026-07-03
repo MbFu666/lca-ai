@@ -6432,7 +6432,7 @@ function renderReport(d) {
   $('#pageHome').classList.add('hidden');
   $('#pageResults').classList.add('show');
   // Показываем кнопку AI-агента только на странице отчёта
-  $('#agentFab').classList.remove('show');
+  $('#agentFab').classList.add('show');
   setTimeout(() => $('#pageResults').scrollIntoView({behavior:'smooth', block:'start'}), 80);
 }
 
