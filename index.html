@@ -7808,14 +7808,6 @@ async function applyAgentAnswers() {
 }
 
 // Open/close
-$('#agentClose').addEventListener('click', () => {
-  $('#agent').classList.remove('show');
-  // На странице отчёта FAB остаётся видимым
-});
-$('#agentFab').addEventListener('click', () => {
-  $('#agent').classList.add('show');
-});
-
 // Chat mode toggle
 $('#chatModeToggle').addEventListener('click', () => {
   toggleChatMode();
@@ -8435,20 +8427,9 @@ function showNewProjectModalForSave() {
 /* ════════════════════════════════════════════════════════
    EXCEL EXPORT
    ════════════════════════════════════════════════════════ */
-$('#exportExcel').addEventListener('click', () => {
-  if (!lastReport) return;
-  buildExcelPreview(lastReport);
-  showModal('modalExcel');
-});
-
 $('#xlsDownload').addEventListener('click', () => {
   if (!lastReport) return;
   downloadExcel(lastReport);
-});
-
-$('#exportWord').addEventListener('click', () => {
-  if (!lastReport) return;
-  showWordPreview(lastReport);
 });
 
 $('#wordDownload').addEventListener('click', () => {
