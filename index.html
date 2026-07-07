@@ -3383,7 +3383,7 @@ async function loadLib(name) {
     border-radius: 6px;
     overflow: auto;
     max-height: 60vh;
-    background: white;
+    background: var(--bg);
   }
   .xls-grid {
     width: 100%;
@@ -3428,7 +3428,7 @@ async function loadLib(name) {
   }
   .xls-grid tbody tr.hdr td:first-child { background: var(--bg-soft); color: var(--ink-mute); font-weight: 500; }
   .xls-grid tbody tr.stage td {
-    background: #FFFBF1;
+    background: var(--jade-bg);
     font-weight: 600;
   }
   .xls-grid tbody tr.stage td:first-child { background: var(--bg-soft); font-weight: 500; }
@@ -3438,6 +3438,17 @@ async function loadLib(name) {
     font-weight: 700;
   }
   .xls-grid tbody tr.total td:first-child { background: var(--bg-soft); color: var(--ink-mute); }
+
+  /* Dark mode for xls-grid */
+  html.dark .xls-grid-wrap { background: var(--bg); border-color: var(--rule); }
+  html.dark .xls-grid thead tr:first-child th { background: var(--bg-soft); color: var(--ink-mute); border-color: var(--rule); }
+  html.dark .xls-grid thead tr:first-child th:first-child { background: var(--bg-tint); }
+  html.dark .xls-grid tbody td { background: var(--bg); color: var(--ink); border-color: var(--rule-soft); }
+  html.dark .xls-grid tbody td:first-child { background: var(--bg-soft); color: var(--ink-mute); }
+  html.dark .xls-grid tbody tr.hdr td { background: var(--jade-bg); color: var(--ink); }
+  html.dark .xls-grid tbody tr.hdr td:first-child { background: var(--bg-soft); color: var(--ink-mute); }
+  html.dark .xls-grid tbody tr.stage td { background: var(--bg-tint); color: var(--ink); }
+  html.dark .xls-grid tbody tr.stage td:first-child { background: var(--bg-soft); color: var(--ink-mute); }
 
   /* ═══════════════════════════════════════════════
        PAGE TRANSITIONS
