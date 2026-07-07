@@ -8681,15 +8681,18 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Автоопределение языка: localStorage > браузерный > zh по умолчанию
+  // Автоопределение языка: браузерный > localStorage > ru по умолчанию
+  var browserLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
   var savedLang = localStorage.getItem('lca-lang');
-  if (savedLang) {
+  if (savedLang && savedLang !== 'zh') {
+    // Используем сохранённый язык, кроме zh (китайский не по умолчанию)
     applyLanguage(savedLang);
+  } else if (browserLang.startsWith('ru')) {
+    applyLanguage('ru');
+  } else if (browserLang.startsWith('en')) {
+    applyLanguage('en');
   } else {
-    var browserLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
-    if (browserLang.startsWith('ru')) applyLanguage('ru');
-    else if (browserLang.startsWith('en')) applyLanguage('en');
-    else applyLanguage('zh');
+    applyLanguage('ru');
   }
 
   document.querySelectorAll('.lang button').forEach(function(b) {
