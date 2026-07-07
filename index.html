@@ -2089,6 +2089,32 @@ async function loadLib(name) {
     background: var(--jade-bg);
   }
 
+  /* Auth button */
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .auth-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border: 1px solid var(--rule);
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-decoration: none;
+    transition: all .15s;
+    cursor: pointer;
+  }
+  .auth-btn:hover {
+    border-color: var(--jade);
+    color: var(--jade-deep);
+    background: var(--jade-bg);
+  }
+
   /* ═══════════════════════════════════════════════
        MODALS (Edit Model + Excel + …)
      ═══════════════════════════════════════════════ */
@@ -5085,7 +5111,13 @@ body::before {
         <button data-lang="en">EN</button>
         <button data-lang="zh" class="active">中文</button>
       </div>
-      <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">🌙</button>
+      <div class="header-actions">
+        <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">🌙</button>
+        <a href="/login.html" class="auth-btn" id="authBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span data-i18n="auth_login">Войти</span>
+        </a>
+      </div>
     </div>
   </header>
 
@@ -5707,6 +5739,7 @@ const I18N = {
     cta_title:    'Готовы рассчитать углеродный след?',
     cta_sub:      'Бесплатно, без регистрации, за 10 секунд',
     cta_btn:      'Начать расчёт',
+    auth_login:   'Войти',
     /* composer */
     mode_full:    'Полный цикл',
     mode_factor:  'Приоритет факторов',
@@ -5883,6 +5916,7 @@ const I18N = {
     cta_title:    'Ready to calculate your carbon footprint?',
     cta_sub:      'Free, no registration, 10 seconds',
     cta_btn:      'Start calculation',
+    auth_login:   'Sign in',
     mode_full:    'Full life cycle',
     mode_factor:  'Factor preference',
     placeholder:  'Describe the product in text, e.g. 1 kg of nanocellulose from sweet sorghum bagasse, produced in northeast China…',
@@ -6045,6 +6079,7 @@ const I18N = {
     cta_title:    '准备好计算碳足迹了吗？',
     cta_sub:      '免费、无需注册、10 秒完成',
     cta_btn:      '开始计算',
+    auth_login:   '登录',
     mode_full:    '全生命周期',
     mode_factor:  '因子优先',
     placeholder:  '请用文字描述产品，例如:1 kg 由甜高粱渣制备的纳米纤维素,中国东北地区生产…',
