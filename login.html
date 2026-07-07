@@ -194,7 +194,12 @@
 
         <form class="email-form" id="emailForm">
             <input type="email" class="email-input" id="emailInput" placeholder="Введите email" required>
-            <button type="submit" class="email-btn" id="emailBtn">Отправить ссылку входа</button>
+            <button type="submit" class="email-btn" id="emailBtn">Отправить код</button>
+        </form>
+
+        <form class="email-form" id="codeForm" style="display:none">
+            <input type="text" class="email-input" id="codeInput" placeholder="Введите 6-значный код" maxlength="6" pattern="[0-9]{6}" required>
+            <button type="submit" class="email-btn" id="codeBtn">Войти</button>
         </form>
 
         <div class="msg" id="msg"></div>
@@ -244,7 +249,7 @@
             if (error) showError(error.message);
         });
 
-        // Email magic link
+        // Email OTP (6-значный код)
         document.getElementById('emailForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('emailInput').value;
@@ -254,16 +259,51 @@
 
             const { error } = await supabase.auth.signInWithOtp({
                 email: email,
-                options: { emailRedirectTo: REDIRECT_TO }
+                options: {
+                    shouldCreateUser: true
+                }
             });
 
             btn.disabled = false;
-            btn.textContent = 'Отправить ссылку входа';
+            btn.textContent = 'Отправить код';
 
             if (error) {
                 showError(error.message);
             } else {
-                showSuccess('Ссылка для входа отправлена на ' + email);
+                // Показываем поле для ввода кода
+                document.getElementById('emailForm').style.display = 'none';
+                document.getElementById('codeForm').style.display = 'flex';
+                showSuccess('Код отправлен на ' + email);
+            }
+        });
+
+        // Верификация OTP кода
+        document.getElementById('codeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const code = document.getElementById('codeInput').value;
+            const btn = document.getElementById('codeBtn');
+            btn.disabled = true;
+            btn.textContent = 'Проверка...';
+
+            const { error } = await supabase.auth.verifyOtp({
+                email: document.getElementById('emailInput').value,
+                token: code,
+                type: 'email'
+            });
+
+            btn.disabled = false;
+            btn.textContent = 'Войти';
+
+            if (error) {
+                showError('Неверный код: ' + error.message);
+            } else {
+                // Успешный вход — перенаправляем
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) {
+                    localStorage.setItem('supabase_user', JSON.stringify(session.user));
+                    localStorage.setItem('supabase_token', session.access_token);
+                    window.location.href = REDIRECT_TO;
+                }
             }
         });
 
