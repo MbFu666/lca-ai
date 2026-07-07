@@ -407,6 +407,49 @@ async function loadLib(name) {
     z-index: -1;
     opacity: 0.5;
   }
+  .hero-sub {
+    margin-top: 16px;
+    font-size: 17px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    max-width: 480px;
+  }
+
+  /* ───────── FEATURES ───────── */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 48px;
+    padding-top: 40px;
+    border-top: 1px solid var(--rule);
+  }
+  .feature-card {
+    text-align: center;
+    padding: 28px 20px;
+    border-radius: 12px;
+    background: var(--bg-soft);
+    border: 1px solid var(--rule-soft);
+    transition: all .25s ease;
+  }
+  .feature-card:hover {
+    border-color: var(--jade-soft);
+    background: var(--jade-bg);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px -8px rgba(20,201,151,0.15);
+  }
+  .feature-icon { font-size: 32px; margin-bottom: 14px; }
+  .feature-card h3 { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+  .feature-card p { font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
+
+  /* ───────── TRUST STRIP ───────── */
+  .trust-strip {
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px; margin-top: 32px; padding: 20px 0;
+    font-size: 13px; color: var(--ink-mute);
+  }
+  .trust-item strong { color: var(--ink-soft); font-weight: 600; }
+  .trust-dot { color: var(--rule); }
 
   /* ───────── COMPOSER ───────── */
   .composer {
@@ -1756,6 +1799,7 @@ async function loadLib(name) {
     transition: color 0.2s;
   }
   footer a:hover { color: var(--jade-dark); }
+  .footer-links { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; }
 
   /* ───── LANG SWITCHER ───── */
   .lang {
@@ -4765,6 +4809,7 @@ body::before {
       <div>
         <span class="eyebrow" data-i18n="eyebrow">оценка жизненного цикла · AI</span>
         <h1 data-i18n-html="h1">Углеродный след<br>продукта <em>за секунду</em>.</h1>
+        <p class="hero-sub" data-i18n="hero_sub">Опишите продукт — ИИ рассчитает углеродный след за 10 секунд</p>
       </div>
     </section>
 
@@ -4814,6 +4859,34 @@ body::before {
           <div class="loader-msg" id="loaderMsg">—</div>
         </div>
       </div>
+    </section>
+
+    <!-- ============== FEATURES ============== -->
+    <section class="features">
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3 data-i18n="feat_speed">Быстрый расчёт</h3>
+        <p data-i18n="feat_speed_d">DeepSeek анализирует продукт за секунды, а не часы</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3 data-i18n="feat_viz">Визуализация</h3>
+        <p data-i18n="feat_viz_d">Графы, диаграммы, рейтинги и детальный разбор по стадиям</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌍</div>
+        <h3 data-i18n="feat_full">Полный цикл</h3>
+        <p data-i18n="feat_full_d">От добычи сырья до утилизации — полная оценка жизненного цикла</p>
+      </div>
+    </section>
+
+    <!-- ============== TRUST ============== -->
+    <section class="trust-strip">
+      <span class="trust-item">Powered by <strong>DeepSeek</strong></span>
+      <span class="trust-dot">·</span>
+      <span class="trust-item">Open Source</span>
+      <span class="trust-dot">·</span>
+      <span class="trust-item">LCA Methodology</span>
     </section>
   </div>
 
@@ -4993,6 +5066,11 @@ body::before {
 
   <footer>
     <span data-i18n-html="footer_left">© LCA·AI &nbsp; · &nbsp; Прототип на базе DeepSeek</span>
+    <span class="footer-links">
+      <a href="https://github.com/MbFu666/lca-ai" target="_blank" rel="noopener">GitHub</a>
+      <span style="color:var(--rule)">·</span>
+      <a href="https://www.ipcc.ch/report/ar6/synthesis-report/" target="_blank" rel="noopener">IPCC AR6</a>
+    </span>
   </footer>
 
 </div>
@@ -5248,6 +5326,13 @@ const I18N = {
     /* hero */
     eyebrow:      'оценка жизненного цикла · AI',
     h1:           'Углеродный след<br>продукта <em>за секунду</em>.',
+    hero_sub:     'Опишите продукт — ИИ рассчитает углеродный след за 10 секунд',
+    feat_speed:   'Быстрый расчёт',
+    feat_speed_d: 'DeepSeek анализирует продукт за секунды, а не часы',
+    feat_viz:     'Визуализация',
+    feat_viz_d:   'Графы, диаграммы, рейтинги и детальный разбор по стадиям',
+    feat_full:    'Полный цикл',
+    feat_full_d:  'От добычи сырья до утилизации — полная оценка жизненного цикла',
     /* composer */
     mode_full:    'Полный цикл',
     mode_factor:  'Приоритет факторов',
@@ -5402,6 +5487,13 @@ const I18N = {
     meta_scope:   'SCOPE <b>cradle → grave</b>',
     eyebrow:      'life cycle assessment · AI',
     h1:           'A product carbon footprint,<br><em>in seconds</em>.',
+    hero_sub:     'Describe a product — AI calculates its carbon footprint in 10 seconds',
+    feat_speed:   'Instant Analysis',
+    feat_speed_d: 'DeepSeek processes your product in seconds, not hours',
+    feat_viz:     'Visualization',
+    feat_viz_d:   'Graphs, charts, rankings and detailed stage-by-stage breakdown',
+    feat_full:    'Full Lifecycle',
+    feat_full_d:  'From raw material extraction to disposal — complete life cycle assessment',
     mode_full:    'Full life cycle',
     mode_factor:  'Factor preference',
     placeholder:  'Describe the product in text, e.g. 1 kg of nanocellulose from sweet sorghum bagasse, produced in northeast China…',
@@ -5542,6 +5634,13 @@ const I18N = {
   zh: {
     eyebrow:      '生命周期评价 · AI',
     h1:           '产品碳足迹，<br><em>秒级生成</em>。',
+    hero_sub:     '描述产品 — AI 在 10 秒内计算碳足迹',
+    feat_speed:   '快速计算',
+    feat_speed_d: 'DeepSeek 在数秒内分析产品，而非数小时',
+    feat_viz:     '可视化',
+    feat_viz_d:   '图表、排名和详细的阶段分析',
+    feat_full:    '全生命周期',
+    feat_full_d:  '从原材料开采到废弃处置 — 完整的生命周期评估',
     mode_full:    '全生命周期',
     mode_factor:  '因子优先',
     placeholder:  '请用文字描述产品，例如:1 kg 由甜高粱渣制备的纳米纤维素,中国东北地区生产…',
