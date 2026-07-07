@@ -2115,6 +2115,56 @@ async function loadLib(name) {
     background: var(--jade-bg);
   }
 
+  /* Auth user profile */
+  .auth-user {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px 4px 4px;
+    border: 1px solid var(--rule);
+    border-radius: 30px;
+    cursor: default;
+  }
+  .auth-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .auth-avatar-text {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--jade);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .auth-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .auth-logout {
+    background: none;
+    border: none;
+    color: var(--ink-mute);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all .15s;
+  }
+  .auth-logout:hover {
+    background: var(--c-rust);
+    color: white;
+  }
+
   /* ═══════════════════════════════════════════════
        MODALS (Edit Model + Excel + …)
      ═══════════════════════════════════════════════ */
@@ -5113,10 +5163,12 @@ body::before {
       </div>
       <div class="header-actions">
         <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">🌙</button>
-        <a href="/login.html" class="auth-btn" id="authBtn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <span data-i18n="auth_login">Войти</span>
-        </a>
+        <div class="auth-section" id="authSection">
+          <a href="/login.html" class="auth-btn" id="authBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span data-i18n="auth_login">Войти</span>
+          </a>
+        </div>
       </div>
     </div>
   </header>
@@ -8828,6 +8880,22 @@ initJsonWorker();
    ============================================================ */
 document.addEventListener('DOMContentLoaded', function() {
   console.log('[LCA] Initializing...');
+
+  // Проверка авторизации
+  var user = null;
+  try {
+    user = JSON.parse(localStorage.getItem('authing_user'));
+  } catch(e) {}
+  var authSection = document.getElementById('authSection');
+  if (user && authSection) {
+    var name = user.name || user.nickname || user.email || 'User';
+    var picture = user.photo || '';
+    authSection.innerHTML = '<div class="auth-user">' +
+      (picture ? '<img src="' + picture + '" class="auth-avatar" alt="">' : '<span class="auth-avatar-text">' + name.charAt(0).toUpperCase() + '</span>') +
+      '<span class="auth-name">' + name + '</span>' +
+      '<button class="auth-logout" onclick="localStorage.removeItem(\'authing_token\');localStorage.removeItem(\'authing_user\');location.reload();" title="Выйти">✕</button>' +
+      '</div>';
+  }
 
   var savedTheme = localStorage.getItem('lca-theme');
   var themeToggle = document.getElementById('themeToggle');
