@@ -932,6 +932,12 @@ async function loadLib(name) {
     cursor: pointer;
     transition: all .15s;
     font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .cs-actions button svg {
+    flex-shrink: 0;
   }
   .cs-actions button:hover {
     border-color: var(--jade);
@@ -1822,6 +1828,16 @@ async function loadLib(name) {
     line-height: 1.65;
     margin-bottom: 22px;
   }
+  /* Shimmer loading effect */
+  .shimmer {
+    background: linear-gradient(90deg, var(--bg-soft) 25%, var(--rule-soft) 50%, var(--bg-soft) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 6px;
+  }
+  .shimmer-line { height: 16px; margin-bottom: 10px; }
+  .shimmer-line:last-child { width: 60%; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
   .ai-thinking {
     background: var(--jade-bg);
     border-left: 3px solid var(--jade);
@@ -2388,14 +2404,22 @@ async function loadLib(name) {
   .agent-empty {
     text-align: center;
     color: var(--ink-mute);
-    padding: 60px 20px;
+    padding: 48px 20px;
     font-size: 13px;
-    line-height: 1.55;
+    line-height: 1.6;
   }
   .agent-empty .icon {
-    font-size: 36px;
-    display: block;
-    margin-bottom: 12px;
+    width: 56px; height: 56px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: var(--jade-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .agent-empty .icon svg {
+    width: 28px; height: 28px;
+    color: var(--jade);
   }
   .agent-spinner {
     text-align: center;
@@ -3335,6 +3359,14 @@ async function loadLib(name) {
   }
   @keyframes fadeInPage {
     from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  /* Stagger animation for report sections */
+  .res-hero { animation: fadeSlideUp 0.5s ease 0.1s both; }
+  .res-row { animation: fadeSlideUp 0.5s ease 0.2s both; }
+  .ai-section { animation: fadeSlideUp 0.5s ease 0.3s both; }
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
   }
   .back-to-home {
@@ -5074,11 +5106,11 @@ body::before {
         <button id="projectsBtn" data-i18n="projects">Проекты</button>
         <button id="saveToProjectBtn" data-i18n="save_to_project">В проект</button>
         <button id="editModelBtn" data-i18n="edit_model">Edit Model</button>
-        <button id="exportExcel" data-i18n="export_excel">Excel</button>
-        <button id="exportWord" data-i18n="export_word">Word</button>
-        <button id="exportJson" data-i18n="export_json">JSON</button>
-        <button id="exportPdf" data-i18n="export_pdf">PDF</button>
-        <button id="exportPrint" class="primary" data-i18n="export_print">Отчёт</button>
+        <button id="exportExcel" data-i18n="export_excel"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg> Excel</button>
+        <button id="exportWord" data-i18n="export_word"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg> Word</button>
+        <button id="exportJson" data-i18n="export_json"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg> JSON</button>
+        <button id="exportPdf" data-i18n="export_pdf"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg> PDF</button>
+        <button id="exportPrint" class="primary" data-i18n="export_print"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Отчёт</button>
       </div>
     </div>
 
@@ -5242,8 +5274,9 @@ body::before {
     <span class="count"><span id="agentDone">0</span>/<span id="agentTotal">0</span></span>
   </div>
   <div class="agent-body" id="agentBody">
-    <div class="agent-empty" data-i18n-html="agent_empty">
-      Расчёт ещё не запущен.<br>Сделайте первый расчёт — и я задам<br>уточняющие вопросы по модели.
+    <div class="agent-empty">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/><path d="M10 21h4"/></svg></div>
+      <span data-i18n-html="agent_empty">Расчёт ещё не запущен.<br>Сделайте первый расчёт — и я задам<br>уточняющие вопросы по модели.</span>
     </div>
   </div>
   <div class="agent-foot">
@@ -6680,7 +6713,19 @@ function renderReport(d) {
 
   // ─── step 2 hero ───
   $('#resName').textContent   = d.product_title || '—';
-  $('#resValue').textContent  = fmtNum(d.total_co2eq);
+  // Count-up animation for CO2 value
+  const target = parseFloat(d.total_co2eq) || 0;
+  const el = $('#resValue');
+  const duration = 1200;
+  const start = performance.now();
+  function countUp(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+    el.textContent = fmtNum(target * eased);
+    if (progress < 1) requestAnimationFrame(countUp);
+  }
+  requestAnimationFrame(countUp);
   $('#resCycle').textContent  = d.accounting_cycle || (new Date().getFullYear() + '-01-01 ~ ' + new Date().getFullYear() + '-12-31');
   $('#resFU').textContent     = d.functional_unit || '—';
   $('#resMethod').textContent = d.method || '—';
