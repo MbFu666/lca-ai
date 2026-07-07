@@ -2388,60 +2388,73 @@ async function loadLib(name) {
     position: fixed;
     top: 0;
     right: 0;
-    width: 360px;
+    width: 380px;
     height: 100vh;
     background: var(--bg);
     border-left: 1px solid var(--rule);
-    box-shadow: -20px 0 40px -20px rgba(14,46,39,0.12);
+    box-shadow: -12px 0 32px -12px rgba(14,46,39,0.1);
     transform: translateX(100%);
-    transition: transform .25s ease;
+    transition: transform .3s cubic-bezier(0.22, 1, 0.36, 1);
     z-index: 120;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
   }
   .agent.show { transform: translateX(0); }
 
   .agent-head {
-    padding: 18px 22px;
+    flex-shrink: 0;
+    padding: 16px 20px;
     border-bottom: 1px solid var(--rule);
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     background: linear-gradient(135deg, var(--jade-bg) 0%, var(--bg) 80%);
   }
   .agent-head .avatar {
-    width: 32px; height: 32px;
-    background: var(--bg);
-    border: 1.5px solid var(--jade);
-    border-radius: 50%;
+    width: 36px; height: 36px;
+    background: var(--jade);
+    border: none;
+    border-radius: 10px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
-    box-shadow: 0 2px 6px rgba(20,201,151,0.2);
+    font-size: 14px;
+    color: white;
+    font-weight: 700;
   }
   .agent-head .title {
     font-weight: 700;
-    font-size: 16px;
+    font-size: 15px;
     color: var(--ink);
     flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .agent-head .title .accent { color: var(--jade); }
   .agent-head .close {
-    width: 26px; height: 26px;
-    background: none;
-    border: none;
-    border-radius: 50%;
-    color: var(--ink-soft);
+    width: 28px; height: 28px;
+    background: var(--bg-soft);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    color: var(--ink-mute);
     cursor: pointer;
     font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s;
   }
-  .agent-head .close:hover { background: var(--bg-soft); }
+  .agent-head .close:hover { background: var(--rule); color: var(--ink); }
 
   .agent-body {
     flex: 1;
     overflow-y: auto;
-    padding: 18px 22px;
+    overflow-x: hidden;
+    padding: 16px 20px;
+    min-height: 0;
   }
   .agent-subhead {
     display: flex;
@@ -2577,7 +2590,8 @@ async function loadLib(name) {
   }
 
   .agent-foot {
-    padding: 14px 22px;
+    flex-shrink: 0;
+    padding: 14px 20px;
     border-top: 1px solid var(--rule);
     background: var(--bg-soft);
   }
@@ -2723,30 +2737,29 @@ async function loadLib(name) {
      ═══════════════════════════════════════════════ */
   .agent {
     position: fixed;
-    top: 80px;
+    top: 0;
     right: 0;
-    width: 360px;
-    height: calc(100vh - 100px);
+    width: 380px;
+    height: 100vh;
     background: var(--bg);
-    border: 1px solid var(--rule);
-    border-right: none;
-    border-radius: 16px 0 0 16px;
-    box-shadow: -8px 0 24px -8px rgba(14,46,39,0.1);
-    z-index: 40;
+    border-left: 1px solid var(--rule);
+    box-shadow: -12px 0 32px -12px rgba(14,46,39,0.1);
+    transform: translateX(100%);
+    transition: transform .3s cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: 120;
     display: flex;
     flex-direction: column;
-    transition: transform .3s cubic-bezier(0.22, 1, 0.36, 1);
-    transform: translateX(100%);
+    overflow: hidden;
   }
   .agent.show { transform: translateX(0); }
   .agent-head {
-    padding: 18px 22px;
+    flex-shrink: 0;
+    padding: 16px 20px;
     border-bottom: 1px solid var(--rule);
     display: flex;
     align-items: center;
     justify-content: space-between;
     background: linear-gradient(135deg, var(--jade-bg) 0%, var(--bg) 70%);
-    border-radius: 14px 0 0 0;
   }
   .agent-title {
     display: flex;
@@ -2797,7 +2810,9 @@ async function loadLib(name) {
   .agent-body {
     flex: 1;
     overflow-y: auto;
-    padding: 12px 22px 18px;
+    overflow-x: hidden;
+    padding: 16px 20px;
+    min-height: 0;
   }
   .agent-empty {
     color: var(--ink-mute);
@@ -2909,8 +2924,10 @@ async function loadLib(name) {
   }
 
   .agent-foot {
+    flex-shrink: 0;
     border-top: 1px solid var(--rule);
-    padding: 14px 22px;
+    padding: 14px 20px;
+    background: var(--bg-soft);
   }
   .agent-msg-wrap {
     background: var(--bg-soft);
