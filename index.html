@@ -415,6 +415,53 @@ async function loadLib(name) {
     max-width: 480px;
   }
 
+  /* ───────── HERO PREVIEW ───────── */
+  .hero-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .preview-card {
+    background: var(--bg-soft);
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    padding: 32px 40px;
+    text-align: center;
+    box-shadow: 0 8px 32px -12px rgba(14,46,39,0.12);
+    position: relative;
+  }
+  .preview-card::before {
+    content: '';
+    position: absolute;
+    top: -2px; left: -2px; right: -2px; bottom: -2px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--jade-soft) 0%, transparent 50%);
+    z-index: -1;
+    opacity: 0.5;
+  }
+  .preview-num {
+    font-family: var(--mono);
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--jade);
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .preview-unit {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--ink-mute);
+    margin-top: 4px;
+    letter-spacing: .05em;
+  }
+  .preview-label {
+    font-size: 11px;
+    color: var(--ink-mute);
+    margin-top: 12px;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+  }
+
   /* ───────── FEATURES ───────── */
   .features {
     display: grid;
@@ -438,7 +485,7 @@ async function loadLib(name) {
     transform: translateY(-3px);
     box-shadow: 0 8px 24px -8px rgba(20,201,151,0.15);
   }
-  .feature-icon { font-size: 32px; margin-bottom: 14px; }
+  .feature-icon { margin-bottom: 14px; display: flex; align-items: center; justify-content: center; }
   .feature-card h3 { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
   .feature-card p { font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
 
@@ -450,6 +497,62 @@ async function loadLib(name) {
   }
   .trust-item strong { color: var(--ink-soft); font-weight: 600; }
   .trust-dot { color: var(--rule); }
+
+  /* ───────── HOW IT WORKS ───────── */
+  .how-it-works {
+    margin-top: 56px;
+    padding-top: 48px;
+    border-top: 1px solid var(--rule);
+  }
+  .section-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ink);
+    text-align: center;
+    margin-bottom: 36px;
+    letter-spacing: -0.02em;
+  }
+  .steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+  }
+  .step {
+    text-align: center;
+    flex: 1;
+    max-width: 240px;
+  }
+  .step-num {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--jade);
+    color: white;
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    box-shadow: 0 4px 12px -4px rgba(20,201,151,0.4);
+  }
+  .step h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .step p {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .step-arrow {
+    font-size: 24px;
+    color: var(--jade-soft);
+    font-weight: 300;
+  }
 
   /* ───────── COMPOSER ───────── */
   .composer {
@@ -501,6 +604,15 @@ async function loadLib(name) {
     box-shadow: 0 1px 3px rgba(14,46,39,0.1);
   }
   .modes button:hover:not(.active) { color: var(--ink-soft); }
+
+  .input-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+    letter-spacing: .02em;
+  }
 
   #productInput {
     width: 100%;
@@ -4811,6 +4923,13 @@ body::before {
         <h1 data-i18n-html="h1">Углеродный след<br>продукта <em>за секунду</em>.</h1>
         <p class="hero-sub" data-i18n="hero_sub">Опишите продукт — ИИ рассчитает углеродный след за 10 секунд</p>
       </div>
+      <div class="hero-preview">
+        <div class="preview-card">
+          <div class="preview-num">2.47</div>
+          <div class="preview-unit">kg CO₂e</div>
+          <div class="preview-label" data-i18n="preview_label">Пример результата</div>
+        </div>
+      </div>
     </section>
 
     <!-- ============== COMPOSER ============== -->
@@ -4821,6 +4940,7 @@ body::before {
           <button data-mode="factor"><em>—</em> <span data-i18n="mode_factor">Приоритет факторов</span></button>
         </div>
 
+        <label class="input-label" data-i18n="input_label">Описание продукта для расчёта LCA</label>
         <textarea id="productInput" rows="3" data-i18n-placeholder="placeholder"
                   placeholder="Например: 1 кг наноцеллюлозы из жома сладкого сорго, произведённой в Северо-Восточном Китае…"></textarea>
         <div class="drop-hint" id="dropHint">
@@ -4864,19 +4984,49 @@ body::before {
     <!-- ============== FEATURES ============== -->
     <section class="features">
       <div class="feature-card">
-        <div class="feature-icon">⚡</div>
+        <div class="feature-icon">
+          <svg width="32" height="32" viewBox="0 0 256 256" fill="none"><path d="M208 128h-64l24-72" stroke="var(--jade)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/><path d="M128 128H64" stroke="var(--jade)" stroke-width="24" stroke-linecap="round"/><circle cx="128" cy="128" r="96" stroke="var(--jade)" stroke-width="16" fill="none"/></svg>
+        </div>
         <h3 data-i18n="feat_speed">Быстрый расчёт</h3>
         <p data-i18n="feat_speed_d">DeepSeek анализирует продукт за секунды, а не часы</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">📊</div>
+        <div class="feature-icon">
+          <svg width="32" height="32" viewBox="0 0 256 256" fill="none"><rect x="48" y="120" width="40" height="88" rx="8" stroke="var(--jade)" stroke-width="16"/><rect x="108" y="80" width="40" height="128" rx="8" stroke="var(--jade)" stroke-width="16"/><rect x="168" y="48" width="40" height="160" rx="8" stroke="var(--jade)" stroke-width="16"/></svg>
+        </div>
         <h3 data-i18n="feat_viz">Визуализация</h3>
         <p data-i18n="feat_viz_d">Графы, диаграммы, рейтинги и детальный разбор по стадиям</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">🌍</div>
+        <div class="feature-icon">
+          <svg width="32" height="32" viewBox="0 0 256 256" fill="none"><circle cx="128" cy="128" r="96" stroke="var(--jade)" stroke-width="16"/><path d="M128 32c0 96-96 96-96 192" stroke="var(--jade)" stroke-width="12" fill="none"/><path d="M32 128h192" stroke="var(--jade)" stroke-width="12"/></svg>
+        </div>
         <h3 data-i18n="feat_full">Полный цикл</h3>
         <p data-i18n="feat_full_d">От добычи сырья до утилизации — полная оценка жизненного цикла</p>
+      </div>
+    </section>
+
+    <!-- ============== HOW IT WORKS ============== -->
+    <section class="how-it-works">
+      <h2 class="section-title" data-i18n="how_title">Как это работает</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3 data-i18n="step1_title">Опишите продукт</h3>
+          <p data-i18n="step1_d">Введите текстовое описание или загрузите Excel</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3 data-i18n="step2_title">ИИ анализирует</h3>
+          <p data-i18n="step2_d">DeepSeek рассчитывает факторы эмиссии по всем стадиям</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3 data-i18n="step3_title">Получите отчёт</h3>
+          <p data-i18n="step3_d">Визуализация, рекомендации и экспорт в PDF/Excel/Word</p>
+        </div>
       </div>
     </section>
 
@@ -5333,6 +5483,15 @@ const I18N = {
     feat_viz_d:   'Графы, диаграммы, рейтинги и детальный разбор по стадиям',
     feat_full:    'Полный цикл',
     feat_full_d:  'От добычи сырья до утилизации — полная оценка жизненного цикла',
+    preview_label:'Пример результата',
+    input_label:  'Описание продукта для расчёта LCA',
+    how_title:    'Как это работает',
+    step1_title:  'Опишите продукт',
+    step1_d:      'Введите текстовое описание или загрузите Excel',
+    step2_title:  'ИИ анализирует',
+    step2_d:      'DeepSeek рассчитывает факторы эмиссии по всем стадиям',
+    step3_title:  'Получите отчёт',
+    step3_d:      'Визуализация, рекомендации и экспорт в PDF/Excel/Word',
     /* composer */
     mode_full:    'Полный цикл',
     mode_factor:  'Приоритет факторов',
@@ -5494,6 +5653,15 @@ const I18N = {
     feat_viz_d:   'Graphs, charts, rankings and detailed stage-by-stage breakdown',
     feat_full:    'Full Lifecycle',
     feat_full_d:  'From raw material extraction to disposal — complete life cycle assessment',
+    preview_label:'Example result',
+    input_label:  'Product description for LCA calculation',
+    how_title:    'How it works',
+    step1_title:  'Describe the product',
+    step1_d:      'Enter a text description or upload Excel',
+    step2_title:  'AI analyzes',
+    step2_d:      'DeepSeek calculates emission factors across all stages',
+    step3_title:  'Get the report',
+    step3_d:      'Visualization, recommendations and export to PDF/Excel/Word',
     mode_full:    'Full life cycle',
     mode_factor:  'Factor preference',
     placeholder:  'Describe the product in text, e.g. 1 kg of nanocellulose from sweet sorghum bagasse, produced in northeast China…',
@@ -5641,6 +5809,15 @@ const I18N = {
     feat_viz_d:   '图表、排名和详细的阶段分析',
     feat_full:    '全生命周期',
     feat_full_d:  '从原材料开采到废弃处置 — 完整的生命周期评估',
+    preview_label:'结果示例',
+    input_label:  '用于 LCA 计算的产品描述',
+    how_title:    '工作原理',
+    step1_title:  '描述产品',
+    step1_d:      '输入文字描述或上传 Excel',
+    step2_title:  'AI 分析',
+    step2_d:      'DeepSeek 计算各阶段的排放因子',
+    step3_title:  '获取报告',
+    step3_d:      '可视化、建议和导出 PDF/Excel/Word',
     mode_full:    '全生命周期',
     mode_factor:  '因子优先',
     placeholder:  '请用文字描述产品，例如:1 kg 由甜高粱渣制备的纳米纤维素,中国东北地区生产…',
