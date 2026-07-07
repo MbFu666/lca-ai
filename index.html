@@ -2390,7 +2390,7 @@ async function loadLib(name) {
     right: 0;
     width: 360px;
     height: 100vh;
-    background: white;
+    background: var(--bg);
     border-left: 1px solid var(--rule);
     box-shadow: -20px 0 40px -20px rgba(14,46,39,0.12);
     transform: translateX(100%);
@@ -2407,11 +2407,11 @@ async function loadLib(name) {
     display: flex;
     align-items: center;
     gap: 10px;
-    background: linear-gradient(135deg, var(--jade-bg) 0%, white 80%);
+    background: linear-gradient(135deg, var(--jade-bg) 0%, var(--bg) 80%);
   }
   .agent-head .avatar {
     width: 32px; height: 32px;
-    background: white;
+    background: var(--bg);
     border: 1.5px solid var(--jade);
     border-radius: 50%;
     display: inline-flex;
@@ -2727,7 +2727,7 @@ async function loadLib(name) {
     right: 0;
     width: 360px;
     height: calc(100vh - 100px);
-    background: white;
+    background: var(--bg);
     border: 1px solid var(--rule);
     border-right: none;
     border-radius: 16px 0 0 16px;
@@ -2745,7 +2745,7 @@ async function loadLib(name) {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: linear-gradient(135deg, var(--jade-bg) 0%, white 70%);
+    background: linear-gradient(135deg, var(--jade-bg) 0%, var(--bg) 70%);
     border-radius: 14px 0 0 0;
   }
   .agent-title {
