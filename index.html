@@ -1753,12 +1753,17 @@ async function loadLib(name) {
   }
   .res-tabs span {
     color: var(--ink-mute);
-    cursor: default;
-    padding: 4px 8px;
-    border-radius: 4px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 6px;
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    transition: all .15s ease;
+  }
+  .res-tabs span:hover:not(.active) {
+    background: var(--bg-soft);
+    color: var(--ink-soft);
   }
   .res-tabs span.active {
     background: var(--jade-bg);
@@ -5354,9 +5359,9 @@ body::before {
         <section class="res-card">
           <div class="res-card-head">
             <h3 data-i18n="contrib_h">Состав выбросов</h3>
-            <span class="res-tabs">
-              <span class="active" data-i18n="tab_stage"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> стадия</span>
-              <span data-i18n="tab_type"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg> тип</span>
+            <span class="res-tabs" data-group="donut">
+              <span class="active" data-mode="stage"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <span data-i18n="tab_stage">стадия</span></span>
+              <span data-mode="type"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg> <span data-i18n="tab_type">тип</span></span>
             </span>
           </div>
           <div class="composition">
@@ -5374,10 +5379,10 @@ body::before {
         <section class="res-card">
           <div class="res-card-head">
             <h3 data-i18n="rank_h">Рейтинг выбросов</h3>
-            <span class="res-tabs">
-              <span class="active" data-i18n="tab_stage"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> стадия</span>
-              <span data-i18n="tab_type"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg> тип</span>
-              <span data-i18n="tab_source"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg> источник</span>
+            <span class="res-tabs" data-group="ranking">
+              <span class="active" data-mode="stage"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <span data-i18n="tab_stage">стадия</span></span>
+              <span data-mode="type"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg> <span data-i18n="tab_type">тип</span></span>
+              <span data-mode="source"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg> <span data-i18n="tab_source">источник</span></span>
             </span>
           </div>
           <div class="ranking" id="ranking"></div>
@@ -6918,6 +6923,7 @@ function renderReport(d) {
   renderFlowTable(d, t);
   renderRanking(d);
   renderDonut(d);
+  initTabs();
 
   fillList('#assumptions',     d.assumptions);
   fillList('#limitations',     d.limitations);
@@ -7254,25 +7260,78 @@ function renderFlowTable(d, t) {
   $('#flowTable').innerHTML = html;
 }
 
+/* ── TAB SWITCHING ────────────────────────────────────── */
+let donutMode = 'stage';
+let rankingMode = 'stage';
+
+function initTabs() {
+  document.querySelectorAll('.res-tabs').forEach(group => {
+    const groupId = group.dataset.group;
+    group.querySelectorAll('span[data-mode]').forEach(tab => {
+      tab.addEventListener('click', () => {
+        // Update active state
+        group.querySelectorAll('span').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        // Update mode and re-render
+        if (groupId === 'donut') {
+          donutMode = tab.dataset.mode;
+          if (lastReport) renderDonut(lastReport);
+        } else if (groupId === 'ranking') {
+          rankingMode = tab.dataset.mode;
+          if (lastReport) renderRanking(lastReport);
+        }
+      });
+    });
+  });
+}
+
 /* ── RANKING (horizontal bar chart, step 2) ──────────── */
 function renderRanking(d) {
-  const stages = (d.stages || []).slice().sort((a, b) => (b.co2eq || 0) - (a.co2eq || 0));
-  const max = Math.max(...stages.map(s => s.co2eq || 0), 0.0001);
+  const tot = total(d) || 1;
   const host = $('#ranking'); host.innerHTML = '';
-  stages.forEach((s, i) => {
-    // preserve original index to map to STAGE_COLORS
-    const origIdx = (d.stages || []).indexOf(s);
-    const c = STAGE_COLORS[origIdx % STAGE_COLORS.length];
-    const w = ((s.co2eq || 0) / max) * 100;
+  let items = [];
+  
+  if (rankingMode === 'stage') {
+    items = (d.stages || []).map((s, i) => ({
+      name: s.name,
+      value: s.co2eq,
+      color: STAGE_COLORS[i % STAGE_COLORS.length]
+    }));
+  } else if (rankingMode === 'type') {
+    const typeMap = {};
+    (d.stages || []).forEach((s, si) => {
+      (s.sub_processes || []).forEach(p => {
+        const key = p.factor_unit || 'Другое';
+        if (!typeMap[key]) typeMap[key] = { name: key, value: 0, color: STAGE_COLORS[si % STAGE_COLORS.length] };
+        typeMap[key].value += p.co2eq || 0;
+      });
+    });
+    items = Object.values(typeMap).sort((a, b) => b.value - a.value);
+  } else {
+    // source mode: aggregate by factor_source
+    const srcMap = {};
+    (d.stages || []).forEach((s, si) => {
+      (s.sub_processes || []).forEach(p => {
+        const key = p.factor_source || 'Неизвестно';
+        if (!srcMap[key]) srcMap[key] = { name: key, value: 0, color: STAGE_COLORS[si % STAGE_COLORS.length] };
+        srcMap[key].value += p.co2eq || 0;
+      });
+    });
+    items = Object.values(srcMap).sort((a, b) => b.value - a.value);
+  }
+  
+  const max = Math.max(...items.map(i => i.value || 0), 0.0001);
+  
+  items.forEach(item => {
+    const w = ((item.value || 0) / max) * 100;
     const row = document.createElement('div');
     row.className = 'rank-row';
     row.innerHTML = `
-      <div class="lbl">${escape(s.name)}</div>
-      <div class="rank-bar"><div class="rank-bar-fill" style="width:0%;background:${c}"></div></div>
-      <div class="val">${fmtNum(s.co2eq)}</div>
+      <div class="lbl">${escape(item.name)}</div>
+      <div class="rank-bar"><div class="rank-bar-fill" style="width:0%;background:${item.color}"></div></div>
+      <div class="val">${fmtNum(item.value)}</div>
     `;
     host.appendChild(row);
-    // animate
     requestAnimationFrame(() =>
       row.querySelector('.rank-bar-fill').style.width = w + '%'
     );
@@ -7285,11 +7344,35 @@ function renderDonut(d) {
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const cx = 85, cy = 85, outerR = 80, innerR = 55;
-  const stages = (d.stages || []).filter(s => (s.share_pct || 0) > 0);
+  const tot = total(d) || 1;
   
   ctx.clearRect(0, 0, 170, 170);
   
-  if (stages.length === 0) {
+  let items = [];
+  if (donutMode === 'stage') {
+    items = (d.stages || []).filter(s => (s.share_pct || 0) > 0).map((s, i) => ({
+      name: s.name,
+      value: s.co2eq,
+      pct: s.share_pct,
+      color: STAGE_COLORS[(d.stages || []).indexOf(s) % STAGE_COLORS.length]
+    }));
+  } else {
+    // type mode: aggregate by sub_process type (factor_unit)
+    const typeMap = {};
+    (d.stages || []).forEach((s, si) => {
+      (s.sub_processes || []).forEach(p => {
+        const key = p.factor_unit || 'Другое';
+        if (!typeMap[key]) typeMap[key] = { name: key, value: 0, color: STAGE_COLORS[si % STAGE_COLORS.length] };
+        typeMap[key].value += p.co2eq || 0;
+      });
+    });
+    items = Object.values(typeMap)
+      .map(t => ({ ...t, pct: (t.value / tot) * 100 }))
+      .filter(t => t.pct > 0)
+      .sort((a, b) => b.value - a.value);
+  }
+  
+  if (items.length === 0) {
     ctx.beginPath();
     ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
     ctx.arc(cx, cy, innerR, 0, Math.PI * 2, true);
@@ -7297,34 +7380,29 @@ function renderDonut(d) {
     ctx.fill();
   } else {
     let startAngle = -Math.PI / 2;
-    stages.forEach((s) => {
-      const origIdx = (d.stages || []).indexOf(s);
-      const c = STAGE_COLORS[origIdx % STAGE_COLORS.length];
-      const sliceAngle = (s.share_pct / 100) * Math.PI * 2;
+    items.forEach(item => {
+      const sliceAngle = (item.pct / 100) * Math.PI * 2;
       ctx.beginPath();
       ctx.arc(cx, cy, outerR, startAngle, startAngle + sliceAngle);
       ctx.arc(cx, cy, innerR, startAngle + sliceAngle, startAngle, true);
       ctx.closePath();
-      ctx.fillStyle = c;
+      ctx.fillStyle = item.color;
       ctx.fill();
       startAngle += sliceAngle;
     });
   }
   
-  // Обновляем CSS fallback (для экрана)
   $('#donut').style.background = 'transparent';
-  
   $('#donutTotal').textContent = fmtNum(total(d));
 
   const leg = $('#donutLegend'); leg.innerHTML = '';
-  (d.stages || []).forEach((s, i) => {
-    const c = STAGE_COLORS[i % STAGE_COLORS.length];
+  items.forEach(item => {
     const row = document.createElement('div');
     row.className = 'donut-legend-row';
     row.innerHTML = `
-      <span class="sw" style="background:${c}"></span>
-      <span class="lbl">${escape(s.name)}</span>
-      <span class="pct">${fmtNum(s.share_pct)}%</span>
+      <span class="sw" style="background:${item.color}"></span>
+      <span class="lbl">${escape(item.name)}</span>
+      <span class="pct">${fmtNum(item.pct)}%</span>
     `;
     leg.appendChild(row);
   });
