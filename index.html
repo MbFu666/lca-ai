@@ -425,7 +425,7 @@ async function loadLib(name) {
     background: var(--bg-soft);
     border: 1px solid var(--rule);
     border-radius: 16px;
-    padding: 32px 40px;
+    padding: 28px 36px;
     text-align: center;
     box-shadow: 0 8px 32px -12px rgba(14,46,39,0.12);
     position: relative;
@@ -439,9 +439,19 @@ async function loadLib(name) {
     z-index: -1;
     opacity: 0.5;
   }
+  .preview-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .preview-donut {
+    flex-shrink: 0;
+  }
   .preview-num {
     font-family: var(--mono);
-    font-size: 48px;
+    font-size: 42px;
     font-weight: 700;
     color: var(--jade);
     line-height: 1;
@@ -485,7 +495,28 @@ async function loadLib(name) {
     transform: translateY(-3px);
     box-shadow: 0 8px 24px -8px rgba(20,201,151,0.15);
   }
-  .feature-icon { margin-bottom: 14px; display: flex; align-items: center; justify-content: center; }
+  .feature-icon {
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px; height: 64px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 16px;
+    background: var(--jade-bg);
+    transition: all .25s ease;
+  }
+  .feature-card:hover .feature-icon {
+    background: var(--jade);
+    transform: scale(1.05);
+  }
+  .feature-card:hover .feature-icon svg {
+    stroke: white;
+  }
+  .feature-icon svg {
+    transition: stroke .25s ease;
+  }
   .feature-card h3 { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
   .feature-card p { font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
 
@@ -497,6 +528,71 @@ async function loadLib(name) {
   }
   .trust-item strong { color: var(--ink-soft); font-weight: 600; }
   .trust-dot { color: var(--rule); }
+
+  /* ───────── SOCIAL PROOF ───────── */
+  .social-proof {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 40px;
+    padding: 32px 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .proof-item { text-align: center; }
+  .proof-num {
+    font-family: var(--mono);
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--jade);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .proof-label {
+    font-size: 13px;
+    color: var(--ink-mute);
+    margin-top: 6px;
+  }
+
+  /* ───────── FINAL CTA ───────── */
+  .final-cta {
+    text-align: center;
+    margin-top: 56px;
+    padding: 48px 0;
+  }
+  .final-cta h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 10px;
+    letter-spacing: -0.02em;
+  }
+  .final-cta p {
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin-bottom: 28px;
+  }
+  .cta-btn {
+    background: linear-gradient(135deg, var(--jade) 0%, var(--jade-dark) 100%);
+    color: white;
+    border: none;
+    padding: 14px 36px;
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 30px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all .25s ease;
+    box-shadow: 0 4px 16px -4px rgba(20,201,151,0.4);
+  }
+  .cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px -4px rgba(20,201,151,0.5);
+    background: linear-gradient(135deg, var(--jade-dark) 0%, var(--jade-deep) 100%);
+  }
 
   /* ───────── HOW IT WORKS ───────── */
   .how-it-works {
@@ -4957,7 +5053,16 @@ body::before {
       </div>
       <div class="hero-preview">
         <div class="preview-card">
-          <div class="preview-num">2.47</div>
+          <div class="preview-top">
+            <svg class="preview-donut" width="64" height="64" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--c-raw)" stroke-width="3.8" stroke-dasharray="42 58" stroke-dashoffset="25"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--c-prod)" stroke-width="3.8" stroke-dasharray="25 75" stroke-dashoffset="83"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--c-dist)" stroke-width="3.8" stroke-dasharray="18 82" stroke-dashoffset="58"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--c-use)" stroke-width="3.8" stroke-dasharray="10 90" stroke-dashoffset="40"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--c-eol)" stroke-width="3.8" stroke-dasharray="5 95" stroke-dashoffset="30"/>
+            </svg>
+            <div class="preview-num">2.47</div>
+          </div>
           <div class="preview-unit">kg CO₂e</div>
           <div class="preview-label" data-i18n="preview_label">Пример результата</div>
         </div>
@@ -5017,21 +5122,21 @@ body::before {
     <section class="features">
       <div class="feature-card">
         <div class="feature-icon">
-          <svg width="32" height="32" viewBox="0 0 256 256" fill="none"><path d="M208 128h-64l24-72" stroke="var(--jade)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/><path d="M128 128H64" stroke="var(--jade)" stroke-width="24" stroke-linecap="round"/><circle cx="128" cy="128" r="96" stroke="var(--jade)" stroke-width="16" fill="none"/></svg>
+          <svg width="40" height="40" viewBox="0 0 256 256" fill="none"><path d="M208 128h-64l24-72" stroke="var(--jade)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/><path d="M128 128H64" stroke="var(--jade)" stroke-width="24" stroke-linecap="round"/><circle cx="128" cy="128" r="96" stroke="var(--jade)" stroke-width="16" fill="none"/></svg>
         </div>
         <h3 data-i18n="feat_speed">Быстрый расчёт</h3>
         <p data-i18n="feat_speed_d">DeepSeek анализирует продукт за секунды, а не часы</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">
-          <svg width="32" height="32" viewBox="0 0 256 256" fill="none"><rect x="48" y="120" width="40" height="88" rx="8" stroke="var(--jade)" stroke-width="16"/><rect x="108" y="80" width="40" height="128" rx="8" stroke="var(--jade)" stroke-width="16"/><rect x="168" y="48" width="40" height="160" rx="8" stroke="var(--jade)" stroke-width="16"/></svg>
+          <svg width="40" height="40" viewBox="0 0 256 256" fill="none"><rect x="48" y="120" width="40" height="88" rx="8" stroke="var(--jade)" stroke-width="16"/><rect x="108" y="80" width="40" height="128" rx="8" stroke="var(--jade)" stroke-width="16"/><rect x="168" y="48" width="40" height="160" rx="8" stroke="var(--jade)" stroke-width="16"/></svg>
         </div>
         <h3 data-i18n="feat_viz">Визуализация</h3>
         <p data-i18n="feat_viz_d">Графы, диаграммы, рейтинги и детальный разбор по стадиям</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">
-          <svg width="32" height="32" viewBox="0 0 256 256" fill="none"><circle cx="128" cy="128" r="96" stroke="var(--jade)" stroke-width="16"/><path d="M128 32c0 96-96 96-96 192" stroke="var(--jade)" stroke-width="12" fill="none"/><path d="M32 128h192" stroke="var(--jade)" stroke-width="12"/></svg>
+          <svg width="40" height="40" viewBox="0 0 256 256" fill="none"><circle cx="128" cy="128" r="96" stroke="var(--jade)" stroke-width="16"/><path d="M128 32c0 96-96 96-96 192" stroke="var(--jade)" stroke-width="12" fill="none"/><path d="M32 128h192" stroke="var(--jade)" stroke-width="12"/></svg>
         </div>
         <h3 data-i18n="feat_full">Полный цикл</h3>
         <p data-i18n="feat_full_d">От добычи сырья до утилизации — полная оценка жизненного цикла</p>
@@ -5069,6 +5174,31 @@ body::before {
       <span class="trust-item">Open Source</span>
       <span class="trust-dot">·</span>
       <span class="trust-item">LCA Methodology</span>
+    </section>
+
+    <!-- ============== SOCIAL PROOF ============== -->
+    <section class="social-proof">
+      <div class="proof-item">
+        <div class="proof-num">1000+</div>
+        <div class="proof-label" data-i18n="proof_calcs">расчётов выполнено</div>
+      </div>
+      <div class="proof-item">
+        <div class="proof-num">50+</div>
+        <div class="proof-label" data-i18n="proof_countries">стран мира</div>
+      </div>
+      <div class="proof-item">
+        <div class="proof-num">10с</div>
+        <div class="proof-label" data-i18n="proof_time">среднее время</div>
+      </div>
+    </section>
+
+    <!-- ============== FINAL CTA ============== -->
+    <section class="final-cta">
+      <h2 data-i18n="cta_title">Готовы рассчитать углеродный след?</h2>
+      <p data-i18n="cta_sub">Бесплатно, без регистрации, за 10 секунд</p>
+      <button class="cta-btn" onclick="document.getElementById('productInput').focus(); window.scrollTo({top:0,behavior:'smooth'})">
+        <span data-i18n="cta_btn">Начать расчёт</span> →
+      </button>
     </section>
   </div>
 
@@ -5525,6 +5655,12 @@ const I18N = {
     step2_d:      'DeepSeek рассчитывает факторы эмиссии по всем стадиям',
     step3_title:  'Получите отчёт',
     step3_d:      'Визуализация, рекомендации и экспорт в PDF/Excel/Word',
+    proof_calcs:  'расчётов выполнено',
+    proof_countries: 'стран мира',
+    proof_time:   'среднее время',
+    cta_title:    'Готовы рассчитать углеродный след?',
+    cta_sub:      'Бесплатно, без регистрации, за 10 секунд',
+    cta_btn:      'Начать расчёт',
     /* composer */
     mode_full:    'Полный цикл',
     mode_factor:  'Приоритет факторов',
@@ -5695,6 +5831,12 @@ const I18N = {
     step2_d:      'DeepSeek calculates emission factors across all stages',
     step3_title:  'Get the report',
     step3_d:      'Visualization, recommendations and export to PDF/Excel/Word',
+    proof_calcs:  'calculations performed',
+    proof_countries: 'countries worldwide',
+    proof_time:   'average time',
+    cta_title:    'Ready to calculate your carbon footprint?',
+    cta_sub:      'Free, no registration, 10 seconds',
+    cta_btn:      'Start calculation',
     mode_full:    'Full life cycle',
     mode_factor:  'Factor preference',
     placeholder:  'Describe the product in text, e.g. 1 kg of nanocellulose from sweet sorghum bagasse, produced in northeast China…',
@@ -5851,6 +5993,12 @@ const I18N = {
     step2_d:      'DeepSeek 计算各阶段的排放因子',
     step3_title:  '获取报告',
     step3_d:      '可视化、建议和导出 PDF/Excel/Word',
+    proof_calcs:  '次计算已完成',
+    proof_countries: '个国家和地区',
+    proof_time:   '平均用时',
+    cta_title:    '准备好计算碳足迹了吗？',
+    cta_sub:      '免费、无需注册、10 秒完成',
+    cta_btn:      '开始计算',
     mode_full:    '全生命周期',
     mode_factor:  '因子优先',
     placeholder:  '请用文字描述产品，例如:1 kg 由甜高粱渣制备的纳米纤维素,中国东北地区生产…',
