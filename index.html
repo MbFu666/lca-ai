@@ -1242,6 +1242,7 @@ async function loadLib(name) {
   .stage-card.selected {
     background: var(--jade-bg);
     border-color: var(--jade);
+    box-shadow: 0 8px 24px -8px rgba(20,201,151,0.25);
   }
   .stage-card-head {
     display: flex;
@@ -1379,23 +1380,25 @@ async function loadLib(name) {
     gap: 4px;
   }
 
-  /* detail panel — floats fixed on left side */
+  /* detail panel — inline expand below card */
   .detail-float {
-    position: fixed;
-    top: 80px;
-    left: 20px;
-    width: 320px;
-    max-height: calc(100vh - 100px);
-    overflow-y: auto;
+    width: 100%;
+    max-width: 480px;
     background: white;
-    border: 1px solid var(--rule);
+    border: 1px solid var(--jade);
     border-radius: 12px;
-    padding: 22px 24px;
-    box-shadow: 0 20px 40px -16px rgba(14,46,39,0.18);
+    padding: 20px 24px;
+    box-shadow: 0 8px 24px -8px rgba(20,201,151,0.2);
     z-index: 50;
     display: none;
+    animation: expandIn 0.25s ease;
+    margin-top: 8px;
   }
   .detail-float.show { display: block; }
+  @keyframes expandIn {
+    from { opacity: 0; transform: translateY(-8px); max-height: 0; }
+    to { opacity: 1; transform: translateY(0); max-height: 600px; }
+  }
   .detail-close {
     position: absolute;
     top: 12px; right: 14px;
@@ -6936,7 +6939,7 @@ function renderFlow(d, t) {
   $('#flowRoot').onclick = () => {
     clearSelected();
     $('#flowRoot').classList.add('selected');
-    selectNode('root');
+    selectNode('root', 0, 0, $('#flowRoot'));
   };
 
   // stage row
@@ -6959,7 +6962,7 @@ function renderFlow(d, t) {
     card.onclick = () => {
       clearSelected();
       card.classList.add('selected');
-      selectNode('stage', i);
+      selectNode('stage', i, 0, card);
     };
     stagesEl.appendChild(card);
   });
@@ -6989,7 +6992,7 @@ function renderFlow(d, t) {
       card.onclick = () => {
         clearSelected();
         card.classList.add('selected');
-        selectNode('process', i, j);
+        selectNode('process', i, j, card);
       };
       col.appendChild(card);
     });
@@ -7000,6 +7003,7 @@ function renderFlow(d, t) {
 function clearSelected() {
   $$('.flow-root.selected, .stage-card.selected, .proc-card.selected')
     .forEach(el => el.classList.remove('selected'));
+  $('#detailPanel').classList.remove('show');
 }
 
 function formatCycle(d) {
@@ -7015,7 +7019,7 @@ let currentNodeType = null;
 let currentNodeI = null;
 let currentNodeJ = null;
 
-function selectNode(type, i, j) {
+function selectNode(type, i, j, cardEl) {
   const d = lastReport;
   const t = I18N[currentLang];
   if (!d) return;
@@ -7037,7 +7041,7 @@ function selectNode(type, i, j) {
         [t.m_region, d.region]
       ],
       editable: false
-    });
+    }, cardEl);
   } else if (type === 'stage') {
     const s = d.stages[i];
     if (!s) return;
@@ -7053,7 +7057,7 @@ function selectNode(type, i, j) {
         [t.d_inputs, inputs || '—']
       ],
       editable: false
-    });
+    }, cardEl);
   } else if (type === 'process') {
     const p = d.stages[i]?.sub_processes?.[j];
     if (!p) return;
@@ -7077,11 +7081,11 @@ function selectNode(type, i, j) {
         unit: p.unit || '',
         factorUnit: p.factor_unit || ''
       }
-    });
+    }, cardEl);
   }
 }
 
-function showNodeDetail(o) {
+function showNodeDetail(o, cardEl) {
   const t = I18N[currentLang];
   const rowsHtml = (o.rows || [])
     .filter(r => r[1] !== undefined && r[1] !== null && String(r[1]).trim() !== '')
@@ -7118,7 +7122,13 @@ function showNodeDetail(o) {
     ${rowsHtml ? `<table class="detail-table"><tbody>${rowsHtml}</tbody></table>` : ''}
     ${editHtml}
   `;
-  $('#detailPanel').classList.add('show');
+  
+  // Inline expand: move detail panel below the clicked card
+  const panel = $('#detailPanel');
+  if (cardEl && cardEl.parentNode) {
+    cardEl.parentNode.insertBefore(panel, cardEl.nextSibling);
+  }
+  panel.classList.add('show');
   
   // Привязка обработчиков для редактирования
   if (o.editable && o.editData) {
