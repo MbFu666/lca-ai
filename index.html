@@ -8881,19 +8881,19 @@ initJsonWorker();
 document.addEventListener('DOMContentLoaded', function() {
   console.log('[LCA] Initializing...');
 
-  // Проверка авторизации
+  // Проверка авторизации (Supabase)
   var user = null;
   try {
-    user = JSON.parse(localStorage.getItem('authing_user'));
+    user = JSON.parse(localStorage.getItem('supabase_user'));
   } catch(e) {}
   var authSection = document.getElementById('authSection');
   if (user && authSection) {
-    var name = user.name || user.nickname || user.email || 'User';
-    var picture = user.photo || '';
+    var name = user.user_metadata?.full_name || user.user_metadata?.name || user.email || 'User';
+    var picture = user.user_metadata?.avatar_url || user.user_metadata?.picture || '';
     authSection.innerHTML = '<div class="auth-user">' +
       (picture ? '<img src="' + picture + '" class="auth-avatar" alt="">' : '<span class="auth-avatar-text">' + name.charAt(0).toUpperCase() + '</span>') +
       '<span class="auth-name">' + name + '</span>' +
-      '<button class="auth-logout" onclick="localStorage.removeItem(\'authing_token\');localStorage.removeItem(\'authing_user\');location.reload();" title="Выйти">✕</button>' +
+      '<button class="auth-logout" onclick="localStorage.removeItem(\'supabase_token\');localStorage.removeItem(\'supabase_user\');location.reload();" title="Выйти">✕</button>' +
       '</div>';
   }
 

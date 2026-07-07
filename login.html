@@ -17,6 +17,7 @@
             --jade-dark: #0FB386;
             --jade-bg: #ECFAF4;
             --rule: #E5E8EB;
+            --c-rust: #C25450;
         }
         html.dark {
             --bg: #0F1F1B;
@@ -150,6 +151,16 @@
             transition: all .15s;
         }
         .email-btn:hover { background: var(--jade-dark); }
+        .email-btn:disabled { opacity: .5; cursor: not-allowed; }
+        .msg {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: none;
+        }
+        .msg.success { display: block; background: var(--jade-bg); color: var(--jade-deep); border: 1px solid var(--jade-soft); }
+        .msg.error { display: block; background: #FEF1EE; color: var(--c-rust); border: 1px solid var(--c-rust); }
         .footer {
             margin-top: 32px;
             font-size: 12px;
@@ -169,83 +180,107 @@
         </div>
         <p class="subtitle">Войдите для доступа к расчётам</p>
 
-        <button class="login-btn google" onclick="loginWith('google')">
+        <button class="login-btn google" id="googleBtn">
             <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
             Войти через Google
         </button>
 
-        <button class="login-btn github" onclick="loginWith('github')">
+        <button class="login-btn github" id="githubBtn">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
             Войти через GitHub
         </button>
 
         <div class="divider">или</div>
 
-        <form class="email-form" onsubmit="event.preventDefault(); loginWithEmail()">
+        <form class="email-form" id="emailForm">
             <input type="email" class="email-input" id="emailInput" placeholder="Введите email" required>
-            <button type="submit" class="email-btn">Получить код входа</button>
+            <button type="submit" class="email-btn" id="emailBtn">Отправить ссылку входа</button>
         </form>
+
+        <div class="msg" id="msg"></div>
 
         <p class="footer">
             Нажимая "Войти", вы соглашаетесь с <a href="#">условиями использования</a>
         </p>
     </div>
 
-    <!-- Authing SDK -->
-    <script src="https://cdn.authing.cn/sdk/v3/authing.min.js"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Замените YOUR_APP_ID на ваш App ID из Authing Dashboard
-        const AUTHING_APP_ID = 'YOUR_APP_ID';
-        const REDIRECT_URI = window.location.origin + '/';
+        // ============================================
+        // ЗАМЕНИТЕ НА ВАШИ ДАННЫЕ ИЗ SUPABASE DASHBOARD
+        // ============================================
+        const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+        const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
 
-        let authClient = null;
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const REDIRECT_TO = window.location.origin + '/';
 
-        async function initAuthing() {
-            authClient = await authing.AuthClient.create({
-                appId: AUTHING_APP_ID,
-                redirectUri: REDIRECT_URI,
-            });
-
-            // Проверяем, вернулся ли пользователь с редиректа
-            const callbackData = await authClient.getRedirectCallback();
-            if (callbackData && callbackData.token) {
-                // Сохраняем токен
-                localStorage.setItem('authing_token', JSON.stringify(callbackData.token));
-                localStorage.setItem('authing_user', JSON.stringify(callbackData.userInfo));
-                window.location.href = '/';
+        // Проверяем, вернулся ли пользователь с OAuth
+        async function checkSession() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                localStorage.setItem('supabase_user', JSON.stringify(session.user));
+                localStorage.setItem('supabase_token', session.access_token);
+                window.location.href = REDIRECT_TO;
             }
         }
 
-        async function loginWith(provider) {
-            if (!authClient) await initAuthing();
-            await authClient.loginWithRedirect({ connection: provider });
-        }
+        // OAuth: Google
+        document.getElementById('googleBtn').addEventListener('click', async () => {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: REDIRECT_TO }
+            });
+            if (error) showError(error.message);
+        });
 
-        async function loginWithEmail() {
-            if (!authClient) await initAuthing();
+        // OAuth: GitHub
+        document.getElementById('githubBtn').addEventListener('click', async () => {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'github',
+                options: { redirectTo: REDIRECT_TO }
+            });
+            if (error) showError(error.message);
+        });
+
+        // Email magic link
+        document.getElementById('emailForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
             const email = document.getElementById('emailInput').value;
-            if (!email) return;
+            const btn = document.getElementById('emailBtn');
+            btn.disabled = true;
+            btn.textContent = 'Отправка...';
 
-            // Отправляем магический код на email
-            await authClient.sendEmailCode(email);
-            const code = prompt('Введите код из письма:');
-            if (!code) return;
-
-            // Логинимся по коду
-            const result = await authClient.loginByEmail({
+            const { error } = await supabase.auth.signInWithOtp({
                 email: email,
-                code: code,
+                options: { emailRedirectTo: REDIRECT_TO }
             });
 
-            if (result.token) {
-                localStorage.setItem('authing_token', JSON.stringify(result.token));
-                localStorage.setItem('authing_user', JSON.stringify(result.userInfo));
-                window.location.href = '/';
+            btn.disabled = false;
+            btn.textContent = 'Отправить ссылку входа';
+
+            if (error) {
+                showError(error.message);
+            } else {
+                showSuccess('Ссылка для входа отправлена на ' + email);
             }
+        });
+
+        function showError(msg) {
+            const el = document.getElementById('msg');
+            el.className = 'msg error';
+            el.textContent = msg;
         }
 
-        // Инициализация при загрузке
-        initAuthing();
+        function showSuccess(msg) {
+            const el = document.getElementById('msg');
+            el.className = 'msg success';
+            el.textContent = msg;
+        }
+
+        // Проверяем сессию при загрузке
+        checkSession();
     </script>
 </body>
 </html>
