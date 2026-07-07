@@ -1954,7 +1954,7 @@ async function loadLib(name) {
     position: relative;
   }
   .ai-thinking::before {
-    content: '🤔';
+    content: '✦';
     position: absolute;
     left: -14px;
     top: 14px;
@@ -2923,9 +2923,10 @@ async function loadLib(name) {
   }
   .agent-opt.selected {
     border-color: var(--jade);
-    color: var(--ink);
+    color: var(--jade-deep);
     background: var(--jade-bg);
-    font-weight: 500;
+    font-weight: 600;
+    box-shadow: 0 0 0 1px var(--jade);
   }
 
   .agent-foot {
@@ -2949,6 +2950,7 @@ async function loadLib(name) {
     border: none;
     background: transparent;
     outline: none;
+    color: var(--ink);
     resize: none;
     min-height: 36px;
     max-height: 100px;
@@ -3517,6 +3519,7 @@ async function loadLib(name) {
     cursor: pointer;
     transition: all 0.15s;
     font-weight: 500;
+    margin-top: 20px;
     margin-bottom: 20px;
   }
   .back-to-home:hover {
@@ -5419,7 +5422,7 @@ body::before {
     <span class="footer-links">
       <a href="https://github.com/MbFu666/lca-ai" target="_blank" rel="noopener">GitHub</a>
       <span style="color:var(--rule)">·</span>
-      <a href="https://www.ipcc.ch/report/ar6/synthesis-report/" target="_blank" rel="noopener">IPCC AR6</a>
+      <a href="https://www.ipcc.ch/report/ar6/wg1/" target="_blank" rel="noopener">IPCC AR6</a>
     </span>
   </footer>
 
@@ -7037,7 +7040,13 @@ function renderFlow(d, t) {
 function clearSelected() {
   $$('.flow-root.selected, .stage-card.selected, .proc-card.selected')
     .forEach(el => el.classList.remove('selected'));
-  $('#detailPanel').classList.remove('show');
+  const panel = $('#detailPanel');
+  panel.classList.remove('show');
+  // Move panel back to original position in DOM
+  const output = document.querySelector('#step2 .output') || document.querySelector('#step2');
+  if (output && panel.parentNode !== output) {
+    output.appendChild(panel);
+  }
 }
 
 function formatCycle(d) {
