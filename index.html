@@ -6840,10 +6840,10 @@ async function apiCall(messages, opts = {}) {
   }
 
   const t0 = Date.now();
+  const token = localStorage.getItem('supabase_token') || SUPABASE_ANON_KEY;
   const headers = { 
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-    'apikey': SUPABASE_ANON_KEY
+    'Authorization': `Bearer ${token}`
   };
   
   const res = await fetch(API_URL, {
