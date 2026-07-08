@@ -211,10 +211,14 @@
 
         // Инициализация Supabase
         function initSupabase() {
+            console.log('[Login] Проверяю Supabase SDK...');
             if (window.supabase) {
+                console.log('[Login] Supabase SDK найден');
                 supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 return true;
             }
+            console.error('[Login] Supabase SDK НЕ найден!');
+            showError('Supabase SDK не загружен. Обновите страницу.');
             return false;
         }
 
@@ -233,24 +237,33 @@
         document.getElementById('emailForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             e.stopPropagation();
-            if (!supabase) { showError('Supabase не загружен'); return; }
+            e.stopImmediatePropagation();
+            console.log('[Login] Форма отправлена');
+            if (!supabase) { 
+                console.error('[Login] Supabase не инициализирован');
+                showError('Supabase не загружен. Обновите страницу.');
+                return; 
+            }
             const email = document.getElementById('emailInput').value;
+            console.log('[Login] Отправляю OTP на:', email);
             const btn = document.getElementById('emailBtn');
             btn.disabled = true;
             btn.textContent = 'Отправка...';
 
             try {
-                const { error } = await supabase.auth.signInWithOtp({
+                const { data, error } = await supabase.auth.signInWithOtp({
                     email: email,
                     options: {
                         shouldCreateUser: true
                     }
                 });
+                console.log('[Login] OTP ответ:', { data, error });
 
                 btn.disabled = false;
                 btn.textContent = 'Отправить код';
 
                 if (error) {
+                    console.error('[Login] Ошибка OTP:', error);
                     showError(error.message);
                 } else {
                     // Показываем поле для ввода кода
@@ -259,6 +272,7 @@
                     showSuccess('Код отправлен на ' + email);
                 }
             } catch (err) {
+                console.error('[Login] Исключение:', err);
                 btn.disabled = false;
                 btn.textContent = 'Отправить код';
                 showError('Ошибка: ' + err.message);
