@@ -1,1 +1,0 @@
-(http.host eq "lca-ai.ru" and http.request.uri.path ne "/maintenance.html")
