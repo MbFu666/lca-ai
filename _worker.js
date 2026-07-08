@@ -1,5 +1,5 @@
 // _worker.js — Maintenance mode
-const MAINTENANCE_MODE = false; // false = выключить техобслуживание
+const MAINTENANCE_MODE = true; // false = выключить техобслуживание
 const YOUR_IP = "1.58.73.217";
 
 const MAINTENANCE_HTML = `<!DOCTYPE html>
