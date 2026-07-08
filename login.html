@@ -206,7 +206,7 @@
         const SUPABASE_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
 
-        let supabase = null;
+        let sbClient = null;
         const REDIRECT_TO = window.location.origin + '/';
 
         // Инициализация Supabase
@@ -214,7 +214,7 @@
             console.log('[Login] Проверяю Supabase SDK...');
             if (window.supabase) {
                 console.log('[Login] Supabase SDK найден');
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 return true;
             }
             console.error('[Login] Supabase SDK НЕ найден!');
@@ -224,8 +224,8 @@
 
         // Проверяем сессию
         async function checkSession() {
-            if (!supabase) return;
-            const { data: { session } } = await supabase.auth.getSession();
+            if (!sbClient) return;
+            const { data: { session } } = await sbClient.auth.getSession();
             if (session) {
                 localStorage.setItem('supabase_user', JSON.stringify(session.user));
                 localStorage.setItem('supabase_token', session.access_token);
@@ -239,10 +239,10 @@
             e.stopPropagation();
             e.stopImmediatePropagation();
             console.log('[Login] Форма отправлена');
-            if (!supabase) { 
+            if (!sbClient) {
                 console.error('[Login] Supabase не инициализирован');
                 showError('Supabase не загружен. Обновите страницу.');
-                return; 
+                return;
             }
             const email = document.getElementById('emailInput').value;
             console.log('[Login] Отправляю OTP на:', email);
@@ -251,7 +251,7 @@
             btn.textContent = 'Отправка...';
 
             try {
-                const { data, error } = await supabase.auth.signInWithOtp({
+                const { data, error } = await sbClient.auth.signInWithOtp({
                     email: email,
                     options: {
                         shouldCreateUser: true
@@ -283,14 +283,17 @@
         document.getElementById('codeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             e.stopPropagation();
-            if (!supabase) { showError('Supabase не загружен'); return; }
+            if (!sbClient) {
+                showError('Supabase не загружен');
+                return;
+            }
             const code = document.getElementById('codeInput').value;
             const btn = document.getElementById('codeBtn');
             btn.disabled = true;
             btn.textContent = 'Проверка...';
 
             try {
-                const { error } = await supabase.auth.verifyOtp({
+                const { error } = await sbClient.auth.verifyOtp({
                     email: document.getElementById('emailInput').value,
                     token: code,
                     type: 'email'
@@ -303,7 +306,7 @@
                     showError('Неверный код: ' + error.message);
                 } else {
                     // Успешный вход — перенаправляем
-                    const { data: { session } } = await supabase.auth.getSession();
+                    const { data: { session } } = await sbClient.auth.getSession();
                     if (session) {
                         localStorage.setItem('supabase_user', JSON.stringify(session.user));
                         localStorage.setItem('supabase_token', session.access_token);
