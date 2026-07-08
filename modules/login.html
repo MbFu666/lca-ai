@@ -218,11 +218,21 @@
         const SUPABASE_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let supabase = null;
         const REDIRECT_TO = window.location.origin + '/';
 
-        // Проверяем, вернулся ли пользователь с OAuth
+        // Инициализация Supabase
+        function initSupabase() {
+            if (window.supabase) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                return true;
+            }
+            return false;
+        }
+
+        // Проверяем сессию
         async function checkSession() {
+            if (!supabase) return;
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
                 localStorage.setItem('supabase_user', JSON.stringify(session.user));
@@ -233,6 +243,7 @@
 
         // OAuth: Google
         document.getElementById('googleBtn').addEventListener('click', async () => {
+            if (!supabase) { showError('Supabase не загружен'); return; }
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: { redirectTo: REDIRECT_TO }
@@ -242,6 +253,7 @@
 
         // OAuth: GitHub
         document.getElementById('githubBtn').addEventListener('click', async () => {
+            if (!supabase) { showError('Supabase не загружен'); return; }
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'github',
                 options: { redirectTo: REDIRECT_TO }
@@ -252,58 +264,74 @@
         // Email OTP (6-значный код)
         document.getElementById('emailForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            e.stopPropagation();
+            if (!supabase) { showError('Supabase не загружен'); return; }
             const email = document.getElementById('emailInput').value;
             const btn = document.getElementById('emailBtn');
             btn.disabled = true;
             btn.textContent = 'Отправка...';
 
-            const { error } = await supabase.auth.signInWithOtp({
-                email: email,
-                options: {
-                    shouldCreateUser: true
+            try {
+                const { error } = await supabase.auth.signInWithOtp({
+                    email: email,
+                    options: {
+                        shouldCreateUser: true
+                    }
+                });
+
+                btn.disabled = false;
+                btn.textContent = 'Отправить код';
+
+                if (error) {
+                    showError(error.message);
+                } else {
+                    // Показываем поле для ввода кода
+                    document.getElementById('emailForm').style.display = 'none';
+                    document.getElementById('codeForm').style.display = 'flex';
+                    showSuccess('Код отправлен на ' + email);
                 }
-            });
-
-            btn.disabled = false;
-            btn.textContent = 'Отправить код';
-
-            if (error) {
-                showError(error.message);
-            } else {
-                // Показываем поле для ввода кода
-                document.getElementById('emailForm').style.display = 'none';
-                document.getElementById('codeForm').style.display = 'flex';
-                showSuccess('Код отправлен на ' + email);
+            } catch (err) {
+                btn.disabled = false;
+                btn.textContent = 'Отправить код';
+                showError('Ошибка: ' + err.message);
             }
         });
 
         // Верификация OTP кода
         document.getElementById('codeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            e.stopPropagation();
+            if (!supabase) { showError('Supabase не загружен'); return; }
             const code = document.getElementById('codeInput').value;
             const btn = document.getElementById('codeBtn');
             btn.disabled = true;
             btn.textContent = 'Проверка...';
 
-            const { error } = await supabase.auth.verifyOtp({
-                email: document.getElementById('emailInput').value,
-                token: code,
-                type: 'email'
-            });
+            try {
+                const { error } = await supabase.auth.verifyOtp({
+                    email: document.getElementById('emailInput').value,
+                    token: code,
+                    type: 'email'
+                });
 
-            btn.disabled = false;
-            btn.textContent = 'Войти';
+                btn.disabled = false;
+                btn.textContent = 'Войти';
 
-            if (error) {
-                showError('Неверный код: ' + error.message);
-            } else {
-                // Успешный вход — перенаправляем
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session) {
-                    localStorage.setItem('supabase_user', JSON.stringify(session.user));
-                    localStorage.setItem('supabase_token', session.access_token);
-                    window.location.href = REDIRECT_TO;
+                if (error) {
+                    showError('Неверный код: ' + error.message);
+                } else {
+                    // Успешный вход — перенаправляем
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session) {
+                        localStorage.setItem('supabase_user', JSON.stringify(session.user));
+                        localStorage.setItem('supabase_token', session.access_token);
+                        window.location.href = REDIRECT_TO;
+                    }
                 }
+            } catch (err) {
+                btn.disabled = false;
+                btn.textContent = 'Войти';
+                showError('Ошибка: ' + err.message);
             }
         });
 
@@ -319,8 +347,14 @@
             el.textContent = msg;
         }
 
-        // Проверяем сессию при загрузке
-        checkSession();
+        // Инициализация при загрузке
+        window.addEventListener('load', () => {
+            if (initSupabase()) {
+                checkSession();
+            } else {
+                showError('Не удалось загрузить Supabase SDK');
+            }
+        });
     </script>
 </body>
 </html>

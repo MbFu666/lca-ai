@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/jsonrepair@3.11.2/lib/umd/jsonrepair.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // Register Service Worker
 if ('serviceWorker' in navigator) {
@@ -38,6 +39,178 @@ async function loadLib(name) {
     script.onerror = () => resolve(false);
     document.head.appendChild(script);
   });
+}
+
+// ============================================
+// Supabase Configuration
+// ============================================
+const SUPABASE_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Auth state
+let currentUser = null;
+
+// Check auth state
+async function checkAuth() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    localStorage.setItem('supabase_user', JSON.stringify(session.user));
+    localStorage.setItem('supabase_token', session.access_token);
+    updateAuthUI(true);
+    // Load user data from Supabase
+    await loadUserData();
+  } else {
+    // Check localStorage for cached session
+    const cachedUser = localStorage.getItem('supabase_user');
+    if (cachedUser) {
+      currentUser = JSON.parse(cachedUser);
+      updateAuthUI(true);
+    }
+  }
+}
+
+// Update UI based on auth state
+function updateAuthUI(isLoggedIn) {
+  const authSection = document.getElementById('authSection');
+  if (!authSection) return;
+  
+  if (isLoggedIn && currentUser) {
+    const name = currentUser.user_metadata?.full_name || 
+                 currentUser.user_metadata?.name || 
+                 currentUser.email || 'User';
+    const picture = currentUser.user_metadata?.avatar_url || 
+                   currentUser.user_metadata?.picture || '';
+    
+    authSection.innerHTML = '<a href="/cabinet.html" class="auth-btn" style="margin-right:8px">' +
+      (picture ? '<img src="' + picture + '" class="auth-avatar" alt="">' : 
+                 '<span class="auth-avatar-text">' + name.charAt(0).toUpperCase() + '</span>') +
+      '<span>' + name + '</span></a>' +
+      '<button class="auth-logout" onclick="logout()" title="Выйти">✕</button>';
+  } else {
+    authSection.innerHTML = '<a href="/login.html" class="auth-btn">' +
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
+      '<span>Войти</span></a>';
+  }
+}
+
+// Logout
+async function logout() {
+  await supabaseClient.auth.signOut();
+  localStorage.removeItem('supabase_user');
+  localStorage.removeItem('supabase_token');
+  currentUser = null;
+  updateAuthUI(false);
+}
+
+// Load user data from Supabase
+async function loadUserData() {
+  if (!currentUser) return;
+  
+  try {
+    // Load history
+    const { data: history } = await supabaseClient
+      .from('user_history')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false });
+    
+    if (history && history.length > 0) {
+      // Store in localStorage for quick access
+      localStorage.setItem('lca-history', JSON.stringify(history.map(h => ({
+        id: h.id,
+        date: h.created_at,
+        product: h.product_title,
+        fu: h.functional_unit,
+        total: h.total_co2eq,
+        data: h.report_data
+      }))));
+    }
+    
+    // Load projects
+    const { data: projects } = await supabaseClient
+      .from('user_projects')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false });
+    
+    if (projects && projects.length > 0) {
+      // Load calculations for each project
+      const projectsWithCalcs = await Promise.all(projects.map(async (p) => {
+        const { data: calcs } = await supabaseClient
+          .from('project_calculations')
+          .select('*')
+          .eq('project_id', p.id)
+          .order('created_at', { ascending: false });
+        
+        return {
+          id: p.id,
+          name: p.name,
+          createdAt: p.created_at,
+          calculations: (calcs || []).map(c => ({
+            id: c.id,
+            date: c.created_at,
+            data: c.report_data
+          }))
+        };
+      }));
+      
+      localStorage.setItem('lca-projects', JSON.stringify(projectsWithCalcs));
+    }
+  } catch (err) {
+    console.error('Error loading user data:', err);
+  }
+}
+
+// Save calculation to Supabase
+async function saveCalculation(report) {
+  if (!currentUser) return;
+  
+  try {
+    await supabaseClient.from('user_history').insert({
+      user_id: currentUser.id,
+      product_title: report.product_title,
+      functional_unit: report.functional_unit,
+      total_co2eq: report.total_co2eq,
+      report_data: report
+    });
+  } catch (err) {
+    console.error('Error saving calculation:', err);
+  }
+}
+
+// Save project to Supabase
+async function saveProject(projectName) {
+  if (!currentUser) return null;
+  
+  try {
+    const { data, error } = await supabaseClient.from('user_projects').insert({
+      user_id: currentUser.id,
+      name: projectName
+    }).select().single();
+    
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.error('Error saving project:', err);
+    return null;
+  }
+}
+
+// Save calculation to project
+async function saveToProject(projectId, report) {
+  if (!currentUser) return;
+  
+  try {
+    await supabaseClient.from('project_calculations').insert({
+      project_id: projectId,
+      user_id: currentUser.id,
+      report_data: report
+    });
+  } catch (err) {
+    console.error('Error saving to project:', err);
+  }
 }
 </script>
 
@@ -5755,7 +5928,7 @@ body::before {
    и временно вшить ключ в заголовок ниже (но НИ В КОЕМ СЛУЧАЕ
    не выкладывайте такой файл в открытый доступ).
    ============================================================ */
-const API_URL = "/api/lca";              // ← ваш прокси-эндпоинт (см. Cloudflare Worker в конце файла)
+const API_URL = "https://pbisngkepszwzzjivxus.supabase.co/functions/v1/lca-proxy";  // Supabase Edge Function
 const MODEL   = "deepseek-v4-flash";      // мультимодальная, дешёвая. Для сильнее: "deepseek-v4-pro"
 
 const STAGE_COLORS = ["#2C4A3E", "#5B7860", "#B8753C", "#8B6F47", "#3D5A6C", "#7A3B2D"];
@@ -6331,6 +6504,11 @@ function saveToHistory(report) {
   history.unshift(entry);
   if (history.length > MAX_HISTORY) history.pop();
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  
+  // Also save to Supabase if user is logged in
+  if (currentUser) {
+    saveCalculation(report);
+  }
 }
 
 function loadFromHistory(id) {
@@ -6661,9 +6839,15 @@ async function apiCall(messages, opts = {}) {
   }
 
   const t0 = Date.now();
+  const token = localStorage.getItem('supabase_token') || SUPABASE_ANON_KEY;
+  const headers = { 
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  };
+  
   const res = await fetch(API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: headers,
     body: JSON.stringify(body)
   });
   const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
@@ -8881,21 +9065,8 @@ initJsonWorker();
 document.addEventListener('DOMContentLoaded', function() {
   console.log('[LCA] Initializing...');
 
-  // Проверка авторизации (Supabase)
-  var user = null;
-  try {
-    user = JSON.parse(localStorage.getItem('supabase_user'));
-  } catch(e) {}
-  var authSection = document.getElementById('authSection');
-  if (user && authSection) {
-    var name = user.user_metadata?.full_name || user.user_metadata?.name || user.email || 'User';
-    var picture = user.user_metadata?.avatar_url || user.user_metadata?.picture || '';
-    authSection.innerHTML = '<div class="auth-user">' +
-      (picture ? '<img src="' + picture + '" class="auth-avatar" alt="">' : '<span class="auth-avatar-text">' + name.charAt(0).toUpperCase() + '</span>') +
-      '<span class="auth-name">' + name + '</span>' +
-      '<button class="auth-logout" onclick="localStorage.removeItem(\'supabase_token\');localStorage.removeItem(\'supabase_user\');location.reload();" title="Выйти">✕</button>' +
-      '</div>';
-  }
+  // Проверка авторизации через Supabase
+  checkAuth();
 
   var savedTheme = localStorage.getItem('lca-theme');
   var themeToggle = document.getElementById('themeToggle');
