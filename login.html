@@ -152,6 +152,10 @@
         }
         .email-btn:hover { background: var(--jade-dark); }
         .email-btn:disabled { opacity: .5; cursor: not-allowed; }
+        .check-email { text-align: center; padding: 40px 20px; }
+        .check-email .icon { font-size: 48px; margin-bottom: 16px; }
+        .check-email h3 { font-size: 18px; margin-bottom: 8px; }
+        .check-email p { font-size: 14px; color: var(--ink-mute); }
         .msg {
             margin-top: 16px;
             padding: 12px;
@@ -182,12 +186,7 @@
 
         <form class="email-form" id="emailForm">
             <input type="email" class="email-input" id="emailInput" placeholder="Введите email" required>
-            <button type="submit" class="email-btn" id="emailBtn">Отправить код</button>
-        </form>
-
-        <form class="email-form" id="codeForm" style="display:none">
-            <input type="text" class="email-input" id="codeInput" placeholder="Введите 6-значный код" maxlength="6" pattern="[0-9]{6}" required>
-            <button type="submit" class="email-btn" id="codeBtn">Войти</button>
+            <button type="submit" class="email-btn" id="emailBtn">Отправить ссылку</button>
         </form>
 
         <div class="msg" id="msg"></div>
@@ -233,7 +232,7 @@
             }
         }
 
-        // Email OTP (6-значный код)
+        // Email Magic Link
         document.getElementById('emailForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -245,7 +244,7 @@
                 return;
             }
             const email = document.getElementById('emailInput').value;
-            console.log('[Login] Отправляю OTP на:', email);
+            console.log('[Login] Отправляю magic link на:', email);
             const btn = document.getElementById('emailBtn');
             btn.disabled = true;
             btn.textContent = 'Отправка...';
@@ -254,71 +253,39 @@
                 const { data, error } = await sbClient.auth.signInWithOtp({
                     email: email,
                     options: {
-                        shouldCreateUser: true
+                        emailRedirectTo: REDIRECT_TO
                     }
                 });
-                console.log('[Login] OTP ответ:', { data, error });
+                console.log('[Login] Ответ:', { data, error });
 
                 btn.disabled = false;
-                btn.textContent = 'Отправить код';
+                btn.textContent = 'Отправить ссылку';
 
                 if (error) {
-                    console.error('[Login] Ошибка OTP:', error);
+                    console.error('[Login] Ошибка:', error);
                     showError(error.message);
                 } else {
-                    // Показываем поле для ввода кода
+                    showSuccess('Ссылка для входа отправлена на ' + email + '. Проверьте почту.');
                     document.getElementById('emailForm').style.display = 'none';
-                    document.getElementById('codeForm').style.display = 'flex';
-                    showSuccess('Код отправлен на ' + email);
                 }
             } catch (err) {
                 console.error('[Login] Исключение:', err);
                 btn.disabled = false;
-                btn.textContent = 'Отправить код';
+                btn.textContent = 'Отправить ссылку';
                 showError('Ошибка: ' + err.message);
             }
         });
 
-        // Верификация OTP кода
-        document.getElementById('codeForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (!sbClient) {
-                showError('Supabase не загружен');
-                return;
+        // Проверяем сессию при загрузке (для magic link callback)
+        async function checkSession() {
+            if (!sbClient) return;
+            const { data: { session } } = await sbClient.auth.getSession();
+            if (session) {
+                localStorage.setItem('supabase_user', JSON.stringify(session.user));
+                localStorage.setItem('supabase_token', session.access_token);
+                window.location.href = REDIRECT_TO;
             }
-            const code = document.getElementById('codeInput').value;
-            const btn = document.getElementById('codeBtn');
-            btn.disabled = true;
-            btn.textContent = 'Проверка...';
-
-            try {
-                const { error } = await sbClient.auth.verifyOtp({
-                    email: document.getElementById('emailInput').value,
-                    token: code,
-                    type: 'email'
-                });
-
-                btn.disabled = false;
-                btn.textContent = 'Войти';
-
-                if (error) {
-                    showError('Неверный код: ' + error.message);
-                } else {
-                    // Успешный вход — перенаправляем
-                    const { data: { session } } = await sbClient.auth.getSession();
-                    if (session) {
-                        localStorage.setItem('supabase_user', JSON.stringify(session.user));
-                        localStorage.setItem('supabase_token', session.access_token);
-                        window.location.href = REDIRECT_TO;
-                    }
-                }
-            } catch (err) {
-                btn.disabled = false;
-                btn.textContent = 'Войти';
-                showError('Ошибка: ' + err.message);
-            }
-        });
+        }
 
         function showError(msg) {
             const el = document.getElementById('msg');
