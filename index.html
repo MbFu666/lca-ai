@@ -83,12 +83,11 @@ function updateAuthUI(isLoggedIn) {
     const picture = currentUser.user_metadata?.avatar_url || 
                    currentUser.user_metadata?.picture || '';
     
-    authSection.innerHTML = '<div class="auth-user">' +
+    authSection.innerHTML = '<a href="/cabinet.html" class="auth-btn" style="margin-right:8px">' +
       (picture ? '<img src="' + picture + '" class="auth-avatar" alt="">' : 
                  '<span class="auth-avatar-text">' + name.charAt(0).toUpperCase() + '</span>') +
-      '<span class="auth-name">' + name + '</span>' +
-      '<button class="auth-logout" onclick="logout()" title="Выйти">✕</button>' +
-      '</div>';
+      '<span>' + name + '</span></a>' +
+      '<button class="auth-logout" onclick="logout()" title="Выйти">✕</button>';
   } else {
     authSection.innerHTML = '<a href="/login.html" class="auth-btn">' +
       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +

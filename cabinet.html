@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LCA·AI — Личный кабинет</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg: #FFFFFF;
+            --bg-soft: #F8FAFA;
+            --bg-tint: #F0FBF7;
+            --ink: #0E2E27;
+            --ink-soft: #4D5E61;
+            --ink-mute: #93A0A6;
+            --rule: #E5E8EB;
+            --jade: #14C997;
+            --jade-dark: #0FB386;
+            --jade-deep: #0A8567;
+            --jade-soft: #B6EFDA;
+            --jade-bg: #ECFAF4;
+            --c-rust: #C25450;
+            --sans: 'Manrope', system-ui, sans-serif;
+            --mono: 'JetBrains Mono', monospace;
+        }
+        html.dark {
+            --bg: #0F1F1B;
+            --bg-soft: #162B26;
+            --bg-tint: #1A332D;
+            --ink: #E8F0ED;
+            --ink-soft: #A0B0AA;
+            --ink-mute: #6B7D78;
+            --rule: #2A3F39;
+            --rule-soft: #1E332D;
+            --jade-bg: #1A332D;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--sans); background: var(--bg); color: var(--ink); min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+        
+        /* Header */
+        header { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid var(--rule); }
+        .brand { display: inline-flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 600; color: var(--ink); text-decoration: none; }
+        .brand .dot { width: 22px; height: 22px; border-radius: 50%; background: var(--jade); display: inline-flex; align-items: center; justify-content: center; }
+        .brand .dot::after { content: ''; width: 9px; height: 9px; background: white; border-radius: 50%; }
+        .brand em { font-style: normal; color: var(--jade); font-weight: 700; }
+        .nav { display: flex; gap: 20px; align-items: center; }
+        .nav a { color: var(--ink-soft); text-decoration: none; font-size: 14px; font-weight: 500; transition: color .15s; }
+        .nav a:hover { color: var(--jade); }
+        .nav a.active { color: var(--jade); font-weight: 600; }
+        .theme-toggle { background: none; border: 1px solid var(--rule); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; transition: all .15s; padding: 0; }
+        .theme-toggle:hover { border-color: var(--jade); background: var(--jade-bg); }
+        
+        /* Layout */
+        .layout { display: grid; grid-template-columns: 260px 1fr; gap: 32px; padding: 32px 0; }
+        @media (max-width: 768px) { .layout { grid-template-columns: 1fr; } }
+        
+        /* Sidebar */
+        .sidebar { position: sticky; top: 32px; align-self: start; }
+        .profile-card { background: var(--bg-soft); border: 1px solid var(--rule); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 20px; }
+        .avatar { width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; }
+        .avatar.img { background: var(--jade); color: white; }
+        .avatar.text { background: var(--jade); color: white; font-size: 28px; }
+        .profile-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+        .profile-email { font-size: 13px; color: var(--ink-mute); margin-bottom: 16px; }
+        .profile-stats { display: flex; justify-content: center; gap: 24px; padding-top: 16px; border-top: 1px solid var(--rule); }
+        .stat { text-align: center; }
+        .stat-num { font-size: 20px; font-weight: 700; color: var(--jade); font-family: var(--mono); }
+        .stat-label { font-size: 11px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: .05em; }
+        
+        .menu { list-style: none; }
+        .menu li { margin-bottom: 4px; }
+        .menu a { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; color: var(--ink-soft); text-decoration: none; font-size: 14px; font-weight: 500; transition: all .15s; cursor: pointer; }
+        .menu a:hover { background: var(--bg-soft); color: var(--ink); }
+        .menu a.active { background: var(--jade-bg); color: var(--jade-deep); font-weight: 600; }
+        .menu a svg { width: 18px; height: 18px; flex-shrink: 0; }
+        
+        /* Main content */
+        .main-content { min-height: 60vh; }
+        .section-title { font-size: 24px; font-weight: 700; margin-bottom: 24px; letter-spacing: -0.02em; }
+        
+        /* Cards */
+        .card { background: var(--bg); border: 1px solid var(--rule); border-radius: 12px; padding: 20px; margin-bottom: 16px; transition: all .15s; }
+        .card:hover { border-color: var(--jade-soft); box-shadow: 0 4px 12px rgba(20,201,151,0.1); }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .card-title { font-size: 15px; font-weight: 600; }
+        .card-date { font-size: 12px; color: var(--ink-mute); font-family: var(--mono); }
+        .card-meta { display: flex; gap: 16px; font-size: 13px; color: var(--ink-soft); }
+        .card-meta span { display: inline-flex; align-items: center; gap: 4px; }
+        .card-actions { display: flex; gap: 8px; margin-top: 12px; }
+        
+        /* Buttons */
+        .btn { padding: 8px 16px; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; border: none; }
+        .btn-primary { background: var(--jade); color: white; }
+        .btn-primary:hover { background: var(--jade-dark); }
+        .btn-outline { background: none; border: 1px solid var(--rule); color: var(--ink-soft); }
+        .btn-outline:hover { border-color: var(--jade); color: var(--jade); }
+        .btn-danger { background: none; border: 1px solid var(--c-rust); color: var(--c-rust); }
+        .btn-danger:hover { background: var(--c-rust); color: white; }
+        
+        /* Empty state */
+        .empty { text-align: center; padding: 60px 20px; color: var(--ink-mute); }
+        .empty-icon { font-size: 48px; margin-bottom: 16px; }
+        .empty-text { font-size: 14px; margin-bottom: 20px; }
+        
+        /* Toast */
+        .toast { position: fixed; bottom: 24px; right: 24px; background: var(--ink); color: var(--bg); padding: 12px 20px; border-radius: 10px; font-size: 14px; z-index: 1000; opacity: 0; transform: translateY(10px); transition: all .3s; }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        
+        /* Settings */
+        .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--rule-soft); }
+        .setting-row:last-child { border-bottom: none; }
+        .setting-label { font-size: 14px; font-weight: 500; }
+        .setting-desc { font-size: 12px; color: var(--ink-mute); margin-top: 2px; }
+        .toggle { position: relative; width: 48px; height: 26px; background: var(--rule); border-radius: 13px; cursor: pointer; transition: background .2s; }
+        .toggle.active { background: var(--jade); }
+        .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: transform .2s; }
+        .toggle.active::after { transform: translateX(22px); }
+        
+        /* Print */
+        @media print { header, .sidebar { display: none; } .layout { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container" style="display:flex;justify-content:space-between;align-items:center;width:100%">
+            <a href="/" class="brand"><span class="dot"></span>LCA<em>·</em>AI</a>
+            <div class="nav">
+                <a href="/">Главная</a>
+                <a href="/cabinet.html" class="active">Кабинет</a>
+                <button class="theme-toggle" id="themeToggle">🌙</button>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="layout">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="profile-card">
+                    <div class="avatar text" id="avatar">—</div>
+                    <div class="profile-name" id="profileName">Загрузка...</div>
+                    <div class="profile-email" id="profileEmail">—</div>
+                    <div class="profile-stats">
+                        <div class="stat"><div class="stat-num" id="statCalcs">0</div><div class="stat-label">Расчётов</div></div>
+                        <div class="stat"><div class="stat-num" id="statProjects">0</div><div class="stat-label">Проектов</div></div>
+                    </div>
+                </div>
+                <ul class="menu">
+                    <li><a href="#" class="active" data-tab="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> История</a></li>
+                    <li><a href="#" data-tab="projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Проекты</a></li>
+                    <li><a href="#" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Настройки</a></li>
+                    <li><a href="#" data-tab="logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Выйти</a></li>
+                </ul>
+            </aside>
+            
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- History Tab -->
+                <div class="tab-content" id="tab-history">
+                    <h2 class="section-title">История расчётов</h2>
+                    <div id="historyList"></div>
+                </div>
+                
+                <!-- Projects Tab -->
+                <div class="tab-content" id="tab-projects" style="display:none">
+                    <h2 class="section-title">Проекты</h2>
+                    <button class="btn btn-primary" id="newProjectBtn" style="margin-bottom:20px">+ Новый проект</button>
+                    <div id="projectsList"></div>
+                </div>
+                
+                <!-- Settings Tab -->
+                <div class="tab-content" id="tab-settings" style="display:none">
+                    <h2 class="section-title">Настройки</h2>
+                    <div class="card">
+                        <div class="setting-row">
+                            <div><div class="setting-label">Тёмная тема</div><div class="setting-desc">Переключить тёмный режим</div></div>
+                            <div class="toggle" id="darkToggle"></div>
+                        </div>
+                        <div class="setting-row">
+                            <div><div class="setting-label">Язык по умолчанию</div><div class="setting-desc">Язык интерфейса при входе</div></div>
+                            <select id="langSelect" style="padding:6px 12px;border:1px solid var(--rule);border-radius:6px;font-family:inherit;font-size:13px;background:var(--bg);color:var(--ink)">
+                                <option value="ru">Русский</option>
+                                <option value="en">English</option>
+                                <option value="zh">中文</option>
+                            </select>
+                        </div>
+                        <div class="setting-row">
+                            <div><div class="setting-label">Удалить аккаунт</div><div class="setting-desc">Безвозвратно удалить все данные</div></div>
+                            <button class="btn btn-danger" id="deleteAccountBtn">Удалить</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const SUPABASE_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let currentUser = null;
+        let currentTab = 'history';
+        
+        // Check auth
+        async function init() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.href = '/login.html'; return; }
+            currentUser = session.user;
+            localStorage.setItem('supabase_user', JSON.stringify(session.user));
+            localStorage.setItem('supabase_token', session.access_token);
+            renderProfile();
+            loadTab('history');
+        }
+        
+        function renderProfile() {
+            if (!currentUser) return;
+            const name = currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || currentUser.email;
+            const picture = currentUser.user_metadata?.avatar_url || currentUser.user_metadata?.picture;
+            const email = currentUser.email || '';
+            
+            document.getElementById('profileName').textContent = name;
+            document.getElementById('profileEmail').textContent = email;
+            
+            const avatarEl = document.getElementById('avatar');
+            if (picture) {
+                avatarEl.innerHTML = '<img src="' + picture + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover" alt="">';
+                avatarEl.className = 'avatar img';
+            } else {
+                avatarEl.textContent = name.charAt(0).toUpperCase();
+            }
+            
+            // Load stats
+            loadStats();
+        }
+        
+        async function loadStats() {
+            if (!currentUser) return;
+            const { count: calcs } = await supabase.from('user_history').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
+            const { count: projects } = await supabase.from('user_projects').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
+            document.getElementById('statCalcs').textContent = calcs || 0;
+            document.getElementById('statProjects').textContent = projects || 0;
+        }
+        
+        // Tab switching
+        document.querySelectorAll('.menu a[data-tab]').forEach(a => {
+            a.addEventListener('click', e => {
+                e.preventDefault();
+                const tab = a.dataset.tab;
+                if (tab === 'logout') { logout(); return; }
+                document.querySelectorAll('.menu a').forEach(x => x.classList.remove('active'));
+                a.classList.add('active');
+                document.querySelectorAll('.tab-content').forEach(x => x.style.display = 'none');
+                document.getElementById('tab-' + tab).style.display = 'block';
+                currentTab = tab;
+                loadTab(tab);
+            });
+        });
+        
+        async function loadTab(tab) {
+            if (tab === 'history') await loadHistory();
+            if (tab === 'projects') await loadProjects();
+        }
+        
+        // History
+        async function loadHistory() {
+            if (!currentUser) return;
+            const { data } = await supabase.from('user_history').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+            const list = document.getElementById('historyList');
+            if (!data || data.length === 0) {
+                list.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Нет сохранённых расчётов</div><a href="/" class="btn btn-primary">Сделать расчёт</a></div>';
+                return;
+            }
+            list.innerHTML = data.map(h => `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">${escape(h.product_title || '—')}</div>
+                        <div class="card-date">${new Date(h.created_at).toLocaleDateString('ru')}</div>
+                    </div>
+                    <div class="card-meta">
+                        <span>📦 ${escape(h.functional_unit || '—')}</span>
+                        <span>🌱 ${fmtNum(h.total_co2eq)} kgCO₂e</span>
+                    </div>
+                    <div class="card-actions">
+                        <a href="/?id=${h.id}" class="btn btn-primary">Посмотреть</a>
+                        <button class="btn btn-danger" onclick="deleteHistory('${h.id}')">Удалить</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        async function deleteHistory(id) {
+            if (!confirm('Удалить расчёт?')) return;
+            await supabase.from('user_history').delete().eq('id', id);
+            loadHistory();
+            loadStats();
+            showToast('Расчёт удалён');
+        }
+        
+        // Projects
+        async function loadProjects() {
+            if (!currentUser) return;
+            const { data } = await supabase.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+            const list = document.getElementById('projectsList');
+            if (!data || data.length === 0) {
+                list.innerHTML = '<div class="empty"><div class="empty-icon">📁</div><div class="empty-text">Нет проектов</div><button class="btn btn-primary" onclick="createProject()">Создать проект</button></div>';
+                return;
+            }
+            list.innerHTML = data.map(p => `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">${escape(p.name)}</div>
+                        <div class="card-date">${new Date(p.created_at).toLocaleDateString('ru')}</div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn btn-primary" onclick="viewProject('${p.id}')">Открыть</button>
+                        <button class="btn btn-danger" onclick="deleteProject('${p.id}')">Удалить</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        document.getElementById('newProjectBtn').addEventListener('click', createProject);
+        
+        async function createProject() {
+            const name = prompt('Название проекта:');
+            if (!name) return;
+            await supabase.from('user_projects').insert({ user_id: currentUser.id, name });
+            loadProjects();
+            loadStats();
+            showToast('Проект создан');
+        }
+        
+        async function deleteProject(id) {
+            if (!confirm('Удалить проект и все расчёты?')) return;
+            await supabase.from('project_calculations').delete().eq('project_id', id);
+            await supabase.from('user_projects').delete().eq('id', id);
+            loadProjects();
+            loadStats();
+            showToast('Проект удалён');
+        }
+        
+        function viewProject(id) { window.location.href = '/?project=' + id; }
+        
+        // Settings
+        const darkToggle = document.getElementById('darkToggle');
+        if (localStorage.getItem('lca-theme') === 'dark') darkToggle.classList.add('active');
+        darkToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            darkToggle.classList.toggle('active', isDark);
+            localStorage.setItem('lca-theme', isDark ? 'dark' : 'light');
+            document.getElementById('themeToggle').textContent = isDark ? '☀️' : '🌙';
+        });
+        
+        const savedLang = localStorage.getItem('lca-lang') || 'ru';
+        document.getElementById('langSelect').value = savedLang;
+        document.getElementById('langSelect').addEventListener('change', e => {
+            localStorage.setItem('lca-lang', e.target.value);
+            showToast('Язык сохранён');
+        });
+        
+        document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
+            if (!confirm('Вы уверены? Все данные будут удалены безвозвратно.')) return;
+            if (!confirm('Точно удалить аккаунт?')) return;
+            await supabase.from('user_history').delete().eq('user_id', currentUser.id);
+            await supabase.from('project_calculations').delete().eq('user_id', currentUser.id);
+            await supabase.from('user_projects').delete().eq('user_id', currentUser.id);
+            await supabase.auth.admin.deleteUser(currentUser.id);
+            await supabase.auth.signOut();
+            localStorage.clear();
+            window.location.href = '/';
+        });
+        
+        // Logout
+        async function logout() {
+            await supabase.auth.signOut();
+            localStorage.removeItem('supabase_user');
+            localStorage.removeItem('supabase_token');
+            window.location.href = '/';
+        }
+        
+        // Theme
+        const themeToggle = document.getElementById('themeToggle');
+        if (localStorage.getItem('lca-theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+            themeToggle.textContent = '☀️';
+        }
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            themeToggle.textContent = isDark ? '☀️' : '🌙';
+            localStorage.setItem('lca-theme', isDark ? 'dark' : 'light');
+        });
+        
+        function escape(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+        function fmtNum(n) { return typeof n === 'number' ? n.toFixed(2) : '—'; }
+        function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+        
+        init();
+    </script>
+</body>
+</html>
