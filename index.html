@@ -8512,8 +8512,8 @@ function renderHistory() {
   
   list.querySelectorAll('.history-item').forEach(item => {
     item.addEventListener('click', () => {
-      const id = parseInt(item.dataset.id);
-      const entry = loadFromHistory(id);
+      const id = item.dataset.id; // UUID string, not integer
+      const entry = getHistory().find(h => String(h.id) === String(id));
       if (entry) {
         closeModal('modalHistory');
         renderReport(entry.data);
@@ -8673,11 +8673,20 @@ function deleteProject(projectId) {
 }
 
 function deleteCalcFromProject(projectId, calcId) {
+  // Delete from localStorage
   const projects = getProjects();
   const project = projects.find(p => p.id === projectId);
   if (project) {
     project.calculations = project.calculations.filter(c => c.id !== calcId);
     saveProjectLocal(project);
+  }
+  // Delete from Supabase if logged in and ID is UUID
+  if (currentUser && supabaseClient && typeof calcId === 'string' && calcId.includes('-')) {
+    supabaseClient.from('project_calculations').delete().eq('id', calcId)
+      .then(({ error }) => {
+        if (error) console.error('[deleteCalcFromProject] Supabase error:', error);
+        else console.log('[deleteCalcFromProject] Deleted from Supabase:', calcId);
+      });
   }
 }
 
@@ -8887,16 +8896,10 @@ function showProjectSelectModal() {
   
   list.querySelectorAll('.select-project-item').forEach(item => {
     item.addEventListener('click', async () => {
-      const projectId = parseInt(item.dataset.id);
-      addToProject(projectId, lastReport);
-      // Also save to Supabase if logged in
-      if (currentUser) {
-        // Find the Supabase project by matching name
-        const localProject = getProjects().find(p => p.id === projectId);
-        if (localProject) {
-          const { data: sbProjects } = await supabaseClient.from('user_projects').select('id').eq('user_id', currentUser.id).eq('name', localProject.name).limit(1);
-          if (sbProjects?.length) await saveToProject(sbProjects[0].id, lastReport);
-        }
+      const projectId = item.dataset.id; // UUID string, not integer
+      addToProject(projectId, lastReport); // addToProject already saves to Supabase
+      closeModal('modalSelectProject');
+      showToast(currentLang === 'ru' ? 'Сохранено в проект!' : currentLang === 'zh' ? '已保存到项目！' : 'Saved to project!');
       }
       closeModal('modalSelectProject');
       showToast(currentLang === 'ru' ? 'Сохранено в проект!' : currentLang === 'zh' ? '已保存到项目！' : 'Saved to project!');
@@ -9261,41 +9264,29 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     if (historyId && supabaseClient) {
-      console.log('[LCA] Fetching history from Supabase:', historyId);
+      console.log('[LCA] Fetching from Supabase:', historyId);
+      // Try user_history first, then project_calculations
       supabaseClient.from('user_history').select('*').eq('id', historyId).single()
         .then(({ data, error }) => {
-          console.log('[LCA] Supabase history response:', { data, error });
-          if (error) {
-            console.warn('[LCA] Supabase history error:', error.code, error.message);
-            showToast(currentLang === 'ru' ? 'Расчёт не найден в облаке'
-              : currentLang === 'zh' ? '未在云端找到该计算'
-              : 'Calculation not found in cloud');
-            return;
-          }
           if (data && data.report_data) {
-            const h = JSON.parse(localStorage.getItem('lca-history') || '[]');
-            h.unshift({
-              id: data.id,
-              date: data.created_at,
-              product: data.product_title,
-              fu: data.functional_unit,
-              total: data.total_co2eq,
-              data: data.report_data
-            });
-            localStorage.setItem('lca-history', JSON.stringify(h.slice(0, 20)));
+            console.log('[LCA] Found in user_history');
             renderReport(data.report_data);
           } else {
-            console.warn('[LCA] History row exists but report_data is empty');
-            showToast(currentLang === 'ru' ? 'Данные расчёта повреждены'
-              : currentLang === 'zh' ? '计算数据已损坏'
-              : 'Calculation data is corrupted');
+            // Try project_calculations table
+            supabaseClient.from('project_calculations').select('*').eq('id', historyId).single()
+              .then(({ data: pcData, error: pcErr }) => {
+                if (pcData && pcData.report_data) {
+                  console.log('[LCA] Found in project_calculations');
+                  renderReport(pcData.report_data);
+                } else {
+                  showToast(currentLang === 'ru' ? 'Расчёт не найден' : 'Calculation not found');
+                }
+              });
           }
         })
         .catch(e => {
-          console.error('[LCA] Failed to load history:', e);
-          showToast(currentLang === 'ru' ? 'Ошибка загрузки из облака'
-            : currentLang === 'zh' ? '从云端加载失败'
-            : 'Failed to load from cloud');
+          console.error('[LCA] Failed:', e);
+          showToast(currentLang === 'ru' ? 'Ошибка загрузки' : 'Failed to load');
         });
     }
 
