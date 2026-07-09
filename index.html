@@ -9079,11 +9079,11 @@ initJsonWorker();
 /* ============================================================
    DOMContentLoaded — Full initialization
    ============================================================ */
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
   console.log('[LCA] Initializing...');
 
-  // Проверка авторизации через Supabase
-  checkAuth();
+  // Ждём завершения авторизации
+  await checkAuth();
 
   // URL parameter handler for opening saved calculations
   // Deep-link handler for ?history=ID and ?project=ID
@@ -9092,18 +9092,38 @@ document.addEventListener('DOMContentLoaded', function() {
     const historyId = params.get('history');
     const projectId = params.get('project');
     
+    console.log('[LCA] URL params:', { historyId, projectId, hasUser: !!currentUser, hasSB: !!supabaseClient });
+    
     if (historyId) {
       // Try localStorage first (timestamp IDs)
       const history = JSON.parse(localStorage.getItem('lca-history') || '[]');
       let entry = history.find(h => String(h.id) === String(historyId));
       
-      // If not found, try Supabase (UUID IDs)
-      if (!entry && currentUser && supabaseClient) {
-        supabaseClient.from('user_history').select('*').eq('id', historyId).single()
-          .then(({ data }) => { if (data && data.report_data) renderReport(data.report_data); })
-          .catch(e => console.error('Failed to load history:', e));
-      } else if (entry && entry.data) {
+      if (entry && entry.data) {
+        console.log('[LCA] Found in localStorage');
         renderReport(entry.data);
+      } else if (supabaseClient) {
+        // Try Supabase (UUID IDs)
+        console.log('[LCA] Trying Supabase for history:', historyId);
+        supabaseClient.from('user_history').select('*').eq('id', historyId).single()
+          .then(({ data, error }) => {
+            console.log('[LCA] Supabase history result:', data, error);
+            if (data && data.report_data) {
+              // Also save to localStorage for future use
+              const h = JSON.parse(localStorage.getItem('lca-history') || '[]');
+              h.unshift({
+                id: data.id,
+                date: data.created_at,
+                product: data.product_title,
+                fu: data.functional_unit,
+                total: data.total_co2eq,
+                data: data.report_data
+              });
+              localStorage.setItem('lca-history', JSON.stringify(h.slice(0, 20)));
+              renderReport(data.report_data);
+            }
+          })
+          .catch(e => console.error('[LCA] Failed to load history:', e));
       }
       
       // Clean URL
@@ -9115,15 +9135,18 @@ document.addEventListener('DOMContentLoaded', function() {
       const projects = JSON.parse(localStorage.getItem('lca-projects') || '[]');
       let project = projects.find(p => String(p.id) === String(projectId));
       
-      // If not found, try Supabase
-      if (!project && currentUser && supabaseClient) {
+      if (project && project.calculations && project.calculations.length > 0) {
+        console.log('[LCA] Found project in localStorage');
+        renderReport(project.calculations[0].data);
+      } else if (supabaseClient) {
+        // Try Supabase
+        console.log('[LCA] Trying Supabase for project:', projectId);
         supabaseClient.from('project_calculations').select('*').eq('project_id', projectId).order('created_at', { ascending: false })
-          .then(({ data }) => {
+          .then(({ data, error }) => {
+            console.log('[LCA] Supabase project result:', data, error);
             if (data && data.length > 0) renderReport(data[0].report_data);
           })
-          .catch(e => console.error('Failed to load project:', e));
-      } else if (project && project.calculations && project.calculations.length > 0) {
-        renderReport(project.calculations[0].data);
+          .catch(e => console.error('[LCA] Failed to load project:', e));
       }
       
       // Clean URL
