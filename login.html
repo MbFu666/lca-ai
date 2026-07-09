@@ -119,12 +119,26 @@
             color: var(--ink-mute);
         }
         .footer a { color: var(--jade); text-decoration: none; }
+        .header-bar { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; }
+        .theme-toggle { background: none; border: 1px solid var(--rule); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; transition: all .15s; padding: 0; }
+        .theme-toggle:hover { border-color: var(--jade); background: var(--jade-bg); }
+        .lang-switch { display: inline-flex; background: var(--bg-soft); border-radius: 30px; padding: 3px; border: 1px solid var(--rule); }
+        .lang-switch button { background: none; border: none; padding: 5px 10px; border-radius: 30px; font-size: 11px; font-weight: 600; color: var(--ink-mute); cursor: pointer; transition: all .15s; }
+        .lang-switch button.active { background: white; color: var(--ink); box-shadow: 0 1px 4px rgba(14,46,39,0.08); }
         @media (max-width: 480px) {
             .login-card { padding: 32px 24px; }
         }
     </style>
 </head>
 <body>
+    <div class="header-bar">
+        <div class="lang-switch">
+            <button data-lang="ru" class="active">RU</button>
+            <button data-lang="en">EN</button>
+            <button data-lang="zh">中文</button>
+        </div>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+    </div>
     <div class="login-card">
         <div class="brand">
             <span class="dot"></span>
@@ -209,6 +223,52 @@
             const el = document.getElementById('msg');
             el.className = 'msg success';
             el.textContent = msg;
+        }
+
+        // Theme auto-detect
+        (function() {
+            const saved = localStorage.getItem('lca-theme');
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+            const btn = document.getElementById('themeToggle');
+            if (btn) {
+                btn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+                btn.addEventListener('click', () => {
+                    document.documentElement.classList.toggle('dark');
+                    btn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+                    localStorage.setItem('lca-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+                });
+            }
+        })();
+
+        // Language auto-detect
+        (function() {
+            const saved = localStorage.getItem('lca-lang');
+            const browserLang = (navigator.language || '').toLowerCase();
+            const lang = saved || (browserLang.startsWith('ru') ? 'ru' : browserLang.startsWith('en') ? 'en' : 'ru');
+            document.querySelectorAll('.lang-switch button').forEach(b => {
+                b.classList.toggle('active', b.dataset.lang === lang);
+                b.addEventListener('click', () => {
+                    document.querySelectorAll('.lang-switch button').forEach(x => x.classList.remove('active'));
+                    b.classList.add('active');
+                    localStorage.setItem('lca-lang', b.dataset.lang);
+                    applyLoginLang(b.dataset.lang);
+                });
+            });
+            applyLoginLang(lang);
+        })();
+
+        function applyLoginLang(lang) {
+            const t = {
+                ru: { subtitle: 'Войдите для доступа к расчётам', placeholder: 'Введите email', btn: 'Отправить ссылку', sending: 'Отправка...', agreement: 'Нажимая «Войти», вы соглашаетесь с', terms: 'условиями использования' },
+                en: { subtitle: 'Sign in to access calculations', placeholder: 'Enter email', btn: 'Send link', sending: 'Sending...', agreement: 'By signing in, you agree to the', terms: 'terms of service' },
+                zh: { subtitle: '登录以访问计算', placeholder: '输入邮箱', btn: '发送链接', sending: '发送中...', agreement: '登录即表示您同意', terms: '服务条款' }
+            }[lang] || { subtitle: 'Войдите для доступа к расчётам', placeholder: 'Введите email', btn: 'Отправить ссылку', sending: 'Отправка...', agreement: 'Нажимая «Войти», вы соглашаетесь с', terms: 'условиями использования' };
+            document.querySelector('.subtitle').textContent = t.subtitle;
+            document.getElementById('emailInput').placeholder = t.placeholder;
+            document.getElementById('emailBtn').textContent = t.btn;
+            document.querySelector('.footer').innerHTML = t.agreement + ' <a href="#">' + t.terms + '</a>';
         }
 
         window.addEventListener('load', () => {

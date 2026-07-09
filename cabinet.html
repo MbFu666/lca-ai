@@ -203,7 +203,7 @@
                     list.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Нет расчётов</div><a href="/" class="btn btn-primary">Сделать расчёт</a></div>';
                     return;
                 }
-                list.innerHTML = data.map(h => '<div class="card"><div class="card-header"><div class="card-title">' + (h.product_title || '—') + '</div><div class="card-date">' + new Date(h.created_at).toLocaleDateString('ru') + '</div></div><div class="card-meta"><span>📦 ' + (h.functional_unit || '—') + '</span><span>🌱 ' + (h.total_co2eq || 0) + ' kgCO₂e</span></div><div class="card-actions"><button class="btn btn-primary" onclick="showToast(\'Открываю...\')">Посмотреть</button><button class="btn btn-danger" onclick="deleteHistory(\'' + h.id + '\')">Удалить</button></div></div>').join('');
+                list.innerHTML = data.map(h => '<div class="card"><div class="card-header"><div class="card-title">' + esc(h.product_title || '—') + '</div><div class="card-date">' + new Date(h.created_at).toLocaleDateString('ru') + '</div></div><div class="card-meta"><span>📦 ' + esc(h.functional_unit || '—') + '</span><span>🌱 ' + (h.total_co2eq || 0) + ' kgCO₂e</span></div><div class="card-actions"><a href="/?history=' + h.id + '" class="btn btn-primary">Посмотреть</a><button class="btn btn-danger" onclick="deleteHistory(\'' + h.id + '\')">Удалить</button></div></div>').join('');
             } catch (e) { showToast('Ошибка загрузки'); console.error(e); }
         }
 
@@ -221,7 +221,7 @@
                     list.innerHTML = '<div class="empty"><div class="empty-icon">📁</div><div class="empty-text">Нет проектов</div><button class="btn btn-primary" onclick="createProject()">Создать</button></div>';
                     return;
                 }
-                list.innerHTML = data.map(p => '<div class="card"><div class="card-header"><div class="card-title">' + p.name + '</div><div class="card-date">' + new Date(p.created_at).toLocaleDateString('ru') + '</div></div><div class="card-actions"><button class="btn btn-danger" onclick="deleteProject(\'' + p.id + '\')">Удалить</button></div></div>').join('');
+                list.innerHTML = data.map(p => '<div class="card"><div class="card-header"><div class="card-title">' + esc(p.name) + '</div><div class="card-date">' + new Date(p.created_at).toLocaleDateString('ru') + '</div></div><div class="card-actions"><a href="/?project=' + p.id + '" class="btn btn-primary">Открыть</a><button class="btn btn-danger" onclick="deleteProject(\'' + p.id + '\')">Удалить</button></div></div>').join('');
             } catch (e) { showToast('Ошибка загрузки'); console.error(e); }
         }
 
@@ -261,15 +261,27 @@
         document.getElementById('langSelect').value = localStorage.getItem('lca-lang') || 'ru';
         document.getElementById('langSelect').addEventListener('change', e => { localStorage.setItem('lca-lang', e.target.value); showToast('Язык сохранён'); });
 
+        // Theme sync — header toggle and settings toggle
+        function syncThemeUI() {
+            const isDark = document.documentElement.classList.contains('dark');
+            document.getElementById('themeToggle').textContent = isDark ? '☀️' : '🌙';
+            const dt = document.getElementById('darkToggle');
+            if (isDark) dt.classList.add('active'); else dt.classList.remove('active');
+        }
         const themeToggle = document.getElementById('themeToggle');
-        if (localStorage.getItem('lca-theme') === 'dark') { document.documentElement.classList.add('dark'); themeToggle.textContent = '☀️'; }
         themeToggle.addEventListener('click', () => {
             document.documentElement.classList.toggle('dark');
-            themeToggle.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
             localStorage.setItem('lca-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            syncThemeUI();
         });
+        const darkToggle = document.getElementById('darkToggle');
+        darkToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('lca-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            syncThemeUI();
+        });
+        syncThemeUI();
 
-        function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
         init();
     </script>
 </body>
