@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LCAВ·AI вЂ” Р’С…РѕРґ</title>
+    <title>LCAР’В·AI РІР‚вЂќ Р вЂ™РЎвЂ¦Р С•Р Т‘</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -180,19 +180,19 @@
     <div class="login-card">
         <div class="brand">
             <span class="dot"></span>
-            LCAВ·AI
+            LCAР’В·AI
         </div>
-        <p class="subtitle">Р’РѕР№РґРёС‚Рµ РґР»СЏ РґРѕСЃС‚СѓРїР° Рє СЂР°СЃС‡С‘С‚Р°Рј</p>
+        <p class="subtitle">Р вЂ™Р С•Р в„–Р Т‘Р С‘РЎвЂљР Вµ Р Т‘Р В»РЎРЏ Р Т‘Р С•РЎРѓРЎвЂљРЎС“Р С—Р В° Р С” РЎР‚Р В°РЎРѓРЎвЂЎРЎвЂРЎвЂљР В°Р С</p>
 
         <form class="email-form" id="emailForm">
-            <input type="email" class="email-input" id="emailInput" placeholder="Р’РІРµРґРёС‚Рµ email" required>
-            <button type="submit" class="email-btn" id="emailBtn">РћС‚РїСЂР°РІРёС‚СЊ СЃСЃС‹Р»РєСѓ</button>
+            <input type="email" class="email-input" id="emailInput" placeholder="Р вЂ™Р Р†Р ВµР Т‘Р С‘РЎвЂљР Вµ email" required>
+            <button type="submit" class="email-btn" id="emailBtn">Р С›РЎвЂљР С—РЎР‚Р В°Р Р†Р С‘РЎвЂљРЎРЉ РЎРѓРЎРѓРЎвЂ№Р В»Р С”РЎС“</button>
         </form>
 
         <div class="msg" id="msg"></div>
 
         <p class="footer">
-            РќР°Р¶РёРјР°СЏ "Р’РѕР№С‚Рё", РІС‹ СЃРѕРіР»Р°С€Р°РµС‚РµСЃСЊ СЃ <a href="#">СѓСЃР»РѕРІРёСЏРјРё РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ</a>
+            Р СњР В°Р В¶Р С‘Р СР В°РЎРЏ "Р вЂ™Р С•Р в„–РЎвЂљР С‘", Р Р†РЎвЂ№ РЎРѓР С•Р С–Р В»Р В°РЎв‚¬Р В°Р ВµРЎвЂљР ВµРЎРѓРЎРЉ РЎРѓ <a href="#">РЎС“РЎРѓР В»Р С•Р Р†Р С‘РЎРЏР СР С‘ Р С‘РЎРѓР С—Р С•Р В»РЎРЉР В·Р С•Р Р†Р В°Р Р…Р С‘РЎРЏ</a>
         </p>
     </div>
 
@@ -200,7 +200,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         // ============================================
-        // ЗАМЕНИТЕ НА ВАШИ ДАННЫЕ ИЗ SUPABASE DASHBOARD
+        // Р—РђРњР•РќРРўР• РќРђ Р’РђРЁР Р”РђРќРќР«Р• РР— SUPABASE DASHBOARD
         // ============================================
         const SUPABASE_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
@@ -208,20 +208,20 @@
         let sbClient = null;
         const REDIRECT_TO = window.location.origin + '/';
 
-        // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ Supabase
+        // Р ВР Р…Р С‘РЎвЂ Р С‘Р В°Р В»Р С‘Р В·Р В°РЎвЂ Р С‘РЎРЏ Supabase
         function initSupabase() {
-            console.log('[Login] РџСЂРѕРІРµСЂСЏСЋ Supabase SDK...');
+            console.log('[Login] Р СџРЎР‚Р С•Р Р†Р ВµРЎР‚РЎРЏРЎР‹ Supabase SDK...');
             if (window.supabase) {
-                console.log('[Login] Supabase SDK РЅР°Р№РґРµРЅ');
+                console.log('[Login] Supabase SDK Р Р…Р В°Р в„–Р Т‘Р ВµР Р…');
                 sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 return true;
             }
-            console.error('[Login] Supabase SDK РќР• РЅР°Р№РґРµРЅ!');
-            showError('Supabase SDK РЅРµ Р·Р°РіСЂСѓР¶РµРЅ. РћР±РЅРѕРІРёС‚Рµ СЃС‚СЂР°РЅРёС†Сѓ.');
+            console.error('[Login] Supabase SDK Р СњР вЂў Р Р…Р В°Р в„–Р Т‘Р ВµР Р…!');
+            showError('Supabase SDK Р Р…Р Вµ Р В·Р В°Р С–РЎР‚РЎС“Р В¶Р ВµР Р…. Р С›Р В±Р Р…Р С•Р Р†Р С‘РЎвЂљР Вµ РЎРѓРЎвЂљРЎР‚Р В°Р Р…Р С‘РЎвЂ РЎС“.');
             return false;
         }
 
-        // РџСЂРѕРІРµСЂСЏРµРј СЃРµСЃСЃРёСЋ
+        // Р СџРЎР‚Р С•Р Р†Р ВµРЎР‚РЎРЏР ВµР С РЎРѓР ВµРЎРѓРЎРѓР С‘РЎР‹
         async function checkSession() {
             if (!sbClient) return;
             const { data: { session } } = await sbClient.auth.getSession();
@@ -237,17 +237,17 @@
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
-            console.log('[Login] Р¤РѕСЂРјР° РѕС‚РїСЂР°РІР»РµРЅР°');
+            console.log('[Login] Р В¤Р С•РЎР‚Р СР В° Р С•РЎвЂљР С—РЎР‚Р В°Р Р†Р В»Р ВµР Р…Р В°');
             if (!sbClient) {
-                console.error('[Login] Supabase РЅРµ РёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°РЅ');
-                showError('Supabase РЅРµ Р·Р°РіСЂСѓР¶РµРЅ. РћР±РЅРѕРІРёС‚Рµ СЃС‚СЂР°РЅРёС†Сѓ.');
+                console.error('[Login] Supabase Р Р…Р Вµ Р С‘Р Р…Р С‘РЎвЂ Р С‘Р В°Р В»Р С‘Р В·Р С‘РЎР‚Р С•Р Р†Р В°Р Р…');
+                showError('Supabase Р Р…Р Вµ Р В·Р В°Р С–РЎР‚РЎС“Р В¶Р ВµР Р…. Р С›Р В±Р Р…Р С•Р Р†Р С‘РЎвЂљР Вµ РЎРѓРЎвЂљРЎР‚Р В°Р Р…Р С‘РЎвЂ РЎС“.');
                 return;
             }
             const email = document.getElementById('emailInput').value;
-            console.log('[Login] РћС‚РїСЂР°РІР»СЏСЋ magic link РЅР°:', email);
+            console.log('[Login] Р С›РЎвЂљР С—РЎР‚Р В°Р Р†Р В»РЎРЏРЎР‹ magic link Р Р…Р В°:', email);
             const btn = document.getElementById('emailBtn');
             btn.disabled = true;
-            btn.textContent = 'РћС‚РїСЂР°РІРєР°...';
+            btn.textContent = 'Р С›РЎвЂљР С—РЎР‚Р В°Р Р†Р С”Р В°...';
 
             try {
                 const { data, error } = await sbClient.auth.signInWithOtp({
@@ -256,27 +256,27 @@
                         emailRedirectTo: REDIRECT_TO
                     }
                 });
-                console.log('[Login] РћС‚РІРµС‚:', { data, error });
+                console.log('[Login] Р С›РЎвЂљР Р†Р ВµРЎвЂљ:', { data, error });
 
                 btn.disabled = false;
-                btn.textContent = 'РћС‚РїСЂР°РІРёС‚СЊ СЃСЃС‹Р»РєСѓ';
+                btn.textContent = 'Р С›РЎвЂљР С—РЎР‚Р В°Р Р†Р С‘РЎвЂљРЎРЉ РЎРѓРЎРѓРЎвЂ№Р В»Р С”РЎС“';
 
                 if (error) {
-                    console.error('[Login] РћС€РёР±РєР°:', error);
+                    console.error('[Login] Р С›РЎв‚¬Р С‘Р В±Р С”Р В°:', error);
                     showError(error.message);
                 } else {
-                    showSuccess('РЎСЃС‹Р»РєР° РґР»СЏ РІС…РѕРґР° РѕС‚РїСЂР°РІР»РµРЅР° РЅР° ' + email + '. РџСЂРѕРІРµСЂСЊС‚Рµ РїРѕС‡С‚Сѓ.');
+                    showSuccess('Р РЋРЎРѓРЎвЂ№Р В»Р С”Р В° Р Т‘Р В»РЎРЏ Р Р†РЎвЂ¦Р С•Р Т‘Р В° Р С•РЎвЂљР С—РЎР‚Р В°Р Р†Р В»Р ВµР Р…Р В° Р Р…Р В° ' + email + '. Р СџРЎР‚Р С•Р Р†Р ВµРЎР‚РЎРЉРЎвЂљР Вµ Р С—Р С•РЎвЂЎРЎвЂљРЎС“.');
                     document.getElementById('emailForm').style.display = 'none';
                 }
             } catch (err) {
-                console.error('[Login] РСЃРєР»СЋС‡РµРЅРёРµ:', err);
+                console.error('[Login] Р ВРЎРѓР С”Р В»РЎР‹РЎвЂЎР ВµР Р…Р С‘Р Вµ:', err);
                 btn.disabled = false;
-                btn.textContent = 'РћС‚РїСЂР°РІРёС‚СЊ СЃСЃС‹Р»РєСѓ';
-                showError('РћС€РёР±РєР°: ' + err.message);
+                btn.textContent = 'Р С›РЎвЂљР С—РЎР‚Р В°Р Р†Р С‘РЎвЂљРЎРЉ РЎРѓРЎРѓРЎвЂ№Р В»Р С”РЎС“';
+                showError('Р С›РЎв‚¬Р С‘Р В±Р С”Р В°: ' + err.message);
             }
         });
 
-        // РџСЂРѕРІРµСЂСЏРµРј СЃРµСЃСЃРёСЋ РїСЂРё Р·Р°РіСЂСѓР·РєРµ (РґР»СЏ magic link callback)
+        // Р СџРЎР‚Р С•Р Р†Р ВµРЎР‚РЎРЏР ВµР С РЎРѓР ВµРЎРѓРЎРѓР С‘РЎР‹ Р С—РЎР‚Р С‘ Р В·Р В°Р С–РЎР‚РЎС“Р В·Р С”Р Вµ (Р Т‘Р В»РЎРЏ magic link callback)
         async function checkSession() {
             if (!sbClient) return;
             const { data: { session } } = await sbClient.auth.getSession();
@@ -299,15 +299,14 @@
             el.textContent = msg;
         }
 
-        // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РїСЂРё Р·Р°РіСЂСѓР·РєРµ
+        // Р ВР Р…Р С‘РЎвЂ Р С‘Р В°Р В»Р С‘Р В·Р В°РЎвЂ Р С‘РЎРЏ Р С—РЎР‚Р С‘ Р В·Р В°Р С–РЎР‚РЎС“Р В·Р С”Р Вµ
         window.addEventListener('load', () => {
             if (initSupabase()) {
                 checkSession();
             } else {
-                showError('РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ Supabase SDK');
+                showError('Р СњР Вµ РЎС“Р Т‘Р В°Р В»Р С•РЎРѓРЎРЉ Р В·Р В°Р С–РЎР‚РЎС“Р В·Р С‘РЎвЂљРЎРЉ Supabase SDK');
             }
         });
     </script>
 </body>
 </html>
-
