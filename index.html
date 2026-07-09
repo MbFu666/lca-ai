@@ -9086,25 +9086,48 @@ document.addEventListener('DOMContentLoaded', function() {
   checkAuth();
 
   // URL parameter handler for opening saved calculations
+  // Deep-link handler for ?history=ID and ?project=ID
   (function() {
     const params = new URLSearchParams(window.location.search);
     const historyId = params.get('history');
     const projectId = params.get('project');
     
     if (historyId) {
+      // Try localStorage first (timestamp IDs)
       const history = JSON.parse(localStorage.getItem('lca-history') || '[]');
-      const entry = history.find(h => String(h.id) === String(historyId));
-      if (entry && entry.data) {
+      let entry = history.find(h => String(h.id) === String(historyId));
+      
+      // If not found, try Supabase (UUID IDs)
+      if (!entry && currentUser && supabaseClient) {
+        supabaseClient.from('user_history').select('*').eq('id', historyId).single()
+          .then(({ data }) => { if (data && data.report_data) renderReport(data.report_data); })
+          .catch(e => console.error('Failed to load history:', e));
+      } else if (entry && entry.data) {
         renderReport(entry.data);
       }
+      
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
     }
     
     if (projectId) {
+      // Try localStorage first
       const projects = JSON.parse(localStorage.getItem('lca-projects') || '[]');
-      const project = projects.find(p => String(p.id) === String(projectId));
-      if (project && project.calculations && project.calculations.length > 0) {
+      let project = projects.find(p => String(p.id) === String(projectId));
+      
+      // If not found, try Supabase
+      if (!project && currentUser && supabaseClient) {
+        supabaseClient.from('project_calculations').select('*').eq('project_id', projectId).order('created_at', { ascending: false })
+          .then(({ data }) => {
+            if (data && data.length > 0) renderReport(data[0].report_data);
+          })
+          .catch(e => console.error('Failed to load project:', e));
+      } else if (project && project.calculations && project.calculations.length > 0) {
         renderReport(project.calculations[0].data);
       }
+      
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
     }
   })();
 

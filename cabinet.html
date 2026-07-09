@@ -69,6 +69,14 @@
         .toggle.active { background: var(--jade); }
         .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: transform .2s; }
         .toggle.active::after { transform: translateX(22px); }
+        .project-card { overflow: hidden; }
+        .project-calcs { border-top: 1px solid var(--rule); padding-top: 12px; margin-top: 12px; }
+        .calc-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border: 1px solid var(--rule); border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: all .15s; }
+        .calc-item:hover { border-color: var(--jade); background: var(--jade-bg); }
+        .calc-name { font-size: 13px; font-weight: 600; }
+        .calc-date { font-size: 11px; color: var(--ink-mute); }
+        .calc-total { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--jade); }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -268,18 +276,56 @@
         async function loadProjects() {
             if (!currentUser || !db) return;
             try {
-                const { data, error } = await db.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-                if (error) throw error;
+                const { data: projects, error: pErr } = await db.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+                if (pErr) throw pErr;
                 const list = document.getElementById('projectsList');
-                if (!data || data.length === 0) {
+                if (!projects || projects.length === 0) {
                     list.innerHTML = '<div class="empty"><div class="empty-icon">📁</div><div class="empty-text">Нет проектов</div><button class="btn btn-primary" onclick="createProject()">Создать</button></div>';
                     return;
                 }
-                list.innerHTML = data.map(p => '<div class="card"><div class="card-header"><div class="card-title">' + esc(p.name) + '</div><div class="card-date">' + new Date(p.created_at).toLocaleDateString('ru') + '</div></div><div class="card-actions"><a href="/?project=' + p.id + '" class="btn btn-primary">Открыть</a><button class="btn btn-danger" onclick="deleteProject(\'' + p.id + '\')">Удалить</button></div></div>').join('');
+                // Load calculations for each project
+                let html = '';
+                for (const p of projects) {
+                    const { data: calcs } = await db.from('project_calculations').select('*').eq('project_id', p.id).order('created_at', { ascending: false });
+                    const calcCount = (calcs || []).length;
+                    html += '<div class="card project-card" id="proj-' + p.id + '">';
+                    html += '<div class="card-header">';
+                    html += '<div class="card-title">' + esc(p.name) + '</div>';
+                    html += '<div class="card-date">' + calcCount + ' расчётов · ' + new Date(p.created_at).toLocaleDateString('ru') + '</div>';
+                    html += '</div>';
+                    if (calcs && calcs.length > 0) {
+                        html += '<div class="project-calcs" style="display:none">';
+                        calcs.forEach(c => {
+                            const product = c.report_data?.product_title || 'Без названия';
+                            const total = c.report_data?.total_co2eq || 0;
+                            const date = new Date(c.created_at).toLocaleDateString('ru');
+                            html += '<div class="calc-item" onclick="window.location.href=\'/?history=' + c.id + '\'">';
+                            html += '<div class="calc-info"><div class="calc-name">' + esc(product) + '</div><div class="calc-date">' + date + '</div></div>';
+                            html += '<div class="calc-total">' + total + ' kgCO₂e</div>';
+                            html += '</div>';
+                        });
+                        html += '</div>';
+                    }
+                    html += '<div class="card-actions">';
+                    html += '<button class="btn btn-sm" onclick="toggleProjectCalcs(\'' + p.id + '\')">▸ Расчёты</button>';
+                    html += '<button class="btn btn-danger" onclick="deleteProject(\'' + p.id + '\')">Удалить</button>';
+                    html += '</div>';
+                    html += '</div>';
+                }
+                list.innerHTML = html;
             } catch (e) { 
                 console.error('loadProjects error:', e); 
                 showToast('Ошибка загрузки проектов: ' + (e.message || e)); 
             }
+        }
+
+        function toggleProjectCalcs(projectId) {
+            const el = document.getElementById('proj-' + projectId);
+            if (!el) return;
+            const calcs = el.querySelector('.project-calcs');
+            if (!calcs) return;
+            const isHidden = calcs.style.display === 'none';
+            calcs.style.display = isHidden ? 'block' : 'none';
         }
 
         document.getElementById('newProjectBtn').addEventListener('click', createProject);
