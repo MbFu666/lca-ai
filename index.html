@@ -106,38 +106,44 @@ async function logout() {
 
 // Load user data from Supabase
 async function loadUserData() {
-  if (!currentUser) return;
+  if (!currentUser || !supabaseClient) return;
   
   try {
-    // Load history
-    const { data: history } = await supabaseClient
+    console.log('[LCA] Loading user data from Supabase...');
+    
+    // Load history from Supabase (PRIMARY source)
+    const { data: history, error: hErr } = await supabaseClient
       .from('user_history')
       .select('*')
       .eq('user_id', currentUser.id)
       .order('created_at', { ascending: false });
     
+    if (hErr) console.error('[LCA] History load error:', hErr);
+    
     if (history && history.length > 0) {
-      // Merge with localStorage — don't overwrite local-only entries
-      const localHistory = JSON.parse(localStorage.getItem('lca-history') || '[]');
-      const remoteIds = new Set(history.map(h => String(h.id)));
-      const localOnly = localHistory.filter(h => !remoteIds.has(String(h.id)));
-      const merged = [...history.map(h => ({
+      // Cache in localStorage for fast access
+      localStorage.setItem('lca-history', JSON.stringify(history.map(h => ({
         id: h.id,
         date: h.created_at,
         product: h.product_title,
         fu: h.functional_unit,
         total: h.total_co2eq,
         data: h.report_data
-      })), ...localOnly];
-      localStorage.setItem('lca-history', JSON.stringify(merged));
+      }))));
+      console.log('[LCA] History cached:', history.length, 'entries');
+    } else {
+      // Clear localStorage if Supabase is empty
+      localStorage.removeItem('lca-history');
     }
     
-    // Load projects
-    const { data: projects } = await supabaseClient
+    // Load projects from Supabase (PRIMARY source)
+    const { data: projects, error: pErr } = await supabaseClient
       .from('user_projects')
       .select('*')
       .eq('user_id', currentUser.id)
       .order('created_at', { ascending: false });
+    
+    if (pErr) console.error('[LCA] Projects load error:', pErr);
     
     if (projects && projects.length > 0) {
       // Load calculations for each project
@@ -163,15 +169,15 @@ async function loadUserData() {
         };
       }));
       
-      // Merge with localStorage — don't overwrite local-only projects
-      const localProjects = JSON.parse(localStorage.getItem('lca-projects') || '[]');
-      const remoteProjectIds = new Set(projectsWithCalcs.map(p => String(p.id)));
-      const localOnlyProjects = localProjects.filter(p => !remoteProjectIds.has(String(p.id)));
-      const mergedProjects = [...projectsWithCalcs, ...localOnlyProjects];
-      localStorage.setItem('lca-projects', JSON.stringify(mergedProjects));
+      // Cache in localStorage for fast access
+      localStorage.setItem('lca-projects', JSON.stringify(projectsWithCalcs));
+      console.log('[LCA] Projects cached:', projectsWithCalcs.length, 'projects');
+    } else {
+      // Clear localStorage if Supabase is empty
+      localStorage.removeItem('lca-projects');
     }
   } catch (err) {
-    console.error('Error loading user data:', err);
+    console.error('[LCA] Error loading user data:', err);
   }
 }
 
@@ -9094,46 +9100,44 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     console.log('[LCA] URL params:', { historyId, projectId, hasUser: !!currentUser, hasSB: !!supabaseClient });
     
-    if (historyId) {
-      // Try localStorage first (timestamp IDs)
-      const history = JSON.parse(localStorage.getItem('lca-history') || '[]');
-      let entry = history.find(h => String(h.id) === String(historyId));
-      
-      if (entry && entry.data) {
-        console.log('[LCA] Found in localStorage');
-        renderReport(entry.data);
-      } else if (supabaseClient) {
-        // Try Supabase (UUID IDs)
-        console.log('[LCA] Trying Supabase for history:', historyId);
-        supabaseClient.from('user_history').select('*').eq('id', historyId).single()
-          .then(({ data, error }) => {
-            console.log('[LCA] Supabase history result:', data, error);
-            if (data && data.report_data) {
-              // Also save to localStorage for future use
-              const h = JSON.parse(localStorage.getItem('lca-history') || '[]');
-              h.unshift({
-                id: data.id,
-                date: data.created_at,
-                product: data.product_title,
-                fu: data.functional_unit,
-                total: data.total_co2eq,
-                data: data.report_data
-              });
-              localStorage.setItem('lca-history', JSON.stringify(h.slice(0, 20)));
-              renderReport(data.report_data);
-            }
-          })
-          .catch(e => console.error('[LCA] Failed to load history:', e));
-      }
+    if (historyId && supabaseClient) {
+      // Always fetch from Supabase (PRIMARY source)
+      console.log('[LCA] Fetching history from Supabase:', historyId);
+      supabaseClient.from('user_history').select('*').eq('id', historyId).single()
+        .then(({ data, error }) => {
+          console.log('[LCA] Supabase result:', data, error);
+          if (data && data.report_data) {
+            // Cache in localStorage
+            const h = JSON.parse(localStorage.getItem('lca-history') || '[]');
+            h.unshift({
+              id: data.id,
+              date: data.created_at,
+              product: data.product_title,
+              fu: data.functional_unit,
+              total: data.total_co2eq,
+              data: data.report_data
+            });
+            localStorage.setItem('lca-history', JSON.stringify(h.slice(0, 20)));
+            renderReport(data.report_data);
+          }
+        })
+        .catch(e => console.error('[LCA] Failed to load history:', e));
       
       // Clean URL
       window.history.replaceState({}, '', window.location.pathname);
     }
     
-    if (projectId) {
-      // Try localStorage first
-      const projects = JSON.parse(localStorage.getItem('lca-projects') || '[]');
-      let project = projects.find(p => String(p.id) === String(projectId));
+    if (projectId && supabaseClient) {
+      // Always fetch from Supabase (PRIMARY source)
+      console.log('[LCA] Fetching project from Supabase:', projectId);
+      supabaseClient.from('project_calculations').select('*').eq('project_id', projectId).order('created_at', { ascending: false })
+        .then(({ data, error }) => {
+          console.log('[LCA] Supabase project result:', data, error);
+          if (data && data.length > 0) {
+            renderReport(data[0].report_data);
+          }
+        })
+        .catch(e => console.error('[LCA] Failed to load project:', e));
       
       if (project && project.calculations && project.calculations.length > 0) {
         console.log('[LCA] Found project in localStorage');
