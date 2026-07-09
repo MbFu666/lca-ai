@@ -8900,7 +8900,7 @@ function showProjectSelectModal() {
       addToProject(projectId, lastReport); // addToProject already saves to Supabase
       closeModal('modalSelectProject');
       showToast(currentLang === 'ru' ? 'Сохранено в проект!' : currentLang === 'zh' ? '已保存到项目！' : 'Saved to project!');
-     
+    });
   });
   
   document.getElementById('createAndSaveBtn').onclick = async () => {
