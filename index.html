@@ -117,15 +117,19 @@ async function loadUserData() {
       .order('created_at', { ascending: false });
     
     if (history && history.length > 0) {
-      // Store in localStorage for quick access
-      localStorage.setItem('lca-history', JSON.stringify(history.map(h => ({
+      // Merge with localStorage — don't overwrite local-only entries
+      const localHistory = JSON.parse(localStorage.getItem('lca-history') || '[]');
+      const remoteIds = new Set(history.map(h => String(h.id)));
+      const localOnly = localHistory.filter(h => !remoteIds.has(String(h.id)));
+      const merged = [...history.map(h => ({
         id: h.id,
         date: h.created_at,
         product: h.product_title,
         fu: h.functional_unit,
         total: h.total_co2eq,
         data: h.report_data
-      }))));
+      })), ...localOnly];
+      localStorage.setItem('lca-history', JSON.stringify(merged));
     }
     
     // Load projects
@@ -159,7 +163,12 @@ async function loadUserData() {
         };
       }));
       
-      localStorage.setItem('lca-projects', JSON.stringify(projectsWithCalcs));
+      // Merge with localStorage — don't overwrite local-only projects
+      const localProjects = JSON.parse(localStorage.getItem('lca-projects') || '[]');
+      const remoteProjectIds = new Set(projectsWithCalcs.map(p => String(p.id)));
+      const localOnlyProjects = localProjects.filter(p => !remoteProjectIds.has(String(p.id)));
+      const mergedProjects = [...projectsWithCalcs, ...localOnlyProjects];
+      localStorage.setItem('lca-projects', JSON.stringify(mergedProjects));
     }
   } catch (err) {
     console.error('Error loading user data:', err);
@@ -8488,6 +8497,11 @@ function addToProject(projectId, report) {
 function deleteProject(projectId) {
   const projects = getProjects().filter(p => p.id !== projectId);
   localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+  // Also delete from Supabase if logged in
+  if (currentUser && supabaseClient) {
+    supabaseClient.from('project_calculations').delete().eq('project_id', projectId);
+    supabaseClient.from('user_projects').delete().eq('id', projectId);
+  }
 }
 
 function deleteCalcFromProject(projectId, calcId) {
@@ -8649,7 +8663,7 @@ function showNewProjectModal() {
     error.style.display = 'none';
   };
   
-  document.getElementById('createProjectConfirm').onclick = () => {
+  document.getElementById('createProjectConfirm').onclick = async () => {
     const name = input.value.trim();
     if (!name) {
       error.textContent = currentLang === 'ru' ? 'Введите название проекта' : currentLang === 'zh' ? '请输入项目名称' : 'Enter project name';
@@ -8659,6 +8673,10 @@ function showNewProjectModal() {
       return;
     }
     createProject(name);
+    // Sync to Supabase if logged in
+    if (currentUser && supabaseClient) {
+      await saveProject(name);
+    }
     closeModal('modalNewProject');
     renderProjects();
     showToast(currentLang === 'ru' ? `Проект «${name}» создан` : currentLang === 'zh' ? `项目「${name}」已创建` : `Project "${name}" created`);
