@@ -8478,7 +8478,7 @@ function getProjects() {
   } catch { return []; }
 }
 
-function saveProject(project) {
+function saveProjectLocal(project) {
   const projects = getProjects();
   const existing = projects.findIndex(p => p.id === project.id);
   if (existing >= 0) {
@@ -8496,7 +8496,7 @@ function createProject(name) {
     createdAt: new Date().toISOString(),
     calculations: []
   };
-  saveProject(project);
+  saveProjectLocal(project);
   return project;
 }
 
@@ -8511,7 +8511,7 @@ function addToProject(projectId, report) {
       data: report,
       addedAt: new Date().toISOString()
     });
-    saveProject(project);
+    saveProjectLocal(project);
   }
 }
 
@@ -8525,7 +8525,7 @@ function deleteCalcFromProject(projectId, calcId) {
   const project = projects.find(p => p.id === projectId);
   if (project) {
     project.calculations = project.calculations.filter(c => c.id !== calcId);
-    saveProject(project);
+    saveProjectLocal(project);
   }
 }
 
@@ -8733,19 +8733,33 @@ function showProjectSelectModal() {
   `).join('');
   
   list.querySelectorAll('.select-project-item').forEach(item => {
-    item.addEventListener('click', () => {
+    item.addEventListener('click', async () => {
       const projectId = parseInt(item.dataset.id);
       addToProject(projectId, lastReport);
+      // Also save to Supabase if logged in
+      if (currentUser) {
+        // Find the Supabase project by matching name
+        const localProject = getProjects().find(p => p.id === projectId);
+        if (localProject) {
+          const { data: sbProjects } = await supabaseClient.from('user_projects').select('id').eq('user_id', currentUser.id).eq('name', localProject.name).limit(1);
+          if (sbProjects?.length) await saveToProject(sbProjects[0].id, lastReport);
+        }
+      }
       closeModal('modalSelectProject');
       showToast(currentLang === 'ru' ? 'Сохранено в проект!' : currentLang === 'zh' ? '已保存到项目！' : 'Saved to project!');
     });
   });
   
-  document.getElementById('createAndSaveBtn').onclick = () => {
+  document.getElementById('createAndSaveBtn').onclick = async () => {
     const name = document.getElementById('newProjectNameInput').value.trim();
     if (!name) return;
     const project = createProject(name);
     addToProject(project.id, lastReport);
+    // Also save to Supabase if logged in
+    if (currentUser) {
+      const sbProject = await saveProject(name);
+      if (sbProject) await saveToProject(sbProject.id, lastReport);
+    }
     closeModal('modalSelectProject');
     showToast(currentLang === 'ru' ? 'Проект создан и расчёт сохранён!' : currentLang === 'zh' ? '项目已创建并保存！' : 'Project created and saved!');
   };
@@ -8811,7 +8825,7 @@ function showNewProjectModalForSave() {
     error.style.display = 'none';
   };
   
-  document.getElementById('createAndSaveConfirm').onclick = () => {
+  document.getElementById('createAndSaveConfirm').onclick = async () => {
     const name = input.value.trim();
     if (!name) {
       error.textContent = currentLang === 'ru' ? 'Введите название проекта' : currentLang === 'zh' ? '请输入项目名称' : 'Enter project name';
@@ -8822,6 +8836,11 @@ function showNewProjectModalForSave() {
     }
     const project = createProject(name);
     addToProject(project.id, lastReport);
+    // Also save to Supabase if logged in
+    if (currentUser) {
+      const sbProject = await saveProject(name);
+      if (sbProject) await saveToProject(sbProject.id, lastReport);
+    }
     closeModal('modalNewProjectSave');
     showToast(currentLang === 'ru' ? `Проект «${name}» создан и расчёт сохранён!` : currentLang === 'zh' ? `项目「${name}」已创建并保存！` : `Project "${name}" created and saved!`);
   };

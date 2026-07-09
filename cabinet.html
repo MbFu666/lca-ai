@@ -241,10 +241,14 @@
         
         async function loadStats() {
             if (!currentUser) return;
-            const { count: calcs } = await supabase.from('user_history').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
-            const { count: projects } = await supabase.from('user_projects').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
-            document.getElementById('statCalcs').textContent = calcs || 0;
-            document.getElementById('statProjects').textContent = projects || 0;
+            try {
+                const { count: calcs } = await supabase.from('user_history').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
+                const { count: projects } = await supabase.from('user_projects').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
+                document.getElementById('statCalcs').textContent = calcs || 0;
+                document.getElementById('statProjects').textContent = projects || 0;
+            } catch (err) {
+                console.error('loadStats error:', err);
+            }
         }
         
         // Tab switching
@@ -270,12 +274,14 @@
         // History
         async function loadHistory() {
             if (!currentUser) return;
-            const { data } = await supabase.from('user_history').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-            const list = document.getElementById('historyList');
-            if (!data || data.length === 0) {
-                list.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Нет сохранённых расчётов</div><a href="/" class="btn btn-primary">Сделать расчёт</a></div>';
-                return;
-            }
+            try {
+                const { data, error } = await supabase.from('user_history').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+                if (error) throw error;
+                const list = document.getElementById('historyList');
+                if (!data || data.length === 0) {
+                    list.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Нет сохранённых расчётов</div><a href="/" class="btn btn-primary">Сделать расчёт</a></div>';
+                    return;
+                }
             list.innerHTML = data.map(h => `
                 <div class="card">
                     <div class="card-header">
@@ -292,37 +298,51 @@
                     </div>
                 </div>
             `).join('');
+            } catch (err) {
+                console.error('loadHistory error:', err);
+                showToast('Ошибка загрузки истории');
+            }
         }
         
         async function deleteHistory(id) {
             if (!confirm('Удалить расчёт?')) return;
-            await supabase.from('user_history').delete().eq('id', id);
-            loadHistory();
-            loadStats();
-            showToast('Расчёт удалён');
+            try {
+                await supabase.from('user_history').delete().eq('id', id);
+                loadHistory();
+                loadStats();
+                showToast('Расчёт удалён');
+            } catch (err) {
+                showToast('Ошибка удаления: ' + err.message);
+            }
         }
         
         // Projects
         async function loadProjects() {
             if (!currentUser) return;
-            const { data } = await supabase.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-            const list = document.getElementById('projectsList');
-            if (!data || data.length === 0) {
-                list.innerHTML = '<div class="empty"><div class="empty-icon">📁</div><div class="empty-text">Нет проектов</div><button class="btn btn-primary" onclick="createProject()">Создать проект</button></div>';
-                return;
+            try {
+                const { data, error } = await supabase.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+                if (error) throw error;
+                const list = document.getElementById('projectsList');
+                if (!data || data.length === 0) {
+                    list.innerHTML = '<div class="empty"><div class="empty-icon">📁</div><div class="empty-text">Нет проектов</div><button class="btn btn-primary" onclick="createProject()">Создать проект</button></div>';
+                    return;
+                }
+                list.innerHTML = data.map(p => `
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">${escape(p.name)}</div>
+                            <div class="card-date">${new Date(p.created_at).toLocaleDateString('ru')}</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" onclick="viewProject('${p.id}')">Открыть</button>
+                            <button class="btn btn-danger" onclick="deleteProject('${p.id}')">Удалить</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error('loadProjects error:', err);
+                showToast('Ошибка загрузки проектов');
             }
-            list.innerHTML = data.map(p => `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">${escape(p.name)}</div>
-                        <div class="card-date">${new Date(p.created_at).toLocaleDateString('ru')}</div>
-                    </div>
-                    <div class="card-actions">
-                        <button class="btn btn-primary" onclick="viewProject('${p.id}')">Открыть</button>
-                        <button class="btn btn-danger" onclick="deleteProject('${p.id}')">Удалить</button>
-                    </div>
-                </div>
-            `).join('');
         }
         
         document.getElementById('newProjectBtn').addEventListener('click', createProject);
@@ -330,21 +350,29 @@
         async function createProject() {
             const name = prompt('Название проекта:');
             if (!name) return;
-            await supabase.from('user_projects').insert({ user_id: currentUser.id, name });
-            loadProjects();
-            loadStats();
-            showToast('Проект создан');
+            try {
+                await supabase.from('user_projects').insert({ user_id: currentUser.id, name });
+                loadProjects();
+                loadStats();
+                showToast('Проект создан');
+            } catch (err) {
+                showToast('Ошибка создания проекта: ' + err.message);
+            }
         }
         
         async function deleteProject(id) {
             if (!confirm('Удалить проект и все расчёты?')) return;
-            await supabase.from('project_calculations').delete().eq('project_id', id);
-            await supabase.from('user_projects').delete().eq('id', id);
-            loadProjects();
-            loadStats();
-            showToast('Проект удалён');
+            try {
+                await supabase.from('project_calculations').delete().eq('project_id', id);
+                await supabase.from('user_projects').delete().eq('id', id);
+                loadProjects();
+                loadStats();
+                showToast('Проект удалён');
+            } catch (err) {
+                showToast('Ошибка удаления: ' + err.message);
+            }
         }
-        
+
         function viewProject(id) { window.location.href = '/?project=' + id; }
         
         // Settings
@@ -368,13 +396,16 @@
         document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
             if (!confirm('Вы уверены? Все данные будут удалены безвозвратно.')) return;
             if (!confirm('Точно удалить аккаунт?')) return;
-            await supabase.from('user_history').delete().eq('user_id', currentUser.id);
-            await supabase.from('project_calculations').delete().eq('user_id', currentUser.id);
-            await supabase.from('user_projects').delete().eq('user_id', currentUser.id);
-            await supabase.auth.admin.deleteUser(currentUser.id);
-            await supabase.auth.signOut();
-            localStorage.clear();
-            window.location.href = '/';
+            try {
+                await supabase.from('user_history').delete().eq('user_id', currentUser.id);
+                await supabase.from('project_calculations').delete().eq('user_id', currentUser.id);
+                await supabase.from('user_projects').delete().eq('user_id', currentUser.id);
+                await supabase.auth.signOut();
+                localStorage.clear();
+                window.location.href = '/';
+            } catch (err) {
+                showToast('Ошибка: ' + err.message);
+            }
         });
         
         // Logout
