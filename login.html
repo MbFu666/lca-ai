@@ -77,8 +77,14 @@
             color: var(--ink-mute);
             margin-bottom: 32px;
         }
-        .email-form { display: flex; flex-direction: column; gap: 12px; }
-        .email-input {
+        .form-group { display: flex; flex-direction: column; gap: 12px; text-align: left; }
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--ink-soft);
+            margin-bottom: -8px;
+        }
+        .form-group input {
             padding: 12px 16px;
             border: 1px solid var(--rule);
             border-radius: 10px;
@@ -89,8 +95,8 @@
             outline: none;
             transition: border-color .15s;
         }
-        .email-input:focus { border-color: var(--jade); }
-        .email-btn {
+        .form-group input:focus { border-color: var(--jade); }
+        .submit-btn {
             background: var(--jade);
             color: white;
             border: none;
@@ -101,9 +107,23 @@
             font-weight: 600;
             cursor: pointer;
             transition: all .15s;
+            width: 100%;
+            margin-top: 8px;
         }
-        .email-btn:hover { background: var(--jade-dark); }
-        .email-btn:disabled { opacity: .5; cursor: not-allowed; }
+        .submit-btn:hover { background: var(--jade-dark); }
+        .submit-btn:disabled { opacity: .5; cursor: not-allowed; }
+        .switch-mode {
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--ink-mute);
+        }
+        .switch-mode a {
+            color: var(--jade);
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .switch-mode a:hover { text-decoration: underline; }
         .msg {
             margin-top: 16px;
             padding: 12px;
@@ -114,7 +134,7 @@
         .msg.success { display: block; background: var(--jade-bg); color: var(--jade-dark); border: 1px solid var(--jade-bg); }
         .msg.error { display: block; background: #FEF1EE; color: var(--c-rust); border: 1px solid #FEF1EE; }
         .footer {
-            margin-top: 32px;
+            margin-top: 24px;
             font-size: 12px;
             color: var(--ink-mute);
         }
@@ -125,6 +145,9 @@
         .lang-switch { display: inline-flex; background: var(--bg-soft); border-radius: 30px; padding: 3px; border: 1px solid var(--rule); }
         .lang-switch button { background: none; border: none; padding: 5px 10px; border-radius: 30px; font-size: 11px; font-weight: 600; color: var(--ink-mute); cursor: pointer; transition: all .15s; }
         .lang-switch button.active { background: white; color: var(--ink); box-shadow: 0 1px 4px rgba(14,46,39,0.08); }
+        .divider { display: flex; align-items: center; margin: 20px 0; color: var(--ink-mute); font-size: 12px; }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
+        .divider span { padding: 0 12px; }
         @media (max-width: 480px) {
             .login-card { padding: 32px 24px; }
         }
@@ -144,31 +167,52 @@
             <span class="dot"></span>
             LCA·AI
         </div>
-        <p class="subtitle">Войдите для доступа к расчётам</p>
+        <p class="subtitle" id="subtitle">Войдите для доступа к расчётам</p>
 
-        <form class="email-form" id="emailForm">
-            <input type="email" class="email-input" id="emailInput" placeholder="Введите email" required>
-            <button type="submit" class="email-btn" id="emailBtn">Отправить ссылку</button>
+        <!-- Форма входа -->
+        <form class="form-group" id="loginForm">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" placeholder="Введите email" required>
+            <label for="loginPassword">Пароль</label>
+            <input type="password" id="loginPassword" placeholder="Введите пароль" required>
+            <button type="submit" class="submit-btn" id="loginBtn">Войти</button>
+        </form>
+
+        <!-- Форма регистрации -->
+        <form class="form-group" id="registerForm" style="display:none">
+            <label for="regEmail">Email</label>
+            <input type="email" id="regEmail" placeholder="Введите email" required>
+            <label for="regPassword">Пароль</label>
+            <input type="password" id="regPassword" placeholder="Минимум 6 символов" required minlength="6">
+            <label for="regPasswordConfirm">Подтвердите пароль</label>
+            <input type="password" id="regPasswordConfirm" placeholder="Повторите пароль" required minlength="6">
+            <button type="submit" class="submit-btn" id="regBtn">Зарегистрироваться</button>
         </form>
 
         <div class="msg" id="msg"></div>
 
+        <div class="switch-mode" id="switchMode">
+            <span id="switchText">Нет аккаунта?</span>
+            <a id="switchLink" onclick="toggleMode()">Зарегистрироваться</a>
+        </div>
+
         <p class="footer">
-            Нажимая «Войти», вы соглашаетесь с <a href="#">условиями использования</a>
+            <span id="agreementText">Нажимая «Войти», вы соглашаетесь с</span>
+            <a href="#">условиями использования</a>
         </p>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const SUPABASE_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
-
+        const SB_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
+        const REDIRECT = window.location.origin + '/';
         let sbClient = null;
-        const REDIRECT_TO = window.location.origin + '/';
+        let isLoginMode = true;
 
         function initSupabase() {
             if (window.supabase) {
-                sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                sbClient = window.supabase.createClient(SB_URL, SB_KEY);
                 return true;
             }
             showError('Supabase SDK не загружен');
@@ -181,34 +225,91 @@
             if (session) {
                 localStorage.setItem('supabase_user', JSON.stringify(session.user));
                 localStorage.setItem('supabase_token', session.access_token);
-                window.location.href = REDIRECT_TO;
+                window.location.href = REDIRECT;
             }
         }
 
-        document.getElementById('emailForm').addEventListener('submit', async (e) => {
+        function toggleMode() {
+            isLoginMode = !isLoginMode;
+            document.getElementById('loginForm').style.display = isLoginMode ? 'flex' : 'none';
+            document.getElementById('registerForm').style.display = isLoginMode ? 'none' : 'flex';
+            document.getElementById('switchText').textContent = isLoginMode ? 'Нет аккаунта?' : 'Уже есть аккаунт?';
+            document.getElementById('switchLink').textContent = isLoginMode ? 'Зарегистрироваться' : 'Войти';
+            document.getElementById('subtitle').textContent = isLoginMode ? 'Войдите для доступа к расчётам' : 'Создайте аккаунт';
+            hideMsg();
+        }
+
+        // Вход по email + пароль
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!sbClient) { showError('Supabase не загружен'); return; }
-            const email = document.getElementById('emailInput').value;
-            const btn = document.getElementById('emailBtn');
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const btn = document.getElementById('loginBtn');
             btn.disabled = true;
-            btn.textContent = 'Отправка...';
+            btn.textContent = 'Вход...';
 
             try {
-                const { data, error } = await sbClient.auth.signInWithOtp({
-                    email: email,
-                    options: { emailRedirectTo: REDIRECT_TO }
-                });
+                const { data, error } = await sbClient.auth.signInWithPassword({ email, password });
                 btn.disabled = false;
-                btn.textContent = 'Отправить ссылку';
+                btn.textContent = 'Войти';
                 if (error) {
                     showError(error.message);
                 } else {
-                    showSuccess('Ссылка для входа отправлена на ' + email);
-                    document.getElementById('emailForm').style.display = 'none';
+                    localStorage.setItem('supabase_user', JSON.stringify(data.user));
+                    localStorage.setItem('supabase_token', data.session.access_token);
+                    window.location.href = REDIRECT;
                 }
             } catch (err) {
                 btn.disabled = false;
-                btn.textContent = 'Отправить ссылку';
+                btn.textContent = 'Войти';
+                showError('Ошибка: ' + err.message);
+            }
+        });
+
+        // Регистрация по email + пароль
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!sbClient) { showError('Supabase не загружен'); return; }
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const passwordConfirm = document.getElementById('regPasswordConfirm').value;
+
+            if (password !== passwordConfirm) {
+                showError('Пароли не совпадают');
+                return;
+            }
+            if (password.length < 6) {
+                showError('Пароль должен содержать минимум 6 символов');
+                return;
+            }
+
+            const btn = document.getElementById('regBtn');
+            btn.disabled = true;
+            btn.textContent = 'Регистрация...';
+
+            try {
+                const { data, error } = await sbClient.auth.signUp({ email, password });
+                btn.disabled = false;
+                btn.textContent = 'Зарегистрироваться';
+                if (error) {
+                    showError(error.message);
+                } else if (data.user && data.session) {
+                    // Регистрация + автоматический вход
+                    localStorage.setItem('supabase_user', JSON.stringify(data.user));
+                    localStorage.setItem('supabase_token', data.session.access_token);
+                    window.location.href = REDIRECT;
+                } else if (data.user && !data.session) {
+                    // Нужно подтвердить email
+                    showSuccess('Письмо с подтверждением отправлено на ' + email);
+                    toggleMode();
+                } else {
+                    showSuccess('Аккаунт создан! Теперь войдите.');
+                    toggleMode();
+                }
+            } catch (err) {
+                btn.disabled = false;
+                btn.textContent = 'Зарегистрироваться';
                 showError('Ошибка: ' + err.message);
             }
         });
@@ -225,7 +326,13 @@
             el.textContent = msg;
         }
 
-        // Theme auto-detect
+        function hideMsg() {
+            const el = document.getElementById('msg');
+            el.className = 'msg';
+            el.textContent = '';
+        }
+
+        // Theme
         (function() {
             const saved = localStorage.getItem('lca-theme');
             if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -242,7 +349,7 @@
             }
         })();
 
-        // Language auto-detect
+        // Language
         (function() {
             const saved = localStorage.getItem('lca-lang');
             const browserLang = (navigator.language || '').toLowerCase();
@@ -261,14 +368,14 @@
 
         function applyLoginLang(lang) {
             const t = {
-                ru: { subtitle: 'Войдите для доступа к расчётам', placeholder: 'Введите email', btn: 'Отправить ссылку', sending: 'Отправка...', agreement: 'Нажимая «Войти», вы соглашаетесь с', terms: 'условиями использования' },
-                en: { subtitle: 'Sign in to access calculations', placeholder: 'Enter email', btn: 'Send link', sending: 'Sending...', agreement: 'By signing in, you agree to the', terms: 'terms of service' },
-                zh: { subtitle: '登录以访问计算', placeholder: '输入邮箱', btn: '发送链接', sending: '发送中...', agreement: '登录即表示您同意', terms: '服务条款' }
-            }[lang] || { subtitle: 'Войдите для доступа к расчётам', placeholder: 'Введите email', btn: 'Отправить ссылку', sending: 'Отправка...', agreement: 'Нажимая «Войти», вы соглашаетесь с', terms: 'условиями использования' };
-            document.querySelector('.subtitle').textContent = t.subtitle;
-            document.getElementById('emailInput').placeholder = t.placeholder;
-            document.getElementById('emailBtn').textContent = t.btn;
-            document.querySelector('.footer').innerHTML = t.agreement + ' <a href="#">' + t.terms + '</a>';
+                ru: { subtitle_login: 'Войдите для доступа к расчётам', subtitle_reg: 'Создайте аккаунт', email: 'Email', password: 'Пароль', password_confirm: 'Подтвердите пароль', login_btn: 'Войти', reg_btn: 'Зарегистрироваться', no_account: 'Нет аккаунта?', register: 'Зарегистрироваться', has_account: 'Уже есть аккаунт?', login_link: 'Войти', agreement: 'Нажимая «Войти», вы соглашаетесь с', terms: 'условиями использования' },
+                en: { subtitle_login: 'Sign in to access calculations', subtitle_reg: 'Create an account', email: 'Email', password: 'Password', password_confirm: 'Confirm password', login_btn: 'Sign in', reg_btn: 'Register', no_account: "Don't have an account?", register: 'Register', has_account: 'Already have an account?', login_link: 'Sign in', agreement: 'By signing in, you agree to the', terms: 'terms of service' },
+                zh: { subtitle_login: '登录以访问计算', subtitle_reg: '创建账户', email: '邮箱', password: '密码', password_confirm: '确认密码', login_btn: '登录', reg_btn: '注册', no_account: '没有账户？', register: '注册', has_account: '已有账户？', login_link: '登录', agreement: '登录即表示您同意', terms: '服务条款' }
+            }[lang] || {};
+            document.getElementById('subtitle').textContent = t.subtitle_login || 'Войдите для доступа к расчётам';
+            document.getElementById('switchText').textContent = t.no_account || 'Нет аккаунта?';
+            document.getElementById('switchLink').textContent = t.register || 'Зарегистрироваться';
+            document.querySelector('.footer').innerHTML = (t.agreement || 'Нажимая «Войти», вы соглашаетесь с') + ' <a href="#">' + (t.terms || 'условиями использования') + '</a>';
         }
 
         window.addEventListener('load', () => {
