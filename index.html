@@ -9186,17 +9186,27 @@ document.addEventListener('DOMContentLoaded', async function() {
     const params = new URLSearchParams(window.location.search);
     const historyId = params.get('history');
     const projectId = params.get('project');
-    
+
     console.log('[LCA] URL params:', { historyId, projectId, hasUser: !!currentUser, hasSB: !!supabaseClient });
-    
+
+    // Clean URL immediately after reading params
+    if (historyId || projectId) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+
     if (historyId && supabaseClient) {
-      // Always fetch from Supabase (PRIMARY source)
       console.log('[LCA] Fetching history from Supabase:', historyId);
       supabaseClient.from('user_history').select('*').eq('id', historyId).single()
         .then(({ data, error }) => {
-          console.log('[LCA] Supabase result:', data, error);
+          console.log('[LCA] Supabase history response:', { data, error });
+          if (error) {
+            console.warn('[LCA] Supabase history error:', error.code, error.message);
+            showToast(currentLang === 'ru' ? 'Расчёт не найден в облаке'
+              : currentLang === 'zh' ? '未在云端找到该计算'
+              : 'Calculation not found in cloud');
+            return;
+          }
           if (data && data.report_data) {
-            // Cache in localStorage
             const h = JSON.parse(localStorage.getItem('lca-history') || '[]');
             h.unshift({
               id: data.id,
@@ -9208,42 +9218,48 @@ document.addEventListener('DOMContentLoaded', async function() {
             });
             localStorage.setItem('lca-history', JSON.stringify(h.slice(0, 20)));
             renderReport(data.report_data);
+          } else {
+            console.warn('[LCA] History row exists but report_data is empty');
+            showToast(currentLang === 'ru' ? 'Данные расчёта повреждены'
+              : currentLang === 'zh' ? '计算数据已损坏'
+              : 'Calculation data is corrupted');
           }
         })
-        .catch(e => console.error('[LCA] Failed to load history:', e));
-      
-      // Clean URL
-      window.history.replaceState({}, '', window.location.pathname);
+        .catch(e => {
+          console.error('[LCA] Failed to load history:', e);
+          showToast(currentLang === 'ru' ? 'Ошибка загрузки из облака'
+            : currentLang === 'zh' ? '从云端加载失败'
+            : 'Failed to load from cloud');
+        });
     }
-    
+
     if (projectId && supabaseClient) {
-      // Always fetch from Supabase (PRIMARY source)
       console.log('[LCA] Fetching project from Supabase:', projectId);
       supabaseClient.from('project_calculations').select('*').eq('project_id', projectId).order('created_at', { ascending: false })
         .then(({ data, error }) => {
-          console.log('[LCA] Supabase project result:', data, error);
-          if (data && data.length > 0) {
+          console.log('[LCA] Supabase project response:', { data, error });
+          if (error) {
+            console.warn('[LCA] Supabase project error:', error.code, error.message);
+            showToast(currentLang === 'ru' ? 'Проект не найден в облаке'
+              : currentLang === 'zh' ? '未在云端找到该项目'
+              : 'Project not found in cloud');
+            return;
+          }
+          if (data && data.length > 0 && data[0].report_data) {
             renderReport(data[0].report_data);
+          } else {
+            console.warn('[LCA] Project not found or empty:', projectId);
+            showToast(currentLang === 'ru' ? 'Проект не найден или пуст'
+              : currentLang === 'zh' ? '项目未找到或为空'
+              : 'Project not found or empty');
           }
         })
-        .catch(e => console.error('[LCA] Failed to load project:', e));
-      
-      if (project && project.calculations && project.calculations.length > 0) {
-        console.log('[LCA] Found project in localStorage');
-        renderReport(project.calculations[0].data);
-      } else if (supabaseClient) {
-        // Try Supabase
-        console.log('[LCA] Trying Supabase for project:', projectId);
-        supabaseClient.from('project_calculations').select('*').eq('project_id', projectId).order('created_at', { ascending: false })
-          .then(({ data, error }) => {
-            console.log('[LCA] Supabase project result:', data, error);
-            if (data && data.length > 0) renderReport(data[0].report_data);
-          })
-          .catch(e => console.error('[LCA] Failed to load project:', e));
-      }
-      
-      // Clean URL
-      window.history.replaceState({}, '', window.location.pathname);
+        .catch(e => {
+          console.error('[LCA] Failed to load project:', e);
+          showToast(currentLang === 'ru' ? 'Ошибка загрузки проекта'
+            : currentLang === 'zh' ? '项目加载失败'
+            : 'Failed to load project');
+        });
     }
   })();
 
