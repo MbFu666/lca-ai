@@ -6547,15 +6547,40 @@ function getHistory() {
   } catch { return []; }
 }
 
-function saveToHistory(report) {
+async function saveToHistory(report) {
   if (!report) {
     console.error('[saveToHistory] report is null/undefined');
     return;
   }
   
+  // Save to Supabase FIRST to get UUID
+  let supabaseId = null;
+  if (currentUser && supabaseClient) {
+    console.log('[saveToHistory] Saving to Supabase...');
+    try {
+      const { data, error } = await supabaseClient.from('user_history').insert({
+        user_id: currentUser.id,
+        product_title: report.product_title,
+        functional_unit: report.functional_unit,
+        total_co2eq: report.total_co2eq,
+        report_data: report
+      }).select('id').single();
+      
+      if (error) {
+        console.error('[saveToHistory] Supabase error:', error);
+      } else if (data) {
+        supabaseId = data.id;
+        console.log('[saveToHistory] Saved to Supabase, UUID:', supabaseId);
+      }
+    } catch (err) {
+      console.error('[saveToHistory] Exception:', err);
+    }
+  }
+  
+  // Save to localStorage with Supabase UUID (or Date.now() as fallback)
   const history = getHistory();
   const entry = {
-    id: Date.now(),
+    id: supabaseId || Date.now(),
     date: new Date().toISOString(),
     product: report.product_title,
     fu: report.functional_unit,
@@ -6566,12 +6591,9 @@ function saveToHistory(report) {
   if (history.length > MAX_HISTORY) history.pop();
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
   
-  // Also save to Supabase if user is logged in
-  if (currentUser) {
-    console.log('[saveToHistory] Saving to Supabase...', { userId: currentUser.id });
-    saveCalculation(report);
-  } else {
-    console.log('[saveToHistory] No currentUser, skipping Supabase save');
+  if (!currentUser) {
+    console.log('[saveToHistory] No currentUser, saved to localStorage only');
+  }
   }
 }
 
@@ -8522,9 +8544,30 @@ function saveProjectLocal(project) {
   localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
 }
 
-function createProject(name) {
+async function createProject(name) {
+  // Save to Supabase FIRST to get UUID
+  let supabaseId = null;
+  if (currentUser && supabaseClient) {
+    try {
+      const { data, error } = await supabaseClient.from('user_projects').insert({
+        user_id: currentUser.id,
+        name: name
+      }).select('id').single();
+      
+      if (error) {
+        console.error('[createProject] Supabase error:', error);
+      } else if (data) {
+        supabaseId = data.id;
+        console.log('[createProject] Saved to Supabase, UUID:', supabaseId);
+      }
+    } catch (err) {
+      console.error('[createProject] Exception:', err);
+    }
+  }
+  
+  // Save to localStorage with Supabase UUID (or Date.now() as fallback)
   const project = {
-    id: Date.now(),
+    id: supabaseId || Date.now(),
     name,
     createdAt: new Date().toISOString(),
     calculations: []
@@ -8533,12 +8576,33 @@ function createProject(name) {
   return project;
 }
 
-function addToProject(projectId, report) {
+async function addToProject(projectId, report) {
   const projects = getProjects();
   const project = projects.find(p => p.id === projectId);
   if (project) {
+    // Save to Supabase if logged in and projectId is a UUID
+    let supabaseId = null;
+    if (currentUser && supabaseClient && projectId) {
+      try {
+        const { data, error } = await supabaseClient.from('project_calculations').insert({
+          project_id: projectId,
+          user_id: currentUser.id,
+          report_data: report
+        }).select('id').single();
+        
+        if (error) {
+          console.error('[addToProject] Supabase error:', error);
+        } else if (data) {
+          supabaseId = data.id;
+          console.log('[addToProject] Saved to Supabase, UUID:', supabaseId);
+        }
+      } catch (err) {
+        console.error('[addToProject] Exception:', err);
+      }
+    }
+    
     project.calculations.push({
-      id: Date.now(),
+      id: supabaseId || Date.now(),
       product: report.product_title,
       total: report.total_co2eq,
       data: report,
