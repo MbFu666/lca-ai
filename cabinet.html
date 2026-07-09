@@ -175,27 +175,34 @@
         }
 
         async function init() {
+            console.log('[Cabinet] Starting init...');
             db = getSB();
             if (!db) {
                 showToast('Ошибка: Supabase не загружен');
-                console.error('Supabase SDK not loaded');
+                console.error('[Cabinet] Supabase SDK not loaded');
                 return;
             }
+            console.log('[Cabinet] Supabase client created');
             
             const { data: { session }, error } = await db.auth.getSession();
+            console.log('[Cabinet] Session check:', { hasSession: !!session, error });
+            
             if (error) {
-                console.error('getSession error:', error);
-                showToast('Ошибка авторизации');
+                console.error('[Cabinet] getSession error:', error);
+                showToast('Ошибка авторизации: ' + error.message);
                 return;
             }
             if (!session) { 
+                console.log('[Cabinet] No session, redirecting to login');
                 window.location.href = '/login.html'; 
                 return; 
             }
             currentUser = session.user;
-            console.log('User loaded:', currentUser.email);
+            console.log('[Cabinet] User loaded:', currentUser.email, 'ID:', currentUser.id);
             renderProfile();
-            loadTab('history');
+            console.log('[Cabinet] Profile rendered, loading history...');
+            await loadTab('history');
+            console.log('[Cabinet] Init complete');
         }
 
         function renderProfile() {
@@ -244,10 +251,15 @@
         }
 
         async function loadHistory() {
-            if (!currentUser || !db) return;
+            if (!currentUser || !db) {
+                console.log('[Cabinet] loadHistory skipped: no user or db');
+                return;
+            }
+            console.log('[Cabinet] loadHistory for user:', currentUser.id);
             try {
                 const { data, error } = await db.from('user_history').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
                 if (error) throw error;
+                console.log('[Cabinet] loadHistory result:', data?.length, 'rows');
                 const list = document.getElementById('historyList');
                 if (!data || data.length === 0) {
                     list.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Нет расчётов</div><a href="/" class="btn btn-primary">Сделать расчёт</a></div>';
@@ -274,7 +286,11 @@
         }
 
         async function loadProjects() {
-            if (!currentUser || !db) return;
+            if (!currentUser || !db) {
+                console.log('[Cabinet] loadProjects skipped: no user or db');
+                return;
+            }
+            console.log('[Cabinet] loadProjects for user:', currentUser.id);
             try {
                 const { data: projects, error: pErr } = await db.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
                 if (pErr) throw pErr;
