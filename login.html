@@ -7,137 +7,29 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #FFFFFF;
-            --bg-soft: #F8FAFA;
-            --ink: #0E2E27;
-            --ink-soft: #4D5E61;
-            --ink-mute: #93A0A6;
-            --jade: #14C997;
-            --jade-dark: #0FB386;
-            --jade-bg: #ECFAF4;
-            --rule: #E5E8EB;
-            --c-rust: #C25450;
-        }
-        html.dark {
-            --bg: #0F1F1B;
-            --bg-soft: #162B26;
-            --ink: #E8F0ED;
-            --ink-soft: #A0B0AA;
-            --ink-mute: #6B7D78;
-            --jade-bg: #1A332D;
-            --rule: #2A3F39;
-        }
+        :root { --bg: #FFFFFF; --bg-soft: #F8FAFA; --ink: #0E2E27; --ink-soft: #4D5E61; --ink-mute: #93A0A6; --jade: #14C997; --jade-dark: #0FB386; --jade-bg: #ECFAF4; --rule: #E5E8EB; --c-rust: #C25450; }
+        html.dark { --bg: #0F1F1B; --bg-soft: #162B26; --ink: #E8F0ED; --ink-soft: #A0B0AA; --ink-mute: #6B7D78; --jade-bg: #1A332D; --rule: #2A3F39; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Manrope', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--ink);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 24px;
-        }
-        .login-card {
-            background: var(--bg);
-            border: 1px solid var(--rule);
-            border-radius: 20px;
-            padding: 48px 40px;
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 20px 40px -12px rgba(14,46,39,0.1);
-        }
-        .brand {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--ink);
-            margin-bottom: 8px;
-        }
-        .brand .dot {
-            width: 28px; height: 28px;
-            border-radius: 50%;
-            background: var(--jade);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .brand .dot::after {
-            content: '';
-            width: 11px; height: 11px;
-            background: white;
-            border-radius: 50%;
-        }
-        .subtitle {
-            font-size: 14px;
-            color: var(--ink-mute);
-            margin-bottom: 32px;
-        }
+        body { font-family: 'Manrope', system-ui, sans-serif; background: var(--bg); color: var(--ink); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 24px; }
+        .login-card { background: var(--bg); border: 1px solid var(--rule); border-radius: 20px; padding: 48px 40px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 20px 40px -12px rgba(14,46,39,0.1); }
+        .brand { display: inline-flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+        .brand .dot { width: 28px; height: 28px; border-radius: 50%; background: var(--jade); display: inline-flex; align-items: center; justify-content: center; }
+        .brand .dot::after { content: ''; width: 11px; height: 11px; background: white; border-radius: 50%; }
+        .subtitle { font-size: 14px; color: var(--ink-mute); margin-bottom: 32px; }
         .form-group { display: flex; flex-direction: column; gap: 12px; text-align: left; }
-        .form-group label {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--ink-soft);
-            margin-bottom: -8px;
-        }
-        .form-group input {
-            padding: 12px 16px;
-            border: 1px solid var(--rule);
-            border-radius: 10px;
-            font-family: inherit;
-            font-size: 14px;
-            color: var(--ink);
-            background: var(--bg-soft);
-            outline: none;
-            transition: border-color .15s;
-        }
+        .form-group label { font-size: 12px; font-weight: 600; color: var(--ink-soft); margin-bottom: -8px; }
+        .form-group input { padding: 12px 16px; border: 1px solid var(--rule); border-radius: 10px; font-family: inherit; font-size: 14px; color: var(--ink); background: var(--bg-soft); outline: none; transition: border-color .15s; }
         .form-group input:focus { border-color: var(--jade); }
-        .submit-btn {
-            background: var(--jade);
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 10px;
-            font-family: inherit;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all .15s;
-            width: 100%;
-            margin-top: 8px;
-        }
+        .submit-btn { background: var(--jade); color: white; border: none; padding: 12px; border-radius: 10px; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s; width: 100%; margin-top: 8px; }
         .submit-btn:hover { background: var(--jade-dark); }
         .submit-btn:disabled { opacity: .5; cursor: not-allowed; }
-        .switch-mode {
-            margin-top: 20px;
-            font-size: 13px;
-            color: var(--ink-mute);
-        }
-        .switch-mode a {
-            color: var(--jade);
-            cursor: pointer;
-            font-weight: 600;
-            text-decoration: none;
-        }
+        .switch-mode { margin-top: 20px; font-size: 13px; color: var(--ink-mute); }
+        .switch-mode a { color: var(--jade); cursor: pointer; font-weight: 600; text-decoration: none; }
         .switch-mode a:hover { text-decoration: underline; }
-        .msg {
-            margin-top: 16px;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            display: none;
-        }
+        .msg { margin-top: 16px; padding: 12px; border-radius: 8px; font-size: 13px; display: none; }
         .msg.success { display: block; background: var(--jade-bg); color: var(--jade-dark); border: 1px solid var(--jade-bg); }
         .msg.error { display: block; background: #FEF1EE; color: var(--c-rust); border: 1px solid #FEF1EE; }
-        .footer {
-            margin-top: 24px;
-            font-size: 12px;
-            color: var(--ink-mute);
-        }
+        .footer { margin-top: 24px; font-size: 12px; color: var(--ink-mute); }
         .footer a { color: var(--jade); text-decoration: none; }
         .header-bar { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; }
         .theme-toggle { background: none; border: 1px solid var(--rule); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; transition: all .15s; padding: 0; }
@@ -148,27 +40,9 @@
         .divider { display: flex; align-items: center; margin: 20px 0; color: var(--ink-mute); font-size: 12px; }
         .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
         .divider span { padding: 0 12px; }
-        .google-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--rule);
-            border-radius: 10px;
-            background: white;
-            font-family: inherit;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--ink);
-            cursor: pointer;
-            transition: all .15s;
-        }
+        .google-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px; border: 1px solid var(--rule); border-radius: 10px; background: white; font-family: inherit; font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer; transition: all .15s; }
         .google-btn:hover { border-color: var(--jade); background: var(--jade-bg); }
-        @media (max-width: 480px) {
-            .login-card { padding: 32px 24px; }
-        }
+        @media (max-width: 480px) { .login-card { padding: 32px 24px; } }
     </style>
 </head>
 <body>
@@ -181,10 +55,7 @@
         <button class="theme-toggle" id="themeToggle">🌙</button>
     </div>
     <div class="login-card">
-        <div class="brand">
-            <span class="dot"></span>
-            LCA·AI
-        </div>
+        <div class="brand"><span class="dot"></span>LCA·AI</div>
         <p class="subtitle" id="subtitle">Войдите для доступа к расчётам</p>
 
         <button type="button" class="google-btn" id="googleBtn">
@@ -194,7 +65,6 @@
 
         <div class="divider"><span>или</span></div>
 
-        <!-- Форма входа -->
         <form class="form-group" id="loginForm">
             <label for="loginEmail">Email</label>
             <input type="email" id="loginEmail" placeholder="Введите email" required>
@@ -203,7 +73,6 @@
             <button type="submit" class="submit-btn" id="loginBtn">Войти</button>
         </form>
 
-        <!-- Форма регистрации -->
         <form class="form-group" id="registerForm" style="display:none">
             <label for="regEmail">Email</label>
             <input type="email" id="regEmail" placeholder="Введите email" required>
@@ -215,16 +84,11 @@
         </form>
 
         <div class="msg" id="msg"></div>
-
         <div class="switch-mode" id="switchMode">
             <span id="switchText">Нет аккаунта?</span>
             <a id="switchLink" onclick="toggleMode()">Зарегистрироваться</a>
         </div>
-
-        <p class="footer">
-            <span id="agreementText">Нажимая «Войти», вы соглашаетесь с</span>
-            <a href="#">условиями использования</a>
-        </p>
+        <p class="footer"><span id="agreementText">Нажимая «Войти», вы соглашаетесь с</span> <a href="#">условиями использования</a></p>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -235,14 +99,7 @@
         let sbClient = null;
         let isLoginMode = true;
 
-        function initSupabase() {
-            if (window.supabase) {
-                sbClient = window.supabase.createClient(SB_URL, SB_KEY);
-                return true;
-            }
-            showError('Supabase SDK не загружен');
-            return false;
-        }
+        function initSupabase() { if (window.supabase) { sbClient = window.supabase.createClient(SB_URL, SB_KEY); return true; } showError('Supabase SDK не загружен'); return false; }
 
         async function checkSession() {
             if (!sbClient) return;
@@ -264,164 +121,80 @@
             hideMsg();
         }
 
-        // Google OAuth
         document.getElementById('googleBtn').addEventListener('click', async () => {
             if (!sbClient) { showError('Supabase не загружен'); return; }
             try {
-                const { error } = await sbClient.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: { redirectTo: REDIRECT }
-                });
+                const { error } = await sbClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: REDIRECT } });
                 if (error) showError(error.message);
-            } catch (err) {
-                showError('Ошибка Google: ' + err.message);
-            }
+            } catch (err) { showError('Ошибка Google: ' + err.message); }
         });
 
-        // Вход по email + пароль
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!sbClient) { showError('Supabase не загружен'); return; }
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             const btn = document.getElementById('loginBtn');
-            btn.disabled = true;
-            btn.textContent = 'Вход...';
-
+            btn.disabled = true; btn.textContent = 'Вход...';
             try {
                 const { data, error } = await sbClient.auth.signInWithPassword({ email, password });
-                btn.disabled = false;
-                btn.textContent = 'Войти';
-                if (error) {
-                    showError(error.message);
-                } else {
-                    localStorage.setItem('supabase_user', JSON.stringify(data.user));
-                    localStorage.setItem('supabase_token', data.session.access_token);
-                    window.location.href = REDIRECT;
-                }
-            } catch (err) {
-                btn.disabled = false;
-                btn.textContent = 'Войти';
-                showError('Ошибка: ' + err.message);
-            }
+                btn.disabled = false; btn.textContent = 'Войти';
+                if (error) showError(error.message);
+                else { localStorage.setItem('supabase_user', JSON.stringify(data.user)); localStorage.setItem('supabase_token', data.session.access_token); window.location.href = REDIRECT; }
+            } catch (err) { btn.disabled = false; btn.textContent = 'Войти'; showError('Ошибка: ' + err.message); }
         });
 
-        // Регистрация по email + пароль
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!sbClient) { showError('Supabase не загружен'); return; }
             const email = document.getElementById('regEmail').value;
             const password = document.getElementById('regPassword').value;
             const passwordConfirm = document.getElementById('regPasswordConfirm').value;
-
-            if (password !== passwordConfirm) {
-                showError('Пароли не совпадают');
-                return;
-            }
-            if (password.length < 6) {
-                showError('Пароль должен содержать минимум 6 символов');
-                return;
-            }
-
+            if (password !== passwordConfirm) { showError('Пароли не совпадают'); return; }
+            if (password.length < 6) { showError('Пароль должен содержать минимум 6 символов'); return; }
             const btn = document.getElementById('regBtn');
-            btn.disabled = true;
-            btn.textContent = 'Регистрация...';
-
+            btn.disabled = true; btn.textContent = 'Регистрация...';
             try {
                 const { data, error } = await sbClient.auth.signUp({ email, password });
-                btn.disabled = false;
-                btn.textContent = 'Зарегистрироваться';
-                if (error) {
-                    showError(error.message);
-                } else if (data.user && data.session) {
-                    // Регистрация + автоматический вход
-                    localStorage.setItem('supabase_user', JSON.stringify(data.user));
-                    localStorage.setItem('supabase_token', data.session.access_token);
-                    window.location.href = REDIRECT;
-                } else if (data.user && !data.session) {
-                    // Нужно подтвердить email
-                    showSuccess('Письмо с подтверждением отправлено на ' + email);
-                    toggleMode();
-                } else {
-                    showSuccess('Аккаунт создан! Теперь войдите.');
-                    toggleMode();
-                }
-            } catch (err) {
-                btn.disabled = false;
-                btn.textContent = 'Зарегистрироваться';
-                showError('Ошибка: ' + err.message);
-            }
+                btn.disabled = false; btn.textContent = 'Зарегистрироваться';
+                if (error) showError(error.message);
+                else if (data.user && data.session) { localStorage.setItem('supabase_user', JSON.stringify(data.user)); localStorage.setItem('supabase_token', data.session.access_token); window.location.href = REDIRECT; }
+                else if (data.user && !data.session) { showSuccess('Письмо с подтверждением отправлено на ' + email); toggleMode(); }
+                else { showSuccess('Аккаунт создан! Теперь войдите.'); toggleMode(); }
+            } catch (err) { btn.disabled = false; btn.textContent = 'Зарегистрироваться'; showError('Ошибка: ' + err.message); }
         });
 
-        function showError(msg) {
-            const el = document.getElementById('msg');
-            el.className = 'msg error';
-            el.textContent = msg;
-        }
+        function showError(msg) { const el = document.getElementById('msg'); el.className = 'msg error'; el.textContent = msg; }
+        function showSuccess(msg) { const el = document.getElementById('msg'); el.className = 'msg success'; el.textContent = msg; }
+        function hideMsg() { const el = document.getElementById('msg'); el.className = 'msg'; el.textContent = ''; }
 
-        function showSuccess(msg) {
-            const el = document.getElementById('msg');
-            el.className = 'msg success';
-            el.textContent = msg;
-        }
-
-        function hideMsg() {
-            const el = document.getElementById('msg');
-            el.className = 'msg';
-            el.textContent = '';
-        }
-
-        // Theme
         (function() {
             const saved = localStorage.getItem('lca-theme');
-            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-            }
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark');
             const btn = document.getElementById('themeToggle');
-            if (btn) {
-                btn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
-                btn.addEventListener('click', () => {
-                    document.documentElement.classList.toggle('dark');
-                    btn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
-                    localStorage.setItem('lca-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-                });
-            }
+            if (btn) { btn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙'; btn.addEventListener('click', () => { document.documentElement.classList.toggle('dark'); btn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙'; localStorage.setItem('lca-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); }); }
         })();
 
-        // Language
         (function() {
             const saved = localStorage.getItem('lca-lang');
             const browserLang = (navigator.language || '').toLowerCase();
             const lang = saved || (browserLang.startsWith('ru') ? 'ru' : browserLang.startsWith('en') ? 'en' : 'ru');
             document.querySelectorAll('.lang-switch button').forEach(b => {
                 b.classList.toggle('active', b.dataset.lang === lang);
-                b.addEventListener('click', () => {
-                    document.querySelectorAll('.lang-switch button').forEach(x => x.classList.remove('active'));
-                    b.classList.add('active');
-                    localStorage.setItem('lca-lang', b.dataset.lang);
-                    applyLoginLang(b.dataset.lang);
-                });
+                b.addEventListener('click', () => { document.querySelectorAll('.lang-switch button').forEach(x => x.classList.remove('active')); b.classList.add('active'); localStorage.setItem('lca-lang', b.dataset.lang); applyLoginLang(b.dataset.lang); });
             });
             applyLoginLang(lang);
         })();
 
         function applyLoginLang(lang) {
-            const t = {
-                ru: { subtitle_login: 'Войдите для доступа к расчётам', subtitle_reg: 'Создайте аккаунт', email: 'Email', password: 'Пароль', password_confirm: 'Подтвердите пароль', login_btn: 'Войти', reg_btn: 'Зарегистрироваться', no_account: 'Нет аккаунта?', register: 'Зарегистрироваться', has_account: 'Уже есть аккаунт?', login_link: 'Войти', agreement: 'Нажимая «Войти», вы соглашаетесь с', terms: 'условиями использования' },
-                en: { subtitle_login: 'Sign in to access calculations', subtitle_reg: 'Create an account', email: 'Email', password: 'Password', password_confirm: 'Confirm password', login_btn: 'Sign in', reg_btn: 'Register', no_account: "Don't have an account?", register: 'Register', has_account: 'Already have an account?', login_link: 'Sign in', agreement: 'By signing in, you agree to the', terms: 'terms of service' },
-                zh: { subtitle_login: '登录以访问计算', subtitle_reg: '创建账户', email: '邮箱', password: '密码', password_confirm: '确认密码', login_btn: '登录', reg_btn: '注册', no_account: '没有账户？', register: '注册', has_account: '已有账户？', login_link: '登录', agreement: '登录即表示您同意', terms: '服务条款' }
-            }[lang] || {};
-            document.getElementById('subtitle').textContent = t.subtitle_login || 'Войдите для доступа к расчётам';
+            const t = { ru: { subtitle: 'Войдите для доступа к расчётам', btn: 'Войти', reg_btn: 'Зарегистрироваться', no_account: 'Нет аккаунта?', register: 'Зарегистрироваться', has_account: 'Уже есть аккаунт?', login_link: 'Войти', agreement: 'Нажимая «Войти», вы соглашаетесь с', terms: 'условиями использования' }, en: { subtitle: 'Sign in to access calculations', btn: 'Sign in', reg_btn: 'Register', no_account: "Don't have an account?", register: 'Register', has_account: 'Already have an account?', login_link: 'Sign in', agreement: 'By signing in, you agree to the', terms: 'terms of service' }, zh: { subtitle: '登录以访问计算', btn: '登录', reg_btn: '注册', no_account: '没有账户？', register: '注册', has_account: '已有账户？', login_link: '登录', agreement: '登录即表示您同意', terms: '服务条款' } }[lang] || {};
+            document.getElementById('subtitle').textContent = t.subtitle || 'Войдите для доступа к расчётам';
             document.getElementById('switchText').textContent = t.no_account || 'Нет аккаунта?';
             document.getElementById('switchLink').textContent = t.register || 'Зарегистрироваться';
             document.querySelector('.footer').innerHTML = (t.agreement || 'Нажимая «Войти», вы соглашаетесь с') + ' <a href="#">' + (t.terms || 'условиями использования') + '</a>';
         }
 
-        window.addEventListener('load', () => {
-            if (initSupabase()) {
-                checkSession();
-            }
-        });
+        window.addEventListener('load', () => { if (initSupabase()) checkSession(); });
     </script>
 </body>
 </html>
