@@ -315,9 +315,10 @@
                             const product = c.report_data?.product_title || 'Без названия';
                             const total = c.report_data?.total_co2eq || 0;
                             const date = new Date(c.created_at).toLocaleDateString('ru');
-                            html += '<div class="calc-item" onclick="window.location.href=\'/?history=' + c.id + '\'">';
-                            html += '<div class="calc-info"><div class="calc-name">' + esc(product) + '</div><div class="calc-date">' + date + '</div></div>';
+                            html += '<div class="calc-item">';
+                            html += '<div class="calc-info" onclick="window.location.href=\'/?history=' + c.id + '\'" style="cursor:pointer;flex:1"><div class="calc-name">' + esc(product) + '</div><div class="calc-date">' + date + '</div></div>';
                             html += '<div class="calc-total">' + total + ' kgCO₂e</div>';
+                            html += '<button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteCalcFromProject(\'' + c.id + '\')" title="Удалить расчёт">✕</button>';
                             html += '</div>';
                         });
                         html += '</div>';
@@ -371,6 +372,19 @@
                 showToast('Удалено'); 
             } catch (e) { 
                 showToast('Ошибка удаления: ' + (e.message || e)); 
+            }
+        }
+
+        async function deleteCalcFromProject(calcId) {
+            if (!confirm('Удалить расчёт из проекта?')) return;
+            try {
+                const { error } = await db.from('project_calculations').delete().eq('id', calcId);
+                if (error) throw error;
+                loadProjects();
+                loadStats();
+                showToast('Расчёт удалён');
+            } catch (e) {
+                showToast('Ошибка удаления: ' + (e.message || e));
             }
         }
 

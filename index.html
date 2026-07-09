@@ -6603,6 +6603,15 @@ function loadFromHistory(id) {
 }
 
 function clearHistory() {
+  const history = getHistory();
+  if (currentUser && supabaseClient) {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const uuidEntries = history.filter(h => uuidRegex.test(String(h.id)));
+    console.log('[clearHistory] Deleting', uuidEntries.length, 'entries from Supabase');
+    uuidEntries.forEach(entry => {
+      supabaseClient.from('user_history').delete().eq('id', entry.id);
+    });
+  }
   localStorage.removeItem(HISTORY_KEY);
 }
 
@@ -8859,7 +8868,7 @@ function showProjectSelectModal() {
         <div class="modal-body" style="padding:16px 30px 30px">
           <div class="select-project-list" id="selectProjectList"></div>
           <div class="select-project-new">
-            <input type="text" id="newProjectNameInput" placeholder="${currentLang === 'ru' ? 'Название нового проекта' : currentLang === 'zh' ? '新项目名称' : 'New project name'}">
+            <input type="text" id="selectProjectNewNameInput" placeholder="${currentLang === 'ru' ? 'Название нового проекта' : currentLang === 'zh' ? '新项目名称' : 'New project name'}">
             <button id="createAndSaveBtn" class="primary">${currentLang === 'ru' ? 'Создать и сохранить' : currentLang === 'zh' ? '创建并保存' : 'Create & save'}</button>
           </div>
         </div>
@@ -8898,7 +8907,7 @@ function showProjectSelectModal() {
   });
   
   document.getElementById('createAndSaveBtn').onclick = async () => {
-    const name = document.getElementById('newProjectNameInput').value.trim();
+    const name = document.getElementById('selectProjectNewNameInput').value.trim();
     if (!name) return;
     const project = createProject(name);
     addToProject(project.id, lastReport);
