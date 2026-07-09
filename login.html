@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LCAР’В·AI РІР‚вЂќ Р вЂ™РЎвЂ¦Р С•Р Т‘</title>
+    <title>LCA·AI — Вход</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -77,54 +77,6 @@
             color: var(--ink-mute);
             margin-bottom: 32px;
         }
-        .login-btn {
-            width: 100%;
-            padding: 14px 24px;
-            border-radius: 12px;
-            font-family: inherit;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all .2s ease;
-            border: none;
-            margin-bottom: 12px;
-        }
-        .login-btn.google {
-            background: white;
-            border: 1px solid var(--rule);
-            color: var(--ink);
-        }
-        .login-btn.google:hover {
-            border-color: var(--jade);
-            box-shadow: 0 4px 12px rgba(20,201,151,0.15);
-        }
-        .login-btn.github {
-            background: var(--ink);
-            color: white;
-        }
-        .login-btn.github:hover {
-            background: #24292e;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        .login-btn svg { width: 20px; height: 20px; }
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin: 24px 0;
-            font-size: 12px;
-            color: var(--ink-mute);
-        }
-        .divider::before, .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--rule);
-        }
         .email-form { display: flex; flex-direction: column; gap: 12px; }
         .email-input {
             padding: 12px 16px;
@@ -152,10 +104,6 @@
         }
         .email-btn:hover { background: var(--jade-dark); }
         .email-btn:disabled { opacity: .5; cursor: not-allowed; }
-        .check-email { text-align: center; padding: 40px 20px; }
-        .check-email .icon { font-size: 48px; margin-bottom: 16px; }
-        .check-email h3 { font-size: 18px; margin-bottom: 8px; }
-        .check-email p { font-size: 14px; color: var(--ink-mute); }
         .msg {
             margin-top: 16px;
             padding: 12px;
@@ -163,8 +111,8 @@
             font-size: 13px;
             display: none;
         }
-        .msg.success { display: block; background: var(--jade-bg); color: var(--jade-deep); border: 1px solid var(--jade-soft); }
-        .msg.error { display: block; background: #FEF1EE; color: var(--c-rust); border: 1px solid var(--c-rust); }
+        .msg.success { display: block; background: var(--jade-bg); color: var(--jade-dark); border: 1px solid var(--jade-bg); }
+        .msg.error { display: block; background: #FEF1EE; color: var(--c-rust); border: 1px solid #FEF1EE; }
         .footer {
             margin-top: 32px;
             font-size: 12px;
@@ -180,48 +128,39 @@
     <div class="login-card">
         <div class="brand">
             <span class="dot"></span>
-            LCAР’В·AI
+            LCA·AI
         </div>
-        <p class="subtitle">Р вЂ™Р С•Р в„–Р Т‘Р С‘РЎвЂљР Вµ Р Т‘Р В»РЎРЏ Р Т‘Р С•РЎРѓРЎвЂљРЎС“Р С—Р В° Р С” РЎР‚Р В°РЎРѓРЎвЂЎРЎвЂРЎвЂљР В°Р С</p>
+        <p class="subtitle">Войдите для доступа к расчётам</p>
 
         <form class="email-form" id="emailForm">
-            <input type="email" class="email-input" id="emailInput" placeholder="Р вЂ™Р Р†Р ВµР Т‘Р С‘РЎвЂљР Вµ email" required>
-            <button type="submit" class="email-btn" id="emailBtn">Р С›РЎвЂљР С—РЎР‚Р В°Р Р†Р С‘РЎвЂљРЎРЉ РЎРѓРЎРѓРЎвЂ№Р В»Р С”РЎС“</button>
+            <input type="email" class="email-input" id="emailInput" placeholder="Введите email" required>
+            <button type="submit" class="email-btn" id="emailBtn">Отправить ссылку</button>
         </form>
 
         <div class="msg" id="msg"></div>
 
         <p class="footer">
-            Р СњР В°Р В¶Р С‘Р СР В°РЎРЏ "Р вЂ™Р С•Р в„–РЎвЂљР С‘", Р Р†РЎвЂ№ РЎРѓР С•Р С–Р В»Р В°РЎв‚¬Р В°Р ВµРЎвЂљР ВµРЎРѓРЎРЉ РЎРѓ <a href="#">РЎС“РЎРѓР В»Р С•Р Р†Р С‘РЎРЏР СР С‘ Р С‘РЎРѓР С—Р С•Р В»РЎРЉР В·Р С•Р Р†Р В°Р Р…Р С‘РЎРЏ</a>
+            Нажимая «Войти», вы соглашаетесь с <a href="#">условиями использования</a>
         </p>
     </div>
 
-    <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // ============================================
-        // Р—РђРњР•РќРРўР• РќРђ Р’РђРЁР Р”РђРќРќР«Р• РР— SUPABASE DASHBOARD
-        // ============================================
         const SUPABASE_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
 
         let sbClient = null;
         const REDIRECT_TO = window.location.origin + '/';
 
-        // Р ВР Р…Р С‘РЎвЂ Р С‘Р В°Р В»Р С‘Р В·Р В°РЎвЂ Р С‘РЎРЏ Supabase
         function initSupabase() {
-            console.log('[Login] Р СџРЎР‚Р С•Р Р†Р ВµРЎР‚РЎРЏРЎР‹ Supabase SDK...');
             if (window.supabase) {
-                console.log('[Login] Supabase SDK Р Р…Р В°Р в„–Р Т‘Р ВµР Р…');
                 sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 return true;
             }
-            console.error('[Login] Supabase SDK Р СњР вЂў Р Р…Р В°Р в„–Р Т‘Р ВµР Р…!');
-            showError('Supabase SDK Р Р…Р Вµ Р В·Р В°Р С–РЎР‚РЎС“Р В¶Р ВµР Р…. Р С›Р В±Р Р…Р С•Р Р†Р С‘РЎвЂљР Вµ РЎРѓРЎвЂљРЎР‚Р В°Р Р…Р С‘РЎвЂ РЎС“.');
+            showError('Supabase SDK не загружен');
             return false;
         }
 
-        // Р СџРЎР‚Р С•Р Р†Р ВµРЎР‚РЎРЏР ВµР С РЎРѓР ВµРЎРѓРЎРѓР С‘РЎР‹
         async function checkSession() {
             if (!sbClient) return;
             const { data: { session } } = await sbClient.auth.getSession();
@@ -232,60 +171,33 @@
             }
         }
 
-        // Email Magic Link
         document.getElementById('emailForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            console.log('[Login] Р В¤Р С•РЎР‚Р СР В° Р С•РЎвЂљР С—РЎР‚Р В°Р Р†Р В»Р ВµР Р…Р В°');
-            if (!sbClient) {
-                console.error('[Login] Supabase Р Р…Р Вµ Р С‘Р Р…Р С‘РЎвЂ Р С‘Р В°Р В»Р С‘Р В·Р С‘РЎР‚Р С•Р Р†Р В°Р Р…');
-                showError('Supabase Р Р…Р Вµ Р В·Р В°Р С–РЎР‚РЎС“Р В¶Р ВµР Р…. Р С›Р В±Р Р…Р С•Р Р†Р С‘РЎвЂљР Вµ РЎРѓРЎвЂљРЎР‚Р В°Р Р…Р С‘РЎвЂ РЎС“.');
-                return;
-            }
+            if (!sbClient) { showError('Supabase не загружен'); return; }
             const email = document.getElementById('emailInput').value;
-            console.log('[Login] Р С›РЎвЂљР С—РЎР‚Р В°Р Р†Р В»РЎРЏРЎР‹ magic link Р Р…Р В°:', email);
             const btn = document.getElementById('emailBtn');
             btn.disabled = true;
-            btn.textContent = 'Р С›РЎвЂљР С—РЎР‚Р В°Р Р†Р С”Р В°...';
+            btn.textContent = 'Отправка...';
 
             try {
                 const { data, error } = await sbClient.auth.signInWithOtp({
                     email: email,
-                    options: {
-                        emailRedirectTo: REDIRECT_TO
-                    }
+                    options: { emailRedirectTo: REDIRECT_TO }
                 });
-                console.log('[Login] Р С›РЎвЂљР Р†Р ВµРЎвЂљ:', { data, error });
-
                 btn.disabled = false;
-                btn.textContent = 'Р С›РЎвЂљР С—РЎР‚Р В°Р Р†Р С‘РЎвЂљРЎРЉ РЎРѓРЎРѓРЎвЂ№Р В»Р С”РЎС“';
-
+                btn.textContent = 'Отправить ссылку';
                 if (error) {
-                    console.error('[Login] Р С›РЎв‚¬Р С‘Р В±Р С”Р В°:', error);
                     showError(error.message);
                 } else {
-                    showSuccess('Р РЋРЎРѓРЎвЂ№Р В»Р С”Р В° Р Т‘Р В»РЎРЏ Р Р†РЎвЂ¦Р С•Р Т‘Р В° Р С•РЎвЂљР С—РЎР‚Р В°Р Р†Р В»Р ВµР Р…Р В° Р Р…Р В° ' + email + '. Р СџРЎР‚Р С•Р Р†Р ВµРЎР‚РЎРЉРЎвЂљР Вµ Р С—Р С•РЎвЂЎРЎвЂљРЎС“.');
+                    showSuccess('Ссылка для входа отправлена на ' + email);
                     document.getElementById('emailForm').style.display = 'none';
                 }
             } catch (err) {
-                console.error('[Login] Р ВРЎРѓР С”Р В»РЎР‹РЎвЂЎР ВµР Р…Р С‘Р Вµ:', err);
                 btn.disabled = false;
-                btn.textContent = 'Р С›РЎвЂљР С—РЎР‚Р В°Р Р†Р С‘РЎвЂљРЎРЉ РЎРѓРЎРѓРЎвЂ№Р В»Р С”РЎС“';
-                showError('Р С›РЎв‚¬Р С‘Р В±Р С”Р В°: ' + err.message);
+                btn.textContent = 'Отправить ссылку';
+                showError('Ошибка: ' + err.message);
             }
         });
-
-        // Р СџРЎР‚Р С•Р Р†Р ВµРЎР‚РЎРЏР ВµР С РЎРѓР ВµРЎРѓРЎРѓР С‘РЎР‹ Р С—РЎР‚Р С‘ Р В·Р В°Р С–РЎР‚РЎС“Р В·Р С”Р Вµ (Р Т‘Р В»РЎРЏ magic link callback)
-        async function checkSession() {
-            if (!sbClient) return;
-            const { data: { session } } = await sbClient.auth.getSession();
-            if (session) {
-                localStorage.setItem('supabase_user', JSON.stringify(session.user));
-                localStorage.setItem('supabase_token', session.access_token);
-                window.location.href = REDIRECT_TO;
-            }
-        }
 
         function showError(msg) {
             const el = document.getElementById('msg');
@@ -299,12 +211,9 @@
             el.textContent = msg;
         }
 
-        // Р ВР Р…Р С‘РЎвЂ Р С‘Р В°Р В»Р С‘Р В·Р В°РЎвЂ Р С‘РЎРЏ Р С—РЎР‚Р С‘ Р В·Р В°Р С–РЎР‚РЎС“Р В·Р С”Р Вµ
         window.addEventListener('load', () => {
             if (initSupabase()) {
                 checkSession();
-            } else {
-                showError('Р СњР Вµ РЎС“Р Т‘Р В°Р В»Р С•РЎРѓРЎРЉ Р В·Р В°Р С–РЎР‚РЎС“Р В·Р С‘РЎвЂљРЎРЉ Supabase SDK');
             }
         });
     </script>
