@@ -5237,10 +5237,7 @@ h1 em {
    LIVE WALLPAPER SYSTEM
    ═══════════════════════════════════════════════════════ */
 
-/* ─── Animated Gradient Background ───────────────────── */
-body {
-  background: linear-gradient(135deg, #0a0a0f 0%, #0d1117 50%, #0a0f14 100%);
-}
+/* ─── Animated Gradient Background (disabled — use theme system) ── */
 
 body::before {
   content: '';
@@ -6635,38 +6632,8 @@ function bindResetLink() {
 }
 
 /* ============================================================
-   Listeners
+   Listeners (removed duplicates — see DOMContentLoaded)
    ============================================================ */
-$$('.lang button').forEach(b => {
-  b.addEventListener('click', () => applyLanguage(b.dataset.lang));
-});
-
-$$('.modes button').forEach(b => {
-  b.addEventListener('click', () => {
-    $$('.modes button').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    currentMode = b.dataset.mode;
-  });
-});
-
-$('#imageInput').addEventListener('change', async e => {
-  const f = e.target.files[0];
-  if (!f) return;
-  // DeepSeek API не поддерживает изображения
-  const t = I18N[currentLang];
-  showError('⚠️ ' + (currentLang === 'ru' 
-    ? 'Загрузка изображений не поддерживается. Пожалуйста, опишите продукт текстом.'
-    : currentLang === 'zh' 
-    ? '不支持图片上传。请用文字描述产品。'
-    : 'Image upload is not supported. Please describe the product in text.'));
-  e.target.value = '';
-  $('#uploadName').textContent = '';
-  uploadedImage = null;
-});
-
-$('#submitBtn').addEventListener('click', run);
-$('#productInput').addEventListener('keydown', e => {
-  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') run();
 });
 
 /* ============================================================
@@ -8956,6 +8923,16 @@ function buildExcelPreview(d) {
   $('#xlsGrid').innerHTML = html;
   $('#xlsSheetName').textContent =
     (d.product_title || 'LCA').slice(0, 30).replace(/[\\\/\?\*\[\]:]/g, '_');
+}
+
+function downloadJson(d) {
+  const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (d.product_title || 'lca-report') + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 async function downloadExcel(d) {
