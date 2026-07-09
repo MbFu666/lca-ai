@@ -8840,11 +8840,8 @@ function showNewProjectModal() {
       input.focus();
       return;
     }
-    createProject(name);
-    // Sync to Supabase if logged in
-    if (currentUser && supabaseClient) {
-      await saveProject(name);
-    }
+    // createProject() already saves to Supabase — don't call saveProject() again
+    await createProject(name);
     closeModal('modalNewProject');
     renderProjects();
     showToast(currentLang === 'ru' ? `Проект «${name}» создан` : currentLang === 'zh' ? `项目「${name}」已创建` : `Project "${name}" created`);
@@ -8909,13 +8906,9 @@ function showProjectSelectModal() {
   document.getElementById('createAndSaveBtn').onclick = async () => {
     const name = document.getElementById('selectProjectNewNameInput').value.trim();
     if (!name) return;
-    const project = createProject(name);
+    // createProject() already saves to Supabase
+    const project = await createProject(name);
     addToProject(project.id, lastReport);
-    // Also save to Supabase if logged in
-    if (currentUser) {
-      const sbProject = await saveProject(name);
-      if (sbProject) await saveToProject(sbProject.id, lastReport);
-    }
     closeModal('modalSelectProject');
     showToast(currentLang === 'ru' ? 'Проект создан и расчёт сохранён!' : currentLang === 'zh' ? '项目已创建并保存！' : 'Project created and saved!');
   };
