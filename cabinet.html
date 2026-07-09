@@ -250,14 +250,6 @@
             } catch (e) { showToast('Ошибка: ' + e.message); }
         });
 
-        const darkToggle = document.getElementById('darkToggle');
-        if (localStorage.getItem('lca-theme') === 'dark') darkToggle.classList.add('active');
-        darkToggle.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            darkToggle.classList.toggle('active');
-            localStorage.setItem('lca-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-        });
-
         document.getElementById('langSelect').value = localStorage.getItem('lca-lang') || 'ru';
         document.getElementById('langSelect').addEventListener('change', e => { localStorage.setItem('lca-lang', e.target.value); showToast('Язык сохранён'); });
 
