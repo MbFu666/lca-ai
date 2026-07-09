@@ -151,6 +151,9 @@ async function loadUserData() {
           calculations: (calcs || []).map(c => ({
             id: c.id,
             date: c.created_at,
+            product: c.report_data?.product_title || '',
+            total: c.report_data?.total_co2eq || 0,
+            addedAt: c.created_at,
             data: c.report_data
           }))
         };
@@ -200,14 +203,15 @@ async function saveProject(projectName) {
 
 // Save calculation to project
 async function saveToProject(projectId, report) {
-  if (!currentUser) return;
+  if (!currentUser || !report) return;
   
   try {
-    await supabaseClient.from('project_calculations').insert({
+    const { error } = await supabaseClient.from('project_calculations').insert({
       project_id: projectId,
       user_id: currentUser.id,
       report_data: report
     });
+    if (error) console.error('Supabase insert error:', error);
   } catch (err) {
     console.error('Error saving to project:', err);
   }
