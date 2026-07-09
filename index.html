@@ -8621,18 +8621,16 @@ function deleteProject(projectId) {
     return;
   }
   
-  // Validate currentUser
-  if (!currentUser) {
-    console.warn('deleteProject: currentUser is not set, skipping Supabase delete');
-  }
+  // Check if projectId is a UUID (format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+  const isUUID = typeof projectId === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(projectId);
   
-  // Delete from localStorage
+  // Delete from localStorage (always, regardless of ID format)
   const projects = getProjects().filter(p => p.id !== projectId);
   localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
   console.log('deleteProject: Deleted from localStorage');
   
-  // Delete from Supabase if logged in
-  if (currentUser && supabaseClient) {
+  // Delete from Supabase only if logged in AND projectId is a valid UUID
+  if (isUUID && currentUser && supabaseClient) {
     console.log('deleteProject: Deleting from Supabase...');
     
     // Delete project_calculations
@@ -8658,6 +8656,8 @@ function deleteProject(projectId) {
           console.log('deleteProject: Successfully deleted from user_projects:', data);
         }
       });
+  } else if (!isUUID) {
+    console.log('deleteProject: Skipping Supabase delete - projectId is not a UUID:', projectId);
   }
   
   console.log('deleteProject: Delete operation completed');
@@ -8734,7 +8734,7 @@ function renderProjects() {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       if (confirm(currentLang === 'ru' ? 'Удалить проект?' : currentLang === 'zh' ? '删除项目？' : 'Delete project?')) {
-        deleteProject(parseInt(btn.dataset.id));
+        deleteProject(btn.dataset.id);
         renderProjects();
       }
     });
