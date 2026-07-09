@@ -65,7 +65,6 @@
         .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--rule); }
         .setting-row:last-child { border-bottom: none; }
         .setting-label { font-size: 14px; font-weight: 500; }
-        .setting-desc { font-size: 12px; color: var(--ink-mute); margin-top: 2px; }
         .toggle { position: relative; width: 48px; height: 26px; background: var(--rule); border-radius: 13px; cursor: pointer; transition: background .2s; }
         .toggle.active { background: var(--jade); }
         .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: transform .2s; }
@@ -141,15 +140,52 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        const SUPABASE_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SB_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
+        
+        function getSB() {
+            if (window.supabase && window.supabase.createClient) {
+                return window.supabase.createClient(SB_URL, SB_KEY);
+            }
+            return null;
+        }
+        
+        let db = null;
         let currentUser = null;
 
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        function esc(s) {
+            const d = document.createElement('div');
+            d.textContent = s || '';
+            return d.innerHTML;
+        }
+
         async function init() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) { window.location.href = '/login.html'; return; }
+            db = getSB();
+            if (!db) {
+                showToast('Ошибка: Supabase не загружен');
+                console.error('Supabase SDK not loaded');
+                return;
+            }
+            
+            const { data: { session }, error } = await db.auth.getSession();
+            if (error) {
+                console.error('getSession error:', error);
+                showToast('Ошибка авторизации');
+                return;
+            }
+            if (!session) { 
+                window.location.href = '/login.html'; 
+                return; 
+            }
             currentUser = session.user;
+            console.log('User loaded:', currentUser.email);
             renderProfile();
             loadTab('history');
         }
@@ -167,20 +203,25 @@
         }
 
         async function loadStats() {
-            if (!currentUser) return;
+            if (!currentUser || !db) return;
             try {
-                const { count: c } = await supabase.from('user_history').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
-                const { count: p } = await supabase.from('user_projects').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
+                const { count: c } = await db.from('user_history').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
+                const { count: p } = await db.from('user_projects').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
                 document.getElementById('statCalcs').textContent = c || 0;
                 document.getElementById('statProjects').textContent = p || 0;
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error('loadStats error:', e); showToast('Ошибка загрузки статистики'); }
         }
 
         document.querySelectorAll('.menu a[data-tab]').forEach(a => {
             a.addEventListener('click', e => {
                 e.preventDefault();
                 const tab = a.dataset.tab;
-                if (tab === 'logout') { supabase.auth.signOut(); localStorage.clear(); window.location.href = '/'; return; }
+                if (tab === 'logout') { 
+                    if (db) db.auth.signOut(); 
+                    localStorage.clear(); 
+                    window.location.href = '/'; 
+                    return; 
+                }
                 document.querySelectorAll('.menu a').forEach(x => x.classList.remove('active'));
                 a.classList.add('active');
                 document.querySelectorAll('.tab-content').forEach(x => x.style.display = 'none');
@@ -195,79 +236,111 @@
         }
 
         async function loadHistory() {
-            if (!currentUser) return;
+            if (!currentUser || !db) return;
             try {
-                const { data } = await supabase.from('user_history').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+                const { data, error } = await db.from('user_history').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+                if (error) throw error;
                 const list = document.getElementById('historyList');
                 if (!data || data.length === 0) {
                     list.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Нет расчётов</div><a href="/" class="btn btn-primary">Сделать расчёт</a></div>';
                     return;
                 }
                 list.innerHTML = data.map(h => '<div class="card"><div class="card-header"><div class="card-title">' + esc(h.product_title || '—') + '</div><div class="card-date">' + new Date(h.created_at).toLocaleDateString('ru') + '</div></div><div class="card-meta"><span>📦 ' + esc(h.functional_unit || '—') + '</span><span>🌱 ' + (h.total_co2eq || 0) + ' kgCO₂e</span></div><div class="card-actions"><a href="/?history=' + h.id + '" class="btn btn-primary">Посмотреть</a><button class="btn btn-danger" onclick="deleteHistory(\'' + h.id + '\')">Удалить</button></div></div>').join('');
-            } catch (e) { showToast('Ошибка загрузки'); console.error(e); }
+            } catch (e) { 
+                console.error('loadHistory error:', e); 
+                showToast('Ошибка загрузки истории: ' + (e.message || e)); 
+            }
         }
 
         async function deleteHistory(id) {
-            if (!confirm('Удалить?')) return;
-            try { await supabase.from('user_history').delete().eq('id', id); loadHistory(); loadStats(); showToast('Удалено'); } catch (e) { showToast('Ошибка'); }
+            if (!confirm('Удалить расчёт?')) return;
+            try { 
+                const { error } = await db.from('user_history').delete().eq('id', id); 
+                if (error) throw error;
+                loadHistory(); 
+                loadStats(); 
+                showToast('Удалено'); 
+            } catch (e) { 
+                showToast('Ошибка удаления: ' + (e.message || e)); 
+            }
         }
 
         async function loadProjects() {
-            if (!currentUser) return;
+            if (!currentUser || !db) return;
             try {
-                const { data } = await supabase.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+                const { data, error } = await db.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+                if (error) throw error;
                 const list = document.getElementById('projectsList');
                 if (!data || data.length === 0) {
                     list.innerHTML = '<div class="empty"><div class="empty-icon">📁</div><div class="empty-text">Нет проектов</div><button class="btn btn-primary" onclick="createProject()">Создать</button></div>';
                     return;
                 }
                 list.innerHTML = data.map(p => '<div class="card"><div class="card-header"><div class="card-title">' + esc(p.name) + '</div><div class="card-date">' + new Date(p.created_at).toLocaleDateString('ru') + '</div></div><div class="card-actions"><a href="/?project=' + p.id + '" class="btn btn-primary">Открыть</a><button class="btn btn-danger" onclick="deleteProject(\'' + p.id + '\')">Удалить</button></div></div>').join('');
-            } catch (e) { showToast('Ошибка загрузки'); console.error(e); }
+            } catch (e) { 
+                console.error('loadProjects error:', e); 
+                showToast('Ошибка загрузки проектов: ' + (e.message || e)); 
+            }
         }
 
         document.getElementById('newProjectBtn').addEventListener('click', createProject);
 
         async function createProject() {
             const name = prompt('Название проекта:');
-            if (!name) return;
-            try { await supabase.from('user_projects').insert({ user_id: currentUser.id, name }); loadProjects(); loadStats(); showToast('Проект создан'); } catch (e) { showToast('Ошибка'); }
+            if (!name || !name.trim()) return;
+            try { 
+                const { error } = await db.from('user_projects').insert({ user_id: currentUser.id, name: name.trim() }); 
+                if (error) throw error;
+                loadProjects(); 
+                loadStats(); 
+                showToast('Проект создан'); 
+            } catch (e) { 
+                showToast('Ошибка создания: ' + (e.message || e)); 
+            }
         }
 
         async function deleteProject(id) {
             if (!confirm('Удалить проект?')) return;
-            try { await supabase.from('project_calculations').delete().eq('project_id', id); await supabase.from('user_projects').delete().eq('id', id); loadProjects(); loadStats(); showToast('Удалено'); } catch (e) { showToast('Ошибка'); }
+            try { 
+                const { error: e1 } = await db.from('project_calculations').delete().eq('project_id', id); 
+                const { error: e2 } = await db.from('user_projects').delete().eq('id', id); 
+                if (e1 || e2) throw (e1 || e2);
+                loadProjects(); 
+                loadStats(); 
+                showToast('Удалено'); 
+            } catch (e) { 
+                showToast('Ошибка удаления: ' + (e.message || e)); 
+            }
         }
 
         document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
             if (!confirm('Удалить аккаунт и все данные?')) return;
             try {
-                await supabase.from('user_history').delete().eq('user_id', currentUser.id);
-                await supabase.from('project_calculations').delete().eq('user_id', currentUser.id);
-                await supabase.from('user_projects').delete().eq('user_id', currentUser.id);
-                await supabase.auth.signOut();
+                await db.from('user_history').delete().eq('user_id', currentUser.id);
+                await db.from('project_calculations').delete().eq('user_id', currentUser.id);
+                await db.from('user_projects').delete().eq('user_id', currentUser.id);
+                await db.auth.signOut();
                 localStorage.clear();
                 window.location.href = '/';
-            } catch (e) { showToast('Ошибка: ' + e.message); }
+            } catch (e) { showToast('Ошибка: ' + (e.message || e)); }
         });
 
         document.getElementById('langSelect').value = localStorage.getItem('lca-lang') || 'ru';
         document.getElementById('langSelect').addEventListener('change', e => { localStorage.setItem('lca-lang', e.target.value); showToast('Язык сохранён'); });
 
-        // Theme sync — header toggle and settings toggle
         function syncThemeUI() {
             const isDark = document.documentElement.classList.contains('dark');
             document.getElementById('themeToggle').textContent = isDark ? '☀️' : '🌙';
             const dt = document.getElementById('darkToggle');
             if (isDark) dt.classList.add('active'); else dt.classList.remove('active');
         }
-        const themeToggle = document.getElementById('themeToggle');
-        themeToggle.addEventListener('click', () => {
+        const headerToggle = document.getElementById('themeToggle');
+        headerToggle.addEventListener('click', () => {
             document.documentElement.classList.toggle('dark');
             localStorage.setItem('lca-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
             syncThemeUI();
         });
-        const darkToggle = document.getElementById('darkToggle');
-        darkToggle.addEventListener('click', () => {
+        const settingsToggle = document.getElementById('darkToggle');
+        settingsToggle.addEventListener('click', () => {
             document.documentElement.classList.toggle('dark');
             localStorage.setItem('lca-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
             syncThemeUI();
