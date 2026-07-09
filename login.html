@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LCA·AI — Вход</title>
+    <title>LCAВ·AI вЂ” Р’С…РѕРґ</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -180,19 +180,19 @@
     <div class="login-card">
         <div class="brand">
             <span class="dot"></span>
-            LCA·AI
+            LCAВ·AI
         </div>
-        <p class="subtitle">Войдите для доступа к расчётам</p>
+        <p class="subtitle">Р’РѕР№РґРёС‚Рµ РґР»СЏ РґРѕСЃС‚СѓРїР° Рє СЂР°СЃС‡С‘С‚Р°Рј</p>
 
         <form class="email-form" id="emailForm">
-            <input type="email" class="email-input" id="emailInput" placeholder="Введите email" required>
-            <button type="submit" class="email-btn" id="emailBtn">Отправить ссылку</button>
+            <input type="email" class="email-input" id="emailInput" placeholder="Р’РІРµРґРёС‚Рµ email" required>
+            <button type="submit" class="email-btn" id="emailBtn">РћС‚РїСЂР°РІРёС‚СЊ СЃСЃС‹Р»РєСѓ</button>
         </form>
 
         <div class="msg" id="msg"></div>
 
         <p class="footer">
-            Нажимая "Войти", вы соглашаетесь с <a href="#">условиями использования</a>
+            РќР°Р¶РёРјР°СЏ "Р’РѕР№С‚Рё", РІС‹ СЃРѕРіР»Р°С€Р°РµС‚РµСЃСЊ СЃ <a href="#">СѓСЃР»РѕРІРёСЏРјРё РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ</a>
         </p>
     </div>
 
@@ -200,7 +200,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         // ============================================
-        // ЗАМЕНИТЕ НА ВАШИ ДАННЫЕ ИЗ SUPABASE DASHBOARD
+        // Р—РђРњР•РќРРўР• РќРђ Р’РђРЁР Р”РђРќРќР«Р• РР— SUPABASE DASHBOARD
         // ============================================
         const SUPABASE_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
@@ -208,20 +208,20 @@
         let sbClient = null;
         const REDIRECT_TO = window.location.origin + '/';
 
-        // Инициализация Supabase
+        // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ Supabase
         function initSupabase() {
-            console.log('[Login] Проверяю Supabase SDK...');
+            console.log('[Login] РџСЂРѕРІРµСЂСЏСЋ Supabase SDK...');
             if (window.supabase) {
-                console.log('[Login] Supabase SDK найден');
+                console.log('[Login] Supabase SDK РЅР°Р№РґРµРЅ');
                 sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 return true;
             }
-            console.error('[Login] Supabase SDK НЕ найден!');
-            showError('Supabase SDK не загружен. Обновите страницу.');
+            console.error('[Login] Supabase SDK РќР• РЅР°Р№РґРµРЅ!');
+            showError('Supabase SDK РЅРµ Р·Р°РіСЂСѓР¶РµРЅ. РћР±РЅРѕРІРёС‚Рµ СЃС‚СЂР°РЅРёС†Сѓ.');
             return false;
         }
 
-        // Проверяем сессию
+        // РџСЂРѕРІРµСЂСЏРµРј СЃРµСЃСЃРёСЋ
         async function checkSession() {
             if (!sbClient) return;
             const { data: { session } } = await sbClient.auth.getSession();
@@ -237,17 +237,17 @@
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
-            console.log('[Login] Форма отправлена');
+            console.log('[Login] Р¤РѕСЂРјР° РѕС‚РїСЂР°РІР»РµРЅР°');
             if (!sbClient) {
-                console.error('[Login] Supabase не инициализирован');
-                showError('Supabase не загружен. Обновите страницу.');
+                console.error('[Login] Supabase РЅРµ РёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°РЅ');
+                showError('Supabase РЅРµ Р·Р°РіСЂСѓР¶РµРЅ. РћР±РЅРѕРІРёС‚Рµ СЃС‚СЂР°РЅРёС†Сѓ.');
                 return;
             }
             const email = document.getElementById('emailInput').value;
-            console.log('[Login] Отправляю magic link на:', email);
+            console.log('[Login] РћС‚РїСЂР°РІР»СЏСЋ magic link РЅР°:', email);
             const btn = document.getElementById('emailBtn');
             btn.disabled = true;
-            btn.textContent = 'Отправка...';
+            btn.textContent = 'РћС‚РїСЂР°РІРєР°...';
 
             try {
                 const { data, error } = await sbClient.auth.signInWithOtp({
@@ -256,27 +256,27 @@
                         emailRedirectTo: REDIRECT_TO
                     }
                 });
-                console.log('[Login] Ответ:', { data, error });
+                console.log('[Login] РћС‚РІРµС‚:', { data, error });
 
                 btn.disabled = false;
-                btn.textContent = 'Отправить ссылку';
+                btn.textContent = 'РћС‚РїСЂР°РІРёС‚СЊ СЃСЃС‹Р»РєСѓ';
 
                 if (error) {
-                    console.error('[Login] Ошибка:', error);
+                    console.error('[Login] РћС€РёР±РєР°:', error);
                     showError(error.message);
                 } else {
-                    showSuccess('Ссылка для входа отправлена на ' + email + '. Проверьте почту.');
+                    showSuccess('РЎСЃС‹Р»РєР° РґР»СЏ РІС…РѕРґР° РѕС‚РїСЂР°РІР»РµРЅР° РЅР° ' + email + '. РџСЂРѕРІРµСЂСЊС‚Рµ РїРѕС‡С‚Сѓ.');
                     document.getElementById('emailForm').style.display = 'none';
                 }
             } catch (err) {
-                console.error('[Login] Исключение:', err);
+                console.error('[Login] РСЃРєР»СЋС‡РµРЅРёРµ:', err);
                 btn.disabled = false;
-                btn.textContent = 'Отправить ссылку';
-                showError('Ошибка: ' + err.message);
+                btn.textContent = 'РћС‚РїСЂР°РІРёС‚СЊ СЃСЃС‹Р»РєСѓ';
+                showError('РћС€РёР±РєР°: ' + err.message);
             }
         });
 
-        // Проверяем сессию при загрузке (для magic link callback)
+        // РџСЂРѕРІРµСЂСЏРµРј СЃРµСЃСЃРёСЋ РїСЂРё Р·Р°РіСЂСѓР·РєРµ (РґР»СЏ magic link callback)
         async function checkSession() {
             if (!sbClient) return;
             const { data: { session } } = await sbClient.auth.getSession();
@@ -299,14 +299,15 @@
             el.textContent = msg;
         }
 
-        // Инициализация при загрузке
+        // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РїСЂРё Р·Р°РіСЂСѓР·РєРµ
         window.addEventListener('load', () => {
             if (initSupabase()) {
                 checkSession();
             } else {
-                showError('Не удалось загрузить Supabase SDK');
+                showError('РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ Supabase SDK');
             }
         });
     </script>
 </body>
 </html>
+

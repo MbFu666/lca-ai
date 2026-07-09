@@ -372,13 +372,7 @@
                 showToast('Ошибка удаления: ' + err.message);
             }
         }
-            await supabase.from('project_calculations').delete().eq('project_id', id);
-            await supabase.from('user_projects').delete().eq('id', id);
-            loadProjects();
-            loadStats();
-            showToast('Проект удалён');
-        }
-        
+
         function viewProject(id) { window.location.href = '/?project=' + id; }
         
         // Settings
