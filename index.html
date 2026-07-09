@@ -183,18 +183,38 @@ async function loadUserData() {
 
 // Save calculation to Supabase
 async function saveCalculation(report) {
-  if (!currentUser) return;
+  if (!currentUser) {
+    console.error('[saveCalculation] currentUser is null');
+    return;
+  }
+  if (!report) {
+    console.error('[saveCalculation] report is null/undefined');
+    return;
+  }
+  if (!supabaseClient) {
+    console.error('[saveCalculation] supabaseClient is not initialized');
+    return;
+  }
   
   try {
-    await supabaseClient.from('user_history').insert({
+    console.log('[saveCalculation] Inserting to Supabase...', { 
+      userId: currentUser.id, 
+      product: report.product_title 
+    });
+    const { data, error } = await supabaseClient.from('user_history').insert({
       user_id: currentUser.id,
       product_title: report.product_title,
       functional_unit: report.functional_unit,
       total_co2eq: report.total_co2eq,
       report_data: report
     });
+    if (error) {
+      console.error('[saveCalculation] Supabase insert error:', error);
+    } else {
+      console.log('[saveCalculation] Successfully saved to Supabase');
+    }
   } catch (err) {
-    console.error('Error saving calculation:', err);
+    console.error('[saveCalculation] Error saving calculation:', err);
   }
 }
 
@@ -218,17 +238,37 @@ async function saveProject(projectName) {
 
 // Save calculation to project
 async function saveToProject(projectId, report) {
-  if (!currentUser || !report) return;
-  
+  console.log('[saveToProject] called with:', { projectId, currentUser: !!currentUser, reportDefined: report !== undefined, reportType: typeof report });
+
+  if (!currentUser) {
+    console.warn('[saveToProject] Aborted: currentUser is not set');
+    return;
+  }
+  if (!projectId && projectId !== 0) {
+    console.warn('[saveToProject] Aborted: projectId is invalid', projectId);
+    return;
+  }
+  if (report === undefined || report === null) {
+    console.warn('[saveToProject] Aborted: report is undefined/null');
+    return;
+  }
+
+  const payload = {
+    project_id: projectId,
+    user_id: currentUser.id,
+    report_data: report
+  };
+  console.log('[saveToProject] Inserting into project_calculations:', payload);
+
   try {
-    const { error } = await supabaseClient.from('project_calculations').insert({
-      project_id: projectId,
-      user_id: currentUser.id,
-      report_data: report
-    });
-    if (error) console.error('Supabase insert error:', error);
+    const { data, error } = await supabaseClient.from('project_calculations').insert(payload).select();
+    if (error) {
+      console.error('[saveToProject] Supabase insert error:', error);
+    } else {
+      console.log('[saveToProject] Insert succeeded, returned rows:', data);
+    }
   } catch (err) {
-    console.error('Error saving to project:', err);
+    console.error('[saveToProject] Exception during insert:', err);
   }
 }
 </script>
@@ -6508,6 +6548,11 @@ function getHistory() {
 }
 
 function saveToHistory(report) {
+  if (!report) {
+    console.error('[saveToHistory] report is null/undefined');
+    return;
+  }
+  
   const history = getHistory();
   const entry = {
     id: Date.now(),
@@ -6523,7 +6568,10 @@ function saveToHistory(report) {
   
   // Also save to Supabase if user is logged in
   if (currentUser) {
+    console.log('[saveToHistory] Saving to Supabase...', { userId: currentUser.id });
     saveCalculation(report);
+  } else {
+    console.log('[saveToHistory] No currentUser, skipping Supabase save');
   }
 }
 
@@ -8501,13 +8549,54 @@ function addToProject(projectId, report) {
 }
 
 function deleteProject(projectId) {
+  console.log('deleteProject: Starting delete for projectId:', projectId);
+  
+  // Validate projectId
+  if (!projectId) {
+    console.error('deleteProject: projectId is invalid:', projectId);
+    return;
+  }
+  
+  // Validate currentUser
+  if (!currentUser) {
+    console.warn('deleteProject: currentUser is not set, skipping Supabase delete');
+  }
+  
+  // Delete from localStorage
   const projects = getProjects().filter(p => p.id !== projectId);
   localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
-  // Also delete from Supabase if logged in
+  console.log('deleteProject: Deleted from localStorage');
+  
+  // Delete from Supabase if logged in
   if (currentUser && supabaseClient) {
-    supabaseClient.from('project_calculations').delete().eq('project_id', projectId);
-    supabaseClient.from('user_projects').delete().eq('id', projectId);
+    console.log('deleteProject: Deleting from Supabase...');
+    
+    // Delete project_calculations
+    supabaseClient.from('project_calculations')
+      .delete()
+      .eq('project_id', projectId)
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('deleteProject: Error deleting project_calculations:', error);
+        } else {
+          console.log('deleteProject: Successfully deleted from project_calculations:', data);
+        }
+      });
+    
+    // Delete user_projects
+    supabaseClient.from('user_projects')
+      .delete()
+      .eq('id', projectId)
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('deleteProject: Error deleting user_projects:', error);
+        } else {
+          console.log('deleteProject: Successfully deleted from user_projects:', data);
+        }
+      });
   }
+  
+  console.log('deleteProject: Delete operation completed');
 }
 
 function deleteCalcFromProject(projectId, calcId) {
