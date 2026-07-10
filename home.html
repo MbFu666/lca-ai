@@ -6423,6 +6423,19 @@ function loadFromHistory(id) {
   const history = getHistory();
   return history.find(h => h.id === id);
 }
+
+function clearHistory() {
+  const history = getHistory();
+  if (currentUser && supabaseClient) {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const uuidEntries = history.filter(h => uuidRegex.test(String(h.id)));
+    console.log('[clearHistory] Deleting', uuidEntries.length, 'entries from Supabase');
+    uuidEntries.forEach(entry => {
+      supabaseClient.from('user_history').delete().eq('id', entry.id);
+    });
+  }
+  localStorage.removeItem(HISTORY_KEY);
+}
 /* ============================================================
    Caching — кэширование ответов API
    ============================================================ */
@@ -6585,7 +6598,6 @@ async function run() {
     return;
   }
   
-  // Сохраняем оригинальное описание (без уточнений)
   originalProduct = product;
   
   hideError();
@@ -6596,12 +6608,10 @@ async function run() {
   phaseTimer = cyclePhases();
 
   try {
-    // Формируем полный текст для API: оригинальное описание + уточнения
     const fullText = agentRefinements 
       ? product + '\n\n' + agentRefinements 
       : product;
     
-    // Проверяем кэш
     let data = getCached(fullText);
     if (!data) {
       data = await callClaude(fullText);
@@ -6609,15 +6619,12 @@ async function run() {
     }
     clearInterval(phaseTimer);
 
-    // фильтр «только LCA» — модель сама помечает не-LCA запросы
     if (data && data.error === 'not_lca') {
       showError(t.err_not_lca + (data.message ? '<br><i>' + escape(data.message) + '</i>' : ''));
       return;
     }
     
-    // Сохраняем в историю
     await saveToHistory(data);
-    // Navigate to results page with history ID
     const historyId = data._supabaseId || Date.now();
     window.location.href = '/?history=' + historyId;
     return;
@@ -6710,6 +6717,7 @@ async function apiCall(messages, opts = {}) {
   }
   return text;
 }
+/* Web Worker for JSON parsing */
 let jsonWorker = null;
 let workerCallbacks = new Map();
 let workerIdCounter = 0;
@@ -6810,6 +6818,10 @@ function parseJsonResponseSync(text) {
   throw new Error(I18N[currentLang].err_parse);
 }
 
+// Keep original function for backward compatibility
+function parseJsonResponse(text) {
+  return parseJsonResponseSync(text);
+}
 async function callClaude(productText) {
   const langName = LANG_NAMES[currentLang];
   const modeNote = currentMode === 'factor'
@@ -6873,34 +6885,6 @@ HARD CONSTRAINTS — failure to comply will break the parser:
   );
   return parseJsonResponse(text);
 }
-function escapeInlineNewlines(s) {
-  let out = '';
-  let inStr = false;
-  let esc = false;
-  for (let i = 0; i < s.length; i++) {
-    const ch = s[i];
-    if (esc) { out += ch; esc = false; continue; }
-    if (ch === '\\') { out += ch; esc = true; continue; }
-    if (ch === '"')  { out += ch; inStr = !inStr; continue; }
-    if (inStr) {
-      if (ch === '\n')      out += '\\n';
-      else if (ch === '\r') out += '\\r';
-      else if (ch === '\t') out += '\\t';
-      else if (ch.charCodeAt(0) < 0x20) out += '\\u' + ch.charCodeAt(0).toString(16).padStart(4, '0');
-      else out += ch;
-    } else {
-      out += ch;
-    }
-  }
-  return out;
-}
-function repairTruncatedJson(s) {
-  // Снимаем висячий хвост после неполного значения
-  s = s.replace(/,\s*$/, '');
-  // Если последний символ — внутри строки, обрезаем до закрывающей кавычки
-  // (грубо: до последней неэкранированной ")
-  const lastQuote = s.lastIndexOf('"');
-  const lastClose = Math.max(s.lastIndexOf('}'), s.lastIndexOf(']'));
 function fmtNum(n) {
   if (n === null || n === undefined || isNaN(n)) return '—';
   const num = Number(n);
@@ -6923,6 +6907,7 @@ function showError(msg) {
   e.classList.add('show');
 }
 function hideError() { $('#errorBox').classList.remove('show'); }
+// Тост-уведомление
 function showToast(msg) {
   let toast = document.getElementById('toast');
   if (!toast) {
@@ -7090,143 +7075,16 @@ function deleteCalcFromProject(projectId, calcId) {
       });
   }
 }
-async function createProject(name) {
-  // Save to Supabase FIRST to get UUID
-  let supabaseId = null;
-  if (currentUser && supabaseClient) {
-    try {
-      const { data, error } = await supabaseClient.from('user_projects').insert({
-        user_id: currentUser.id,
-        name: name
-      }).select('id').single();
-      
-      if (error) {
-        console.error('[createProject] Supabase error:', error);
-      } else if (data) {
-        supabaseId = data.id;
-        console.log('[createProject] Saved to Supabase, UUID:', supabaseId);
-      }
-    } catch (err) {
-      console.error('[createProject] Exception:', err);
-    }
-  }
-  
-  // Save to localStorage with Supabase UUID (or Date.now() as fallback)
-  const project = {
-    id: supabaseId || Date.now(),
-    name,
-    createdAt: new Date().toISOString(),
-    calculations: []
-  };
-  saveProjectLocal(project);
-  return project;
-}
-
-async function addToProject(projectId, report) {
-  const projects = getProjects();
-  const project = projects.find(p => p.id === projectId);
-  if (project) {
-    // Save to Supabase if logged in and projectId is a UUID
-    let supabaseId = null;
-    if (currentUser && supabaseClient && projectId) {
-      try {
-        const { data, error } = await supabaseClient.from('project_calculations').insert({
-          project_id: projectId,
-          user_id: currentUser.id,
-          report_data: report
-        }).select('id').single();
-        
-        if (error) {
-          console.error('[addToProject] Supabase error:', error);
-        } else if (data) {
-          supabaseId = data.id;
-          console.log('[addToProject] Saved to Supabase, UUID:', supabaseId);
-        }
-      } catch (err) {
-        console.error('[addToProject] Exception:', err);
-      }
-    }
-    
-    project.calculations.push({
-      id: supabaseId || Date.now(),
-      product: report.product_title,
-      total: report.total_co2eq,
-      data: report,
-      addedAt: new Date().toISOString()
-    });
-    saveProjectLocal(project);
-  }
-}
-function saveProjectLocal(project) {
-  const projects = getProjects();
-  const existing = projects.findIndex(p => p.id === project.id);
-  if (existing >= 0) {
-    projects[existing] = project;
-  } else {
-    projects.push(project);
-  }
-  localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
-}
-function initJsonWorker() {
-  try {
-    jsonWorker = new Worker('/json-worker.js');
-    jsonWorker.addEventListener('message', (e) => {
-      const { id, success, result, error } = e.data;
-      const callback = workerCallbacks.get(id);
-      if (callback) {
-        workerCallbacks.delete(id);
-        if (success) {
-          callback.resolve(result);
-        } else {
-          callback.reject(new Error(error));
-        }
-      }
-    });
-  } catch (e) {
-    console.warn('[LCA] Web Worker not available, using main thread');
-  }
-}
-function parseJsonWithWorker(text) {
-  return new Promise((resolve, reject) => {
-    if (!jsonWorker) {
-      // Fallback to main thread
-      try {
-        resolve(parseJsonResponseSync(text));
-      } catch (e) {
-        reject(e);
-      }
-      return;
-    }
-    
-    const id = ++workerIdCounter;
-    workerCallbacks.set(id, { resolve, reject });
-    jsonWorker.postMessage({ id, action: 'parse', data: { text } });
-    
-    // Timeout after 5 seconds
-    setTimeout(() => {
-      if (workerCallbacks.has(id)) {
-        workerCallbacks.delete(id);
-        // Fallback to main thread
-        try {
-          resolve(parseJsonResponseSync(text));
-        } catch (e) {
-          reject(e);
-        }
-      }
-    }, 5000);
-  });
-}
 document.addEventListener('DOMContentLoaded', async function() {
   console.log('[LCA] Initializing...');
 
-  // Ждём завершения авторизации
   await checkAuth();
-    // URL params (?history=, ?project=) handled by index.html only
+
+  // URL params (?history=, ?project=) handled by index.html only
 
   var savedTheme = localStorage.getItem('lca-theme');
   var themeToggle = document.getElementById('themeToggle');
 
-  // Автоопределение тёмной темы: localStorage > системные настройки
   if (savedTheme === 'dark') {
     document.documentElement.classList.add('dark');
   } else if (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -7243,11 +7101,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
-  // Автоопределение языка: браузерный > localStorage > ru по умолчанию
   var browserLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
   var savedLang = localStorage.getItem('lca-lang');
   if (savedLang && savedLang !== 'zh') {
-    // Используем сохранённый язык, кроме zh (китайский не по умолчанию)
     applyLanguage(savedLang);
   } else if (browserLang.startsWith('ru')) {
     applyLanguage('ru');
@@ -7269,36 +7125,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') run();
   });
   
-  // backToHome removed - no home page in this file
-  
-  document.addEventListener('click', function(e) {
-    var stepBtn = e.target.closest('.cs-step');
-    if (stepBtn) switchStep(stepBtn.dataset.step);
-    var viewBtn = e.target.closest('.cs-view button');
-    if (viewBtn) switchView(viewBtn.dataset.view);
-  });
-  
-  document.getElementById('exportExcel').addEventListener('click', function() { if (lastReport) { buildExcelPreview(lastReport); showModal('modalExcel'); } });
-  document.getElementById('exportWord').addEventListener('click', function() { if (lastReport) showWordPreview(lastReport); });
-  document.getElementById('exportJson').addEventListener('click', function() { if (lastReport) downloadJson(lastReport); });
-  document.getElementById('exportPdf').addEventListener('click', function() { showPdfPreview(); });
-  document.getElementById('exportPrint').addEventListener('click', function() { window.print(); });
-  
-  document.getElementById('agentClose').addEventListener('click', function() {
-    document.getElementById('agent').classList.remove('show');
-  });
-  document.getElementById('agentFab').addEventListener('click', function() {
-    document.getElementById('agent').classList.add('show');
-  });
-  // Скрываем FAB на главной странице
-  if (document.getElementById('pageHome') && !document.getElementById('pageHome').classList.contains('hidden')) {
-    document.getElementById('agentFab').classList.remove('show');
-  }
-  document.getElementById('agentSend').addEventListener('click', function() {
-    var msg = document.getElementById('agentMsg').value.trim();
-    if (typeof agentChatMode !== 'undefined' && agentChatMode) { sendChatMessage(msg); } else { applyAgentAnswers(); }
-  });
-  
   document.querySelectorAll('.modes button').forEach(function(b) {
     b.addEventListener('click', function() {
       document.querySelectorAll('.modes button').forEach(function(x) { x.classList.remove('active'); });
@@ -7306,48 +7132,9 @@ document.addEventListener('DOMContentLoaded', async function() {
       currentMode = b.dataset.mode;
     });
   });
-  
-  var examples = [
-    { l: '\u9ED1\u9EA6\u9762\u5305, 1 kg', v: '1 kg \u6CE2\u5170\u70D8\u7119\u7684\u9ED1\u9EA6\u9762\u5305\uFF0C\u725B\u76AE\u7EB8\u5305\u88C5' },
-    { l: 'T\u6064, 200g', v: '1 \u4EF6 200g \u68C9\u8D28 T \u6064\uFF0C\u5B5F\u52A0\u62C9\u56FD\u751F\u4EA7' },
-    { l: '1 kWh \u7164\u7535', v: '1 kWh \u6765\u81EA\u7164\u706B\u7535\u5382\u7684\u7535\u529B' },
-    { l: '\u725B\u5976, 1L', v: '1 \u5347 2.5% \u725B\u5976\uFF0C\u767D\u4FC4\u7F57\u65AF\u7267\u573A' }
-  ];
-  var host = document.getElementById('exampleChips');
-  if (host) {
-    examples.forEach(function(ex) {
-      var b = document.createElement('button');
-      b.textContent = ex.l;
-      b.addEventListener('click', function() {
-        document.getElementById('productInput').value = ex.v;
-        document.getElementById('productInput').focus();
-      });
-      host.appendChild(b);
-    });
-  }
-  
+
   console.log('[LCA] Init complete');
 });
-  var examples = [
-    { l: '\u9ED1\u9EA6\u9762\u5305, 1 kg', v: '1 kg \u6CE2\u5170\u70D8\u7119\u7684\u9ED1\u9EA6\u9762\u5305\uFF0C\u725B\u76AE\u7EB8\u5305\u88C5' },
-    { l: 'T\u6064, 200g', v: '1 \u4EF6 200g \u68C9\u8D28 T \u6064\uFF0C\u5B5F\u52A0\u62C9\u56FD\u751F\u4EA7' },
-    { l: '1 kWh \u7164\u7535', v: '1 kWh \u6765\u81EA\u7164\u706B\u7535\u5382\u7684\u7535\u529B' },
-    { l: '\u725B\u5976, 1L', v: '1 \u5347 2.5% \u725B\u5976\uFF0C\u767D\u4FC4\u7F57\u65AF\u7267\u573A' }
-  ];
-  var host = document.getElementById('exampleChips');
-  if (host) {
-    examples.forEach(function(ex) {
-      var b = document.createElement('button');
-      b.textContent = ex.l;
-      b.addEventListener('click', function() {
-        document.getElementById('productInput').value = ex.v;
-        document.getElementById('productInput').focus();
-      });
-      host.appendChild(b);
-    });
-  }
-  
-  console.log('[LCA] Init complete');
 </script>
 <script>
 // Particles Animation
@@ -7424,7 +7211,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 })();
 
 </script>
-
 
 </body>
 </html>
