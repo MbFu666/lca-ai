@@ -593,6 +593,584 @@ async function saveToProject(projectId, report) {
   }
   .meta span b { color: var(--ink); font-weight: 600; }
 
+  /* ───────── HERO ───────── */
+  .hero {
+    padding: 80px 0 48px;
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 60px;
+    align-items: end;
+    position: relative;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    left: -100px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, var(--jade-bg) 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: -1;
+    opacity: 0.6;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--jade-deep);
+    background: var(--jade-bg);
+    padding: 6px 14px;
+    border-radius: 30px;
+    margin-bottom: 24px;
+    font-weight: 600;
+    border: 1px solid var(--jade-soft);
+  }
+  h1 {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: clamp(36px, 5vw, 58px);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+  }
+  h1 em {
+    font-style: normal;
+    color: var(--jade);
+    font-weight: 700;
+    position: relative;
+  }
+  h1 em::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: var(--jade-soft);
+    border-radius: 4px;
+    z-index: -1;
+    opacity: 0.5;
+  }
+  .hero-sub {
+    margin-top: 16px;
+    font-size: 17px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    max-width: 480px;
+  }
+
+  /* ───────── HERO PREVIEW ───────── */
+  .hero-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .preview-card {
+    background: var(--bg-soft);
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    padding: 28px 36px;
+    text-align: center;
+    box-shadow: 0 8px 32px -12px rgba(14,46,39,0.12);
+    position: relative;
+  }
+  .preview-card::before {
+    content: '';
+    position: absolute;
+    top: -2px; left: -2px; right: -2px; bottom: -2px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--jade-soft) 0%, transparent 50%);
+    z-index: -1;
+    opacity: 0.5;
+  }
+  .preview-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .preview-donut {
+    flex-shrink: 0;
+  }
+  .preview-num {
+    font-family: var(--mono);
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--jade);
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .preview-unit {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--ink-mute);
+    margin-top: 4px;
+    letter-spacing: .05em;
+  }
+  .preview-label {
+    font-size: 11px;
+    color: var(--ink-mute);
+    margin-top: 12px;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+  }
+
+  /* ───────── FEATURES ───────── */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 48px;
+    padding-top: 40px;
+    border-top: 1px solid var(--rule);
+  }
+  .feature-card {
+    text-align: center;
+    padding: 28px 20px;
+    border-radius: 12px;
+    background: var(--bg-soft);
+    border: 1px solid var(--rule-soft);
+    transition: all .25s ease;
+  }
+  .feature-card:hover {
+    border-color: var(--jade-soft);
+    background: var(--jade-bg);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px -8px rgba(20,201,151,0.15);
+  }
+  .feature-icon {
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px; height: 64px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 16px;
+    background: var(--jade-bg);
+    transition: all .25s ease;
+  }
+  .feature-card:hover .feature-icon {
+    background: var(--jade);
+    transform: scale(1.05);
+  }
+  .feature-card:hover .feature-icon svg {
+    stroke: white;
+  }
+  .feature-icon svg {
+    transition: stroke .25s ease;
+  }
+  .feature-card h3 { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+  .feature-card p { font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
+
+  /* ───────── TRUST STRIP ───────── */
+  .trust-strip {
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px; margin-top: 32px; padding: 20px 0;
+    font-size: 13px; color: var(--ink-mute);
+  }
+  .trust-item strong { color: var(--ink-soft); font-weight: 600; }
+  .trust-dot { color: var(--rule); }
+
+  /* ───────── SOCIAL PROOF ───────── */
+  .social-proof {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 40px;
+    padding: 32px 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .proof-item { text-align: center; }
+  .proof-num {
+    font-family: var(--mono);
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--jade);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .proof-label {
+    font-size: 13px;
+    color: var(--ink-mute);
+    margin-top: 6px;
+  }
+
+  /* ───────── FINAL CTA ───────── */
+  .final-cta {
+    text-align: center;
+    margin-top: 56px;
+    padding: 48px 0;
+  }
+  .final-cta h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 10px;
+    letter-spacing: -0.02em;
+  }
+  .final-cta p {
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin-bottom: 28px;
+  }
+  .cta-btn {
+    background: linear-gradient(135deg, var(--jade) 0%, var(--jade-dark) 100%);
+    color: white;
+    border: none;
+    padding: 14px 36px;
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 30px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all .25s ease;
+    box-shadow: 0 4px 16px -4px rgba(20,201,151,0.4);
+  }
+  .cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px -4px rgba(20,201,151,0.5);
+    background: linear-gradient(135deg, var(--jade-dark) 0%, var(--jade-deep) 100%);
+  }
+
+  /* ───────── HOW IT WORKS ───────── */
+  .how-it-works {
+    margin-top: 56px;
+    padding-top: 48px;
+    border-top: 1px solid var(--rule);
+  }
+  .section-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ink);
+    text-align: center;
+    margin-bottom: 36px;
+    letter-spacing: -0.02em;
+  }
+  .steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+  }
+  .step {
+    text-align: center;
+    flex: 1;
+    max-width: 240px;
+  }
+  .step-num {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--jade);
+    color: white;
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    box-shadow: 0 4px 12px -4px rgba(20,201,151,0.4);
+  }
+  .step h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .step p {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .step-arrow {
+    font-size: 24px;
+    color: var(--jade-soft);
+    font-weight: 300;
+  }
+
+  /* ───────── COMPOSER ───────── */
+  .composer {
+    margin-top: 40px;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    padding: 8px 8px 16px;
+    box-shadow:
+      0 1px 2px rgba(14,46,39,0.04),
+      0 4px 8px rgba(14,46,39,0.02),
+      0 24px 48px -28px rgba(14,46,39,0.15);
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  .composer:focus-within {
+    border-color: var(--jade);
+    box-shadow:
+      0 0 0 3px var(--jade-bg),
+      0 4px 8px rgba(14,46,39,0.02),
+      0 24px 48px -28px rgba(14,46,39,0.15);
+  }
+  html.dark .composer:focus-within {
+    border-color: var(--rule);
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.03);
+  }
+  .composer-inner { padding: 18px 22px 6px; }
+
+  .modes {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 14px;
+    padding: 4px;
+    background: var(--bg-soft);
+    border-radius: 10px;
+    width: fit-content;
+  }
+  .modes button {
+    background: none;
+    border: none;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink-mute);
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all .2s ease;
+  }
+  .modes button em { font-style: normal; color: var(--jade); margin-right: 4px; }
+  .modes button.active {
+    color: var(--ink);
+    background: var(--bg);
+    box-shadow: 0 1px 3px rgba(14,46,39,0.1);
+  }
+  .modes button:hover:not(.active) { color: var(--ink-soft); }
+
+  .input-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+    letter-spacing: .02em;
+  }
+
+  #productInput {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 1.4;
+    color: var(--ink);
+    resize: none;
+    min-height: 76px;
+    padding: 12px 0;
+    transition: color 0.2s;
+  }
+  #productInput::placeholder {
+    color: var(--ink-mute);
+    font-weight: 400;
+  }
+
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 22px 8px;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .actions-left {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: 12px;
+    color: var(--ink-mute);
+  }
+  .upload {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border: 1px solid var(--rule);
+    border-radius: 30px;
+    transition: all .2s ease;
+    font-weight: 500;
+    color: var(--ink-soft);
+    background: var(--bg);
+  }
+  .upload:hover {
+    border-color: var(--jade);
+    color: var(--jade-deep);
+    background: var(--jade-bg);
+    transform: translateY(-1px);
+  }
+  .upload input { display: none; }
+  .upload-name {
+    font-size: 11px;
+    color: var(--jade-deep);
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  #submitBtn {
+    background: linear-gradient(135deg, var(--jade) 0%, var(--jade-dark) 100%);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 30px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all .2s ease;
+    box-shadow: 0 4px 12px -4px rgba(20,201,151,0.4);
+    position: relative;
+    overflow: hidden;
+  }
+  #submitBtn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+  }
+  #submitBtn:hover:not(:disabled)::before {
+    left: 100%;
+  }
+  #submitBtn:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--jade-dark) 0%, var(--jade-deep) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px -4px rgba(20,201,151,0.5);
+  }
+  #submitBtn:disabled { opacity: .5; cursor: not-allowed; }
+  #submitBtn .arrow { font-size: 14px; transition: transform .2s; }
+  #submitBtn:hover:not(:disabled) .arrow { transform: translateX(3px); }
+
+  /* examples */
+  .examples {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    padding-left: 4px;
+  }
+  .examples > span {
+    color: var(--ink-mute);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    font-family: var(--mono);
+    margin-right: 4px;
+  }
+  .examples button {
+    background: var(--bg-soft);
+    border: 1px solid var(--rule);
+    border-radius: 30px;
+    padding: 6px 14px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all .2s ease;
+    font-weight: 500;
+  }
+  .examples button:hover {
+    border-color: var(--jade);
+    color: var(--jade-deep);
+    background: var(--jade-bg);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(20,201,151,0.2);
+  }
+
+  /* Drop zone */
+  .composer.drag-over {
+    border-color: var(--jade);
+    background: var(--jade-bg);
+  }
+  .drop-hint {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    margin-top: 8px;
+    border: 2px dashed var(--jade-soft);
+    border-radius: 8px;
+    color: var(--jade-deep);
+    font-size: 13px;
+    background: var(--jade-bg);
+  }
+  .composer.drag-over .drop-hint {
+    display: flex;
+  }
+  .drop-hint span:first-child {
+    font-size: 18px;
+  }
+
+  /* error */
+  .error {
+    display: none;
+    margin-top: 16px;
+    padding: 14px 18px;
+    background: #FEF1EE;
+    border-left: 3px solid var(--c-rust);
+    color: var(--c-rust);
+    font-size: 13px;
+    border-radius: 0 6px 6px 0;
+  }
+  .error.show { display: block; }
+  .error b { font-weight: 600; }
+
+  /* loader */
+  .loader {
+    display: none;
+    margin-top: 20px;
+    padding: 20px 22px;
+    background: var(--bg-soft);
+    border-radius: 10px;
+  }
+  .loader.show { display: block; }
+  .loader-status {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .15em;
+    color: var(--jade-deep);
+    margin-bottom: 10px;
+  }
+  .loader-status::before {
+    content: '◌ ';
+    animation: spin 1.5s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loader-msg {
+    font-size: 16px;
+    color: var(--ink);
+    font-weight: 500;
+    min-height: 1.4em;
+  }
+
   /* ═══════════════════════════════════════════════
        OUTPUT — Carbonstop accountDetail mimic
      ═══════════════════════════════════════════════ */
@@ -3236,8 +3814,11 @@ async function saveToProject(projectId, report) {
     display: none;
   }
   .page-results {
-    display: block;
+    display: none;
     animation: fadeInPage 0.4s ease;
+  }
+  .page-results.show {
+    display: block;
   }
   .page-results .output {
     display: block;
@@ -4837,6 +5418,166 @@ body::before {
       </div>
     </div>
   </header>
+
+  <!-- ============== HOME PAGE (Search only) ============== -->
+  <div class="page-home" id="pageHome">
+    <section class="hero">
+      <div>
+        <span class="eyebrow" data-i18n="eyebrow">оценка жизненного цикла · AI</span>
+        <h1 data-i18n-html="h1">Углеродный след<br>продукта <em>за секунду</em>.</h1>
+        <p class="hero-sub" data-i18n="hero_sub">Опишите продукт — ИИ рассчитает углеродный след за 10 секунд</p>
+      </div>
+      <div class="hero-preview">
+        <div class="preview-card">
+          <div class="preview-top">
+            <svg class="preview-donut" width="64" height="64" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--c-raw)" stroke-width="3.8" stroke-dasharray="42 58" stroke-dashoffset="25"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--c-prod)" stroke-width="3.8" stroke-dasharray="25 75" stroke-dashoffset="83"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--c-dist)" stroke-width="3.8" stroke-dasharray="18 82" stroke-dashoffset="58"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--c-use)" stroke-width="3.8" stroke-dasharray="10 90" stroke-dashoffset="40"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--c-eol)" stroke-width="3.8" stroke-dasharray="5 95" stroke-dashoffset="30"/>
+            </svg>
+            <div class="preview-num">2.47</div>
+          </div>
+          <div class="preview-unit">kg CO₂e</div>
+          <div class="preview-label" data-i18n="preview_label">Пример результата</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== COMPOSER ============== -->
+    <section class="composer" id="composerDropZone">
+      <div class="composer-inner">
+        <div class="modes">
+          <button data-mode="full" class="active"><em>—</em> <span data-i18n="mode_full">Полный цикл</span></button>
+          <button data-mode="factor"><em>—</em> <span data-i18n="mode_factor">Приоритет факторов</span></button>
+        </div>
+
+        <label class="input-label" data-i18n="input_label">Описание продукта для расчёта LCA</label>
+        <textarea id="productInput" rows="3" data-i18n-placeholder="placeholder"
+                  placeholder="Например: 1 кг наноцеллюлозы из жома сладкого сорго, произведённой в Северо-Восточном Китае…"></textarea>
+        <div class="drop-hint" id="dropHint">
+          <span>📄</span>
+          <span data-i18n="drop_excel">Перетащите Excel файл для импорта данных</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <div class="actions-left">
+          <!-- Image upload disabled - DeepSeek API doesn't support images -->
+          <label class="upload" style="display:none">
+            <span>＋</span> <span data-i18n="upload">Изображение</span>
+            <input type="file" id="imageInput" accept="image/*">
+          </label>
+          <label class="upload" id="excelUploadLabel">
+            <span>📊</span> <span data-i18n="upload_excel">Excel</span>
+            <input type="file" id="excelInput" accept=".xlsx,.xls,.csv" style="display:none">
+          </label>
+          <span class="upload-name" id="uploadName"></span>
+        </div>
+        <button id="submitBtn">
+          <span data-i18n="submit">Рассчитать</span> <span class="arrow">→</span>
+        </button>
+      </div>
+
+      <div class="composer-inner">
+        <div class="examples">
+          <span data-i18n="examples_label">пример:</span>
+          <span id="exampleChips"></span>
+        </div>
+
+        <div class="error" id="errorBox"></div>
+        <div class="loader" id="loader">
+          <div class="loader-status" data-i18n="loader_status">расчёт</div>
+          <div class="loader-msg" id="loaderMsg">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== FEATURES ============== -->
+    <section class="features">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="40" height="40" viewBox="0 0 256 256" fill="none"><path d="M208 128h-64l24-72" stroke="var(--jade)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/><path d="M128 128H64" stroke="var(--jade)" stroke-width="24" stroke-linecap="round"/><circle cx="128" cy="128" r="96" stroke="var(--jade)" stroke-width="16" fill="none"/></svg>
+        </div>
+        <h3 data-i18n="feat_speed">Быстрый расчёт</h3>
+        <p data-i18n="feat_speed_d">DeepSeek анализирует продукт за секунды, а не часы</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="40" height="40" viewBox="0 0 256 256" fill="none"><rect x="48" y="120" width="40" height="88" rx="8" stroke="var(--jade)" stroke-width="16"/><rect x="108" y="80" width="40" height="128" rx="8" stroke="var(--jade)" stroke-width="16"/><rect x="168" y="48" width="40" height="160" rx="8" stroke="var(--jade)" stroke-width="16"/></svg>
+        </div>
+        <h3 data-i18n="feat_viz">Визуализация</h3>
+        <p data-i18n="feat_viz_d">Графы, диаграммы, рейтинги и детальный разбор по стадиям</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="40" height="40" viewBox="0 0 256 256" fill="none"><circle cx="128" cy="128" r="96" stroke="var(--jade)" stroke-width="16"/><path d="M128 32c0 96-96 96-96 192" stroke="var(--jade)" stroke-width="12" fill="none"/><path d="M32 128h192" stroke="var(--jade)" stroke-width="12"/></svg>
+        </div>
+        <h3 data-i18n="feat_full">Полный цикл</h3>
+        <p data-i18n="feat_full_d">От добычи сырья до утилизации — полная оценка жизненного цикла</p>
+      </div>
+    </section>
+
+    <!-- ============== HOW IT WORKS ============== -->
+    <section class="how-it-works">
+      <h2 class="section-title" data-i18n="how_title">Как это работает</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3 data-i18n="step1_title">Опишите продукт</h3>
+          <p data-i18n="step1_d">Введите текстовое описание или загрузите Excel</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3 data-i18n="step2_title">ИИ анализирует</h3>
+          <p data-i18n="step2_d">DeepSeek рассчитывает факторы эмиссии по всем стадиям</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3 data-i18n="step3_title">Получите отчёт</h3>
+          <p data-i18n="step3_d">Визуализация, рекомендации и экспорт в PDF/Excel/Word</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== TRUST ============== -->
+    <section class="trust-strip">
+      <span class="trust-item">Powered by <strong>DeepSeek</strong></span>
+      <span class="trust-dot">·</span>
+      <span class="trust-item">Open Source</span>
+      <span class="trust-dot">·</span>
+      <span class="trust-item">LCA Methodology</span>
+    </section>
+
+    <!-- ============== SOCIAL PROOF ============== -->
+    <section class="social-proof">
+      <div class="proof-item">
+        <div class="proof-num">1000+</div>
+        <div class="proof-label" data-i18n="proof_calcs">расчётов выполнено</div>
+      </div>
+      <div class="proof-item">
+        <div class="proof-num">50+</div>
+        <div class="proof-label" data-i18n="proof_countries">стран мира</div>
+      </div>
+      <div class="proof-item">
+        <div class="proof-num">10с</div>
+        <div class="proof-label" data-i18n="proof_time">среднее время</div>
+      </div>
+    </section>
+
+    <!-- ============== FINAL CTA ============== -->
+    <section class="final-cta">
+      <h2 data-i18n="cta_title">Готовы рассчитать углеродный след?</h2>
+      <p data-i18n="cta_sub">Бесплатно, без регистрации, за 10 секунд</p>
+      <button class="cta-btn" onclick="document.getElementById('productInput').focus(); window.scrollTo({top:0,behavior:'smooth'})">
+        <span data-i18n="cta_btn">Начать расчёт</span> →
+      </button>
+    </section>
+  </div>
+
   <!-- ============== RESULTS PAGE ============== -->
   <div class="page-results" id="pageResults">
     <button class="back-to-home" id="backToHome">
@@ -5010,6 +5751,7 @@ body::before {
       </section>
     </div>
   </div>
+
   <footer>
     <span data-i18n-html="footer_left">© LCA·AI &nbsp; · &nbsp; Прототип на базе DeepSeek</span>
     <span class="footer-links">
@@ -5020,6 +5762,7 @@ body::before {
   </footer>
 
 </div>
+
 <!-- ═════════ AI Agent sidebar ═════════ -->
 <aside class="agent" id="agent" aria-hidden="true">
   <div class="agent-head">
@@ -5055,6 +5798,7 @@ body::before {
 </aside>
 
 <button class="agent-fab" id="agentFab" title="AI Agent">✦</button>
+
 <!-- ═════════ EDIT MODEL modal ═════════ -->
 <div class="modal-mask" id="modalEdit">
   <div class="modal">
@@ -5242,11 +5986,26 @@ body::before {
     </div>
   </div>
 </div>
+
 <script>
+/* ============================================================
+   LCA·AI — расчёт LCA через DeepSeek API (через прокси-бэкенд)
+   ------------------------------------------------------------
+   ВНИМАНИЕ: API_URL должен указывать на ВАШ бэкенд-прокси,
+   а НЕ напрямую на api.deepseek.com. Ключ DeepSeek хранится
+   на сервере (env var DEEPSEEK_API_KEY), браузер ходит к
+   прокси БЕЗ ключа. Готовый Cloudflare Worker — в комментарии
+   ниже файла.
+
+   Локально для тестов можно поставить API_URL = "https://api.deepseek.com/chat/completions"
+   и временно вшить ключ в заголовок ниже (но НИ В КОЕМ СЛУЧАЕ
+   не выкладывайте такой файл в открытый доступ).
+   ============================================================ */
 const API_URL = "https://pbisngkepszwzzjivxus.supabase.co/functions/v1/lca-proxy";  // Supabase Edge Function
 const MODEL   = "deepseek-v4-flash";      // мультимодальная, дешёвая. Для сильнее: "deepseek-v4-pro"
 
 const STAGE_COLORS = ["#2C4A3E", "#5B7860", "#B8753C", "#8B6F47", "#3D5A6C", "#7A3B2D"];
+
 /* ============================================================
    i18n — словарь интерфейса
    ============================================================ */
@@ -5756,6 +6515,7 @@ const I18N = {
     ]
   }
 };
+
 const LANG_NAMES = { ru: 'Russian', en: 'English', zh: 'Chinese (Simplified)' };
 
 let currentLang = 'zh';
@@ -5769,6 +6529,7 @@ let isAgentRefining = false; // флаг режима уточнений чер�
 
 const $  = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
+
 /* ── Modal helpers ── */
 function showModal(id) {
   const mask = document.getElementById(id);
@@ -5790,6 +6551,7 @@ document.addEventListener('click', e => {
     e.target.classList.remove('show');
   }
 });
+
 /* ============================================================
    History — сохранение истории расчётов в localStorage
    ============================================================ */
@@ -5869,6 +6631,7 @@ function clearHistory() {
   }
   localStorage.removeItem(HISTORY_KEY);
 }
+
 /* ============================================================
    Caching — кэширование ответов API
    ============================================================ */
@@ -5910,27 +6673,239 @@ function setCache(text, data) {
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
   } catch {}
 }
+
+/* ============================================================
+   Применение языка
+   ============================================================ */
 function applyLanguage(lang) {
   currentLang = lang;
   document.documentElement.lang = lang;
   const t = I18N[lang];
+
+  // обычный текст
   $$('[data-i18n]').forEach(el => {
     const k = el.dataset.i18n;
     if (t[k] !== undefined) el.textContent = t[k];
   });
+  // HTML с разметкой
   $$('[data-i18n-html]').forEach(el => {
     const k = el.dataset.i18nHtml;
     if (t[k] !== undefined) el.innerHTML = t[k];
   });
+  // плейсхолдеры
   $$('[data-i18n-placeholder]').forEach(el => {
     const k = el.dataset.i18nPlaceholder;
     if (t[k] !== undefined) el.placeholder = t[k];
   });
+
+  // переcборка чипов-примеров
+  renderExampleChips();
+
+  // активная кнопка
   $$('.lang button').forEach(b =>
     b.classList.toggle('active', b.dataset.lang === lang)
   );
+
+  // если отчёт уже отрисован — перерисуем динамические части на новом языке
   if (lastReport) renderReport(lastReport);
+
+  // обновить ссылку «новый расчёт» после переписи innerHTML
+  bindResetLink();
 }
+
+function renderExampleChips() {
+  const host = $('#exampleChips');
+  host.innerHTML = '';
+  I18N[currentLang].examples.forEach(ex => {
+    const b = document.createElement('button');
+    b.textContent = ex.l;
+    b.dataset.ex = ex.v;
+    b.addEventListener('click', () => {
+      $('#productInput').value = ex.v;
+      $('#productInput').focus();
+    });
+    host.appendChild(b);
+  });
+}
+
+function bindResetLink() {
+  const link = $('#resetBtn');
+  if (!link) return;
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    $('#output').classList.remove('show');
+    $('#productInput').value = '';
+    $('#uploadName').textContent = '';
+    uploadedImage = null;
+    $('#imageInput').value = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+/* ============================================================
+   Listeners (removed duplicates — see DOMContentLoaded)
+   ============================================================ */
+
+/* ============================================================
+   Drag & Drop for Excel files
+   ============================================================ */
+const dropZone = document.getElementById('composerDropZone');
+const excelInput = document.getElementById('excelInput');
+
+if (dropZone) {
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, preventDefaults, false);
+  });
+
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropZone.addEventListener(eventName, () => dropZone.classList.add('drag-over'), false);
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, () => dropZone.classList.remove('drag-over'), false);
+  });
+
+  dropZone.addEventListener('drop', handleDrop, false);
+}
+
+async function handleDrop(e) {
+  const files = e.dataTransfer.files;
+  if (files.length) {
+    const file = files[0];
+    if (file.name.match(/\.(xlsx|xls|csv)$/i)) {
+      await processExcelFile(file);
+    } else {
+      showError('Пожалуйста, перетащите Excel файл (.xlsx, .xls, .csv)');
+    }
+  }
+}
+
+if (excelInput) {
+  excelInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (file) await processExcelFile(file);
+  });
+}
+
+async function processExcelFile(file) {
+  await loadLib('xlsx');
+  if (typeof XLSX === 'undefined') {
+    showError('Библиотека XLSX не загружена');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+      
+      // Convert to text description
+      let description = 'Данные из Excel файла ' + file.name + ':\n';
+      jsonData.forEach((row, i) => {
+        if (i < 10 && row.length) { // First 10 rows
+          description += row.join(', ') + '\n';
+        }
+      });
+      
+      document.getElementById('productInput').value = description;
+      document.getElementById('uploadName').textContent = file.name;
+    } catch (err) {
+      showError('Ошибка чтения файла: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+/* ============================================================
+   Main flow
+   ============================================================ */
+async function run() {
+  const product = $('#productInput').value.trim();
+  const t = I18N[currentLang];
+
+  if (!product) {
+    showError(t.err_empty);
+    return;
+  }
+  
+  // Сохраняем оригинальное описание (без уточнений)
+  originalProduct = product;
+  
+  hideError();
+  $('#submitBtn').disabled = true;
+  $('#loader').classList.add('show');
+
+  setTimeout(() => $('#loader').scrollIntoView({behavior:'smooth', block:'center'}), 50);
+  phaseTimer = cyclePhases();
+
+  try {
+    // Формируем полный текст для API: оригинальное описание + уточнения
+    const fullText = agentRefinements 
+      ? product + '\n\n' + agentRefinements 
+      : product;
+    
+    // Проверяем кэш
+    let data = getCached(fullText);
+    if (!data) {
+      data = await callClaude(fullText);
+      setCache(fullText, data);
+    }
+    clearInterval(phaseTimer);
+
+    // фильтр «только LCA» — модель сама помечает не-LCA запросы
+    if (data && data.error === 'not_lca') {
+      showError(t.err_not_lca + (data.message ? '<br><i>' + escape(data.message) + '</i>' : ''));
+      return;
+    }
+    
+    // Сохраняем в историю
+    saveToHistory(data);
+    
+    renderReport(data);
+  } catch (err) {
+    clearInterval(phaseTimer);
+    console.error(err);
+    showError(t.err_api + ' <b>' + (err.message || err) + '</b>');
+  } finally {
+    $('#loader').classList.remove('show');
+    $('#submitBtn').disabled = false;
+  }
+}
+
+function cyclePhases() {
+  const phases = I18N[currentLang].phases;
+  let i = 0;
+  $('#loaderMsg').textContent = phases[0];
+  return setInterval(() => {
+    i = (i + 1) % phases.length;
+    const el = $('#loaderMsg');
+    el.style.opacity = 0;
+    setTimeout(() => {
+      el.textContent = phases[i];
+      el.style.transition = 'opacity .25s';
+      el.style.opacity = 1;
+    }, 200);
+  }, 1500);
+}
+
+/* ============================================================
+   DeepSeek API call — only LCA, in selected language
+   ------------------------------------------------------------
+   OpenAI-compatible format. system как первое сообщение, JSON-
+   режим включён через response_format.
+   ============================================================ */
+/* ── Универсальный вызов DeepSeek через прокси ──────────
+   Простой fetch+JSON. Без streaming — оказалось ненадёжно
+   через Cloudflare. Прокидывает понятные ошибки.
+   Возвращает строку content или бросает Error с диагностикой. */
 async function apiCall(messages, opts = {}) {
   const body = {
     model: MODEL,
@@ -5996,6 +6971,8 @@ async function apiCall(messages, opts = {}) {
   }
   return text;
 }
+
+/* Парсит ответ DeepSeek с попыткой починки оборванного JSON. */
 /* Web Worker for JSON parsing */
 let jsonWorker = null;
 let workerCallbacks = new Map();
@@ -6101,6 +7078,32 @@ function parseJsonResponseSync(text) {
 function parseJsonResponse(text) {
   return parseJsonResponseSync(text);
 }
+
+/* Экранирует неэкранированные \n, \r, \t ВНУТРИ строковых значений JSON.
+   Идёт посимвольно, отслеживает is-inside-string, замещает сырые
+   управляющие символы их escape-последовательностями. */
+function escapeInlineNewlines(s) {
+  let out = '';
+  let inStr = false;
+  let esc = false;
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (esc) { out += ch; esc = false; continue; }
+    if (ch === '\\') { out += ch; esc = true; continue; }
+    if (ch === '"')  { out += ch; inStr = !inStr; continue; }
+    if (inStr) {
+      if (ch === '\n')      out += '\\n';
+      else if (ch === '\r') out += '\\r';
+      else if (ch === '\t') out += '\\t';
+      else if (ch.charCodeAt(0) < 0x20) out += '\\u' + ch.charCodeAt(0).toString(16).padStart(4, '0');
+      else out += ch;
+    } else {
+      out += ch;
+    }
+  }
+  return out;
+}
+
 async function callClaude(productText) {
   const langName = LANG_NAMES[currentLang];
   const modeNote = currentMode === 'factor'
@@ -6164,6 +7167,13 @@ HARD CONSTRAINTS — failure to comply will break the parser:
   );
   return parseJsonResponse(text);
 }
+
+/* ════════════════════════════════════════════════════════
+   STAGE 2 — отдельный короткий запрос на аналитику.
+   Принимает уже посчитанную модель (d), возвращает только
+   текстовые поля: total_description, assumptions, limitations,
+   recommendations. Запускается лениво при переходе на шаг 2.
+   ════════════════════════════════════════════════════════ */
 async function callAnalysis(d) {
   const langName = LANG_NAMES[currentLang];
 
@@ -6200,6 +7210,7 @@ Each list = exactly 3 short phrases (≤ 14 words each). Do not repeat ideas.`;
   );
   return parseJsonResponse(text);
 }
+
 /* Аккуратно закрывает оборванный JSON: отбрасывает хвост до последней
    валидной запятой/закрытия и достраивает недостающие ] и }. */
 function repairTruncatedJson(s) {
@@ -6233,6 +7244,7 @@ function repairTruncatedJson(s) {
   while (depthObj-- > 0) s += '}';
   return s;
 }
+
 /* ============================================================
    Renderer
    ============================================================ */
@@ -6284,6 +7296,9 @@ function renderReport(d) {
   switchStep(1);
   switchView('tree');
 
+  // Переключаемся на страницу результатов
+  $('#pageHome').classList.add('hidden');
+  $('#pageResults').classList.add('show');
   // Показываем кнопку AI-агента только на странице отчёта
   $('#agentFab').classList.add('show');
   // Открываем панель AI-агента с вопросами
@@ -6291,6 +7306,7 @@ function renderReport(d) {
   renderAgent();
   setTimeout(() => $('#pageResults').scrollIntoView({behavior:'smooth', block:'start'}), 80);
 }
+
 /* ── PROCESS FLOW (Carbonstop-style columns) ───────────── */
 function renderFlow(d, t) {
   const tot = total(d);
@@ -6377,6 +7393,7 @@ function renderFlow(d, t) {
     colsEl.appendChild(col);
   });
 }
+
 function clearSelected() {
   $$('.flow-root.selected, .stage-card.selected, .proc-card.selected')
     .forEach(el => el.classList.remove('selected'));
@@ -6394,6 +7411,9 @@ function formatCycle(d) {
   const y = new Date().getFullYear();
   return `${y}-01-01 ~ ${y}-12-31`;
 }
+
+function total(d) { return Number(d?.total_co2eq) || 0; }
+
 /* ── NODE SELECTION → DETAIL PANEL ─────────────────────── */
 let currentNodeType = null;
 let currentNodeI = null;
@@ -6552,6 +7572,7 @@ function applyDetailEdit() {
   renderReport(d);
   showToast(currentLang === 'ru' ? 'Значения обновлены' : currentLang === 'zh' ? '已更新' : 'Values updated');
 }
+
 /* ── FLOW TABLE (list view) ──────────────────────────── */
 function renderFlowTable(d, t) {
   const tot = total(d);
@@ -6604,6 +7625,7 @@ function renderFlowTable(d, t) {
   `;
   $('#flowTable').innerHTML = html;
 }
+
 /* ── TAB SWITCHING ────────────────────────────────────── */
 let donutMode = 'stage';
 let rankingMode = 'stage';
@@ -6879,6 +7901,7 @@ function switchView(v) {
   $('#flowView').style.display = v === 'tree' ? 'flex' : 'none';
   $('#listView').style.display = v === 'list' ? 'block' : 'none';
 }
+
 // wire step + view + detail close (deferred — elements exist after DOM ready)
 document.addEventListener('click', e => {
   const stepBtn = e.target.closest('.cs-step');
@@ -6891,8 +7914,16 @@ document.addEventListener('click', e => {
   }
   if (e.target.closest('#resetBtn2') || e.target.closest('#backToHome')) {
     // Возвращаемся на домашнюю страницу
-    // Navigate to home page for new calculation
-    window.location.href = '/';
+    $('#pageResults').classList.remove('show');
+    $('#pageHome').classList.remove('hidden');
+    // Скрываем AI-агента на главной
+    $('#agent').classList.remove('show');
+    $('#agentFab').classList.remove('show');
+    // Сбрасываем состояние агента
+    agentQuestions = [];
+    agentRefinements = '';
+    renderAgent();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 });
 
@@ -6927,6 +7958,7 @@ function fillList(sel, arr) {
     el.appendChild(li);
   });
 }
+
 async function showPdfPreview() {
   if (!lastReport) return;
   const d = lastReport;
@@ -7008,6 +8040,7 @@ async function exportPdf() {
     doc.save(fileName);
   }, 500);
 }
+
 function fmtNum(n) {
   if (n === null || n === undefined || isNaN(n)) return '—';
   const num = Number(n);
@@ -7030,6 +8063,7 @@ function showError(msg) {
   e.classList.add('show');
 }
 function hideError() { $('#errorBox').classList.remove('show'); }
+
 /* ════════════════════════════════════════════════════════
    AI AGENT — генерация уточняющих вопросов и пересчёт
    ════════════════════════════════════════════════════════ */
@@ -7267,6 +8301,7 @@ $('#chatModeToggle').addEventListener('click', () => {
   const progress = $('#agentProgress');
   if (progress) progress.style.display = agentChatMode ? 'none' : '';
 });
+
 /* ════════════════════════════════════════════════════════
    EDIT MODEL MODAL
    ════════════════════════════════════════════════════════ */
@@ -7362,10 +8397,12 @@ $('#emAddFactor').addEventListener('click', () => {
   
   row.querySelector('.em-factor-remove').addEventListener('click', () => row.remove());
 });
+
 // Initialize remove buttons
 document.querySelectorAll('.em-factor-remove').forEach(btn => {
   btn.addEventListener('click', () => btn.closest('.em-factor-row').remove());
 });
+
 /* ════════════════════════════════════════════════════════
    COMPARE & HISTORY
    ════════════════════════════════════════════════════════ */
@@ -7510,6 +8547,7 @@ $('#clearHistory').addEventListener('click', () => {
     renderHistory();
   }
 });
+
 /* ════════════════════════════════════════════════════════
    PROJECTS
    ════════════════════════════════════════════════════════ */
@@ -7899,6 +8937,7 @@ function showProjectSelectModal() {
   
   showModal('modalSelectProject');
 }
+
 $('#saveToProjectBtn')?.addEventListener('click', () => {
   if (!requireAuth('save to project')) return;
   if (!lastReport) return;
@@ -7978,6 +9017,7 @@ function showNewProjectModalForSave() {
     showToast(currentLang === 'ru' ? `Проект «${name}» создан и расчёт сохранён!` : currentLang === 'zh' ? `项目「${name}」已创建并保存！` : `Project "${name}" created and saved!`);
   };
 }
+
 /* ════════════════════════════════════════════════════════
    EXCEL EXPORT
    ════════════════════════════════════════════════════════ */
@@ -8210,20 +9250,31 @@ async function downloadWord(d) {
   a.remove();
   URL.revokeObjectURL(url);
 }
+
 /* ============================================================
    Theme Toggle + Auto-detect
    ============================================================ */
 // Удалён дублирующий обработчик — основной в DOMContentLoaded ниже
+
 /* ============================================================
    Init
    ============================================================ */
 initJsonWorker();
+/* ============================================================
+   DOMContentLoaded — Full initialization
+   ============================================================ */
+// Re-render history when localStorage changes (e.g. deletion from cabinet page)
+window.addEventListener('storage', () => {
+  if (typeof renderHistory === 'function') renderHistory();
+});
+
 document.addEventListener('DOMContentLoaded', async function() {
   console.log('[LCA] Initializing...');
 
   // Ждём завершения авторизации
   await checkAuth();
 
+  // URL parameter handler for opening saved calculations
   // Deep-link handler for ?history=ID and ?project=ID
   (function() {
     const params = new URLSearchParams(window.location.search);
@@ -8239,12 +9290,14 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     if (historyId && supabaseClient) {
       console.log('[LCA] Fetching from Supabase:', historyId);
+      // Try user_history first, then project_calculations
       supabaseClient.from('user_history').select('*').eq('id', historyId).single()
         .then(({ data, error }) => {
           if (data && data.report_data) {
             console.log('[LCA] Found in user_history');
             renderReport(data.report_data);
           } else {
+            // Try project_calculations table
             supabaseClient.from('project_calculations').select('*').eq('id', historyId).single()
               .then(({ data: pcData, error: pcErr }) => {
                 if (pcData && pcData.report_data) {
@@ -8295,6 +9348,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   var savedTheme = localStorage.getItem('lca-theme');
   var themeToggle = document.getElementById('themeToggle');
 
+  // Автоопределение тёмной темы: localStorage > системные настройки
   if (savedTheme === 'dark') {
     document.documentElement.classList.add('dark');
   } else if (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -8311,9 +9365,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
+  // Автоопределение языка: браузерный > localStorage > ru по умолчанию
   var browserLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
   var savedLang = localStorage.getItem('lca-lang');
   if (savedLang && savedLang !== 'zh') {
+    // Используем сохранённый язык, кроме zh (китайский не по умолчанию)
     applyLanguage(savedLang);
   } else if (browserLang.startsWith('ru')) {
     applyLanguage('ru');
@@ -8328,6 +9384,17 @@ document.addEventListener('DOMContentLoaded', async function() {
       applyLanguage(b.dataset.lang);
       localStorage.setItem('lca-lang', b.dataset.lang);
     });
+  });
+  
+  document.getElementById('submitBtn').addEventListener('click', run);
+  document.getElementById('productInput').addEventListener('keydown', function(e) {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') run();
+  });
+  
+  document.getElementById('backToHome').addEventListener('click', function() {
+    document.getElementById('pageResults').classList.remove('show');
+    document.getElementById('pageHome').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
   
   document.addEventListener('click', function(e) {
@@ -8349,15 +9416,47 @@ document.addEventListener('DOMContentLoaded', async function() {
   document.getElementById('agentFab').addEventListener('click', function() {
     document.getElementById('agent').classList.add('show');
   });
-  document.getElementById('agentFab').classList.add('show');
+  // Скрываем FAB на главной странице
+  if (document.getElementById('pageHome') && !document.getElementById('pageHome').classList.contains('hidden')) {
+    document.getElementById('agentFab').classList.remove('show');
+  }
   document.getElementById('agentSend').addEventListener('click', function() {
     var msg = document.getElementById('agentMsg').value.trim();
     if (typeof agentChatMode !== 'undefined' && agentChatMode) { sendChatMessage(msg); } else { applyAgentAnswers(); }
   });
   
+  document.querySelectorAll('.modes button').forEach(function(b) {
+    b.addEventListener('click', function() {
+      document.querySelectorAll('.modes button').forEach(function(x) { x.classList.remove('active'); });
+      b.classList.add('active');
+      currentMode = b.dataset.mode;
+    });
+  });
+  
+  var examples = [
+    { l: '\u9ED1\u9EA6\u9762\u5305, 1 kg', v: '1 kg \u6CE2\u5170\u70D8\u7119\u7684\u9ED1\u9EA6\u9762\u5305\uFF0C\u725B\u76AE\u7EB8\u5305\u88C5' },
+    { l: 'T\u6064, 200g', v: '1 \u4EF6 200g \u68C9\u8D28 T \u6064\uFF0C\u5B5F\u52A0\u62C9\u56FD\u751F\u4EA7' },
+    { l: '1 kWh \u7164\u7535', v: '1 kWh \u6765\u81EA\u7164\u706B\u7535\u5382\u7684\u7535\u529B' },
+    { l: '\u725B\u5976, 1L', v: '1 \u5347 2.5% \u725B\u5976\uFF0C\u767D\u4FC4\u7F57\u65AF\u7267\u573A' }
+  ];
+  var host = document.getElementById('exampleChips');
+  if (host) {
+    examples.forEach(function(ex) {
+      var b = document.createElement('button');
+      b.textContent = ex.l;
+      b.addEventListener('click', function() {
+        document.getElementById('productInput').value = ex.v;
+        document.getElementById('productInput').focus();
+      });
+      host.appendChild(b);
+    });
+  }
+  
   console.log('[LCA] Init complete');
 });
 </script>
+
+
 <script>
 // Particles Animation
 (function() {
@@ -8433,6 +9532,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 })();
 
 </script>
+
 
 </body>
 </html>
