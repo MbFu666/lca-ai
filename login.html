@@ -162,6 +162,83 @@
         let sbClient = null;
         let isLoginMode = true;
 
+        const LOGIN_I18N = {
+            ru: {
+                title: 'LCA·AI — Вход', subtitle: 'Войдите для доступа к расчётам',
+                google_btn: 'Продолжить с Google', github_btn: 'GitHub', twitter_btn: 'X / Twitter',
+                or: 'или',
+                email_label: 'Email', email_ph: 'Введите email',
+                password_label: 'Пароль', password_ph: 'Введите пароль',
+                login_btn: 'Войти', confirm_password: 'Подтвердите пароль',
+                min6_ph: 'Минимум 6 символов', confirm_ph: 'Повторите пароль',
+                reg_btn: 'Зарегистрироваться',
+                otp_title: 'Вход по коду из письма', send_code: 'Отправить код',
+                code_ph: 'Код из письма', verify_btn: 'Войти',
+                otp_toggle: 'Войти по коду из письма',
+                no_account: 'Нет аккаунта?', register: 'Зарегистрироваться',
+                has_account: 'Уже есть аккаунт?', login_link: 'Войти',
+                agreement: 'Нажимая «Войти», вы соглашаетесь с', terms: 'условиями использования',
+                wechat_label: 'WeChat (скоро)', wechat_alert: 'WeChat вход будет доступен после настройки WeChat Open Platform',
+                sb_not_loaded: 'Supabase не загружен', sb_sdk_missing: 'Supabase SDK не загружен',
+                logging_in: 'Вход...', passwords_mismatch: 'Пароли не совпадают',
+                min6_chars: 'Пароль должен содержать минимум 6 символов',
+                registering: 'Регистрация...',
+                confirmation_sent: 'Письмо с подтверждением отправлено на',
+                account_created: 'Аккаунт создан! Теперь войдите.',
+                code_sent: 'Код отправлен на'
+            },
+            en: {
+                title: 'LCA·AI — Sign In', subtitle: 'Sign in to access calculations',
+                google_btn: 'Continue with Google', github_btn: 'GitHub', twitter_btn: 'X / Twitter',
+                or: 'or',
+                email_label: 'Email', email_ph: 'Enter email',
+                password_label: 'Password', password_ph: 'Enter password',
+                login_btn: 'Sign in', confirm_password: 'Confirm password',
+                min6_ph: 'Minimum 6 characters', confirm_ph: 'Repeat password',
+                reg_btn: 'Register',
+                otp_title: 'Sign in with email code', send_code: 'Send code',
+                code_ph: 'Code from email', verify_btn: 'Sign in',
+                otp_toggle: 'Sign in with email code',
+                no_account: "Don't have an account?", register: 'Register',
+                has_account: 'Already have an account?', login_link: 'Sign in',
+                agreement: 'By signing in, you agree to the', terms: 'terms of service',
+                wechat_label: 'WeChat (coming soon)', wechat_alert: 'WeChat login will be available after WeChat Open Platform setup',
+                sb_not_loaded: 'Supabase not loaded', sb_sdk_missing: 'Supabase SDK not loaded',
+                logging_in: 'Signing in...', passwords_mismatch: 'Passwords do not match',
+                min6_chars: 'Password must be at least 6 characters',
+                registering: 'Registering...',
+                confirmation_sent: 'Confirmation email sent to',
+                account_created: 'Account created! Please sign in.',
+                code_sent: 'Code sent to'
+            },
+            zh: {
+                title: 'LCA·AI — 登录', subtitle: '登录以访问计算',
+                google_btn: '使用 Google 继续', github_btn: 'GitHub', twitter_btn: 'X / Twitter',
+                or: '或',
+                email_label: '邮箱', email_ph: '请输入邮箱',
+                password_label: '密码', password_ph: '请输入密码',
+                login_btn: '登录', confirm_password: '确认密码',
+                min6_ph: '至少6个字符', confirm_ph: '再次输入密码',
+                reg_btn: '注册',
+                otp_title: '使用邮箱验证码登录', send_code: '发送验证码',
+                code_ph: '邮箱验证码', verify_btn: '登录',
+                otp_toggle: '使用邮箱验证码登录',
+                no_account: '没有账户？', register: '注册',
+                has_account: '已有账户？', login_link: '登录',
+                agreement: '登录即表示您同意', terms: '服务条款',
+                wechat_label: '微信（即将上线）', wechat_alert: '微信登录将在配置微信开放平台后可用',
+                sb_not_loaded: 'Supabase 未加载', sb_sdk_missing: 'Supabase SDK 未加载',
+                logging_in: '登录中...', passwords_mismatch: '密码不匹配',
+                min6_chars: '密码至少需要6个字符',
+                registering: '注册中...',
+                confirmation_sent: '确认邮件已发送至',
+                account_created: '账户已创建！请登录。',
+                code_sent: '验证码已发送至'
+            }
+        };
+        let loginLang = 'ru';
+        function loginT(key) { return LOGIN_I18N[loginLang]?.[key] || LOGIN_I18N.ru[key] || key; }
+
         function initSupabase() { if (window.supabase) { sbClient = window.supabase.createClient(SB_URL, SB_KEY); return true; } showError(loginT('sb_sdk_missing')); return false; }
 
         async function checkSession() {
@@ -270,80 +347,6 @@
             });
             applyLoginLang(lang);
         })();
-
-        const LOGIN_I18N = {
-            ru: {
-                title: 'LCA·AI — Вход', subtitle: 'Войдите для доступа к расчётам',
-                google_btn: 'Продолжить с Google', or: 'или',
-                email_label: 'Email', email_ph: 'Введите email',
-                password_label: 'Пароль', password_ph: 'Введите пароль',
-                login_btn: 'Войти', confirm_password: 'Подтвердите пароль',
-                min6_ph: 'Минимум 6 символов', confirm_ph: 'Повторите пароль',
-                reg_btn: 'Зарегистрироваться',
-                otp_title: 'Вход по коду из письма', send_code: 'Отправить код',
-                code_ph: 'Код из письма', verify_btn: 'Войти',
-                otp_toggle: 'Войти по коду из письма',
-                no_account: 'Нет аккаунта?', register: 'Зарегистрироваться',
-                has_account: 'Уже есть аккаунт?', login_link: 'Войти',
-                agreement: 'Нажимая «Войти», вы соглашаетесь с', terms: 'условиями использования',
-                wechat_label: 'WeChat (скоро)', wechat_alert: 'WeChat вход будет доступен после настройки WeChat Open Platform',
-                sb_not_loaded: 'Supabase не загружен', sb_sdk_missing: 'Supabase SDK не загружен',
-                logging_in: 'Вход...', passwords_mismatch: 'Пароли не совпадают',
-                min6_chars: 'Пароль должен содержать минимум 6 символов',
-                registering: 'Регистрация...',
-                confirmation_sent: 'Письмо с подтверждением отправлено на',
-                account_created: 'Аккаунт создан! Теперь войдите.',
-                code_sent: 'Код отправлен на'
-            },
-            en: {
-                title: 'LCA·AI — Sign In', subtitle: 'Sign in to access calculations',
-                google_btn: 'Continue with Google', or: 'or',
-                email_label: 'Email', email_ph: 'Enter email',
-                password_label: 'Password', password_ph: 'Enter password',
-                login_btn: 'Sign in', confirm_password: 'Confirm password',
-                min6_ph: 'Minimum 6 characters', confirm_ph: 'Repeat password',
-                reg_btn: 'Register',
-                otp_title: 'Sign in with email code', send_code: 'Send code',
-                code_ph: 'Code from email', verify_btn: 'Sign in',
-                otp_toggle: 'Sign in with email code',
-                no_account: "Don't have an account?", register: 'Register',
-                has_account: 'Already have an account?', login_link: 'Sign in',
-                agreement: 'By signing in, you agree to the', terms: 'terms of service',
-                wechat_label: 'WeChat (coming soon)', wechat_alert: 'WeChat login will be available after WeChat Open Platform setup',
-                sb_not_loaded: 'Supabase not loaded', sb_sdk_missing: 'Supabase SDK not loaded',
-                logging_in: 'Signing in...', passwords_mismatch: 'Passwords do not match',
-                min6_chars: 'Password must be at least 6 characters',
-                registering: 'Registering...',
-                confirmation_sent: 'Confirmation email sent to',
-                account_created: 'Account created! Please sign in.',
-                code_sent: 'Code sent to'
-            },
-            zh: {
-                title: 'LCA·AI — 登录', subtitle: '登录以访问计算',
-                google_btn: '使用 Google 继续', or: '或',
-                email_label: '邮箱', email_ph: '请输入邮箱',
-                password_label: '密码', password_ph: '请输入密码',
-                login_btn: '登录', confirm_password: '确认密码',
-                min6_ph: '至少6个字符', confirm_ph: '再次输入密码',
-                reg_btn: '注册',
-                otp_title: '使用邮箱验证码登录', send_code: '发送验证码',
-                code_ph: '邮箱验证码', verify_btn: '登录',
-                otp_toggle: '使用邮箱验证码登录',
-                no_account: '没有账户？', register: '注册',
-                has_account: '已有账户？', login_link: '登录',
-                agreement: '登录即表示您同意', terms: '服务条款',
-                wechat_label: '微信（即将上线）', wechat_alert: '微信登录将在配置微信开放平台后可用',
-                sb_not_loaded: 'Supabase 未加载', sb_sdk_missing: 'Supabase SDK 未加载',
-                logging_in: '登录中...', passwords_mismatch: '密码不匹配',
-                min6_chars: '密码至少需要6个字符',
-                registering: '注册中...',
-                confirmation_sent: '确认邮件已发送至',
-                account_created: '账户已创建！请登录。',
-                code_sent: '验证码已发送至'
-            }
-        };
-        let loginLang = 'ru';
-        function loginT(key) { return LOGIN_I18N[loginLang]?.[key] || LOGIN_I18N.ru[key] || key; }
 
         function applyLoginLang(lang) {
             loginLang = lang;
