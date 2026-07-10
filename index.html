@@ -8137,7 +8137,7 @@ $('#chatModeToggle').addEventListener('click', () => {
 /* ════════════════════════════════════════════════════════
    EDIT MODEL MODAL
    ════════════════════════════════════════════════════════ */
-$('#editModelBtn').addEventListener('click', () => {
+$('#editModelBtn')?.addEventListener('click', () => {
   if (!lastReport) return;
   const d = lastReport;
   $('#emName').value  = d.product_title || '';
@@ -8271,7 +8271,7 @@ function updateCompareBadge() {
   }
 }
 
-$('#compareBtn').addEventListener('click', () => {
+\$\('#compareBtn'\)\?.addEventListener('click', () => {
   if (!lastReport) return;
   // Добавляем текущий отчёт с уникальным ID
   const id = Date.now();
@@ -8336,7 +8336,7 @@ function renderCompare() {
   });
 }
 
-$('#historyBtn').addEventListener('click', () => {
+\$\('#historyBtn'\)\?.addEventListener('click', () => {
   renderHistory();
   showModal('modalHistory');
 });
@@ -9223,7 +9223,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') run();
   });
   
-  document.getElementById('backToHome').addEventListener('click', function() {
+  document.getElementById('backToHome')?.addEventListener('click', function() {
     document.getElementById('pageResults').classList.remove('show');
     document.getElementById('pageHome').classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -9236,11 +9236,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (viewBtn) switchView(viewBtn.dataset.view);
   });
   
-  document.getElementById('exportExcel').addEventListener('click', function() { if (lastReport) { buildExcelPreview(lastReport); showModal('modalExcel'); } });
-  document.getElementById('exportWord').addEventListener('click', function() { if (lastReport) showWordPreview(lastReport); });
-  document.getElementById('exportJson').addEventListener('click', function() { if (lastReport) downloadJson(lastReport); });
-  document.getElementById('exportPdf').addEventListener('click', function() { showPdfPreview(); });
-  document.getElementById('exportPrint').addEventListener('click', function() { window.print(); });
+  document.getElementById('exportExcel')?.addEventListener('click', function() { if (lastReport) { buildExcelPreview(lastReport); showModal('modalExcel'); } });
+  document.getElementById('exportWord')?.addEventListener('click', function() { if (lastReport) showWordPreview(lastReport); });
+  document.getElementById('exportJson')?.addEventListener('click', function() { if (lastReport) downloadJson(lastReport); });
+  document.getElementById('exportPdf')?.addEventListener('click', function() { showPdfPreview(); });
+  document.getElementById('exportPrint')?.addEventListener('click', function() { window.print(); });
   
   document.getElementById('agentClose').addEventListener('click', function() {
     document.getElementById('agent').classList.remove('show');
