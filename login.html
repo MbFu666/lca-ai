@@ -209,6 +209,12 @@
             } catch (err) { showError('Ошибка X/Twitter: ' + err.message); }
         });
 
+        document.getElementById('wechatBtn').addEventListener('click', () => {
+            const lang = localStorage.getItem('lca-lang') || 'ru';
+            const msgs = { ru: 'WeChat вход будет доступен после настройки WeChat Open Platform', en: 'WeChat login will be available after setting up WeChat Open Platform', zh: '微信登录将在配置微信开放平台后可用' };
+            alert(msgs[lang] || msgs.ru);
+        });
+
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!sbClient) { showError('Supabase не загружен'); return; }
@@ -267,11 +273,12 @@
         })();
 
         function applyLoginLang(lang) {
-            const t = { ru: { subtitle: 'Войдите для доступа к расчётам', btn: 'Войти', reg_btn: 'Зарегистрироваться', no_account: 'Нет аккаунта?', register: 'Зарегистрироваться', has_account: 'Уже есть аккаунт?', login_link: 'Войти', agreement: 'Нажимая «Войти», вы соглашаетесь с', terms: 'условиями использования' }, en: { subtitle: 'Sign in to access calculations', btn: 'Sign in', reg_btn: 'Register', no_account: "Don't have an account?", register: 'Register', has_account: 'Already have an account?', login_link: 'Sign in', agreement: 'By signing in, you agree to the', terms: 'terms of service' }, zh: { subtitle: '登录以访问计算', btn: '登录', reg_btn: '注册', no_account: '没有账户？', register: '注册', has_account: '已有账户？', login_link: '登录', agreement: '登录即表示您同意', terms: '服务条款' } }[lang] || {};
+            const t = { ru: { subtitle: 'Войдите для доступа к расчётам', btn: 'Войти', reg_btn: 'Зарегистрироваться', no_account: 'Нет аккаунта?', register: 'Зарегистрироваться', has_account: 'Уже есть аккаунт?', login_link: 'Войти', agreement: 'Нажимая «Войти», вы соглашаетесь с', terms: 'условиями использования', wechat_label: 'WeChat (скоро)' }, en: { subtitle: 'Sign in to access calculations', btn: 'Sign in', reg_btn: 'Register', no_account: "Don't have an account?", register: 'Register', has_account: 'Already have an account?', login_link: 'Sign in', agreement: 'By signing in, you agree to the', terms: 'terms of service', wechat_label: 'WeChat (coming soon)' }, zh: { subtitle: '登录以访问计算', btn: '登录', reg_btn: '注册', no_account: '没有账户？', register: '注册', has_account: '已有账户？', login_link: '登录', agreement: '登录即表示您同意', terms: '服务条款', wechat_label: '微信（即将上线）' } }[lang] || {};
             document.getElementById('subtitle').textContent = t.subtitle || 'Войдите для доступа к расчётам';
             document.getElementById('switchText').textContent = t.no_account || 'Нет аккаунта?';
             document.getElementById('switchLink').textContent = t.register || 'Зарегистрироваться';
             document.querySelector('.footer').innerHTML = (t.agreement || 'Нажимая «Войти», вы соглашаетесь с') + ' <a href="#">' + (t.terms || 'условиями использования') + '</a>';
+            document.getElementById('wechatLabel').textContent = t.wechat_label || 'WeChat (скоро)';
         }
 
         document.getElementById('toggleOtp').addEventListener('click', (e) => {
