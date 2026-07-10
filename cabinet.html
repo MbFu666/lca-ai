@@ -142,6 +142,12 @@
                         </div>
                     </div>
                     <div class="settings-group" style="margin-top:20px">
+                        <h3 style="font-size:16px;font-weight:600;margin-bottom:12px">Профиль</h3>
+                        <input type="text" id="editProfileName" placeholder="Имя" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid var(--rule);border-radius:8px;background:var(--bg);color:var(--ink)">
+                        <input type="text" id="editProfileAvatar" placeholder="URL аватара" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid var(--rule);border-radius:8px;background:var(--bg);color:var(--ink)">
+                        <button id="saveProfileBtn" style="width:100%;padding:10px;background:var(--jade);color:#fff;border:none;border-radius:8px;cursor:pointer">Сохранить профиль</button>
+                    </div>
+                    <div class="settings-group" style="margin-top:20px">
                         <h3 style="font-size:16px;font-weight:600;margin-bottom:12px">Изменить пароль</h3>
                         <input type="password" id="newPassword" placeholder="Новый пароль" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid var(--rule);border-radius:8px;background:var(--bg);color:var(--ink)">
                         <input type="password" id="confirmNewPassword" placeholder="Подтвердите пароль" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid var(--rule);border-radius:8px;background:var(--bg);color:var(--ink)">
@@ -206,6 +212,7 @@
             currentUser = session.user;
             console.log('[Cabinet] User loaded:', currentUser.email, 'ID:', currentUser.id);
             renderProfile();
+            fillProfileFields();
             console.log('[Cabinet] Profile rendered, loading history...');
             await loadTab('history');
             console.log('[Cabinet] Init complete');
@@ -254,6 +261,7 @@
         async function loadTab(tab) {
             if (tab === 'history') await loadHistory();
             if (tab === 'projects') await loadProjects();
+            if (tab === 'settings') fillProfileFields();
         }
 
         async function loadHistory() {
@@ -271,7 +279,7 @@
                     list.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Нет расчётов</div><a href="/" class="btn btn-primary">Сделать расчёт</a></div>';
                     return;
                 }
-                list.innerHTML = data.map(h => '<div class="card"><div class="card-header"><div class="card-title">' + esc(h.product_title || '—') + '</div><div class="card-date">' + new Date(h.created_at).toLocaleDateString('ru') + '</div></div><div class="card-meta"><span>📦 ' + esc(h.functional_unit || '—') + '</span><span>🌱 ' + (h.total_co2eq || 0) + ' kgCO₂e</span></div><div class="card-actions"><a href="/?history=' + h.id + '" class="btn btn-primary">Посмотреть</a><button class="btn btn-danger" onclick="deleteHistory(\'' + h.id + '\')">Удалить</button></div></div>').join('');
+                list.innerHTML = data.map(h => '<div class="card"><div class="card-header"><div class="card-title">' + esc(h.product_title || '—') + '</div><div class="card-date">' + new Date(h.created_at).toLocaleDateString('ru') + '</div></div><div class="card-meta"><span>📦 ' + esc(h.functional_unit || '—') + '</span><span>🌱 ' + (h.total_co2eq || 0) + ' kgCO₂e</span></div><div class="card-actions"><a href="/?history=' + h.id + '" class="btn btn-primary">Посмотреть</a><button class="share-history-btn" data-id="' + h.id + '" title="Скопировать ссылку" style="background:none;border:none;cursor:pointer;padding:4px 8px;font-size:16px">🔗</button><button class="btn btn-danger" onclick="deleteHistory(\'' + h.id + '\')">Удалить</button></div></div>').join('');
             } catch (e) { 
                 console.error('loadHistory error:', e); 
                 showToast('Ошибка загрузки истории: ' + (e.message || e)); 
@@ -316,7 +324,7 @@
                     const calcCount = (calcs || []).length;
                     html += '<div class="card project-card" id="proj-' + p.id + '">';
                     html += '<div class="card-header">';
-                    html += '<div class="card-title">' + esc(p.name) + '</div>';
+                    html += '<div class="card-title">' + esc(p.name) + ' <button class="share-project-btn" data-id="' + p.id + '" title="Скопировать ссылку" style="background:none;border:none;cursor:pointer;padding:4px 8px;font-size:16px">🔗</button></div>';
                     html += '<div class="card-date">' + calcCount + ' расчётов · ' + new Date(p.created_at).toLocaleDateString('ru') + '</div>';
                     html += '</div>';
                     if (calcs && calcs.length > 0) {
@@ -423,6 +431,22 @@
         document.getElementById('langSelect').value = localStorage.getItem('lca-lang') || 'ru';
         document.getElementById('langSelect').addEventListener('change', e => { localStorage.setItem('lca-lang', e.target.value); showToast('Язык сохранён'); });
 
+        function fillProfileFields() {
+            if (!currentUser) return;
+            document.getElementById('editProfileName').value = currentUser.user_metadata?.full_name || '';
+            document.getElementById('editProfileAvatar').value = currentUser.user_metadata?.avatar_url || '';
+        }
+
+        document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+            const name = document.getElementById('editProfileName').value.trim();
+            const avatar = document.getElementById('editProfileAvatar').value.trim();
+            const { error } = await db.auth.updateUser({ data: { full_name: name, avatar_url: avatar } });
+            if (error) { showToast(error.message); return; }
+            currentUser.user_metadata = { ...currentUser.user_metadata, full_name: name, avatar_url: avatar };
+            showToast('Профиль обновлён');
+            renderProfile();
+        });
+
         function syncThemeUI() {
             const isDark = document.documentElement.classList.contains('dark');
             document.getElementById('themeToggle').textContent = isDark ? '☀️' : '🌙';
@@ -447,6 +471,22 @@
             document.documentElement.classList.add('dark');
         }
         syncThemeUI();
+
+        document.addEventListener('click', (e) => {
+            const shareProject = e.target.closest('.share-project-btn');
+            if (shareProject) {
+                e.stopPropagation();
+                const url = window.location.origin + '/?project=' + shareProject.dataset.id;
+                navigator.clipboard.writeText(url).then(() => showToast('Ссылка скопирована!'));
+                return;
+            }
+            const shareHistory = e.target.closest('.share-history-btn');
+            if (shareHistory) {
+                e.stopPropagation();
+                const url = window.location.origin + '/?history=' + shareHistory.dataset.id;
+                navigator.clipboard.writeText(url).then(() => showToast('Ссылка скопирована!'));
+            }
+        });
 
         init();
     </script>
