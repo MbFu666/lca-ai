@@ -42,6 +42,39 @@
         .divider span { padding: 0 12px; }
         .google-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px; border: 1px solid var(--rule); border-radius: 10px; background: white; font-family: inherit; font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer; transition: all .15s; }
         .google-btn:hover { border-color: var(--jade); background: var(--jade-bg); }
+        html.dark .google-btn,
+        html.dark .submit-btn,
+        html.dark button {
+          background: var(--bg-soft);
+          color: var(--ink);
+          border: 1px solid var(--rule);
+        }
+        html.dark .google-btn:hover,
+        html.dark button:hover {
+          background: var(--jade-bg);
+          border-color: var(--jade);
+        }
+        html.dark .submit-btn {
+          background: var(--jade);
+          color: #fff;
+          border: none;
+        }
+        html.dark .submit-btn:hover {
+          background: var(--jade-dark);
+        }
+        html.dark .lang-switch button.active {
+          background: var(--jade-bg);
+          color: var(--ink);
+          box-shadow: none;
+        }
+        html.dark .theme-toggle {
+          color: var(--ink);
+        }
+        html.dark .msg.error {
+          background: #2a1a18;
+          color: #e8908a;
+          border-color: #3d2020;
+        }
         @media (max-width: 480px) { .login-card { padding: 32px 24px; } }
     </style>
 </head>
