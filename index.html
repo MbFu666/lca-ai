@@ -8763,7 +8763,8 @@ function renderProjects() {
     item.addEventListener('click', (e) => {
       if (e.target.classList.contains('project-calc-delete')) return;
       const projectId = parseInt(item.dataset.project);
-      const calcId = parseInt(item.dataset.calc);
+      const rawCalcId = item.dataset.calc;
+      const calcId = rawCalcId.includes('-') ? rawCalcId : parseInt(rawCalcId);
       const projects = getProjects();
       const project = projects.find(p => p.id === projectId);
       if (project) {
@@ -8780,7 +8781,9 @@ function renderProjects() {
   list.querySelectorAll('.project-calc-delete').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      deleteCalcFromProject(parseInt(btn.dataset.project), parseInt(btn.dataset.calc));
+      const rawCalcId = btn.dataset.calc;
+      const calcId = rawCalcId.includes('-') ? rawCalcId : parseInt(rawCalcId);
+      deleteCalcFromProject(parseInt(btn.dataset.project), calcId);
       renderProjects();
     });
   });
@@ -8898,9 +8901,6 @@ function showProjectSelectModal() {
     item.addEventListener('click', async () => {
       const projectId = item.dataset.id; // UUID string, not integer
       addToProject(projectId, lastReport); // addToProject already saves to Supabase
-      closeModal('modalSelectProject');
-      showToast(currentLang === 'ru' ? 'Сохранено в проект!' : currentLang === 'zh' ? '已保存到项目！' : 'Saved to project!');
-      }
       closeModal('modalSelectProject');
       showToast(currentLang === 'ru' ? 'Сохранено в проект!' : currentLang === 'zh' ? '已保存到项目！' : 'Saved to project!');
     });
@@ -9243,6 +9243,11 @@ initJsonWorker();
 /* ============================================================
    DOMContentLoaded — Full initialization
    ============================================================ */
+// Re-render history when localStorage changes (e.g. deletion from cabinet page)
+window.addEventListener('storage', () => {
+  if (typeof renderHistory === 'function') renderHistory();
+});
+
 document.addEventListener('DOMContentLoaded', async function() {
   console.log('[LCA] Initializing...');
 
