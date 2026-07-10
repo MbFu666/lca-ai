@@ -3814,7 +3814,7 @@ async function saveToProject(projectId, report) {
     display: none;
   }
   .page-results {
-    display: block;
+    display: none;
     animation: fadeInPage 0.4s ease;
   }
   .page-results.show {
@@ -5419,6 +5419,165 @@ body::before {
     </div>
   </header>
 
+  <!-- ============== HOME PAGE (Search only) ============== -->
+  <div class="page-home" id="pageHome">
+    <section class="hero">
+      <div>
+        <span class="eyebrow" data-i18n="eyebrow">оценка жизненного цикла · AI</span>
+        <h1 data-i18n-html="h1">Углеродный след<br>продукта <em>за секунду</em>.</h1>
+        <p class="hero-sub" data-i18n="hero_sub">Опишите продукт — ИИ рассчитает углеродный след за 10 секунд</p>
+      </div>
+      <div class="hero-preview">
+        <div class="preview-card">
+          <div class="preview-top">
+            <svg class="preview-donut" width="64" height="64" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--c-raw)" stroke-width="3.8" stroke-dasharray="42 58" stroke-dashoffset="25"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--c-prod)" stroke-width="3.8" stroke-dasharray="25 75" stroke-dashoffset="83"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--c-dist)" stroke-width="3.8" stroke-dasharray="18 82" stroke-dashoffset="58"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--c-use)" stroke-width="3.8" stroke-dasharray="10 90" stroke-dashoffset="40"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--c-eol)" stroke-width="3.8" stroke-dasharray="5 95" stroke-dashoffset="30"/>
+            </svg>
+            <div class="preview-num">2.47</div>
+          </div>
+          <div class="preview-unit">kg CO₂e</div>
+          <div class="preview-label" data-i18n="preview_label">Пример результата</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== COMPOSER ============== -->
+    <section class="composer" id="composerDropZone">
+      <div class="composer-inner">
+        <div class="modes">
+          <button data-mode="full" class="active"><em>—</em> <span data-i18n="mode_full">Полный цикл</span></button>
+          <button data-mode="factor"><em>—</em> <span data-i18n="mode_factor">Приоритет факторов</span></button>
+        </div>
+
+        <label class="input-label" data-i18n="input_label">Описание продукта для расчёта LCA</label>
+        <textarea id="productInput" rows="3" data-i18n-placeholder="placeholder"
+                  placeholder="Например: 1 кг наноцеллюлозы из жома сладкого сорго, произведённой в Северо-Восточном Китае…"></textarea>
+        <div class="drop-hint" id="dropHint">
+          <span>📄</span>
+          <span data-i18n="drop_excel">Перетащите Excel файл для импорта данных</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <div class="actions-left">
+          <!-- Image upload disabled - DeepSeek API doesn't support images -->
+          <label class="upload" style="display:none">
+            <span>＋</span> <span data-i18n="upload">Изображение</span>
+            <input type="file" id="imageInput" accept="image/*">
+          </label>
+          <label class="upload" id="excelUploadLabel">
+            <span>📊</span> <span data-i18n="upload_excel">Excel</span>
+            <input type="file" id="excelInput" accept=".xlsx,.xls,.csv" style="display:none">
+          </label>
+          <span class="upload-name" id="uploadName"></span>
+        </div>
+        <button id="submitBtn">
+          <span data-i18n="submit">Рассчитать</span> <span class="arrow">→</span>
+        </button>
+      </div>
+
+      <div class="composer-inner">
+        <div class="examples">
+          <span data-i18n="examples_label">пример:</span>
+          <span id="exampleChips"></span>
+        </div>
+
+        <div class="error" id="errorBox"></div>
+        <div class="loader" id="loader">
+          <div class="loader-status" data-i18n="loader_status">расчёт</div>
+          <div class="loader-msg" id="loaderMsg">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== FEATURES ============== -->
+    <section class="features">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="40" height="40" viewBox="0 0 256 256" fill="none"><path d="M208 128h-64l24-72" stroke="var(--jade)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/><path d="M128 128H64" stroke="var(--jade)" stroke-width="24" stroke-linecap="round"/><circle cx="128" cy="128" r="96" stroke="var(--jade)" stroke-width="16" fill="none"/></svg>
+        </div>
+        <h3 data-i18n="feat_speed">Быстрый расчёт</h3>
+        <p data-i18n="feat_speed_d">DeepSeek анализирует продукт за секунды, а не часы</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="40" height="40" viewBox="0 0 256 256" fill="none"><rect x="48" y="120" width="40" height="88" rx="8" stroke="var(--jade)" stroke-width="16"/><rect x="108" y="80" width="40" height="128" rx="8" stroke="var(--jade)" stroke-width="16"/><rect x="168" y="48" width="40" height="160" rx="8" stroke="var(--jade)" stroke-width="16"/></svg>
+        </div>
+        <h3 data-i18n="feat_viz">Визуализация</h3>
+        <p data-i18n="feat_viz_d">Графы, диаграммы, рейтинги и детальный разбор по стадиям</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="40" height="40" viewBox="0 0 256 256" fill="none"><circle cx="128" cy="128" r="96" stroke="var(--jade)" stroke-width="16"/><path d="M128 32c0 96-96 96-96 192" stroke="var(--jade)" stroke-width="12" fill="none"/><path d="M32 128h192" stroke="var(--jade)" stroke-width="12"/></svg>
+        </div>
+        <h3 data-i18n="feat_full">Полный цикл</h3>
+        <p data-i18n="feat_full_d">От добычи сырья до утилизации — полная оценка жизненного цикла</p>
+      </div>
+    </section>
+
+    <!-- ============== HOW IT WORKS ============== -->
+    <section class="how-it-works">
+      <h2 class="section-title" data-i18n="how_title">Как это работает</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3 data-i18n="step1_title">Опишите продукт</h3>
+          <p data-i18n="step1_d">Введите текстовое описание или загрузите Excel</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3 data-i18n="step2_title">ИИ анализирует</h3>
+          <p data-i18n="step2_d">DeepSeek рассчитывает факторы эмиссии по всем стадиям</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3 data-i18n="step3_title">Получите отчёт</h3>
+          <p data-i18n="step3_d">Визуализация, рекомендации и экспорт в PDF/Excel/Word</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== TRUST ============== -->
+    <section class="trust-strip">
+      <span class="trust-item">Powered by <strong>DeepSeek</strong></span>
+      <span class="trust-dot">·</span>
+      <span class="trust-item">Open Source</span>
+      <span class="trust-dot">·</span>
+      <span class="trust-item">LCA Methodology</span>
+    </section>
+
+    <!-- ============== SOCIAL PROOF ============== -->
+    <section class="social-proof">
+      <div class="proof-item">
+        <div class="proof-num">1000+</div>
+        <div class="proof-label" data-i18n="proof_calcs">расчётов выполнено</div>
+      </div>
+      <div class="proof-item">
+        <div class="proof-num">50+</div>
+        <div class="proof-label" data-i18n="proof_countries">стран мира</div>
+      </div>
+      <div class="proof-item">
+        <div class="proof-num">10с</div>
+        <div class="proof-label" data-i18n="proof_time">среднее время</div>
+      </div>
+    </section>
+
+    <!-- ============== FINAL CTA ============== -->
+    <section class="final-cta">
+      <h2 data-i18n="cta_title">Готовы рассчитать углеродный след?</h2>
+      <p data-i18n="cta_sub">Бесплатно, без регистрации, за 10 секунд</p>
+      <button class="cta-btn" onclick="document.getElementById('productInput').focus(); window.scrollTo({top:0,behavior:'smooth'})">
+        <span data-i18n="cta_btn">Начать расчёт</span> →
+      </button>
+    </section>
+  </div>
+
   <!-- ============== RESULTS PAGE ============== -->
   <div class="page-results" id="pageResults">
     <button class="back-to-home" id="backToHome">
@@ -6452,7 +6611,8 @@ async function saveToHistory(report) {
   if (!currentUser) {
     console.log('[saveToHistory] No currentUser, saved to localStorage only');
   }
-  }
+  return supabaseId;
+}
 
 
 function loadFromHistory(id) {
@@ -6707,9 +6867,12 @@ async function run() {
       return;
     }
     
-    // Сохраняем в историю
-    saveToHistory(data);
-    
+    // Сохраняем в историю и перенаправляем на страницу отчёта
+    const historyId = await saveToHistory(data);
+    if (historyId) {
+      window.location.href = '/report.html?history=' + historyId;
+      return;
+    }
     renderReport(data);
   } catch (err) {
     clearInterval(phaseTimer);
@@ -7138,7 +7301,7 @@ function renderReport(d) {
   switchView('tree');
 
   // Переключаемся на страницу результатов
-  if ($('#pageHome')) $('#pageHome').classList.add('hidden');
+  $('#pageHome').classList.add('hidden');
   $('#pageResults').classList.add('show');
   // Показываем кнопку AI-агента только на странице отчёта
   $('#agentFab').classList.add('show');
@@ -7755,7 +7918,8 @@ document.addEventListener('click', e => {
   }
   if (e.target.closest('#resetBtn2') || e.target.closest('#backToHome')) {
     // Возвращаемся на домашнюю страницу
-    window.location.href = '/';
+    $('#pageResults').classList.remove('show');
+    $('#pageHome').classList.remove('hidden');
     // Скрываем AI-агента на главной
     $('#agent').classList.remove('show');
     $('#agentFab').classList.remove('show');
@@ -9226,15 +9390,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   });
   
-  var submitBtn = document.getElementById('submitBtn');
-  if (submitBtn) submitBtn.addEventListener('click', run);
-  var productInput = document.getElementById('productInput');
-  if (productInput) productInput.addEventListener('keydown', function(e) {
+  document.getElementById('submitBtn').addEventListener('click', run);
+  document.getElementById('productInput').addEventListener('keydown', function(e) {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') run();
   });
   
   document.getElementById('backToHome').addEventListener('click', function() {
-    window.location.href = '/';
+    document.getElementById('pageResults').classList.remove('show');
+    document.getElementById('pageHome').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
   
   document.addEventListener('click', function(e) {
@@ -9256,9 +9420,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   document.getElementById('agentFab').addEventListener('click', function() {
     document.getElementById('agent').classList.add('show');
   });
-  // На странице отчёта FAB всегда видим
-  if (document.getElementById('agentFab')) {
-    document.getElementById('agentFab').classList.add('show');
+  // Скрываем FAB на главной странице
+  if (document.getElementById('pageHome') && !document.getElementById('pageHome').classList.contains('hidden')) {
+    document.getElementById('agentFab').classList.remove('show');
   }
   document.getElementById('agentSend').addEventListener('click', function() {
     var msg = document.getElementById('agentMsg').value.trim();
@@ -9285,8 +9449,8 @@ document.addEventListener('DOMContentLoaded', async function() {
       var b = document.createElement('button');
       b.textContent = ex.l;
       b.addEventListener('click', function() {
-        var pi = document.getElementById('productInput');
-        if (pi) { pi.value = ex.v; pi.focus(); }
+        document.getElementById('productInput').value = ex.v;
+        document.getElementById('productInput').focus();
       });
       host.appendChild(b);
     });

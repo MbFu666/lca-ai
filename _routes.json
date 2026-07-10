@@ -1,4 +1,3 @@
 [
-  { "pattern": "/", "serve": "/home.html" },
-  { "pattern": "/index.html", "serve": "/index.html" }
+  { "pattern": "/report.html", "serve": "/report.html" }
 ]
