@@ -141,6 +141,12 @@
                             <button class="btn btn-danger" id="deleteAccountBtn">Удалить</button>
                         </div>
                     </div>
+                    <div class="settings-group" style="margin-top:20px">
+                        <h3 style="font-size:16px;font-weight:600;margin-bottom:12px">Изменить пароль</h3>
+                        <input type="password" id="newPassword" placeholder="Новый пароль" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid var(--rule);border-radius:8px;background:var(--bg);color:var(--ink)">
+                        <input type="password" id="confirmNewPassword" placeholder="Подтвердите пароль" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid var(--rule);border-radius:8px;background:var(--bg);color:var(--ink)">
+                        <button id="changePasswordBtn" style="width:100%;padding:10px;background:var(--jade);color:#fff;border:none;border-radius:8px;cursor:pointer">Изменить пароль</button>
+                    </div>
                 </div>
             </main>
         </div>
@@ -274,14 +280,18 @@
 
         async function deleteHistory(id) {
             if (!confirm('Удалить расчёт?')) return;
-            try { 
-                const { error } = await db.from('user_history').delete().eq('id', id); 
+            try {
+                const { error } = await db.from('user_history').delete().eq('id', id);
                 if (error) throw error;
-                loadHistory(); 
-                loadStats(); 
-                showToast('Удалено'); 
-            } catch (e) { 
-                showToast('Ошибка удаления: ' + (e.message || e)); 
+                // Sync localStorage so main page sees the deletion
+                const cached = JSON.parse(localStorage.getItem('lca-history') || '[]');
+                const filtered = cached.filter(e => String(e.id) !== String(id));
+                localStorage.setItem('lca-history', JSON.stringify(filtered));
+                loadHistory();
+                loadStats();
+                showToast('Удалено');
+            } catch (e) {
+                showToast('Ошибка удаления: ' + (e.message || e));
             }
         }
 
@@ -398,6 +408,16 @@
                 localStorage.clear();
                 window.location.href = '/';
             } catch (e) { showToast('Ошибка: ' + (e.message || e)); }
+        });
+
+        document.getElementById('changePasswordBtn').addEventListener('click', async () => {
+            const pw = document.getElementById('newPassword').value;
+            const pw2 = document.getElementById('confirmNewPassword').value;
+            if (pw !== pw2) { showToast('Пароли не совпадают'); return; }
+            if (pw.length < 6) { showToast('Минимум 6 символов'); return; }
+            const { error } = await db.auth.updateUser({ password: pw });
+            if (error) showToast(error.message);
+            else { showToast('Пароль изменён'); document.getElementById('newPassword').value = ''; document.getElementById('confirmNewPassword').value = ''; }
         });
 
         document.getElementById('langSelect').value = localStorage.getItem('lca-lang') || 'ru';
