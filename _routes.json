@@ -1,5 +1,4 @@
-{
-  "version": 1,
-  "include": ["/*"],
-  "exclude": []
-}
+[
+  { "pattern": "/", "serve": "/home.html" },
+  { "pattern": "/index.html", "serve": "/index.html" }
+]
