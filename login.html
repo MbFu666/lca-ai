@@ -116,6 +116,18 @@
             <button type="submit" class="submit-btn" id="regBtn">Зарегистрироваться</button>
         </form>
 
+        <div id="otpSection" style="display:none;margin-top:16px">
+            <div style="font-size:13px;color:var(--ink-soft);margin-bottom:8px">Вход по коду из письма</div>
+            <input type="email" id="otpEmail" placeholder="Email" style="width:100%;padding:12px;border:1px solid var(--rule);border-radius:10px;margin-bottom:8px;background:var(--bg);color:var(--ink)">
+            <button id="sendOtpBtn" style="width:100%;padding:12px;background:var(--jade);color:#fff;border:none;border-radius:10px;cursor:pointer">Отправить код</button>
+            <div id="otpCodeSection" style="display:none;margin-top:8px">
+                <input type="text" id="otpCode" placeholder="Код из письма" maxlength="6" style="width:100%;padding:12px;border:1px solid var(--rule);border-radius:10px;margin-bottom:8px;background:var(--bg);color:var(--ink);text-align:center;font-size:20px;letter-spacing:8px">
+                <button id="verifyOtpBtn" style="width:100%;padding:12px;background:var(--jade);color:#fff;border:none;border-radius:10px;cursor:pointer">Войти</button>
+            </div>
+        </div>
+        <div style="text-align:center;margin-top:12px">
+            <a href="#" id="toggleOtp" style="color:var(--jade);font-size:13px">Войти по коду из письма</a>
+        </div>
         <div class="msg" id="msg"></div>
         <div class="switch-mode" id="switchMode">
             <span id="switchText">Нет аккаунта?</span>
@@ -226,6 +238,32 @@
             document.getElementById('switchLink').textContent = t.register || 'Зарегистрироваться';
             document.querySelector('.footer').innerHTML = (t.agreement || 'Нажимая «Войти», вы соглашаетесь с') + ' <a href="#">' + (t.terms || 'условиями использования') + '</a>';
         }
+
+        document.getElementById('toggleOtp').addEventListener('click', (e) => {
+            e.preventDefault();
+            const otp = document.getElementById('otpSection');
+            otp.style.display = otp.style.display === 'none' ? 'block' : 'none';
+        });
+
+        document.getElementById('sendOtpBtn').addEventListener('click', async () => {
+            if (!sbClient) { showError('Supabase не загружен'); return; }
+            const email = document.getElementById('otpEmail').value;
+            if (!email) return;
+            const { error } = await sbClient.auth.signInWithOtp({ email });
+            if (error) { showError(error.message); return; }
+            showSuccess('Код отправлен на ' + email);
+            document.getElementById('otpCodeSection').style.display = 'block';
+        });
+
+        document.getElementById('verifyOtpBtn').addEventListener('click', async () => {
+            if (!sbClient) { showError('Supabase не загружен'); return; }
+            const email = document.getElementById('otpEmail').value;
+            const token = document.getElementById('otpCode').value;
+            const { error } = await sbClient.auth.verifyOtp({ email, token, type: 'email' });
+            if (error) { showError(error.message); return; }
+            localStorage.setItem('supabase_user', 'true');
+            window.location.href = '/';
+        });
 
         window.addEventListener('load', () => { if (initSupabase()) checkSession(); });
     </script>
