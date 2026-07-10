@@ -9185,6 +9185,18 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   })();
 
+  // Fallback: check sessionStorage for report data (from home page redirect)
+  if (!historyId && !projectId) {
+    const cached = sessionStorage.getItem('lca-report');
+    if (cached) {
+      try {
+        const data = JSON.parse(cached);
+        sessionStorage.removeItem('lca-report');
+        renderReport(data);
+      } catch (e) { console.error('[LCA] sessionStorage parse error:', e); }
+    }
+  }
+
   var savedTheme = localStorage.getItem('lca-theme');
   var themeToggle = document.getElementById('themeToggle');
 
