@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LCA·AI — Вход</title>
+    <script>document.title = {ru:'LCA·AI — Вход',en:'LCA·AI — Sign In',zh:'LCA·AI — 登录'}[localStorage.getItem('lca-lang')||'ru'];</script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -91,11 +92,11 @@
     </div>
     <div class="login-card">
         <div class="brand"><span class="dot"></span>LCA·AI</div>
-        <p class="subtitle" id="subtitle">Войдите для доступа к расчётам</p>
+        <p class="subtitle" id="subtitle" data-i18n="subtitle">Войдите для доступа к расчётам</p>
 
         <button type="button" class="google-btn" id="googleBtn">
             <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-            Продолжить с Google
+            <span data-i18n="google_btn">Продолжить с Google</span>
         </button>
         <!-- NOTE: GitHub provider must be enabled in Supabase Dashboard → Authentication → Providers -->
         <button type="button" id="githubBtn" class="oauth-btn" style="width:100%;padding:12px;border:1px solid var(--rule);border-radius:10px;background:var(--bg);color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;margin-top:10px">
@@ -113,44 +114,44 @@
             <span id="wechatLabel">WeChat (скоро)</span>
         </button>
 
-        <div class="divider"><span>или</span></div>
+        <div class="divider"><span data-i18n="or">или</span></div>
 
         <form class="form-group" id="loginForm">
-            <label for="loginEmail">Email</label>
-            <input type="email" id="loginEmail" placeholder="Введите email" required>
-            <label for="loginPassword">Пароль</label>
-            <input type="password" id="loginPassword" placeholder="Введите пароль" required>
-            <button type="submit" class="submit-btn" id="loginBtn">Войти</button>
+            <label for="loginEmail" data-i18n="email_label">Email</label>
+            <input type="email" id="loginEmail" data-i18n-placeholder="email_ph" placeholder="Введите email" required>
+            <label for="loginPassword" data-i18n="password_label">Пароль</label>
+            <input type="password" id="loginPassword" data-i18n-placeholder="password_ph" placeholder="Введите пароль" required>
+            <button type="submit" class="submit-btn" id="loginBtn" data-i18n="login_btn">Войти</button>
         </form>
 
         <form class="form-group" id="registerForm" style="display:none">
-            <label for="regEmail">Email</label>
-            <input type="email" id="regEmail" placeholder="Введите email" required>
-            <label for="regPassword">Пароль</label>
-            <input type="password" id="regPassword" placeholder="Минимум 6 символов" required minlength="6">
-            <label for="regPasswordConfirm">Подтвердите пароль</label>
-            <input type="password" id="regPasswordConfirm" placeholder="Повторите пароль" required minlength="6">
-            <button type="submit" class="submit-btn" id="regBtn">Зарегистрироваться</button>
+            <label for="regEmail" data-i18n="email_label">Email</label>
+            <input type="email" id="regEmail" data-i18n-placeholder="email_ph" placeholder="Введите email" required>
+            <label for="regPassword" data-i18n="password_label">Пароль</label>
+            <input type="password" id="regPassword" data-i18n-placeholder="min6_ph" placeholder="Минимум 6 символов" required minlength="6">
+            <label for="regPasswordConfirm" data-i18n="confirm_password">Подтвердите пароль</label>
+            <input type="password" id="regPasswordConfirm" data-i18n-placeholder="confirm_ph" placeholder="Повторите пароль" required minlength="6">
+            <button type="submit" class="submit-btn" id="regBtn" data-i18n="reg_btn">Зарегистрироваться</button>
         </form>
 
         <div id="otpSection" style="display:none;margin-top:16px">
-            <div style="font-size:13px;color:var(--ink-soft);margin-bottom:8px">Вход по коду из письма</div>
-            <input type="email" id="otpEmail" placeholder="Email" style="width:100%;padding:12px;border:1px solid var(--rule);border-radius:10px;margin-bottom:8px;background:var(--bg);color:var(--ink)">
-            <button id="sendOtpBtn" style="width:100%;padding:12px;background:var(--jade);color:#fff;border:none;border-radius:10px;cursor:pointer">Отправить код</button>
+            <div style="font-size:13px;color:var(--ink-soft);margin-bottom:8px" data-i18n="otp_title">Вход по коду из письма</div>
+            <input type="email" id="otpEmail" data-i18n-placeholder="email_ph" placeholder="Email" style="width:100%;padding:12px;border:1px solid var(--rule);border-radius:10px;margin-bottom:8px;background:var(--bg);color:var(--ink)">
+            <button id="sendOtpBtn" data-i18n="send_code" style="width:100%;padding:12px;background:var(--jade);color:#fff;border:none;border-radius:10px;cursor:pointer">Отправить код</button>
             <div id="otpCodeSection" style="display:none;margin-top:8px">
-                <input type="text" id="otpCode" placeholder="Код из письма" maxlength="6" style="width:100%;padding:12px;border:1px solid var(--rule);border-radius:10px;margin-bottom:8px;background:var(--bg);color:var(--ink);text-align:center;font-size:20px;letter-spacing:8px">
-                <button id="verifyOtpBtn" style="width:100%;padding:12px;background:var(--jade);color:#fff;border:none;border-radius:10px;cursor:pointer">Войти</button>
+                <input type="text" id="otpCode" data-i18n-placeholder="code_ph" placeholder="Код из письма" maxlength="6" style="width:100%;padding:12px;border:1px solid var(--rule);border-radius:10px;margin-bottom:8px;background:var(--bg);color:var(--ink);text-align:center;font-size:20px;letter-spacing:8px">
+                <button id="verifyOtpBtn" data-i18n="verify_btn" style="width:100%;padding:12px;background:var(--jade);color:#fff;border:none;border-radius:10px;cursor:pointer">Войти</button>
             </div>
         </div>
         <div style="text-align:center;margin-top:12px">
-            <a href="#" id="toggleOtp" style="color:var(--jade);font-size:13px">Войти по коду из письма</a>
+            <a href="#" id="toggleOtp" data-i18n="otp_toggle" style="color:var(--jade);font-size:13px">Войти по коду из письма</a>
         </div>
         <div class="msg" id="msg"></div>
         <div class="switch-mode" id="switchMode">
-            <span id="switchText">Нет аккаунта?</span>
-            <a id="switchLink" onclick="toggleMode()">Зарегистрироваться</a>
+            <span id="switchText" data-i18n="no_account">Нет аккаунта?</span>
+            <a id="switchLink" data-i18n="register" onclick="toggleMode()">Зарегистрироваться</a>
         </div>
-        <p class="footer"><span id="agreementText">Нажимая «Войти», вы соглашаетесь с</span> <a href="#">условиями использования</a></p>
+        <p class="footer"><span id="agreementText" data-i18n="agreement">Нажимая «Войти», вы соглашаетесь с</span> <a href="#" data-i18n="terms">условиями использования</a></p>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -161,7 +162,7 @@
         let sbClient = null;
         let isLoginMode = true;
 
-        function initSupabase() { if (window.supabase) { sbClient = window.supabase.createClient(SB_URL, SB_KEY); return true; } showError('Supabase SDK не загружен'); return false; }
+        function initSupabase() { if (window.supabase) { sbClient = window.supabase.createClient(SB_URL, SB_KEY); return true; } showError(loginT('sb_sdk_missing')); return false; }
 
         async function checkSession() {
             if (!sbClient) return;
@@ -177,77 +178,75 @@
             isLoginMode = !isLoginMode;
             document.getElementById('loginForm').style.display = isLoginMode ? 'flex' : 'none';
             document.getElementById('registerForm').style.display = isLoginMode ? 'none' : 'flex';
-            document.getElementById('switchText').textContent = isLoginMode ? 'Нет аккаунта?' : 'Уже есть аккаунт?';
-            document.getElementById('switchLink').textContent = isLoginMode ? 'Зарегистрироваться' : 'Войти';
-            document.getElementById('subtitle').textContent = isLoginMode ? 'Войдите для доступа к расчётам' : 'Создайте аккаунт';
+            document.getElementById('switchText').textContent = isLoginMode ? loginT('no_account') : loginT('has_account');
+            document.getElementById('switchLink').textContent = isLoginMode ? loginT('register') : loginT('login_link');
+            document.getElementById('subtitle').textContent = loginT('subtitle');
             hideMsg();
         }
 
         document.getElementById('googleBtn').addEventListener('click', async () => {
-            if (!sbClient) { showError('Supabase не загружен'); return; }
+            if (!sbClient) { showError(loginT('sb_not_loaded')); return; }
             try {
                 const { error } = await sbClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: REDIRECT } });
                 if (error) showError(error.message);
-            } catch (err) { showError('Ошибка Google: ' + err.message); }
+            } catch (err) { showError('Google: ' + err.message); }
         });
 
         // NOTE: Requires GitHub provider enabled in Supabase Dashboard → Authentication → Providers
         document.getElementById('githubBtn').addEventListener('click', async () => {
-            if (!sbClient) { showError('Supabase не загружен'); return; }
+            if (!sbClient) { showError(loginT('sb_not_loaded')); return; }
             try {
                 const { error } = await sbClient.auth.signInWithOAuth({ provider: 'github', options: { redirectTo: REDIRECT } });
                 if (error) showError(error.message);
-            } catch (err) { showError('Ошибка GitHub: ' + err.message); }
+            } catch (err) { showError('GitHub: ' + err.message); }
         });
 
         // Supabase uses 'twitter' as the provider name (not 'x')
         document.getElementById('twitterBtn').addEventListener('click', async () => {
-            if (!sbClient) { showError('Supabase не загружен'); return; }
+            if (!sbClient) { showError(loginT('sb_not_loaded')); return; }
             try {
                 const { error } = await sbClient.auth.signInWithOAuth({ provider: 'twitter', options: { redirectTo: REDIRECT } });
                 if (error) showError(error.message);
-            } catch (err) { showError('Ошибка X/Twitter: ' + err.message); }
+            } catch (err) { showError('X/Twitter: ' + err.message); }
         });
 
         document.getElementById('wechatBtn').addEventListener('click', () => {
-            const lang = localStorage.getItem('lca-lang') || 'ru';
-            const msgs = { ru: 'WeChat вход будет доступен после настройки WeChat Open Platform', en: 'WeChat login will be available after setting up WeChat Open Platform', zh: '微信登录将在配置微信开放平台后可用' };
-            alert(msgs[lang] || msgs.ru);
+            alert(loginT('wechat_alert'));
         });
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!sbClient) { showError('Supabase не загружен'); return; }
+            if (!sbClient) { showError(loginT('sb_not_loaded')); return; }
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             const btn = document.getElementById('loginBtn');
-            btn.disabled = true; btn.textContent = 'Вход...';
+            btn.disabled = true; btn.textContent = loginT('logging_in');
             try {
                 const { data, error } = await sbClient.auth.signInWithPassword({ email, password });
-                btn.disabled = false; btn.textContent = 'Войти';
+                btn.disabled = false; btn.textContent = loginT('login_btn');
                 if (error) showError(error.message);
                 else { localStorage.setItem('supabase_user', JSON.stringify(data.user)); localStorage.setItem('supabase_token', data.session.access_token); window.location.href = REDIRECT; }
-            } catch (err) { btn.disabled = false; btn.textContent = 'Войти'; showError('Ошибка: ' + err.message); }
+            } catch (err) { btn.disabled = false; btn.textContent = loginT('login_btn'); showError(err.message); }
         });
 
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!sbClient) { showError('Supabase не загружен'); return; }
+            if (!sbClient) { showError(loginT('sb_not_loaded')); return; }
             const email = document.getElementById('regEmail').value;
             const password = document.getElementById('regPassword').value;
             const passwordConfirm = document.getElementById('regPasswordConfirm').value;
-            if (password !== passwordConfirm) { showError('Пароли не совпадают'); return; }
-            if (password.length < 6) { showError('Пароль должен содержать минимум 6 символов'); return; }
+            if (password !== passwordConfirm) { showError(loginT('passwords_mismatch')); return; }
+            if (password.length < 6) { showError(loginT('min6_chars')); return; }
             const btn = document.getElementById('regBtn');
-            btn.disabled = true; btn.textContent = 'Регистрация...';
+            btn.disabled = true; btn.textContent = loginT('registering');
             try {
                 const { data, error } = await sbClient.auth.signUp({ email, password });
-                btn.disabled = false; btn.textContent = 'Зарегистрироваться';
+                btn.disabled = false; btn.textContent = loginT('reg_btn');
                 if (error) showError(error.message);
                 else if (data.user && data.session) { localStorage.setItem('supabase_user', JSON.stringify(data.user)); localStorage.setItem('supabase_token', data.session.access_token); window.location.href = REDIRECT; }
-                else if (data.user && !data.session) { showSuccess('Письмо с подтверждением отправлено на ' + email); toggleMode(); }
-                else { showSuccess('Аккаунт создан! Теперь войдите.'); toggleMode(); }
-            } catch (err) { btn.disabled = false; btn.textContent = 'Зарегистрироваться'; showError('Ошибка: ' + err.message); }
+                else if (data.user && !data.session) { showSuccess(loginT('confirmation_sent') + ' ' + email); toggleMode(); }
+                else { showSuccess(loginT('account_created')); toggleMode(); }
+            } catch (err) { btn.disabled = false; btn.textContent = loginT('reg_btn'); showError(err.message); }
         });
 
         function showError(msg) { const el = document.getElementById('msg'); el.className = 'msg error'; el.textContent = msg; }
@@ -272,13 +271,96 @@
             applyLoginLang(lang);
         })();
 
+        const LOGIN_I18N = {
+            ru: {
+                title: 'LCA·AI — Вход', subtitle: 'Войдите для доступа к расчётам',
+                google_btn: 'Продолжить с Google', or: 'или',
+                email_label: 'Email', email_ph: 'Введите email',
+                password_label: 'Пароль', password_ph: 'Введите пароль',
+                login_btn: 'Войти', confirm_password: 'Подтвердите пароль',
+                min6_ph: 'Минимум 6 символов', confirm_ph: 'Повторите пароль',
+                reg_btn: 'Зарегистрироваться',
+                otp_title: 'Вход по коду из письма', send_code: 'Отправить код',
+                code_ph: 'Код из письма', verify_btn: 'Войти',
+                otp_toggle: 'Войти по коду из письма',
+                no_account: 'Нет аккаунта?', register: 'Зарегистрироваться',
+                has_account: 'Уже есть аккаунт?', login_link: 'Войти',
+                agreement: 'Нажимая «Войти», вы соглашаетесь с', terms: 'условиями использования',
+                wechat_label: 'WeChat (скоро)', wechat_alert: 'WeChat вход будет доступен после настройки WeChat Open Platform',
+                sb_not_loaded: 'Supabase не загружен', sb_sdk_missing: 'Supabase SDK не загружен',
+                logging_in: 'Вход...', passwords_mismatch: 'Пароли не совпадают',
+                min6_chars: 'Пароль должен содержать минимум 6 символов',
+                registering: 'Регистрация...',
+                confirmation_sent: 'Письмо с подтверждением отправлено на',
+                account_created: 'Аккаунт создан! Теперь войдите.',
+                code_sent: 'Код отправлен на'
+            },
+            en: {
+                title: 'LCA·AI — Sign In', subtitle: 'Sign in to access calculations',
+                google_btn: 'Continue with Google', or: 'or',
+                email_label: 'Email', email_ph: 'Enter email',
+                password_label: 'Password', password_ph: 'Enter password',
+                login_btn: 'Sign in', confirm_password: 'Confirm password',
+                min6_ph: 'Minimum 6 characters', confirm_ph: 'Repeat password',
+                reg_btn: 'Register',
+                otp_title: 'Sign in with email code', send_code: 'Send code',
+                code_ph: 'Code from email', verify_btn: 'Sign in',
+                otp_toggle: 'Sign in with email code',
+                no_account: "Don't have an account?", register: 'Register',
+                has_account: 'Already have an account?', login_link: 'Sign in',
+                agreement: 'By signing in, you agree to the', terms: 'terms of service',
+                wechat_label: 'WeChat (coming soon)', wechat_alert: 'WeChat login will be available after WeChat Open Platform setup',
+                sb_not_loaded: 'Supabase not loaded', sb_sdk_missing: 'Supabase SDK not loaded',
+                logging_in: 'Signing in...', passwords_mismatch: 'Passwords do not match',
+                min6_chars: 'Password must be at least 6 characters',
+                registering: 'Registering...',
+                confirmation_sent: 'Confirmation email sent to',
+                account_created: 'Account created! Please sign in.',
+                code_sent: 'Code sent to'
+            },
+            zh: {
+                title: 'LCA·AI — 登录', subtitle: '登录以访问计算',
+                google_btn: '使用 Google 继续', or: '或',
+                email_label: '邮箱', email_ph: '请输入邮箱',
+                password_label: '密码', password_ph: '请输入密码',
+                login_btn: '登录', confirm_password: '确认密码',
+                min6_ph: '至少6个字符', confirm_ph: '再次输入密码',
+                reg_btn: '注册',
+                otp_title: '使用邮箱验证码登录', send_code: '发送验证码',
+                code_ph: '邮箱验证码', verify_btn: '登录',
+                otp_toggle: '使用邮箱验证码登录',
+                no_account: '没有账户？', register: '注册',
+                has_account: '已有账户？', login_link: '登录',
+                agreement: '登录即表示您同意', terms: '服务条款',
+                wechat_label: '微信（即将上线）', wechat_alert: '微信登录将在配置微信开放平台后可用',
+                sb_not_loaded: 'Supabase 未加载', sb_sdk_missing: 'Supabase SDK 未加载',
+                logging_in: '登录中...', passwords_mismatch: '密码不匹配',
+                min6_chars: '密码至少需要6个字符',
+                registering: '注册中...',
+                confirmation_sent: '确认邮件已发送至',
+                account_created: '账户已创建！请登录。',
+                code_sent: '验证码已发送至'
+            }
+        };
+        let loginLang = 'ru';
+        function loginT(key) { return LOGIN_I18N[loginLang]?.[key] || LOGIN_I18N.ru[key] || key; }
+
         function applyLoginLang(lang) {
-            const t = { ru: { subtitle: 'Войдите для доступа к расчётам', btn: 'Войти', reg_btn: 'Зарегистрироваться', no_account: 'Нет аккаунта?', register: 'Зарегистрироваться', has_account: 'Уже есть аккаунт?', login_link: 'Войти', agreement: 'Нажимая «Войти», вы соглашаетесь с', terms: 'условиями использования', wechat_label: 'WeChat (скоро)' }, en: { subtitle: 'Sign in to access calculations', btn: 'Sign in', reg_btn: 'Register', no_account: "Don't have an account?", register: 'Register', has_account: 'Already have an account?', login_link: 'Sign in', agreement: 'By signing in, you agree to the', terms: 'terms of service', wechat_label: 'WeChat (coming soon)' }, zh: { subtitle: '登录以访问计算', btn: '登录', reg_btn: '注册', no_account: '没有账户？', register: '注册', has_account: '已有账户？', login_link: '登录', agreement: '登录即表示您同意', terms: '服务条款', wechat_label: '微信（即将上线）' } }[lang] || {};
-            document.getElementById('subtitle').textContent = t.subtitle || 'Войдите для доступа к расчётам';
-            document.getElementById('switchText').textContent = t.no_account || 'Нет аккаунта?';
-            document.getElementById('switchLink').textContent = t.register || 'Зарегистрироваться';
-            document.querySelector('.footer').innerHTML = (t.agreement || 'Нажимая «Войти», вы соглашаетесь с') + ' <a href="#">' + (t.terms || 'условиями использования') + '</a>';
-            document.getElementById('wechatLabel').textContent = t.wechat_label || 'WeChat (скоро)';
+            loginLang = lang;
+            const t = LOGIN_I18N[lang] || LOGIN_I18N.ru;
+            document.title = t.title;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.dataset.i18n;
+                if (t[key]) el.textContent = t[key];
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.dataset.i18nPlaceholder;
+                if (t[key]) el.placeholder = t[key];
+            });
+            document.getElementById('loginBtn').textContent = t.login_btn;
+            document.getElementById('regBtn').textContent = t.reg_btn;
+            document.getElementById('switchText').textContent = isLoginMode ? t.no_account : t.has_account;
+            document.getElementById('switchLink').textContent = isLoginMode ? t.register : t.login_link;
         }
 
         document.getElementById('toggleOtp').addEventListener('click', (e) => {
@@ -288,17 +370,17 @@
         });
 
         document.getElementById('sendOtpBtn').addEventListener('click', async () => {
-            if (!sbClient) { showError('Supabase не загружен'); return; }
+            if (!sbClient) { showError(loginT('sb_not_loaded')); return; }
             const email = document.getElementById('otpEmail').value;
             if (!email) return;
             const { error } = await sbClient.auth.signInWithOtp({ email });
             if (error) { showError(error.message); return; }
-            showSuccess('Код отправлен на ' + email);
+            showSuccess(loginT('code_sent') + ' ' + email);
             document.getElementById('otpCodeSection').style.display = 'block';
         });
 
         document.getElementById('verifyOtpBtn').addEventListener('click', async () => {
-            if (!sbClient) { showError('Supabase не загружен'); return; }
+            if (!sbClient) { showError(loginT('sb_not_loaded')); return; }
             const email = document.getElementById('otpEmail').value;
             const token = document.getElementById('otpCode').value;
             const { error } = await sbClient.auth.verifyOtp({ email, token, type: 'email' });
