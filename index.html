@@ -93,6 +93,10 @@ function updateAuthUI(isLoggedIn) {
       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
       '<span>Войти</span></a>';
   }
+
+  // Hide projects button for logged-out users
+  const projBtn = document.getElementById('projectsBtn');
+  if (projBtn) projBtn.style.display = isLoggedIn ? '' : 'none';
 }
 
 // Logout
@@ -102,6 +106,19 @@ async function logout() {
   localStorage.removeItem('supabase_token');
   currentUser = null;
   updateAuthUI(false);
+}
+
+// Auth guard — redirect to login if not authenticated
+function requireAuth(action) {
+  if (currentUser) return true;
+  const msg = {
+    ru: 'Для этого действия нужно войти в аккаунт',
+    en: 'Please login to continue',
+    zh: '请先登录'
+  }[currentLang] || 'Please login to continue';
+  showToast(msg);
+  setTimeout(() => { window.location.href = '/login.html'; }, 1500);
+  return false;
 }
 
 // Load user data from Supabase
@@ -8692,6 +8709,7 @@ function deleteCalcFromProject(projectId, calcId) {
 
 // Projects modal
 $('#projectsBtn')?.addEventListener('click', () => {
+  if (!requireAuth('view projects')) return;
   renderProjects();
   showModal('modalProjects');
 });
@@ -8763,7 +8781,8 @@ function renderProjects() {
     item.addEventListener('click', (e) => {
       if (e.target.classList.contains('project-calc-delete')) return;
       const projectId = parseInt(item.dataset.project);
-      const calcId = parseInt(item.dataset.calc);
+      const rawCalcId = item.dataset.calc;
+      const calcId = rawCalcId.includes('-') ? rawCalcId : parseInt(rawCalcId);
       const projects = getProjects();
       const project = projects.find(p => p.id === projectId);
       if (project) {
@@ -8780,13 +8799,16 @@ function renderProjects() {
   list.querySelectorAll('.project-calc-delete').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      deleteCalcFromProject(parseInt(btn.dataset.project), parseInt(btn.dataset.calc));
+      const rawCalcId = btn.dataset.calc;
+      const calcId = rawCalcId.includes('-') ? rawCalcId : parseInt(rawCalcId);
+      deleteCalcFromProject(parseInt(btn.dataset.project), calcId);
       renderProjects();
     });
   });
 }
 
 $('#newProjectBtn')?.addEventListener('click', () => {
+  if (!requireAuth('create project')) return;
   showNewProjectModal();
 });
 
@@ -8917,6 +8939,7 @@ function showProjectSelectModal() {
 }
 
 $('#saveToProjectBtn')?.addEventListener('click', () => {
+  if (!requireAuth('save to project')) return;
   if (!lastReport) return;
   const projects = getProjects();
   if (!projects.length) {
@@ -9240,6 +9263,11 @@ initJsonWorker();
 /* ============================================================
    DOMContentLoaded — Full initialization
    ============================================================ */
+// Re-render history when localStorage changes (e.g. deletion from cabinet page)
+window.addEventListener('storage', () => {
+  if (typeof renderHistory === 'function') renderHistory();
+});
+
 document.addEventListener('DOMContentLoaded', async function() {
   console.log('[LCA] Initializing...');
 

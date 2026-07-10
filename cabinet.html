@@ -28,6 +28,10 @@
         .nav a.active { color: var(--jade); font-weight: 600; }
         .theme-toggle { background: none; border: 1px solid var(--rule); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; transition: all .15s; padding: 0; }
         .theme-toggle:hover { border-color: var(--jade); background: var(--jade-bg); }
+        .lang-switch { display: inline-flex; background: var(--bg-soft); border-radius: 30px; padding: 3px; border: 1px solid var(--rule); }
+        .lang-switch button { background: none; border: none; padding: 5px 10px; border-radius: 30px; font-size: 11px; font-weight: 600; color: var(--ink-mute); cursor: pointer; transition: all .15s; }
+        .lang-switch button.active { background: white; color: var(--ink); box-shadow: 0 1px 4px rgba(14,46,39,0.08); }
+        html.dark .lang-switch button.active { background: var(--jade-bg); color: var(--ink); box-shadow: none; }
         .layout { display: grid; grid-template-columns: 260px 1fr; gap: 32px; padding: 32px 0; }
         @media (max-width: 768px) { .layout { grid-template-columns: 1fr; } }
         .sidebar { position: sticky; top: 32px; align-self: start; }
@@ -84,8 +88,13 @@
         <div class="container" style="display:flex;justify-content:space-between;align-items:center;width:100%">
             <a href="/" class="brand"><span class="dot"></span>LCA<em>·</em>AI</a>
             <div class="nav">
-                <a href="/">Главная</a>
-                <a href="/cabinet.html" class="active">Кабинет</a>
+                <a href="/" data-i18n="nav_home">Главная</a>
+                <a href="/cabinet.html" class="active" data-i18n="nav_cabinet">Кабинет</a>
+                <div class="lang-switch">
+                    <button data-lang="ru" class="active">RU</button>
+                    <button data-lang="en">EN</button>
+                    <button data-lang="zh">中文</button>
+                </div>
                 <button class="theme-toggle" id="themeToggle">🌙</button>
             </div>
         </div>
@@ -96,40 +105,40 @@
             <aside class="sidebar">
                 <div class="profile-card">
                     <div class="avatar" id="avatar">—</div>
-                    <div class="profile-name" id="profileName">Загрузка...</div>
+                    <div class="profile-name" id="profileName" data-i18n="loading">Загрузка...</div>
                     <div class="profile-email" id="profileEmail">—</div>
                     <div class="profile-stats">
-                        <div class="stat"><div class="stat-num" id="statCalcs">0</div><div class="stat-label">Расчётов</div></div>
-                        <div class="stat"><div class="stat-num" id="statProjects">0</div><div class="stat-label">Проектов</div></div>
+                        <div class="stat"><div class="stat-num" id="statCalcs">0</div><div class="stat-label" data-i18n="stat_calcs">Расчётов</div></div>
+                        <div class="stat"><div class="stat-num" id="statProjects">0</div><div class="stat-label" data-i18n="stat_projects">Проектов</div></div>
                     </div>
                 </div>
                 <ul class="menu">
-                    <li><a href="#" class="active" data-tab="history">📊 История</a></li>
-                    <li><a href="#" data-tab="projects">📁 Проекты</a></li>
-                    <li><a href="#" data-tab="settings">⚙️ Настройки</a></li>
-                    <li><a href="#" data-tab="logout">🚪 Выйти</a></li>
+                    <li><a href="#" class="active" data-tab="history">📊 <span data-i18n="menu_history">История</span></a></li>
+                    <li><a href="#" data-tab="projects">📁 <span data-i18n="menu_projects">Проекты</span></a></li>
+                    <li><a href="#" data-tab="settings">⚙️ <span data-i18n="menu_settings">Настройки</span></a></li>
+                    <li><a href="#" data-tab="logout">🚪 <span data-i18n="menu_logout">Выйти</span></a></li>
                 </ul>
             </aside>
             
             <main>
                 <div class="tab-content" id="tab-history">
-                    <h2 class="section-title">История расчётов</h2>
+                    <h2 class="section-title" data-i18n="history_title">История расчётов</h2>
                     <div id="historyList"></div>
                 </div>
                 <div class="tab-content" id="tab-projects" style="display:none">
-                    <h2 class="section-title">Проекты</h2>
-                    <button class="btn btn-primary" id="newProjectBtn" style="margin-bottom:20px">+ Новый проект</button>
+                    <h2 class="section-title" data-i18n="projects_title">Проекты</h2>
+                    <button class="btn btn-primary" id="newProjectBtn" style="margin-bottom:20px" data-i18n="new_project">+ Новый проект</button>
                     <div id="projectsList"></div>
                 </div>
                 <div class="tab-content" id="tab-settings" style="display:none">
-                    <h2 class="section-title">Настройки</h2>
+                    <h2 class="section-title" data-i18n="settings_title">Настройки</h2>
                     <div class="card">
                         <div class="setting-row">
-                            <div><div class="setting-label">Тёмная тема</div></div>
+                            <div><div class="setting-label" data-i18n="dark_theme">Тёмная тема</div></div>
                             <div class="toggle" id="darkToggle"></div>
                         </div>
                         <div class="setting-row">
-                            <div><div class="setting-label">Язык</div></div>
+                            <div><div class="setting-label" data-i18n="language">Язык</div></div>
                             <select id="langSelect" style="padding:6px 12px;border:1px solid var(--rule);border-radius:6px;font-family:inherit;font-size:13px;background:var(--bg);color:var(--ink)">
                                 <option value="ru">Русский</option>
                                 <option value="en">English</option>
@@ -137,9 +146,21 @@
                             </select>
                         </div>
                         <div class="setting-row">
-                            <div><div class="setting-label">Удалить аккаунт</div></div>
-                            <button class="btn btn-danger" id="deleteAccountBtn">Удалить</button>
+                            <div><div class="setting-label" data-i18n="delete_account">Удалить аккаунт</div></div>
+                            <button class="btn btn-danger" id="deleteAccountBtn" data-i18n="delete_btn">Удалить</button>
                         </div>
+                    </div>
+                    <div class="settings-group" style="margin-top:20px">
+                        <h3 style="font-size:16px;font-weight:600;margin-bottom:12px" data-i18n="profile_title">Профиль</h3>
+                        <input type="text" id="editProfileName" data-i18n-placeholder="profile_name_ph" placeholder="Имя" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid var(--rule);border-radius:8px;background:var(--bg);color:var(--ink)">
+                        <input type="text" id="editProfileAvatar" data-i18n-placeholder="profile_avatar_ph" placeholder="URL аватара" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid var(--rule);border-radius:8px;background:var(--bg);color:var(--ink)">
+                        <button id="saveProfileBtn" data-i18n="save_profile" style="width:100%;padding:10px;background:var(--jade);color:#fff;border:none;border-radius:8px;cursor:pointer">Сохранить профиль</button>
+                    </div>
+                    <div class="settings-group" style="margin-top:20px">
+                        <h3 style="font-size:16px;font-weight:600;margin-bottom:12px" data-i18n="change_pw_title">Изменить пароль</h3>
+                        <input type="password" id="newPassword" data-i18n-placeholder="new_pw_ph" placeholder="Новый пароль" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid var(--rule);border-radius:8px;background:var(--bg);color:var(--ink)">
+                        <input type="password" id="confirmNewPassword" data-i18n-placeholder="confirm_pw_ph" placeholder="Подтвердите пароль" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid var(--rule);border-radius:8px;background:var(--bg);color:var(--ink)">
+                        <button id="changePasswordBtn" data-i18n="change_pw_btn" style="width:100%;padding:10px;background:var(--jade);color:#fff;border:none;border-radius:8px;cursor:pointer">Изменить пароль</button>
                     </div>
                 </div>
             </main>
@@ -150,7 +171,120 @@
     <script>
         const SB_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
-        
+
+        /* ── i18n ── */
+        const CABINET_I18N = {
+            ru: {
+                title: 'LCA·AI — Личный кабинет',
+                nav_home: 'Главная', nav_cabinet: 'Кабинет',
+                loading: 'Загрузка...', stat_calcs: 'Расчётов', stat_projects: 'Проектов',
+                menu_history: 'История', menu_projects: 'Проекты', menu_settings: 'Настройки', menu_logout: 'Выйти',
+                history_title: 'История расчётов', projects_title: 'Проекты', settings_title: 'Настройки',
+                new_project: '+ Новый проект',
+                dark_theme: 'Тёмная тема', language: 'Язык',
+                delete_account: 'Удалить аккаунт', delete_btn: 'Удалить',
+                profile_title: 'Профиль', profile_name_ph: 'Имя', profile_avatar_ph: 'URL аватара',
+                save_profile: 'Сохранить профиль',
+                change_pw_title: 'Изменить пароль', new_pw_ph: 'Новый пароль', confirm_pw_ph: 'Подтвердите пароль',
+                change_pw_btn: 'Изменить пароль',
+                view: 'Посмотреть', delete: 'Удалить', calculations: 'Расчёты',
+                no_history: 'Нет расчётов', do_calc: 'Сделать расчёт', no_projects: 'Нет проектов', create: 'Создать',
+                unnamed: 'Без названия', calcs_count: 'расчётов',
+                confirm_delete_calc: 'Удалить расчёт?', confirm_delete_project: 'Удалить проект?',
+                confirm_delete_calc_from_proj: 'Удалить расчёт из проекта?', confirm_delete_account: 'Удалить аккаунт и все данные?',
+                project_name_prompt: 'Название проекта:',
+                toast_deleted: 'Удалено', toast_calc_deleted: 'Расчёт удалён', toast_project_created: 'Проект создан',
+                toast_profile_saved: 'Профиль обновлён', toast_pw_changed: 'Пароль изменён', toast_lang_saved: 'Язык сохранён',
+                toast_link_copied: 'Ссылка скопирована!',
+                err_sb_not_loaded: 'Ошибка: Supabase не загружен', err_auth: 'Ошибка авторизации: ',
+                err_load_history: 'Ошибка загрузки истории: ', err_load_projects: 'Ошибка загрузки проектов: ',
+                err_load_stats: 'Ошибка загрузки статистики', err_delete: 'Ошибка удаления: ',
+                err_create: 'Ошибка создания: ', err_generic: 'Ошибка: ',
+                pw_mismatch: 'Пароли не совпадают', pw_min6: 'Минимум 6 символов'
+            },
+            en: {
+                title: 'LCA·AI — Dashboard',
+                nav_home: 'Home', nav_cabinet: 'Dashboard',
+                loading: 'Loading...', stat_calcs: 'Calcs', stat_projects: 'Projects',
+                menu_history: 'History', menu_projects: 'Projects', menu_settings: 'Settings', menu_logout: 'Sign out',
+                history_title: 'Calculation history', projects_title: 'Projects', settings_title: 'Settings',
+                new_project: '+ New project',
+                dark_theme: 'Dark theme', language: 'Language',
+                delete_account: 'Delete account', delete_btn: 'Delete',
+                profile_title: 'Profile', profile_name_ph: 'Name', profile_avatar_ph: 'Avatar URL',
+                save_profile: 'Save profile',
+                change_pw_title: 'Change password', new_pw_ph: 'New password', confirm_pw_ph: 'Confirm password',
+                change_pw_btn: 'Change password',
+                view: 'View', delete: 'Delete', calculations: 'Calculations',
+                no_history: 'No calculations yet', do_calc: 'Make a calculation', no_projects: 'No projects yet', create: 'Create',
+                unnamed: 'Untitled', calcs_count: 'calculations',
+                confirm_delete_calc: 'Delete calculation?', confirm_delete_project: 'Delete project?',
+                confirm_delete_calc_from_proj: 'Delete calculation from project?', confirm_delete_account: 'Delete account and all data?',
+                project_name_prompt: 'Project name:',
+                toast_deleted: 'Deleted', toast_calc_deleted: 'Calculation deleted', toast_project_created: 'Project created',
+                toast_profile_saved: 'Profile updated', toast_pw_changed: 'Password changed', toast_lang_saved: 'Language saved',
+                toast_link_copied: 'Link copied!',
+                err_sb_not_loaded: 'Error: Supabase not loaded', err_auth: 'Auth error: ',
+                err_load_history: 'Error loading history: ', err_load_projects: 'Error loading projects: ',
+                err_load_stats: 'Error loading stats', err_delete: 'Delete error: ',
+                err_create: 'Create error: ', err_generic: 'Error: ',
+                pw_mismatch: 'Passwords do not match', pw_min6: 'Minimum 6 characters'
+            },
+            zh: {
+                title: 'LCA·AI — 个人中心',
+                nav_home: '首页', nav_cabinet: '个人中心',
+                loading: '加载中...', stat_calcs: '计算', stat_projects: '项目',
+                menu_history: '历史', menu_projects: '项目', menu_settings: '设置', menu_logout: '退出',
+                history_title: '计算历史', projects_title: '项目', settings_title: '设置',
+                new_project: '+ 新建项目',
+                dark_theme: '深色主题', language: '语言',
+                delete_account: '删除账户', delete_btn: '删除',
+                profile_title: '个人资料', profile_name_ph: '名称', profile_avatar_ph: '头像 URL',
+                save_profile: '保存资料',
+                change_pw_title: '修改密码', new_pw_ph: '新密码', confirm_pw_ph: '确认密码',
+                change_pw_btn: '修改密码',
+                view: '查看', delete: '删除', calculations: '计算',
+                no_history: '暂无计算记录', do_calc: '开始计算', no_projects: '暂无项目', create: '创建',
+                unnamed: '未命名', calcs_count: '次计算',
+                confirm_delete_calc: '确定删除此计算？', confirm_delete_project: '确定删除此项目？',
+                confirm_delete_calc_from_proj: '确定从项目中删除此计算？', confirm_delete_account: '确定删除账户及所有数据？',
+                project_name_prompt: '项目名称：',
+                toast_deleted: '已删除', toast_calc_deleted: '计算已删除', toast_project_created: '项目已创建',
+                toast_profile_saved: '资料已更新', toast_pw_changed: '密码已修改', toast_lang_saved: '语言已保存',
+                toast_link_copied: '链接已复制！',
+                err_sb_not_loaded: '错误：Supabase 未加载', err_auth: '认证错误：',
+                err_load_history: '加载历史出错：', err_load_projects: '加载项目出错：',
+                err_load_stats: '加载统计数据出错', err_delete: '删除出错：',
+                err_create: '创建出错：', err_generic: '错误：',
+                pw_mismatch: '密码不匹配', pw_min6: '至少6个字符'
+            }
+        };
+        let cabinetLang = 'ru';
+        function t(key) { return CABINET_I18N[cabinetLang]?.[key] || CABINET_I18N.ru[key] || key; }
+
+        function applyCabinetLang(lang) {
+            cabinetLang = lang;
+            document.title = t('title');
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.dataset.i18n;
+                if (CABINET_I18N[lang]?.[key]) el.textContent = CABINET_I18N[lang][key];
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.dataset.i18nPlaceholder;
+                if (CABINET_I18N[lang]?.[key]) el.placeholder = CABINET_I18N[lang][key];
+            });
+            document.querySelectorAll('.lang-switch button').forEach(b => {
+                b.classList.toggle('active', b.dataset.lang === lang);
+            });
+            document.getElementById('langSelect').value = lang;
+            if (currentUser) {
+                loadHistory();
+                loadProjects();
+                loadStats();
+            }
+        }
+
+        /* ── Supabase ── */
         function getSB() {
             if (window.supabase && window.supabase.createClient) {
                 return window.supabase.createClient(SB_URL, SB_KEY);
@@ -162,10 +296,10 @@
         let currentUser = null;
 
         function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 3000);
         }
 
         function esc(s) {
@@ -178,7 +312,7 @@
             console.log('[Cabinet] Starting init...');
             db = getSB();
             if (!db) {
-                showToast('Ошибка: Supabase не загружен');
+                showToast(t('err_sb_not_loaded'));
                 console.error('[Cabinet] Supabase SDK not loaded');
                 return;
             }
@@ -189,7 +323,7 @@
             
             if (error) {
                 console.error('[Cabinet] getSession error:', error);
-                showToast('Ошибка авторизации: ' + error.message);
+                showToast(t('err_auth') + error.message);
                 return;
             }
             if (!session) { 
@@ -200,6 +334,7 @@
             currentUser = session.user;
             console.log('[Cabinet] User loaded:', currentUser.email, 'ID:', currentUser.id);
             renderProfile();
+            fillProfileFields();
             console.log('[Cabinet] Profile rendered, loading history...');
             await loadTab('history');
             console.log('[Cabinet] Init complete');
@@ -224,7 +359,7 @@
                 const { count: p } = await db.from('user_projects').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
                 document.getElementById('statCalcs').textContent = c || 0;
                 document.getElementById('statProjects').textContent = p || 0;
-            } catch (e) { console.error('loadStats error:', e); showToast('Ошибка загрузки статистики'); }
+            } catch (e) { console.error('loadStats error:', e); showToast(t('err_load_stats')); }
         }
 
         document.querySelectorAll('.menu a[data-tab]').forEach(a => {
@@ -248,6 +383,7 @@
         async function loadTab(tab) {
             if (tab === 'history') await loadHistory();
             if (tab === 'projects') await loadProjects();
+            if (tab === 'settings') fillProfileFields();
         }
 
         async function loadHistory() {
@@ -262,26 +398,29 @@
                 console.log('[Cabinet] loadHistory result:', data?.length, 'rows');
                 const list = document.getElementById('historyList');
                 if (!data || data.length === 0) {
-                    list.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Нет расчётов</div><a href="/" class="btn btn-primary">Сделать расчёт</a></div>';
+                    list.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">' + t('no_history') + '</div><a href="/" class="btn btn-primary">' + t('do_calc') + '</a></div>';
                     return;
                 }
-                list.innerHTML = data.map(h => '<div class="card"><div class="card-header"><div class="card-title">' + esc(h.product_title || '—') + '</div><div class="card-date">' + new Date(h.created_at).toLocaleDateString('ru') + '</div></div><div class="card-meta"><span>📦 ' + esc(h.functional_unit || '—') + '</span><span>🌱 ' + (h.total_co2eq || 0) + ' kgCO₂e</span></div><div class="card-actions"><a href="/?history=' + h.id + '" class="btn btn-primary">Посмотреть</a><button class="btn btn-danger" onclick="deleteHistory(\'' + h.id + '\')">Удалить</button></div></div>').join('');
+                list.innerHTML = data.map(h => '<div class="card"><div class="card-header"><div class="card-title">' + esc(h.product_title || '—') + '</div><div class="card-date">' + new Date(h.created_at).toLocaleDateString(cabinetLang === 'zh' ? 'zh-CN' : cabinetLang) + '</div></div><div class="card-meta"><span>📦 ' + esc(h.functional_unit || '—') + '</span><span>🌱 ' + (h.total_co2eq || 0) + ' kgCO₂e</span></div><div class="card-actions"><a href="/?history=' + h.id + '" class="btn btn-primary">' + t('view') + '</a><button class="share-history-btn" data-id="' + h.id + '" title="Скопировать ссылку" style="background:none;border:none;cursor:pointer;padding:4px 8px;font-size:16px">🔗</button><button class="btn btn-danger" onclick="deleteHistory(\'' + h.id + '\')">' + t('delete') + '</button></div></div>').join('');
             } catch (e) { 
                 console.error('loadHistory error:', e); 
-                showToast('Ошибка загрузки истории: ' + (e.message || e)); 
+                showToast(t('err_load_history') + (e.message || e)); 
             }
         }
 
         async function deleteHistory(id) {
-            if (!confirm('Удалить расчёт?')) return;
-            try { 
-                const { error } = await db.from('user_history').delete().eq('id', id); 
+            if (!confirm(t('confirm_delete_calc'))) return;
+            try {
+                const { error } = await db.from('user_history').delete().eq('id', id);
                 if (error) throw error;
-                loadHistory(); 
-                loadStats(); 
-                showToast('Удалено'); 
-            } catch (e) { 
-                showToast('Ошибка удаления: ' + (e.message || e)); 
+                const cached = JSON.parse(localStorage.getItem('lca-history') || '[]');
+                const filtered = cached.filter(e => String(e.id) !== String(id));
+                localStorage.setItem('lca-history', JSON.stringify(filtered));
+                loadHistory();
+                loadStats();
+                showToast(t('toast_deleted'));
+            } catch (e) {
+                showToast(t('err_delete') + (e.message || e));
             }
         }
 
@@ -296,43 +435,42 @@
                 if (pErr) throw pErr;
                 const list = document.getElementById('projectsList');
                 if (!projects || projects.length === 0) {
-                    list.innerHTML = '<div class="empty"><div class="empty-icon">📁</div><div class="empty-text">Нет проектов</div><button class="btn btn-primary" onclick="createProject()">Создать</button></div>';
+                    list.innerHTML = '<div class="empty"><div class="empty-icon">📁</div><div class="empty-text">' + t('no_projects') + '</div><button class="btn btn-primary" onclick="createProject()">' + t('create') + '</button></div>';
                     return;
                 }
-                // Load calculations for each project
                 let html = '';
                 for (const p of projects) {
                     const { data: calcs } = await db.from('project_calculations').select('*').eq('project_id', p.id).order('created_at', { ascending: false });
                     const calcCount = (calcs || []).length;
                     html += '<div class="card project-card" id="proj-' + p.id + '">';
                     html += '<div class="card-header">';
-                    html += '<div class="card-title">' + esc(p.name) + '</div>';
-                    html += '<div class="card-date">' + calcCount + ' расчётов · ' + new Date(p.created_at).toLocaleDateString('ru') + '</div>';
+                    html += '<div class="card-title">' + esc(p.name) + ' <button class="share-project-btn" data-id="' + p.id + '" title="Скопировать ссылку" style="background:none;border:none;cursor:pointer;padding:4px 8px;font-size:16px">🔗</button></div>';
+                    html += '<div class="card-date">' + calcCount + ' ' + t('calcs_count') + ' · ' + new Date(p.created_at).toLocaleDateString(cabinetLang === 'zh' ? 'zh-CN' : cabinetLang) + '</div>';
                     html += '</div>';
                     if (calcs && calcs.length > 0) {
                         html += '<div class="project-calcs" style="display:none">';
                         calcs.forEach(c => {
-                            const product = c.report_data?.product_title || 'Без названия';
+                            const product = c.report_data?.product_title || t('unnamed');
                             const total = c.report_data?.total_co2eq || 0;
-                            const date = new Date(c.created_at).toLocaleDateString('ru');
+                            const date = new Date(c.created_at).toLocaleDateString(cabinetLang === 'zh' ? 'zh-CN' : cabinetLang);
                             html += '<div class="calc-item">';
                             html += '<div class="calc-info" onclick="window.location.href=\'/?history=' + c.id + '\'" style="cursor:pointer;flex:1"><div class="calc-name">' + esc(product) + '</div><div class="calc-date">' + date + '</div></div>';
                             html += '<div class="calc-total">' + total + ' kgCO₂e</div>';
-                            html += '<button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteCalcFromProject(\'' + c.id + '\')" title="Удалить расчёт">✕</button>';
+                            html += '<button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteCalcFromProject(\'' + c.id + '\')" title="' + t('delete') + '">✕</button>';
                             html += '</div>';
                         });
                         html += '</div>';
                     }
                     html += '<div class="card-actions">';
-                    html += '<button class="btn btn-sm" onclick="toggleProjectCalcs(\'' + p.id + '\')">▸ Расчёты</button>';
-                    html += '<button class="btn btn-danger" onclick="deleteProject(\'' + p.id + '\')">Удалить</button>';
+                    html += '<button class="btn btn-sm" onclick="toggleProjectCalcs(\'' + p.id + '\')">▸ ' + t('calculations') + '</button>';
+                    html += '<button class="btn btn-danger" onclick="deleteProject(\'' + p.id + '\')">' + t('delete') + '</button>';
                     html += '</div>';
                     html += '</div>';
                 }
                 list.innerHTML = html;
             } catch (e) { 
                 console.error('loadProjects error:', e); 
-                showToast('Ошибка загрузки проектов: ' + (e.message || e)); 
+                showToast(t('err_load_projects') + (e.message || e)); 
             }
         }
 
@@ -348,48 +486,48 @@
         document.getElementById('newProjectBtn').addEventListener('click', createProject);
 
         async function createProject() {
-            const name = prompt('Название проекта:');
+            const name = prompt(t('project_name_prompt'));
             if (!name || !name.trim()) return;
             try { 
                 const { error } = await db.from('user_projects').insert({ user_id: currentUser.id, name: name.trim() }); 
                 if (error) throw error;
                 loadProjects(); 
                 loadStats(); 
-                showToast('Проект создан'); 
+                showToast(t('toast_project_created')); 
             } catch (e) { 
-                showToast('Ошибка создания: ' + (e.message || e)); 
+                showToast(t('err_create') + (e.message || e)); 
             }
         }
 
         async function deleteProject(id) {
-            if (!confirm('Удалить проект?')) return;
+            if (!confirm(t('confirm_delete_project'))) return;
             try { 
                 const { error: e1 } = await db.from('project_calculations').delete().eq('project_id', id); 
                 const { error: e2 } = await db.from('user_projects').delete().eq('id', id); 
                 if (e1 || e2) throw (e1 || e2);
                 loadProjects(); 
                 loadStats(); 
-                showToast('Удалено'); 
+                showToast(t('toast_deleted')); 
             } catch (e) { 
-                showToast('Ошибка удаления: ' + (e.message || e)); 
+                showToast(t('err_delete') + (e.message || e)); 
             }
         }
 
         async function deleteCalcFromProject(calcId) {
-            if (!confirm('Удалить расчёт из проекта?')) return;
+            if (!confirm(t('confirm_delete_calc_from_proj'))) return;
             try {
                 const { error } = await db.from('project_calculations').delete().eq('id', calcId);
                 if (error) throw error;
                 loadProjects();
                 loadStats();
-                showToast('Расчёт удалён');
+                showToast(t('toast_calc_deleted'));
             } catch (e) {
-                showToast('Ошибка удаления: ' + (e.message || e));
+                showToast(t('err_delete') + (e.message || e));
             }
         }
 
         document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
-            if (!confirm('Удалить аккаунт и все данные?')) return;
+            if (!confirm(t('confirm_delete_account'))) return;
             try {
                 await db.from('user_history').delete().eq('user_id', currentUser.id);
                 await db.from('project_calculations').delete().eq('user_id', currentUser.id);
@@ -397,11 +535,59 @@
                 await db.auth.signOut();
                 localStorage.clear();
                 window.location.href = '/';
-            } catch (e) { showToast('Ошибка: ' + (e.message || e)); }
+            } catch (e) { showToast(t('err_generic') + (e.message || e)); }
         });
 
-        document.getElementById('langSelect').value = localStorage.getItem('lca-lang') || 'ru';
-        document.getElementById('langSelect').addEventListener('change', e => { localStorage.setItem('lca-lang', e.target.value); showToast('Язык сохранён'); });
+        document.getElementById('changePasswordBtn').addEventListener('click', async () => {
+            const pw = document.getElementById('newPassword').value;
+            const pw2 = document.getElementById('confirmNewPassword').value;
+            if (pw !== pw2) { showToast(t('pw_mismatch')); return; }
+            if (pw.length < 6) { showToast(t('pw_min6')); return; }
+            const { error } = await db.auth.updateUser({ password: pw });
+            if (error) showToast(error.message);
+            else { showToast(t('toast_pw_changed')); document.getElementById('newPassword').value = ''; document.getElementById('confirmNewPassword').value = ''; }
+        });
+
+        /* ── Language init & switcher ── */
+        (function() {
+            const saved = localStorage.getItem('lca-lang');
+            const browserLang = (navigator.language || '').toLowerCase();
+            const lang = saved || (browserLang.startsWith('zh') ? 'zh' : browserLang.startsWith('en') ? 'en' : 'ru');
+            cabinetLang = lang;
+            document.getElementById('langSelect').value = lang;
+            document.querySelectorAll('.lang-switch button').forEach(b => {
+                b.classList.toggle('active', b.dataset.lang === lang);
+                b.addEventListener('click', () => {
+                    localStorage.setItem('lca-lang', b.dataset.lang);
+                    applyCabinetLang(b.dataset.lang);
+                    showToast(t('toast_lang_saved'));
+                });
+            });
+            applyCabinetLang(lang);
+        })();
+
+        document.getElementById('langSelect').addEventListener('change', e => {
+            const lang = e.target.value;
+            localStorage.setItem('lca-lang', lang);
+            applyCabinetLang(lang);
+            showToast(t('toast_lang_saved'));
+        });
+
+        function fillProfileFields() {
+            if (!currentUser) return;
+            document.getElementById('editProfileName').value = currentUser.user_metadata?.full_name || '';
+            document.getElementById('editProfileAvatar').value = currentUser.user_metadata?.avatar_url || '';
+        }
+
+        document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+            const name = document.getElementById('editProfileName').value.trim();
+            const avatar = document.getElementById('editProfileAvatar').value.trim();
+            const { error } = await db.auth.updateUser({ data: { full_name: name, avatar_url: avatar } });
+            if (error) { showToast(error.message); return; }
+            currentUser.user_metadata = { ...currentUser.user_metadata, full_name: name, avatar_url: avatar };
+            showToast(t('toast_profile_saved'));
+            renderProfile();
+        });
 
         function syncThemeUI() {
             const isDark = document.documentElement.classList.contains('dark');
@@ -421,12 +607,27 @@
             localStorage.setItem('lca-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
             syncThemeUI();
         });
-        // Theme auto-detect: localStorage > system preference
         const savedTheme = localStorage.getItem('lca-theme');
         if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         }
         syncThemeUI();
+
+        document.addEventListener('click', (e) => {
+            const shareProject = e.target.closest('.share-project-btn');
+            if (shareProject) {
+                e.stopPropagation();
+                const url = window.location.origin + '/?project=' + shareProject.dataset.id;
+                navigator.clipboard.writeText(url).then(() => showToast(t('toast_link_copied')));
+                return;
+            }
+            const shareHistory = e.target.closest('.share-history-btn');
+            if (shareHistory) {
+                e.stopPropagation();
+                const url = window.location.origin + '/?history=' + shareHistory.dataset.id;
+                navigator.clipboard.writeText(url).then(() => showToast(t('toast_link_copied')));
+            }
+        });
 
         init();
     </script>
