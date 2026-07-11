@@ -821,7 +821,9 @@
                 const tab = a.dataset.tab;
                 if (tab === 'logout') {
                     if (db) db.auth.signOut();
-                    localStorage.clear();
+                    // Only clear Supabase keys, keep theme/language preferences
+                    localStorage.removeItem('supabase_user');
+                    localStorage.removeItem('supabase_token');
                     window.location.href = '/';
                     return;
                 }
@@ -1154,11 +1156,17 @@
             const ok = await confirmModal(t('confirm_delete_account'), t('confirm_delete_account_text'));
             if (!ok) return;
             try {
-                await db.from('user_history').delete().eq('user_id', currentUser.id);
-                await db.from('project_calculations').delete().eq('user_id', currentUser.id);
-                await db.from('user_projects').delete().eq('user_id', currentUser.id);
+                const errs = [];
+                const r1 = await db.from('user_history').delete().eq('user_id', currentUser.id);
+                if (r1.error) errs.push('history: ' + r1.error.message);
+                const r2 = await db.from('project_calculations').delete().eq('user_id', currentUser.id);
+                if (r2.error) errs.push('calculations: ' + r2.error.message);
+                const r3 = await db.from('user_projects').delete().eq('user_id', currentUser.id);
+                if (r3.error) errs.push('projects: ' + r3.error.message);
+                if (errs.length) console.warn('[DeleteAccount] Partial errors:', errs);
                 await db.auth.signOut();
-                localStorage.clear();
+                localStorage.removeItem('supabase_user');
+                localStorage.removeItem('supabase_token');
                 window.location.href = '/';
             } catch (e) { showToast(t('err_generic') + (e.message || e)); }
         });
