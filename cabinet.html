@@ -419,6 +419,12 @@
                     </div>
                     <div id="historyList"></div>
                     <div class="load-more-wrap"><button class="btn btn-ghost" id="loadMoreBtn" style="display:none" data-i18n="load_more">Показать ещё</button></div>
+                    <div class="batch-bar" id="batchBar">
+                        <span class="batch-count" style="font-size:13px;font-weight:600;color:var(--ink-soft)"><span data-i18n="batch_select">Выбрано:</span> <span id="batchCount">0</span></span>
+                        <button class="btn btn-sm btn-ghost" id="batchExport"><span data-i18n="batch_export">📥 Экспорт</span></button>
+                        <button class="btn btn-sm btn-danger" id="batchDelete"><span data-i18n="batch_delete">🗑 Удалить</span></button>
+                        <button class="btn btn-sm btn-ghost" id="batchDeselect"><span data-i18n="batch_cancel">Отменить</span></button>
+                    </div>
                 </div>
 
                 <!-- ══ PROJECTS ══ -->
@@ -836,6 +842,7 @@
             fillProfileFields();
             renderGreeting();
             await loadHistoryData();
+            await loadProjects();
             renderOverview();
             loadStats();
         }
@@ -1099,9 +1106,12 @@
         /* Add to project */
         async function addToProject(historyId) {
             try {
-                const { data: projects, error } = await db.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-                if (error) throw error;
-                const projectId = await openModal({ title: t('pick_project_title'), projects: projects || [] });
+                if (!projectsCache.length) {
+                    const { data: projects, error } = await db.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+                    if (error) throw error;
+                    projectsCache = projects || [];
+                }
+                const projectId = await openModal({ title: t('pick_project_title'), projects: projectsCache });
                 if (!projectId) return;
                 const row = historyCache.find(h => String(h.id) === String(historyId));
                 if (!row) return;
@@ -1448,6 +1458,45 @@
             localStorage.setItem('lca-lang', lang);
             applyCabinetLang(lang);
             showToast(t('toast_lang_saved'));
+        });
+
+        /* ══════════════════════════════════════════════════
+           Tags: add / remove
+           ══════════════════════════════════════════════════ */
+        async function addTag(historyId, tag) {
+            tag = tag.trim();
+            if (!tag) return;
+            const row = historyCache.find(h => String(h.id) === String(historyId));
+            if (!row) return;
+            const tags = Array.isArray(row.tags) ? row.tags.slice() : [];
+            if (tags.some(t => t.toLowerCase() === tag.toLowerCase())) return;
+            tags.push(tag);
+            try {
+                const { error } = await db.from('user_history').update({ tags }).eq('id', historyId);
+                if (error) throw error;
+                row.tags = tags;
+                renderHistory();
+            } catch (e) { showToast(t('err_generic') + (e.message || e)); }
+        }
+
+        async function removeTag(historyId, tag) {
+            const row = historyCache.find(h => String(h.id) === String(historyId));
+            if (!row) return;
+            const tags = (Array.isArray(row.tags) ? row.tags : []).filter(t => t !== tag);
+            try {
+                const { error } = await db.from('user_history').update({ tags }).eq('id', historyId);
+                if (error) throw error;
+                row.tags = tags;
+                renderHistory();
+            } catch (e) { showToast(t('err_generic') + (e.message || e)); }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.target.classList.contains('tag-input') && e.key === 'Enter') {
+                e.preventDefault();
+                addTag(e.target.dataset.id, e.target.value);
+                e.target.value = '';
+            }
         });
 
         /* ══════════════════════════════════════════════════
