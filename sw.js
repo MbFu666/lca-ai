@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lca-ai-v3';
+const CACHE_NAME = 'lca-ai-v4';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -45,38 +45,38 @@ self.addEventListener('fetch', event => {
   
   if (isCrossOrigin && !isAllowedCDN) return;
   
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) {
+  // Check if this is an HTML request (navigation or .html file)
+  const isHTML = event.request.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname === '/';
+
+  if (isHTML) {
+    // Network-first for HTML: try network, fall back to cache
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
+          }
           return response;
-        }
-        return fetch(event.request).then(response => {
-          // Don't cache non-successful responses
-          if (!response || response.status !== 200) {
+        })
+        .catch(() => {
+          return caches.match(event.request).then(cached => cached || caches.match('/'));
+        })
+    );
+  } else {
+    // Cache-first for static assets (CSS, JS, images, fonts)
+    event.respondWith(
+      caches.match(event.request)
+        .then(response => {
+          if (response) return response;
+          return fetch(event.request).then(response => {
+            if (!response || response.status !== 200) return response;
+            if (response.type !== 'basic' && !isAllowedCDN) return response;
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
             return response;
-          }
-          
-          // Only cache basic responses
-          if (response.type !== 'basic' && !isAllowedCDN) {
-            return response;
-          }
-          
-          // Clone the response
-          const responseToCache = response.clone();
-          
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseToCache);
           });
-          
-          return response;
-        });
-      })
-      .catch(() => {
-        // Return offline page for navigation requests
-        if (event.request.mode === 'navigate') {
-          return caches.match('/');
-        }
-      })
-  );
+        })
+    );
+  }
 });
