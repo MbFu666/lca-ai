@@ -9168,15 +9168,15 @@ document.addEventListener('DOMContentLoaded', async function() {
             : 'Failed to load project');
         });
     }
+    // Fallback: sessionStorage
+    if (!historyId && !projectId) {
+      const cached = sessionStorage.getItem('lca-report');
+      if (cached) {
+        try { renderReport(JSON.parse(cached)); sessionStorage.removeItem('lca-report'); } catch(e) {}
+      }
+    }
   })();
 
-  // Fallback: sessionStorage
-  if (!historyId && !projectId) {
-    const cached = sessionStorage.getItem('lca-report');
-    if (cached) {
-      try { renderReport(JSON.parse(cached)); sessionStorage.removeItem('lca-report'); } catch(e) {}
-    }
-  }
 
   var savedTheme = localStorage.getItem('lca-theme');
   var themeToggle = document.getElementById('themeToggle');
