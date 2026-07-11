@@ -7,6 +7,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script>
+        // Fallback: if Supabase SDK didn't load from jsdelivr, try unpkg
+        if (!window.supabase) {
+            console.warn('[Cabinet] Supabase SDK not loaded from jsdelivr, trying unpkg...');
+            var s = document.createElement('script');
+            s.src = 'https://unpkg.com/@supabase/supabase-js@2';
+            document.head.appendChild(s);
+        }
+    </script>
     <style>
         :root {
             --bg: #FFFFFF; --bg-soft: #F8FAFA; --bg-card: #FFFFFF; --ink: #0E2E27; --ink-soft: #4D5E61; --ink-mute: #93A0A6;
@@ -302,6 +312,13 @@
         /* skeleton loading */
         .skeleton { border-radius: var(--radius); background: linear-gradient(90deg, var(--bg-soft) 25%, var(--rule) 50%, var(--bg-soft) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; height: 92px; margin-bottom: 16px; }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* ── Tags & Filter Bar ── */
+        .tag-chip { display: inline-block; padding: 2px 8px; background: var(--jade-bg); color: var(--jade-deep); border-radius: 12px; font-size: 11px; margin: 2px; }
+        .tag-remove { cursor: pointer; margin-left: 4px; font-size: 10px; opacity: 0.6; }
+        .tag-remove:hover { opacity: 1; }
+        .filter-bar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+        .filter-bar input, .filter-bar select { padding: 8px 12px; border: 1px solid var(--rule); border-radius: 8px; font-size: 13px; background: var(--bg); color: var(--ink); font-family: inherit; }
     </style>
 </head>
 <body>
@@ -451,6 +468,7 @@
                             </div>
                             <button class="btn btn-danger" id="deleteAccountBtn" data-i18n="delete_btn">Удалить</button>
                         </div>
+                        <button id="exportAllBtn" class="btn" style="width:100%;margin-top:12px">📥 Скачать все данные (ZIP)</button>
                     </div>
                     <div class="settings-group">
                         <h3><span class="sg-icon">👤</span> <span data-i18n="profile_title">Профиль</span></h3>
@@ -674,6 +692,7 @@
 
         /* ── Supabase ── */
         function getSB() {
+            console.log('[Cabinet] getSB: window.supabase=', !!window.supabase, 'createClient=', !!(window.supabase && window.supabase.createClient));
             if (window.supabase && window.supabase.createClient) return window.supabase.createClient(SB_URL, SB_KEY);
             return null;
         }
@@ -762,18 +781,23 @@
            Init & profile
            ══════════════════════════════════════════════════ */
         async function init() {
+            console.log('[Cabinet] init() called');
             db = getSB();
-            if (!db) { showToast(t('err_sb_not_loaded')); return; }
+            if (!db) { console.error('[Cabinet] Supabase SDK not loaded!'); showToast(t('err_sb_not_loaded')); return; }
+            console.log('[Cabinet] Supabase client created, getting session...');
             const { data: { session }, error } = await db.auth.getSession();
-            if (error) { showToast(t('err_auth') + error.message); return; }
-            if (!session) { window.location.href = '/login.html'; return; }
+            if (error) { console.error('[Cabinet] Session error:', error); showToast(t('err_auth') + error.message); return; }
+            if (!session) { console.log('[Cabinet] No session, redirecting to login'); window.location.href = '/login.html'; return; }
+            console.log('[Cabinet] Session OK, user:', session.user.id);
             currentUser = session.user;
             renderProfile();
             fillProfileFields();
             renderGreeting();
-            await loadHistoryData();
-            renderOverview();
-            loadStats();
+            try {
+                await loadHistoryData();
+                renderOverview();
+                loadStats();
+            } catch (e) { console.error('[Cabinet] Data load error:', e); }
         }
 
         function renderGreeting() {
