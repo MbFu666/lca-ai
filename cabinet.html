@@ -281,6 +281,13 @@
         .calc-date { font-size: 12px; color: var(--ink-mute); margin-top: 2px; }
         .calc-total { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--jade); white-space: nowrap; }
 
+        .archive-btn { background: none; border: none; cursor: pointer; font-size: 14px; padding: 4px 8px; border-radius: var(--radius-xs); transition: var(--transition); opacity: 0.6; }
+        .archive-btn:hover { opacity: 1; background: var(--bg-soft); }
+        .archived-section { margin-top: 20px; border-top: 1px solid var(--rule); padding-top: 16px; }
+        .archived-toggle { background: none; border: 1px solid var(--rule); padding: 8px 16px; border-radius: var(--radius-xs); cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--ink-mute); transition: var(--transition); }
+        .archived-toggle:hover { border-color: var(--jade); color: var(--ink); background: var(--jade-bg); }
+        .archived-toggle.active { border-color: var(--jade); color: var(--jade-deep); background: var(--jade-bg); }
+
         /* ── Password Strength ── */
         .pw-strength { height: 3px; border-radius: 3px; background: var(--rule); margin-top: -6px; margin-bottom: 12px; overflow: hidden; }
         .pw-strength-bar { height: 100%; border-radius: 3px; transition: width .3s, background .3s; width: 0; }
@@ -400,8 +407,9 @@
                         <h2 class="section-title" data-i18n="history_title">История расчётов</h2>
                         <button class="btn btn-ghost" id="exportCsvBtn" data-i18n="export_csv">⬇ CSV</button>
                     </div>
-                    <div class="toolbar">
-                        <div class="search-box"><input type="text" id="historySearch" data-i18n-placeholder="search_ph" placeholder="Поиск по продукту…"></div>
+                    <div class="filter-bar">
+                        <input type="text" id="historySearch" data-i18n-placeholder="search_ph" placeholder="Поиск по продукту…" style="flex:1;min-width:180px">
+                        <input type="text" id="tagFilter" placeholder="Фильтр по тегу…" style="min-width:140px">
                         <select id="historySort">
                             <option value="date_desc" data-i18n="sort_new">Сначала новые</option>
                             <option value="date_asc" data-i18n="sort_old">Сначала старые</option>
@@ -450,6 +458,13 @@
                                 <div class="setting-desc" data-i18n="delete_account_desc">Удалить все данные безвозвратно</div>
                             </div>
                             <button class="btn btn-danger" id="deleteAccountBtn" data-i18n="delete_btn">Удалить</button>
+                        </div>
+                        <div class="setting-row">
+                            <div>
+                                <div class="setting-label" data-i18n="export_all">📥 Скачать все данные</div>
+                                <div class="setting-desc">ZIP</div>
+                            </div>
+                            <button class="btn btn-ghost" id="exportAllBtn" data-i18n="export_all">📥 Скачать все данные</button>
                         </div>
                     </div>
                     <div class="settings-group">
@@ -550,7 +565,13 @@
                 err_create: 'Ошибка создания: ', err_generic: 'Ошибка: ',
                 pw_mismatch: 'Пароли не совпадают', pw_min6: 'Минимум 6 символов',
                 pw_wrong_old: 'Неверный текущий пароль', pw_old_required: 'Введите текущий пароль',
-                status_done: 'Готово', status_pending: 'В процессе'
+                status_done: 'Готово', status_pending: 'В процессе',
+                move_to_project: 'Переместить', move_to_project_done: 'Перемещено в проект',
+                batch_select: 'Выбрано:', batch_export: '📥 Экспорт', batch_delete: '🗑 Удалить', batch_cancel: 'Отменить',
+                batch_confirm_delete: 'Удалить расчётов?', batch_month: 'По месяцам', batch_top5: 'Топ-5 тяжёлых', batch_avg: 'Средний CO₂', batch_total_count: 'Всего расчётов',
+                export_all: '📥 Скачать все данные', toast_export_done: 'Данные экспортированы',
+                toast_archived: 'Проект архивирован', toast_unarchived: 'Проект восстановлен',
+                archived_title: 'Архив', show_archived: 'Показать архив', hide_archived: 'Скрыть архив'
             },
             en: {
                 title: 'LCA·AI — Dashboard',
@@ -597,7 +618,13 @@
                 err_create: 'Create error: ', err_generic: 'Error: ',
                 pw_mismatch: 'Passwords do not match', pw_min6: 'Minimum 6 characters',
                 pw_wrong_old: 'Wrong current password', pw_old_required: 'Enter current password',
-                status_done: 'Done', status_pending: 'In progress'
+                status_done: 'Done', status_pending: 'In progress',
+                export_all: '📥 Download all data', toast_export_done: 'Data exported',
+                toast_archived: 'Project archived', toast_unarchived: 'Project restored',
+                archived_title: 'Archived', show_archived: 'Show archived', hide_archived: 'Hide archived',
+                move_to_project: 'Move to', move_to_project_done: 'Moved to project',
+                batch_select: 'Selected:', batch_export: '📥 Export', batch_delete: '🗑 Delete', batch_cancel: 'Cancel',
+                batch_confirm_delete: 'Delete calculations?', batch_month: 'By month', batch_top5: 'Top 5 heaviest', batch_avg: 'Average CO₂', batch_total_count: 'Total calculations'
             },
             zh: {
                 title: 'LCA·AI — 个人中心',
@@ -644,7 +671,13 @@
                 err_create: '创建出错：', err_generic: '错误：',
                 pw_mismatch: '密码不匹配', pw_min6: '至少6个字符',
                 pw_wrong_old: '当前密码错误', pw_old_required: '请输入当前密码',
-                status_done: '已完成', status_pending: '进行中'
+                status_done: '已完成', status_pending: '进行中',
+                export_all: '📥 下载所有数据', toast_export_done: '数据已导出',
+                toast_archived: '项目已归档', toast_unarchived: '项目已恢复',
+                archived_title: '归档', show_archived: '显示归档', hide_archived: '隐藏归档',
+                move_to_project: '移至', move_to_project_done: '已移至项目',
+                batch_select: '已选:', batch_export: '📥 导出', batch_delete: '🗑 删除', batch_cancel: '取消',
+                batch_confirm_delete: '删除计算记录？', batch_month: '按月统计', batch_top5: 'Top 5 最重', batch_avg: '平均 CO₂', batch_total_count: '计算总数'
             }
         };
         let cabinetLang = 'ru';
@@ -685,6 +718,37 @@
         let historyCache = [];      // все строки user_history (загружаются один раз, фильтруются локально)
         let historyShown = 10;      // пагинация «показать ещё»
         const PAGE = 10;
+        let archivedProjectsExpanded = false;
+
+        async function loadJSZip() {
+            if (window.JSZip) return window.JSZip;
+            return new Promise((resolve) => {
+                const s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+                s.onload = () => resolve(window.JSZip);
+                document.head.appendChild(s);
+            });
+        }
+
+        document.getElementById('exportAllBtn').addEventListener('click', async () => {
+            const JSZip = await loadJSZip();
+            const zip = new JSZip();
+            const historyData = historyCache.map(h => ({
+                id: h.id, product: h.product_title, co2: h.total_co2eq,
+                date: h.created_at, data: h.report_data
+            }));
+            zip.file('history.json', JSON.stringify(historyData, null, 2));
+            const { data: projects } = await db.from('user_projects').select('*').eq('user_id', currentUser.id);
+            const { data: calcs } = await db.from('project_calculations').select('*').eq('user_id', currentUser.id);
+            zip.file('projects.json', JSON.stringify(projects || [], null, 2));
+            zip.file('calculations.json', JSON.stringify(calcs || [], null, 2));
+            const blob = await zip.generateAsync({ type: 'blob' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'lca-ai-data.zip'; a.click();
+            URL.revokeObjectURL(url);
+            showToast(t('toast_export_done'));
+        });
 
         function showToast(msg) {
             const el = document.getElementById('toast');
@@ -934,9 +998,11 @@
            ══════════════════════════════════════════════════ */
         function filteredHistory() {
             const q = document.getElementById('historySearch').value.trim().toLowerCase();
+            const tagQ = document.getElementById('tagFilter').value.trim().toLowerCase();
             const sort = document.getElementById('historySort').value;
             let rows = historyCache.slice();
             if (q) rows = rows.filter(r => String(r.product_title || '').toLowerCase().includes(q));
+            if (tagQ) rows = rows.filter(r => (r.tags || []).some(tg => tg.toLowerCase().includes(tagQ)));
             rows.sort((a, b) => {
                 if (sort === 'date_asc') return new Date(a.created_at) - new Date(b.created_at);
                 if (sort === 'co2_desc') return (parseFloat(b.total_co2eq) || 0) - (parseFloat(a.total_co2eq) || 0);
@@ -974,6 +1040,10 @@
                         '<span>📦 ' + esc(h.functional_unit || '—') + '</span>' +
                         '<span>🌱 ' + fmtCo2(h.total_co2eq) + ' kgCO₂e</span>' +
                     '</div>' +
+                    '<div class="history-tags">' +
+                        (h.tags || []).map(tg => '<span class="tag-chip">' + esc(tg) + '<span class="tag-remove" data-id="' + h.id + '" data-tag="' + esc(tg) + '">&times;</span></span>').join('') +
+                        '<div class="tag-input-wrap"><input type="text" class="tag-input" placeholder="+ тег" data-id="' + h.id + '"></div>' +
+                    '</div>' +
                     '<div class="card-actions">' +
                         '<a href="/report.html?history=' + h.id + '" class="btn btn-primary btn-sm">' + t('view') + '</a>' +
                         '<button class="btn btn-ghost btn-sm add-to-project-btn" data-id="' + h.id + '">📁 ' + t('to_project') + '</button>' +
@@ -986,6 +1056,7 @@
         }
 
         document.getElementById('historySearch').addEventListener('input', () => { historyShown = PAGE; renderHistory(); });
+        document.getElementById('tagFilter').addEventListener('input', () => { historyShown = PAGE; renderHistory(); });
         document.getElementById('historySort').addEventListener('change', () => { historyShown = PAGE; renderHistory(); });
         document.getElementById('loadMoreBtn').addEventListener('click', () => { historyShown += PAGE; renderHistory(); });
 
@@ -1050,28 +1121,31 @@
         }
 
         /* ══════════════════════════════════════════════════
-           PROJECTS: create / rename / delete / expand
+           PROJECTS: create / rename / delete / expand / archive
            ══════════════════════════════════════════════════ */
         async function loadProjects() {
             if (!currentUser || !db) return;
             try {
-                const { data: projects, error: pErr } = await db.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+                const { data: allProjects, error: pErr } = await db.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
                 if (pErr) throw pErr;
+                const projects = allProjects || [];
+                const visibleProjects = projects.filter(p => !p.archived);
+                const archivedProjects = projects.filter(p => p.archived);
                 const list = document.getElementById('projectsList');
-                if (!projects || projects.length === 0) {
+                if (projects.length === 0) {
                     list.innerHTML = '<div class="empty"><div class="empty-icon">📁</div><div class="empty-text">' + t('no_projects') + '</div><button class="btn btn-primary" id="emptyCreateBtn">' + t('create') + '</button></div>';
                     const b = document.getElementById('emptyCreateBtn');
                     if (b) b.addEventListener('click', createProject);
                     return;
                 }
                 let html = '';
-                for (const p of projects) {
+                for (const p of visibleProjects) {
                     const { data: calcs } = await db.from('project_calculations').select('*').eq('project_id', p.id).order('created_at', { ascending: false });
                     const calcCount = (calcs || []).length;
                     html += '<div class="card" id="proj-' + p.id + '">';
                     html += '<div class="card-header">';
                     html += '<div style="flex:1"><div class="card-title">' + esc(p.name) + '</div></div>';
-                    html += '<div style="display:flex;align-items:center;gap:8px"><span class="badge badge-blue">' + calcCount + ' ' + t('calcs_count') + '</span><div class="card-date">' + fmtDate(p.created_at) + '</div></div>';
+                    html += '<div style="display:flex;align-items:center;gap:8px"><span class="badge badge-blue">' + calcCount + ' ' + t('calcs_count') + '</span><button class="archive-btn" data-id="' + p.id + '" title="📦">📦</button><div class="card-date">' + fmtDate(p.created_at) + '</div></div>';
                     html += '</div>';
                     if (calcs && calcs.length > 0) {
                         html += '<div class="project-calcs" style="display:none">';
@@ -1094,7 +1168,50 @@
                     html += '</div>';
                     html += '</div>';
                 }
+                if (archivedProjects.length > 0) {
+                    html += '<div class="archived-section">';
+                    html += '<button class="archived-toggle' + (archivedProjectsExpanded ? ' active' : '') + '" id="archivedToggle">' + (archivedProjectsExpanded ? t('hide_archived') : t('show_archived')) + ' (' + archivedProjects.length + ')</button>';
+                    html += '<div id="archivedList" style="display:' + (archivedProjectsExpanded ? 'block' : 'none') + ';margin-top:12px">';
+                    for (const p of archivedProjects) {
+                        const { data: calcs } = await db.from('project_calculations').select('*').eq('project_id', p.id).order('created_at', { ascending: false });
+                        const calcCount = (calcs || []).length;
+                        html += '<div class="card" id="proj-' + p.id + '" style="opacity:0.6">';
+                        html += '<div class="card-header">';
+                        html += '<div style="flex:1"><div class="card-title">' + esc(p.name) + ' <span class="badge badge-amber" style="font-size:10px">' + t('archived_title') + '</span></div></div>';
+                        html += '<div style="display:flex;align-items:center;gap:8px"><span class="badge badge-blue">' + calcCount + ' ' + t('calcs_count') + '</span><button class="archive-btn" data-id="' + p.id + '" title="📦">📦</button><div class="card-date">' + fmtDate(p.created_at) + '</div></div>';
+                        html += '</div>';
+                        if (calcs && calcs.length > 0) {
+                            html += '<div class="project-calcs" style="display:none">';
+                            calcs.forEach(c => {
+                                const product = (c.report_data && c.report_data.product_title) || t('unnamed');
+                                const total = (c.report_data && c.report_data.total_co2eq) || 0;
+                                html += '<div class="calc-item">';
+                                html += '<div style="cursor:pointer;flex:1" onclick="window.location.href=\'/report.html?history=' + c.id + '\'"><div class="calc-name">' + esc(product) + '</div><div class="calc-date">' + fmtDate(c.created_at) + '</div></div>';
+                                html += '<div style="display:flex;align-items:center;gap:10px"><div class="calc-total">' + fmtCo2(total) + ' kgCO₂e</div>';
+                                html += '<button class="btn btn-danger btn-sm delete-projcalc-btn" data-id="' + c.id + '" title="' + t('delete') + '">✕</button></div>';
+                                html += '</div>';
+                            });
+                            html += '</div>';
+                        }
+                        html += '<div class="card-actions">';
+                        html += '<button class="btn btn-ghost btn-sm toggle-calcs-btn" data-id="' + p.id + '">▸ ' + t('calculations') + '</button>';
+                        html += '<button class="btn btn-danger btn-sm delete-project-btn" data-id="' + p.id + '">' + t('delete') + '</button>';
+                        html += '</div>';
+                        html += '</div>';
+                    }
+                    html += '</div></div>';
+                }
                 list.innerHTML = html;
+                const archivedToggleBtn = document.getElementById('archivedToggle');
+                if (archivedToggleBtn) {
+                    archivedToggleBtn.addEventListener('click', () => {
+                        archivedProjectsExpanded = !archivedProjectsExpanded;
+                        const archivedList = document.getElementById('archivedList');
+                        archivedList.style.display = archivedProjectsExpanded ? 'block' : 'none';
+                        archivedToggleBtn.textContent = (archivedProjectsExpanded ? t('hide_archived') : t('show_archived')) + ' (' + archivedProjects.length + ')';
+                        archivedToggleBtn.classList.toggle('active', archivedProjectsExpanded);
+                    });
+                }
             } catch (e) {
                 console.error('loadProjects error:', e);
                 showToast(t('err_load_projects') + (e.message || e));
@@ -1146,6 +1263,18 @@
                 loadProjects(); loadStats();
                 showToast(t('toast_calc_deleted'));
             } catch (e) { showToast(t('err_delete') + (e.message || e)); }
+        }
+
+        async function toggleArchive(projectId) {
+            try {
+                const { data: project } = await db.from('user_projects').select('archived').eq('id', projectId).single();
+                if (!project) return;
+                const newArchived = !project.archived;
+                await db.from('user_projects').update({ archived: newArchived }).eq('id', projectId);
+                if (newArchived) archivedProjectsExpanded = true;
+                loadProjects();
+                showToast(newArchived ? t('toast_archived') : t('toast_unarchived'));
+            } catch (e) { showToast(t('err_generic') + (e.message || e)); }
         }
 
         /* ══════════════════════════════════════════════════
@@ -1325,6 +1454,13 @@
            Delegated clicks (share / delete / rename / toggle / to-project)
            ══════════════════════════════════════════════════ */
         document.addEventListener('click', (e) => {
+            /* Tag remove */
+            const tagRemove = e.target.closest('.tag-remove');
+            if (tagRemove) {
+                e.stopPropagation();
+                removeTag(tagRemove.dataset.id, tagRemove.dataset.tag);
+                return;
+            }
             const shareProject = e.target.closest('.share-project-btn');
             if (shareProject) {
                 e.stopPropagation();
@@ -1358,7 +1494,200 @@
             if (delProject) { deleteProject(delProject.dataset.id); return; }
             const delProjCalc = e.target.closest('.delete-projcalc-btn');
             if (delProjCalc) { e.stopPropagation(); deleteCalcFromProject(delProjCalc.dataset.id); return; }
+            const archiveBtn = e.target.closest('.archive-btn');
+            if (archiveBtn) {
+                e.stopPropagation();
+                toggleArchive(archiveBtn.dataset.id);
+                return;
+            }
         });
+
+        /* ══════════════════════════════════════════════════
+           Batch operations
+           ══════════════════════════════════════════════════ */
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('history-checkbox')) {
+                const checked = document.querySelectorAll('.history-checkbox:checked').length;
+                const batchBar = document.getElementById('batchBar');
+                if (checked > 0) {
+                    batchBar.style.display = 'flex';
+                } else {
+                    batchBar.style.display = 'none';
+                }
+                document.getElementById('batchCount').textContent = checked;
+            }
+        });
+
+        document.getElementById('batchDelete')?.addEventListener('click', async () => {
+            const ids = [...document.querySelectorAll('.history-checkbox:checked')].map(cb => cb.value);
+            if (!ids.length) return;
+            if (!confirm(t('batch_confirm_delete') + ' ' + ids.length)) return;
+            for (const id of ids) {
+                await db.from('user_history').delete().eq('id', id);
+            }
+            historyCache = historyCache.filter(h => !ids.includes(h.id));
+            document.getElementById('batchBar').style.display = 'none';
+            document.querySelectorAll('.history-checkbox:checked').forEach(cb => cb.checked = false);
+            renderHistory();
+            renderOverview();
+            loadStats();
+            showToast(t('toast_deleted'));
+        });
+
+        document.getElementById('batchExport')?.addEventListener('click', () => {
+            const ids = [...document.querySelectorAll('.history-checkbox:checked')].map(cb => cb.value);
+            const rows = historyCache.filter(h => ids.includes(h.id));
+            if (!rows.length) return;
+            const head = ['date', 'product', 'functional_unit', 'total_co2eq_kg'];
+            const csv = [head.join(';')].concat(rows.map(r => [
+                new Date(r.created_at).toISOString().slice(0, 10),
+                '"' + String(r.product_title || '').replace(/"/g, '""') + '"',
+                '"' + String(r.functional_unit || '').replace(/"/g, '""') + '"',
+                String(parseFloat(r.total_co2eq) || 0).replace('.', ',')
+            ].join(';'))).join('\r\n');
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'lca-history-batch.csv';
+            document.body.appendChild(a); a.click(); a.remove();
+            URL.revokeObjectURL(url);
+            showToast(t('toast_csv_done'));
+        });
+
+        document.getElementById('batchDeselect')?.addEventListener('click', () => {
+            document.querySelectorAll('.history-checkbox:checked').forEach(cb => cb.checked = false);
+            document.getElementById('batchBar').style.display = 'none';
+        });
+
+        /* ══════════════════════════════════════════════════
+           Move calculation between projects
+           ══════════════════════════════════════════════════ */
+        document.addEventListener('change', async (e) => {
+            if (e.target.classList.contains('move-history-btn')) {
+                const targetProjectId = e.target.value;
+                if (!targetProjectId) return;
+                const historyId = e.target.dataset.id;
+                try {
+                    const row = historyCache.find(h => String(h.id) === String(historyId));
+                    if (!row) return;
+                    const reportData = row.report_data || {
+                        product_title: row.product_title,
+                        functional_unit: row.functional_unit,
+                        total_co2eq: row.total_co2eq
+                    };
+                    // Check if already in this project
+                    const { data: existing } = await db.from('project_calculations').select('id').eq('project_id', targetProjectId).eq('user_id', currentUser.id).limit(1);
+                    const alreadyIn = (existing || []).some(c => {
+                        const rd = c.report_data || {};
+                        return String(rd.product_title) === String(row.product_title) && String(rd.functional_unit) === String(row.functional_unit);
+                    });
+                    if (!alreadyIn) {
+                        const { error } = await db.from('project_calculations').insert({
+                            project_id: targetProjectId,
+                            user_id: currentUser.id,
+                            report_data: reportData
+                        });
+                        if (error) throw error;
+                    }
+                    showToast(t('move_to_project_done'));
+                    e.target.value = '';
+                } catch (err) {
+                    showToast(t('err_generic') + (err.message || err));
+                    e.target.value = '';
+                }
+            }
+        });
+
+        /* ══════════════════════════════════════════════════
+           Extended stats
+           ══════════════════════════════════════════════════ */
+        async function loadExtendedStats() {
+            if (!currentUser || !db) return null;
+            try {
+                const { data, error } = await db.from('user_history').select('total_co2eq, created_at').eq('user_id', currentUser.id);
+                if (error) throw error;
+                if (!data || !data.length) return null;
+
+                // CO2 by month
+                const byMonth = {};
+                data.forEach(d => {
+                    const month = new Date(d.created_at).toISOString().slice(0, 7);
+                    byMonth[month] = (byMonth[month] || 0) + (d.total_co2eq || 0);
+                });
+
+                // Top 5 heaviest
+                const top5 = [...data].sort((a, b) => (b.total_co2eq || 0) - (a.total_co2eq || 0)).slice(0, 5);
+
+                // Average CO2
+                const avg = data.reduce((s, d) => s + (d.total_co2eq || 0), 0) / (data.length || 1);
+
+                return { byMonth, top5, avg, count: data.length };
+            } catch (e) {
+                console.error('loadExtendedStats error:', e);
+                return null;
+            }
+        }
+
+        async function renderExtendedStats() {
+            const stats = await loadExtendedStats();
+            if (!stats) return;
+
+            // Add extended stats panel to overview after sparkline
+            const existingPanel = document.getElementById('extendedStatsPanel');
+            if (existingPanel) existingPanel.remove();
+
+            let html = '<div class="panel" id="extendedStatsPanel" style="margin-top:16px">';
+            html += '<h3>📈 ' + t('batch_total_count') + ': ' + stats.count + '</h3>';
+
+            // By month
+            html += '<div style="margin-top:14px">';
+            html += '<div style="font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:8px">' + t('batch_month') + '</div>';
+            const months = Object.keys(stats.byMonth).sort().slice(-6);
+            months.forEach(m => {
+                const val = stats.byMonth[m];
+                const pct = Math.min(100, (val / Math.max(...Object.values(stats.byMonth))) * 100);
+                html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">';
+                html += '<span style="font-size:12px;color:var(--ink-mute);width:60px;font-family:var(--mono)">' + m + '</span>';
+                html += '<div style="flex:1;height:8px;background:var(--bg-soft);border-radius:4px;overflow:hidden">';
+                html += '<div style="height:100%;width:' + pct + '%;background:var(--jade);border-radius:4px;transition:width .3s"></div>';
+                html += '</div>';
+                html += '<span style="font-size:12px;font-weight:600;color:var(--ink-soft);font-family:var(--mono);min-width:50px;text-align:right">' + fmtCo2(val) + ' kg</span>';
+                html += '</div>';
+            });
+            html += '</div>';
+
+            // Top 5
+            html += '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--rule)">';
+            html += '<div style="font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:8px">' + t('batch_top5') + '</div>';
+            stats.top5.forEach((d, i) => {
+                html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:13px">';
+                html += '<span style="color:var(--ink-soft)">' + (i + 1) + '. ' + esc(d.product_title || t('unnamed')) + '</span>';
+                html += '<span style="font-family:var(--mono);font-weight:700;color:var(--jade)">' + fmtCo2(d.total_co2eq) + ' kg</span>';
+                html += '</div>';
+            });
+            html += '</div>';
+
+            // Average
+            html += '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center">';
+            html += '<span style="font-size:13px;font-weight:600;color:var(--ink-soft)">' + t('batch_avg') + '</span>';
+            html += '<span style="font-family:var(--mono);font-weight:800;color:var(--jade);font-size:16px">' + fmtCo2(stats.avg) + ' kgCO₂e</span>';
+            html += '</div>';
+
+            html += '</div>';
+
+            // Insert after sparkline panel
+            const sparkPanel = document.querySelector('#tab-overview .panel');
+            if (sparkPanel) {
+                sparkPanel.insertAdjacentHTML('afterend', html);
+            }
+        }
+
+        // Hook extended stats into overview render
+        const origRenderOverview = renderOverview;
+        renderOverview = function() {
+            origRenderOverview();
+            renderExtendedStats();
+        };
 
         init();
     </script>
