@@ -548,6 +548,16 @@
 
     <script>
         // NOTE: Supabase 'user_projects' needs: ALTER TABLE user_projects ADD COLUMN IF NOT EXISTS archived BOOLEAN DEFAULT false;
+        // NOTE: Supabase 'project_shares' table:
+        // CREATE TABLE IF NOT EXISTS project_shares (
+        //   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        //   project_id UUID NOT NULL,
+        //   owner_id UUID NOT NULL,
+        //   shared_email TEXT NOT NULL,
+        //   role TEXT DEFAULT 'read',
+        //   status TEXT DEFAULT 'pending',
+        //   created_at TIMESTAMPTZ DEFAULT now()
+        // );
         const SB_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
 
@@ -1164,6 +1174,7 @@
             h += '<button class="btn btn-ghost btn-sm rename-project-btn" data-id="' + p.id + '" data-name="' + esc(p.name) + '">✏️ ' + t('rename') + '</button>';
             h += '<button class="share-project-btn btn-icon" data-id="' + p.id + '" title="🔗">🔗</button>';
             h += '<button class="archive-btn" data-id="' + p.id + '" title="' + (p.archived ? t('toast_restored') : t('toast_archived')) + '" style="background:none;border:none;cursor:pointer;font-size:14px;padding:4px">' + (p.archived ? '📤' : '📦') + '</button>';
+            h += '<button class="email-share-btn" data-id="' + p.id + '" title="Поделиться по email" style="background:none;border:none;cursor:pointer;font-size:14px;padding:4px">👥</button>';
             h += '<button class="btn btn-danger btn-sm delete-project-btn" data-id="' + p.id + '">' + t('delete') + '</button>';
             h += '</div>';
             h += '</div>';
@@ -1487,6 +1498,37 @@
             if (delProjCalc) { e.stopPropagation(); deleteCalcFromProject(delProjCalc.dataset.id); return; }
             const archiveBtn = e.target.closest('.archive-btn');
             if (archiveBtn) { archiveProject(archiveBtn.dataset.id); return; }
+        });
+
+        /* ══ Project sharing by email ══ */
+        let currentShareProjectId = null;
+        document.addEventListener('click', (e) => {
+          const btn = e.target.closest('.email-share-btn');
+          if (!btn) return;
+          currentShareProjectId = btn.dataset.id;
+          document.getElementById('shareEmail').value = '';
+          document.getElementById('modalShare').style.display = 'flex';
+        });
+
+        document.getElementById('modalShare')?.addEventListener('click', (e) => {
+          if (e.target.id === 'modalShare') e.target.style.display = 'none';
+        });
+
+        document.getElementById('shareConfirmBtn')?.addEventListener('click', async () => {
+          const email = document.getElementById('shareEmail').value.trim();
+          const role = document.getElementById('shareRole').value;
+          if (!email || !currentShareProjectId) return;
+          try {
+            await db.from('project_shares').insert({
+              project_id: currentShareProjectId,
+              owner_id: currentUser.id,
+              shared_email: email,
+              role: role,
+              status: 'pending'
+            });
+            document.getElementById('modalShare').style.display = 'none';
+            showToast('Приглашение отправлено на ' + email);
+          } catch (e) { showToast('Ошибка: ' + (e.message || e)); }
         });
 
         init();
