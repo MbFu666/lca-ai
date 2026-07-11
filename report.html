@@ -9173,11 +9173,15 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Fallback: delegate click on agent panel for close button
   document.getElementById('agent')?.addEventListener('click', function(e) {
     if (e.target.closest('#agentClose') || e.target.closest('.agent-close')) {
-      document.getElementById('agent')?.classList.remove('show');
+      const ag = document.getElementById('agent');
+      ag?.classList.remove('show');
+      ag?.setAttribute('aria-hidden', 'true');
     }
   });
   document.getElementById('agentFab')?.addEventListener('click', function() {
-    document.getElementById('agent')?.classList.add('show');
+    const ag = document.getElementById('agent');
+    ag?.classList.add('show');
+    ag?.setAttribute('aria-hidden', 'false');
   });
   // На странице отчёта показываем FAB
   if (document.getElementById('agentFab')) {
