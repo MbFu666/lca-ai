@@ -6359,7 +6359,7 @@ const I18N = {
 
 const LANG_NAMES = { ru: 'Russian', en: 'English', zh: 'Chinese (Simplified)' };
 
-let currentLang = 'zh';
+let currentLang = localStorage.getItem('lca-lang') || 'ru';
 let currentMode = 'full';
 let uploadedImage = null;
 let phaseTimer = null;
@@ -7075,6 +7075,7 @@ function repairTruncatedJson(s) {
    Renderer
    ============================================================ */
 function renderReport(d) {
+  sessionStorage.setItem('lca-last-report', JSON.stringify(d));
   const t = I18N[currentLang];
   lastReport = d;
 
@@ -9174,6 +9175,13 @@ document.addEventListener('DOMContentLoaded', async function() {
       if (cached) {
         try { renderReport(JSON.parse(cached)); sessionStorage.removeItem('lca-report'); } catch(e) {}
       }
+      // If no data from URL params or sessionStorage, try last-report cache
+      if (!cached) {
+        const lastCached = sessionStorage.getItem('lca-last-report');
+        if (lastCached) {
+          try { renderReport(JSON.parse(lastCached)); } catch(e) {}
+        }
+      }
     }
   })();
 
@@ -9198,11 +9206,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
-  // Автоопределение языка: браузерный > localStorage > ru по умолчанию
+  // Автоопределение языка: localStorage > браузерный > ru по умолчанию
   var browserLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
   var savedLang = localStorage.getItem('lca-lang');
-  if (savedLang && savedLang !== 'zh') {
-    // Используем сохранённый язык, кроме zh (китайский не по умолчанию)
+  if (savedLang) {
     applyLanguage(savedLang);
   } else if (browserLang.startsWith('ru')) {
     applyLanguage('ru');
@@ -9219,12 +9226,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   });
   
-  document.getElementById('submitBtn').addEventListener('click', run);
-  document.getElementById('productInput').addEventListener('keydown', function(e) {
+  document.getElementById('submitBtn')?.addEventListener('click', run);
+  document.getElementById('productInput')?.addEventListener('keydown', function(e) {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') run();
   });
   
-  document.getElementById('backToHome').addEventListener('click', function() {
+  document.getElementById('backToHome')?.addEventListener('click', function() {
     window.location.href = '/';
   });
   
@@ -9235,24 +9242,24 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (viewBtn) switchView(viewBtn.dataset.view);
   });
   
-  document.getElementById('exportExcel').addEventListener('click', function() { if (lastReport) { buildExcelPreview(lastReport); showModal('modalExcel'); } });
-  document.getElementById('exportWord').addEventListener('click', function() { if (lastReport) showWordPreview(lastReport); });
-  document.getElementById('exportJson').addEventListener('click', function() { if (lastReport) downloadJson(lastReport); });
-  document.getElementById('exportPdf').addEventListener('click', function() { showPdfPreview(); });
-  document.getElementById('exportPrint').addEventListener('click', function() { window.print(); });
+  document.getElementById('exportExcel')?.addEventListener('click', function() { if (lastReport) { buildExcelPreview(lastReport); showModal('modalExcel'); } });
+  document.getElementById('exportWord')?.addEventListener('click', function() { if (lastReport) showWordPreview(lastReport); });
+  document.getElementById('exportJson')?.addEventListener('click', function() { if (lastReport) downloadJson(lastReport); });
+  document.getElementById('exportPdf')?.addEventListener('click', function() { showPdfPreview(); });
+  document.getElementById('exportPrint')?.addEventListener('click', function() { window.print(); });
   
-  document.getElementById('agentClose').addEventListener('click', function() {
-    document.getElementById('agent').classList.remove('show');
+  document.getElementById('agentClose')?.addEventListener('click', function() {
+    document.getElementById('agent')?.classList.remove('show');
   });
-  document.getElementById('agentFab').addEventListener('click', function() {
-    document.getElementById('agent').classList.add('show');
+  document.getElementById('agentFab')?.addEventListener('click', function() {
+    document.getElementById('agent')?.classList.add('show');
   });
   // На странице отчёта показываем FAB
   if (document.getElementById('agentFab')) {
     document.getElementById('agentFab').classList.add('show');
   }
-  document.getElementById('agentSend').addEventListener('click', function() {
-    var msg = document.getElementById('agentMsg').value.trim();
+  document.getElementById('agentSend')?.addEventListener('click', function() {
+    var msg = document.getElementById('agentMsg')?.value?.trim() || '';
     if (typeof agentChatMode !== 'undefined' && agentChatMode) { sendChatMessage(msg); } else { applyAgentAnswers(); }
   });
   
