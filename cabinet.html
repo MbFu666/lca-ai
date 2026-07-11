@@ -816,12 +816,11 @@
            Tabs
            ══════════════════════════════════════════════════ */
         document.querySelectorAll('.menu a[data-tab]').forEach(a => {
-            a.addEventListener('click', e => {
+            a.addEventListener('click', async e => {
                 e.preventDefault();
                 const tab = a.dataset.tab;
                 if (tab === 'logout') {
-                    if (db) db.auth.signOut();
-                    // Only clear Supabase keys, keep theme/language preferences
+                    if (db) await db.auth.signOut();
                     localStorage.removeItem('supabase_user');
                     localStorage.removeItem('supabase_token');
                     window.location.href = '/';
