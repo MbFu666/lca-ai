@@ -792,7 +792,14 @@
                 share_invalid_email: '请输入有效的邮箱地址',
                 move_to_project: '移至', move_to_project_done: '已移至项目',
                 batch_select: '已选:', batch_export: '📥 导出', batch_delete: '🗑 删除', batch_cancel: '取消',
-                batch_confirm_delete: '删除计算记录？', batch_month: '按月统计', batch_top5: 'Top 5 最重', batch_avg: '平均 CO₂', batch_total_count: '计算总数'
+                batch_confirm_delete: '删除计算记录？', batch_month: '按月统计', batch_top5: 'Top 5 最重', batch_avg: '平均 CO₂', batch_total_count: '计算总数',
+                api_keys_title: 'API 密钥', api_keys_create: '+ 创建密钥',
+                api_keys_empty: '暂无 API 密钥', api_keys_revoke: '撤销',
+                api_keys_revoked: '密钥已撤销', api_keys_created: '密钥已创建',
+                webhook_title: 'Webhook', webhook_desc: '计算完成时发送 POST 请求',
+                webhook_test: '测试', webhook_saved: 'Webhook 已保存',
+                webhook_ok: 'Webhook 正常！', webhook_err: 'Webhook 错误',
+                export_title: '导出', export_format_label: '默认格式'
             }
         };
         let cabinetLang = 'ru';
@@ -1572,6 +1579,93 @@
             showToast(t('toast_profile_saved'));
             renderProfile();
             renderGreeting();
+        });
+
+        /* ══════════════════════════════════════════════════
+           API Keys
+           ══════════════════════════════════════════════════ */
+        async function loadApiKeys() {
+            if (!currentUser || !db) return;
+            try {
+                const { data, error } = await db.from('api_keys').select('id, name, created_at').eq('user_id', currentUser.id);
+                if (error) throw error;
+                const host = document.getElementById('apiKeysList');
+                if (!data || !data.length) { host.innerHTML = '<p style="color:var(--ink-mute)">' + esc(t('api_keys_empty')) + '</p>'; return; }
+                host.innerHTML = data.map(k => `
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--rule)">
+                        <div>
+                            <div style="font-weight:600">${esc(k.name || 'Unnamed')}</div>
+                            <div style="font-size:11px;color:var(--ink-mute)">${new Date(k.created_at).toLocaleDateString()}</div>
+                        </div>
+                        <button class="revoke-key-btn" data-id="${k.id}" style="color:var(--c-rust);background:none;border:none;cursor:pointer;font-size:12px">${t('api_keys_revoke')}</button>
+                    </div>
+                `).join('');
+            } catch (e) { console.error('loadApiKeys error:', e); }
+        }
+
+        document.getElementById('createApiKeyBtn')?.addEventListener('click', async () => {
+            const name = await promptModal(t('api_keys_title'));
+            if (!name) return;
+            const key = 'lca-' + Array.from(crypto.getRandomValues(new Uint8Array(24))).map(b => b.toString(16).padStart(2, '0')).join('');
+            try {
+                const { error } = await db.from('api_keys').insert({ user_id: currentUser.id, name, key_hash: key });
+                if (error) throw error;
+                showToast(t('api_keys_created') + ': ' + key + '\n' + (cabinetLang === 'zh' ? '请复制 — 将不再显示' : cabinetLang === 'en' ? 'Copy it — it won\'t be shown again' : 'Скопируйте его — он больше не будет показан'));
+                loadApiKeys();
+            } catch (e) { showToast(t('err_generic') + (e.message || e)); }
+        });
+
+        document.addEventListener('click', async (e) => {
+            const btn = e.target.closest('.revoke-key-btn');
+            if (!btn) return;
+            if (!confirm(t('api_keys_revoke') + '?')) return;
+            try {
+                const { error } = await db.from('api_keys').delete().eq('id', btn.dataset.id);
+                if (error) throw error;
+                showToast(t('api_keys_revoked'));
+                loadApiKeys();
+            } catch (e) { showToast(t('err_generic') + (e.message || e)); }
+        });
+
+        /* ══════════════════════════════════════════════════
+           Webhook
+           ══════════════════════════════════════════════════ */
+        (function() {
+            if (!currentUser) return;
+            const url = (currentUser.user_metadata || {}).webhook_url || '';
+            const input = document.getElementById('webhookUrl');
+            if (input) input.value = url;
+        })();
+
+        document.getElementById('webhookUrl')?.addEventListener('change', async (e) => {
+            if (!currentUser || !db) return;
+            try {
+                const { error } = await db.auth.updateUser({ data: { webhook_url: e.target.value } });
+                if (error) throw error;
+                currentUser.user_metadata = Object.assign({}, currentUser.user_metadata, { webhook_url: e.target.value });
+                showToast(t('webhook_saved'));
+            } catch (e) { showToast(t('err_generic') + (e.message || e)); }
+        });
+
+        document.getElementById('testWebhookBtn')?.addEventListener('click', async () => {
+            const url = document.getElementById('webhookUrl')?.value;
+            if (!url) return;
+            try {
+                await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ test: true, timestamp: Date.now() }) });
+                showToast(t('webhook_ok'));
+            } catch (e) { showToast(t('webhook_err')); }
+        });
+
+        /* ══════════════════════════════════════════════════
+           Export format default
+           ══════════════════════════════════════════════════ */
+        (function() {
+            const saved = localStorage.getItem('lca-export-format');
+            if (saved) document.getElementById('exportFormat').value = saved;
+        })();
+
+        document.getElementById('exportFormat')?.addEventListener('change', (e) => {
+            localStorage.setItem('lca-export-format', e.target.value);
         });
 
         /* ══════════════════════════════════════════════════
