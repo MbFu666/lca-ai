@@ -2718,6 +2718,7 @@ async function saveToProject(projectId, report) {
 
   /* ═══════════════════════════════════════════════
        AI AGENT — right side panel with refinement Q&A
+       (consolidated — single source of truth)
      ═══════════════════════════════════════════════ */
   .agent {
     position: fixed;
@@ -2730,12 +2731,12 @@ async function saveToProject(projectId, report) {
     box-shadow: -12px 0 32px -12px rgba(14,46,39,0.1);
     transform: translateX(100%);
     transition: transform .3s cubic-bezier(0.22, 1, 0.36, 1);
-    z-index: 120;
+    z-index: 200;
     display: flex;
     flex-direction: column;
     overflow: hidden;
   }
-  .agent.show { transform: translateX(0); }
+  .agent.show { transform: translateX(0); z-index: 200; }
 
   .agent-head {
     flex-shrink: 0;
@@ -2743,7 +2744,7 @@ async function saveToProject(projectId, report) {
     border-bottom: 1px solid var(--rule);
     display: flex;
     align-items: center;
-    gap: 12px;
+    justify-content: space-between;
     background: linear-gradient(135deg, var(--jade-bg) 0%, var(--bg) 80%);
   }
   .agent-head .avatar {
@@ -3068,34 +3069,8 @@ async function saveToProject(projectId, report) {
   }
 
   /* ═══════════════════════════════════════════════
-       AI AGENT SIDEBAR
+       AI AGENT SIDEBAR — removed duplicate (consolidated above)
      ═══════════════════════════════════════════════ */
-  .agent {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 380px;
-    height: 100vh;
-    background: var(--bg);
-    border-left: 1px solid var(--rule);
-    box-shadow: -12px 0 32px -12px rgba(14,46,39,0.1);
-    transform: translateX(100%);
-    transition: transform .3s cubic-bezier(0.22, 1, 0.36, 1);
-    z-index: 120;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .agent.show { transform: translateX(0); }
-  .agent-head {
-    flex-shrink: 0;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--rule);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: linear-gradient(135deg, var(--jade-bg) 0%, var(--bg) 70%);
-  }
   .agent-title {
     display: flex;
     align-items: center;
@@ -3124,6 +3099,9 @@ async function saveToProject(projectId, report) {
     border-radius: 50%;
     cursor: pointer;
     font-size: 14px;
+    pointer-events: auto;
+    z-index: 210;
+    position: relative;
   }
   .agent-close:hover { color: var(--ink); background: var(--rule); }
 
@@ -9242,14 +9220,28 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (viewBtn) switchView(viewBtn.dataset.view);
   });
   
-  document.getElementById('exportExcel')?.addEventListener('click', function() { if (lastReport) { buildExcelPreview(lastReport); showModal('modalExcel'); } });
-  document.getElementById('exportWord')?.addEventListener('click', function() { if (lastReport) showWordPreview(lastReport); });
+  document.getElementById('exportExcel')?.addEventListener('click', function() {
+    console.log('[Excel] lastReport:', !!lastReport, 'type:', typeof lastReport);
+    if (lastReport) { buildExcelPreview(lastReport); showModal('modalExcel'); }
+    else { showToast(currentLang === 'ru' ? 'Нет данных для экспорта' : currentLang === 'zh' ? '没有可导出的数据' : 'No data to export'); }
+  });
+  document.getElementById('exportWord')?.addEventListener('click', function() {
+    console.log('[Word] lastReport:', !!lastReport, 'type:', typeof lastReport);
+    if (lastReport) showWordPreview(lastReport);
+    else { showToast(currentLang === 'ru' ? 'Нет данных для экспорта' : currentLang === 'zh' ? '没有可导出的数据' : 'No data to export'); }
+  });
   document.getElementById('exportJson')?.addEventListener('click', function() { if (lastReport) downloadJson(lastReport); });
   document.getElementById('exportPdf')?.addEventListener('click', function() { showPdfPreview(); });
   document.getElementById('exportPrint')?.addEventListener('click', function() { window.print(); });
   
   document.getElementById('agentClose')?.addEventListener('click', function() {
     document.getElementById('agent')?.classList.remove('show');
+  });
+  // Fallback: delegate click on agent panel for close button
+  document.getElementById('agent')?.addEventListener('click', function(e) {
+    if (e.target.closest('#agentClose') || e.target.closest('.agent-close')) {
+      document.getElementById('agent')?.classList.remove('show');
+    }
   });
   document.getElementById('agentFab')?.addEventListener('click', function() {
     document.getElementById('agent')?.classList.add('show');
