@@ -7282,12 +7282,14 @@ function showNodeDetail(o, cardEl) {
     ${editHtml}
   `;
   
-  // Inline expand: move detail panel below the clicked card
+  // Show detail panel inline
   const panel = $('#detailPanel');
-  if (panel && cardEl && cardEl.parentNode) {
-    cardEl.parentNode.insertBefore(panel, cardEl.nextSibling);
+  if (panel) {
+    if (cardEl && cardEl.parentNode) {
+      cardEl.parentNode.insertBefore(panel, cardEl.nextSibling);
+    }
+    panel.classList.add('show');
   }
-  panel?.classList.add('show');
   
   // Привязка обработчиков для редактирования
   if (o.editable && o.editData) {
@@ -8044,8 +8046,20 @@ async function applyAgentAnswers() {
   `;
 
   // Задержка перед запуском пересчёта (чтобы пользователь увидел процесс)
-  setTimeout(() => {
-    if (lastReport) renderReport(lastReport);
+  setTimeout(async () => {
+    try {
+      const productText = (lastReport.product_title || '') + '\n\n' + agentRefinements;
+      const newData = await callClaude(productText);
+      if (newData && !newData.error) {
+        renderReport(newData);
+        showToast(currentLang === 'ru' ? 'Расчёт обновлён' : currentLang === 'zh' ? '计算已更新' : 'Calculation updated');
+      } else {
+        showToast(currentLang === 'ru' ? 'Ошибка пересчёта' : currentLang === 'zh' ? '重新计算失败' : 'Recalculation failed');
+      }
+    } catch (err) {
+      console.error('[Agent recalc]', err);
+      showToast(currentLang === 'ru' ? 'Ошибка: ' + err.message : 'Error: ' + err.message);
+    }
   }, 1500);
 }
 
