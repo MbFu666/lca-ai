@@ -6517,8 +6517,7 @@ function applyLanguage(lang) {
     if (t[k] !== undefined) el.placeholder = t[k];
   });
 
-  // переcборка чипов-примеров
-  renderExampleChips();
+  // Example chips are on index.html (home page) only
 
   // активная кнопка
   $$('.lang button').forEach(b =>
