@@ -1011,9 +1011,12 @@
            Init & profile
            ══════════════════════════════════════════════════ */
         async function init() {
+            console.log('[Cabinet] init() called');
             db = getSB();
-            if (!db) { showToast(t('err_sb_not_loaded')); return; }
+            if (!db) { console.error('[Cabinet] getSB() returned null'); showToast(t('err_sb_not_loaded')); return; }
+            console.log('[Cabinet] db created, checking session...');
             const { data: { session }, error } = await db.auth.getSession();
+            console.log('[Cabinet] session:', !!session, 'error:', error?.message);
             if (error) { showToast(t('err_auth') + error.message); return; }
             if (!session) { window.location.href = '/login.html'; return; }
             currentUser = session.user;
