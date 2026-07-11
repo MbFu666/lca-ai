@@ -827,7 +827,7 @@
             bar.style.background = colors[Math.max(0, score - 1)] || 'var(--rule)';
         });
 
-        /* ── Avatar File Upload ── */
+        /* ── Avatar File Upload (resized to 100x100 to fit JWT) ── */
         document.getElementById('avatarFileInput').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -835,13 +835,23 @@
 
             const reader = new FileReader();
             reader.onload = (ev) => {
-                const dataUrl = ev.target.result;
-                pendingAvatarBase64 = dataUrl;
-                const previewImg = document.getElementById('avatarPreviewImg');
-                const placeholder = document.getElementById('avatarPlaceholder');
-                previewImg.src = dataUrl;
-                previewImg.style.display = 'block';
-                placeholder.style.display = 'none';
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const size = 100;
+                    canvas.width = size;
+                    canvas.height = size;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, size, size);
+                    const thumb = canvas.toDataURL('image/jpeg', 0.7);
+                    pendingAvatarBase64 = thumb;
+                    const previewImg = document.getElementById('avatarPreviewImg');
+                    const placeholder = document.getElementById('avatarPlaceholder');
+                    previewImg.src = thumb;
+                    previewImg.style.display = 'block';
+                    placeholder.style.display = 'none';
+                };
+                img.src = ev.target.result;
             };
             reader.readAsDataURL(file);
         });
