@@ -7282,8 +7282,11 @@ function showNodeDetail(o, cardEl) {
     ${editHtml}
   `;
   
-  // Show detail panel (don't move it — keep in #step1)
+  // Inline expand: move detail panel below the clicked card
   const panel = $('#detailPanel');
+  if (panel && cardEl && cardEl.parentNode) {
+    cardEl.parentNode.insertBefore(panel, cardEl.nextSibling);
+  }
   panel?.classList.add('show');
   
   // Привязка обработчиков для редактирования
