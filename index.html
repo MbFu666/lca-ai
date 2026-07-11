@@ -6226,6 +6226,11 @@ const I18N = {
     err_api:      'Failed to fetch the calculation.',
     err_parse:    'Response could not be parsed as JSON.',
     err_not_lca:  'This tool only performs <b>life cycle assessment</b> of products and materials. Please describe a specific product, e.g. “1 kg of wheat flour bread”.',
+    /* auth modal */
+    auth_required_title: 'Login Required',
+    auth_required_msg:   'Please login or register to use this feature',
+    auth_required_btn:   'Login / Register',
+    auth_required_close: 'Close',
     examples: [
       { l: 'Rye bread, 1 kg',     v: '1 kg of rye bread, baked in Poland, wrapped in kraft paper' },
       { l: 'T-shirt, 200 g',      v: '1 cotton T-shirt of 200 g, manufactured in Bangladesh, sold in the EU' },
@@ -6396,6 +6401,11 @@ const I18N = {
     err_api:      '计算请求失败。',
     err_parse:    '响应无法解析为 JSON。',
     err_not_lca:  '本工具仅用于产品与材料的<b>生命周期评价</b>。请描述具体产品,例如 “1 kg 小麦粉面包”。',
+    /* auth modal */
+    auth_required_title: '需要登录',
+    auth_required_msg:   '请登录或注册以使用此功能',
+    auth_required_btn:   '登录 / 注册',
+    auth_required_close: '关闭',
     examples: [
       { l: '黑麦面包,1 kg',  v: '1 kg 波兰烘焙的黑麦面包,牛皮纸包装' },
       { l: 'T 恤,200 g',      v: '1 件 200 g 棉质 T 恤,孟加拉国生产,欧盟销售' },
@@ -9327,24 +9337,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   });
   
-  var examples = [
-    { l: '\u9ED1\u9EA6\u9762\u5305, 1 kg', v: '1 kg \u6CE2\u5170\u70D8\u7119\u7684\u9ED1\u9EA6\u9762\u5305\uFF0C\u725B\u76AE\u7EB8\u5305\u88C5' },
-    { l: 'T\u6064, 200g', v: '1 \u4EF6 200g \u68C9\u8D28 T \u6064\uFF0C\u5B5F\u52A0\u62C9\u56FD\u751F\u4EA7' },
-    { l: '1 kWh \u7164\u7535', v: '1 kWh \u6765\u81EA\u7164\u706B\u7535\u5382\u7684\u7535\u529B' },
-    { l: '\u725B\u5976, 1L', v: '1 \u5347 2.5% \u725B\u5976\uFF0C\u767D\u4FC4\u7F57\u65AF\u7267\u573A' }
-  ];
-  var host = document.getElementById('exampleChips');
-  if (host) {
-    examples.forEach(function(ex) {
-      var b = document.createElement('button');
-      b.textContent = ex.l;
-      b.addEventListener('click', function() {
-        document.getElementById('productInput').value = ex.v;
-        document.getElementById('productInput').focus();
-      });
-      host.appendChild(b);
-    });
-  }
+  // Example chips are rendered by renderExampleChips() via applyLanguage()
   
   console.log('[LCA] Init complete');
 });
