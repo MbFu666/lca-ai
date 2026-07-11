@@ -272,7 +272,7 @@
             try {
                 const { error } = await sbClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: REDIRECT } });
                 if (error) showError(translateError(error.message));
-            } catch (err) { showError('Google: ' + err.message); }
+            } catch (err) { showError(translateError(err.message)); }
         });
 
         // NOTE: Requires GitHub provider enabled in Supabase Dashboard → Authentication → Providers
@@ -281,7 +281,7 @@
             try {
                 const { error } = await sbClient.auth.signInWithOAuth({ provider: 'github', options: { redirectTo: REDIRECT } });
                 if (error) showError(translateError(error.message));
-            } catch (err) { showError('GitHub: ' + err.message); }
+            } catch (err) { showError(translateError(err.message)); }
         });
 
         // Supabase uses 'twitter' as the provider name (not 'x')
@@ -290,7 +290,7 @@
             try {
                 const { error } = await sbClient.auth.signInWithOAuth({ provider: 'twitter', options: { redirectTo: REDIRECT } });
                 if (error) showError(translateError(error.message));
-            } catch (err) { showError('X/Twitter: ' + err.message); }
+            } catch (err) { showError(translateError(err.message)); }
         });
 
         document.getElementById('wechatBtn').addEventListener('click', () => {
@@ -336,7 +336,15 @@
             const errors = {
                 'Invalid login credentials': { ru: 'Неверный логин или пароль', en: 'Invalid login credentials', zh: '登录凭证无效' },
                 'Email not confirmed': { ru: 'Email не подтверждён', en: 'Email not confirmed', zh: '邮箱未确认' },
-                'User already registered': { ru: 'Пользователь уже зарегистрирован', en: 'User already registered', zh: '用户已注册' }
+                'User already registered': { ru: 'Пользователь уже зарегистрирован', en: 'User already registered', zh: '用户已注册' },
+                'Invalid email': { ru: 'Некорректный email', en: 'Invalid email', zh: '无效的邮箱' },
+                'Password should be at least 6 characters': { ru: 'Пароль должен содержать минимум 6 символов', en: 'Password should be at least 6 characters', zh: '密码至少需要6个字符' },
+                'Unable to validate email address: invalid format': { ru: 'Некорректный формат email', en: 'Unable to validate email address: invalid format', zh: '无法验证邮箱地址：格式无效' },
+                'Signup is disabled': { ru: 'Регистрация отключена', en: 'Signup is disabled', zh: '注册已关闭' },
+                'Email link is invalid or has expired': { ru: 'Ссылка недействительна или истекла', en: 'Email link is invalid or has expired', zh: '链接无效或已过期' },
+                'Token has expired or is invalid': { ru: 'Токен истёк или недействителен', en: 'Token has expired or is invalid', zh: '令牌已过期或无效' },
+                'For security purposes, you can only request this once every 60 seconds': { ru: 'По соображениям безопасности повторный запрос разрешён раз в 60 секунд', en: 'For security purposes, you can only request this once every 60 seconds', zh: '出于安全考虑，每60秒只能请求一次' },
+                'To login please use the link that was sent to your email': { ru: 'Для входа перейдите по ссылке из письма', en: 'To login please use the link that was sent to your email', zh: '请使用发送到您邮箱的链接登录' }
             };
             for (const [key, translations] of Object.entries(errors)) {
                 if (msg.includes(key)) return translations[loginLang] || translations.en;
