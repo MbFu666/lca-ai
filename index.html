@@ -108,16 +108,30 @@ async function logout() {
   updateAuthUI(false);
 }
 
-// Auth guard — redirect to login if not authenticated
+// Auth guard — show modal if not authenticated
 function requireAuth(action) {
   if (currentUser) return true;
-  const msg = {
-    ru: 'Для этого действия нужно войти в аккаунт',
-    en: 'Please login to continue',
-    zh: '请先登录'
-  }[currentLang] || 'Please login to continue';
-  showToast(msg);
-  setTimeout(() => { window.location.href = '/login.html'; }, 1500);
+  
+  // Create modal if not exists
+  let modal = document.getElementById('modalAuthRequired');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.className = 'modal-mask';
+    modal.id = 'modalAuthRequired';
+    modal.innerHTML = `<div class="modal" style="max-width:400px;text-align:center;padding:32px">
+      <h3 style="margin-bottom:12px" data-i18n="auth_required_title">Требуется авторизация</h3>
+      <p style="margin-bottom:24px;color:var(--ink-soft)" data-i18n="auth_required_msg">Войдите или зарегистрируйтесь, чтобы использовать эту функцию</p>
+      <div style="display:flex;gap:12px;justify-content:center">
+        <a href="/login.html" class="primary" style="padding:10px 24px;border-radius:8px;background:var(--jade);color:white;text-decoration:none" data-i18n="auth_required_btn">Войти / Регистрация</a>
+        <button onclick="closeModal('modalAuthRequired')" style="padding:10px 24px;border-radius:8px;border:1px solid var(--rule);background:var(--bg);cursor:pointer" data-i18n="auth_required_close">Закрыть</button>
+      </div>
+    </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal('modalAuthRequired');
+    });
+  }
+  showModal('modalAuthRequired');
   return false;
 }
 
@@ -5568,6 +5582,28 @@ body::before {
       </div>
     </section>
 
+    <!-- ============== REGISTRATION BENEFITS ============== -->
+    <section class="registration-benefits" style="margin-top:48px;padding:32px;background:var(--bg-soft);border:1px solid var(--rule);border-radius:16px">
+      <h2 style="text-align:center;margin-bottom:24px" data-i18n="reg_benefits_title">Зачем регистрироваться?</h2>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+        <div style="text-align:center">
+          <div style="font-size:32px;margin-bottom:8px">☁️</div>
+          <h3 data-i18n="reg_benefits_1_title">Облачное хранение</h3>
+          <p style="font-size:13px;color:var(--ink-soft)" data-i18n="reg_benefits_1_desc">Все расчёты сохраняются в облаке и доступны с любого устройства</p>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:32px;margin-bottom:8px">📁</div>
+          <h3 data-i18n="reg_benefits_2_title">Проекты</h3>
+          <p style="font-size:13px;color:var(--ink-soft)" data-i18n="reg_benefits_2_desc">Группируйте расчёты по проектам для удобного сравнения</p>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:32px;margin-bottom:8px">🔗</div>
+          <h3 data-i18n="reg_benefits_3_title">Поделиться</h3>
+          <p style="font-size:13px;color:var(--ink-soft)" data-i18n="reg_benefits_3_desc">Отправляйте расчёты коллегам по ссылке</p>
+        </div>
+      </div>
+    </section>
+
     <!-- ============== FINAL CTA ============== -->
     <section class="final-cta">
       <h2 data-i18n="cta_title">Готовы рассчитать углеродный след?</h2>
@@ -5861,6 +5897,13 @@ const I18N = {
     proof_calcs:  'расчётов выполнено',
     proof_countries: 'стран мира',
     proof_time:   'среднее время',
+    reg_benefits_title:    'Зачем регистрироваться?',
+    reg_benefits_1_title:  'Облачное хранение',
+    reg_benefits_1_desc:   'Все расчёты сохраняются в облаке и доступны с любого устройства',
+    reg_benefits_2_title:  'Проекты',
+    reg_benefits_2_desc:   'Группируйте расчёты по проектам для удобного сравнения',
+    reg_benefits_3_title:  'Поделиться',
+    reg_benefits_3_desc:   'Отправляйте расчёты коллегам по ссылке',
     cta_title:    'Готовы рассчитать углеродный след?',
     cta_sub:      'Бесплатно, без регистрации, за 10 секунд',
     cta_btn:      'Начать расчёт',
@@ -6006,6 +6049,11 @@ const I18N = {
     err_api:      'Не удалось получить расчёт.',
     err_parse:    'Ответ не разобран как JSON.',
     err_not_lca:  'Этот инструмент рассчитывает <b>только оценку жизненного цикла</b> продуктов и материалов. Попробуйте описать конкретный продукт, например: «1 кг хлеба из пшеничной муки».',
+    /* auth modal */
+    auth_required_title: 'Требуется авторизация',
+    auth_required_msg:   'Войдите или зарегистрируйтесь, чтобы использовать эту функцию',
+    auth_required_btn:   'Войти / Регистрация',
+    auth_required_close: 'Закрыть',
     /* example chips */
     examples: [
       { l: 'Ржаной хлеб, 1 кг',  v: '1 кг ржаного хлеба, выпеченного в Польше, упакованного в крафт-пакет' },
@@ -6038,6 +6086,13 @@ const I18N = {
     proof_calcs:  'calculations performed',
     proof_countries: 'countries worldwide',
     proof_time:   'average time',
+    reg_benefits_title:    'Why register?',
+    reg_benefits_1_title:  'Cloud storage',
+    reg_benefits_1_desc:   'All calculations are saved in the cloud and accessible from any device',
+    reg_benefits_2_title:  'Projects',
+    reg_benefits_2_desc:   'Group calculations by projects for easy comparison',
+    reg_benefits_3_title:  'Share',
+    reg_benefits_3_desc:   'Send calculations to colleagues via a link',
     cta_title:    'Ready to calculate your carbon footprint?',
     cta_sub:      'Free, no registration, 10 seconds',
     cta_btn:      'Start calculation',
@@ -6201,6 +6256,13 @@ const I18N = {
     proof_calcs:  '次计算已完成',
     proof_countries: '个国家和地区',
     proof_time:   '平均用时',
+    reg_benefits_title:    '为什么要注册？',
+    reg_benefits_1_title:  '云端存储',
+    reg_benefits_1_desc:   '所有计算结果保存在云端，随时随地访问',
+    reg_benefits_2_title:  '项目管理',
+    reg_benefits_2_desc:   '按项目分组计算结果，便于对比分析',
+    reg_benefits_3_title:  '分享协作',
+    reg_benefits_3_desc:   '通过链接将计算结果发送给同事',
     cta_title:    '准备好计算碳足迹了吗？',
     cta_sub:      '免费、无需注册、10 秒完成',
     cta_btn:      '开始计算',
