@@ -111,13 +111,23 @@ async function logout() {
 // Auth guard — redirect to login if not authenticated
 function requireAuth(action) {
   if (currentUser) return true;
-  const msg = {
-    ru: 'Для этого действия нужно войти в аккаунт',
-    en: 'Please login to continue',
-    zh: '请先登录'
-  }[currentLang] || 'Please login to continue';
-  showToast(msg);
-  setTimeout(() => { window.location.href = '/login.html'; }, 1500);
+  let modal = document.getElementById('modalAuthRequired');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.className = 'modal-mask';
+    modal.id = 'modalAuthRequired';
+    modal.innerHTML = `<div class="modal" style="max-width:400px;text-align:center;padding:32px">
+      <h3 style="margin-bottom:12px" data-i18n="auth_required_title">Требуется авторизация</h3>
+      <p style="margin-bottom:24px;color:var(--ink-soft)" data-i18n="auth_required_msg">Войдите или зарегистрируйтесь, чтобы использовать эту функцию</p>
+      <div style="display:flex;gap:12px;justify-content:center">
+        <a href="/login.html" style="padding:10px 24px;border-radius:8px;background:var(--jade);color:white;text-decoration:none;font-weight:600" data-i18n="auth_required_btn">Войти / Регистрация</a>
+        <button onclick="closeModal('modalAuthRequired')" style="padding:10px 24px;border-radius:8px;border:1px solid var(--rule);background:var(--bg);cursor:pointer" data-i18n="auth_required_close">Закрыть</button>
+      </div>
+    </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal('modalAuthRequired'); });
+  }
+  showModal('modalAuthRequired');
   return false;
 }
 
@@ -5983,6 +5993,10 @@ const I18N = {
     ft_co2:      'CO₂-eq',
     ft_share:    'Доля',
     ft_total:    'Итого',
+    auth_required_title: 'Требуется авторизация',
+    auth_required_msg:   'Войдите или зарегистрируйтесь, чтобы использовать эту функцию',
+    auth_required_btn:   'Войти / Регистрация',
+    auth_required_close: 'Закрыть',
     n_assump:    'Ключевые допущения',
     n_limit:     'Ограничения',
     n_rec:       'Рекомендации по снижению',
@@ -6150,6 +6164,10 @@ const I18N = {
     ft_co2:      'CO₂-eq',
     ft_share:    'Share',
     ft_total:    'Total',
+    auth_required_title: 'Login Required',
+    auth_required_msg:   'Please login or register to use this feature',
+    auth_required_btn:   'Login / Register',
+    auth_required_close: 'Close',
     n_assump:    'Key assumptions',
     n_limit:     'Limitations',
     n_rec:       'Reduction recommendations',
@@ -6313,6 +6331,10 @@ const I18N = {
     ft_co2:      'CO₂-eq',
     ft_share:    '占比',
     ft_total:    '合计',
+    auth_required_title: '需要登录',
+    auth_required_msg:   '请登录或注册以使用此功能',
+    auth_required_btn:   '登录 / 注册',
+    auth_required_close: '关闭',
     n_assump:    '关键假设',
     n_limit:     '局限性',
     n_rec:       '减排建议',
