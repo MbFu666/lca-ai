@@ -6540,6 +6540,27 @@ function applyLanguage(lang) {
   bindResetLink();
 }
 
+function renderExampleChips() {
+  const host = document.getElementById('exampleChips');
+  if (!host) return;
+  host.innerHTML = '';
+  const examples = [
+    { l: '黑麦面包, 1 kg', v: '1 kg 波兰烘焙的黑麦面包，牛皮纸包装' },
+    { l: 'T恤, 200g', v: '1 件 200g 棉质 T 恤，孟加拉国生产' },
+    { l: '1 kWh 煤电', v: '1 kWh 来自火力电厂的电力' },
+    { l: '牛奶, 1L', v: '1 升 2.5% 牛奶，白俄罗斯牧场' }
+  ];
+  examples.forEach(function(ex) {
+    var b = document.createElement('button');
+    b.textContent = ex.l;
+    b.addEventListener('click', function() {
+      var pi = document.getElementById('productInput');
+      if (pi) { pi.value = ex.v; pi.focus(); }
+    });
+    host.appendChild(b);
+  });
+}
+
 function bindResetLink() {
   const link = $('#resetBtn');
   if (!link) return;
