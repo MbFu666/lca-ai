@@ -510,6 +510,28 @@
                         <input type="password" id="confirmNewPassword" class="settings-input" data-i18n-placeholder="confirm_pw_ph" placeholder="Подтвердите пароль">
                         <button id="changePasswordBtn" class="btn btn-primary" style="width:100%" data-i18n="change_pw_btn">Изменить пароль</button>
                     </div>
+                    <div class="settings-group">
+                        <h3><span class="sg-icon">🔑</span> <span data-i18n="api_keys_title">API ключи</span></h3>
+                        <div id="apiKeysList"></div>
+                        <button id="createApiKeyBtn" class="btn btn-primary" style="margin-top:12px" data-i18n="api_keys_create">+ Создать ключ</button>
+                    </div>
+                    <div class="settings-group">
+                        <h3><span class="sg-icon">🔔</span> <span data-i18n="webhook_title">Webhook</span></h3>
+                        <p style="font-size:12px;color:var(--ink-mute);margin-bottom:8px" data-i18n="webhook_desc">POST-запрос при завершении расчёта</p>
+                        <div style="display:flex;gap:8px">
+                            <input type="url" id="webhookUrl" placeholder="https://your-api.com/webhook" class="settings-input" style="flex:1;margin-bottom:0">
+                            <button id="testWebhookBtn" class="btn btn-ghost" data-i18n="webhook_test">Тест</button>
+                        </div>
+                    </div>
+                    <div class="settings-group">
+                        <h3><span class="sg-icon">📄</span> <span data-i18n="export_title">Экспорт</span></h3>
+                        <label style="font-size:13px;color:var(--ink-soft)" data-i18n="export_format_label">Формат по умолчанию</label>
+                        <select id="exportFormat" class="settings-input" style="margin-top:6px">
+                            <option value="excel">Excel</option>
+                            <option value="json">JSON</option>
+                            <option value="csv">CSV</option>
+                        </select>
+                    </div>
                 </div>
             </main>
         </div>
@@ -530,6 +552,56 @@
             </div>
         </div>
     </div>
+
+    <!-- ══ Share modal ══ -->
+    <div class="modal-mask" id="modalShare">
+        <div class="modal" style="max-width:400px">
+            <h3 data-i18n="share_title">Поделиться проектом</h3>
+            <p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px" data-i18n="share_desc">Пригласите коллегу по email</p>
+            <input type="email" id="shareEmail" class="settings-input" data-i18n-placeholder="share_email_ph" placeholder="Email коллеги">
+            <select id="shareRole" class="settings-input">
+                <option value="read" data-i18n="share_role_read">Только чтение</option>
+                <option value="edit" data-i18n="share_role_edit">Редактирование</option>
+            </select>
+            <button id="shareConfirmBtn" class="btn btn-primary" style="width:100%;margin-top:4px" data-i18n="share_send">Отправить приглашение</button>
+            <div class="modal-actions" style="margin-top:8px">
+                <button class="btn btn-ghost" id="shareCancelBtn" data-i18n="cancel">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!--
+    ════════════════════════════════════════════════════════════════
+    SQL: project_shares table (run once in Supabase SQL Editor)
+    ════════════════════════════════════════════════════════════════
+    CREATE TABLE project_shares (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      project_id UUID NOT NULL REFERENCES user_projects(id) ON DELETE CASCADE,
+      owner_id UUID NOT NULL REFERENCES auth.users(id),
+      shared_email TEXT NOT NULL,
+      role TEXT DEFAULT 'read',       -- 'read' or 'edit'
+      status TEXT DEFAULT 'pending',  -- 'pending', 'accepted', 'declined'
+      created_at TIMESTAMPTZ DEFAULT now()
+    );
+    ALTER TABLE project_shares ENABLE ROW LEVEL SECURITY;
+    CREATE POLICY "Owner can manage shares" ON project_shares FOR ALL USING (auth.uid() = owner_id);
+
+    ════════════════════════════════════════════════════════════════
+    SQL: audit_log table (run once in Supabase SQL Editor)
+    ════════════════════════════════════════════════════════════════
+    CREATE TABLE audit_log (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID NOT NULL REFERENCES auth.users(id),
+      action TEXT NOT NULL,
+      entity_type TEXT NOT NULL,
+      entity_id UUID,
+      details JSONB,
+      created_at TIMESTAMPTZ DEFAULT now()
+    );
+    ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY;
+    CREATE POLICY "Users can read own logs" ON audit_log FOR SELECT USING (auth.uid() = user_id);
+    CREATE POLICY "Users can insert own logs" ON audit_log FOR INSERT WITH CHECK (auth.uid() = user_id);
+    --
 
     <script>
         const SB_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
@@ -588,7 +660,18 @@
                 batch_confirm_delete: 'Удалить расчётов?', batch_month: 'По месяцам', batch_top5: 'Топ-5 тяжёлых', batch_avg: 'Средний CO₂', batch_total_count: 'Всего расчётов',
                 export_all: '📥 Скачать все данные', toast_export_done: 'Данные экспортированы',
                 toast_archived: 'Проект архивирован', toast_unarchived: 'Проект восстановлен',
-                archived_title: 'Архив', show_archived: 'Показать архив', hide_archived: 'Скрыть архив'
+                archived_title: 'Архив', show_archived: 'Показать архив', hide_archived: 'Скрыть архив',
+                share_title: 'Поделиться проектом', share_desc: 'Пригласите коллегу по email',
+                share_email_ph: 'Email коллеги', share_role_read: 'Только чтение', share_role_edit: 'Редактирование',
+                share_send: 'Отправить приглашение', toast_share_sent: 'Приглашение отправлено!',
+                share_invalid_email: 'Введите корректный email',
+                api_keys_title: 'API ключи', api_keys_create: '+ Создать ключ',
+                api_keys_empty: 'Нет API ключей', api_keys_revoke: 'Отозвать',
+                api_keys_revoked: 'Ключ отозван', api_keys_created: 'Ключ создан',
+                webhook_title: 'Webhook', webhook_desc: 'POST-запрос при завершении расчёта',
+                webhook_test: 'Тест', webhook_saved: 'Webhook сохранён',
+                webhook_ok: 'Webhook работает!', webhook_err: 'Ошибка webhook',
+                export_title: 'Экспорт', export_format_label: 'Формат по умолчанию'
             },
             en: {
                 title: 'LCA·AI — Dashboard',
@@ -639,9 +722,20 @@
                 export_all: '📥 Download all data', toast_export_done: 'Data exported',
                 toast_archived: 'Project archived', toast_unarchived: 'Project restored',
                 archived_title: 'Archived', show_archived: 'Show archived', hide_archived: 'Hide archived',
+                share_title: 'Share project', share_desc: 'Invite a colleague by email',
+                share_email_ph: 'Colleague email', share_role_read: 'Read only', share_role_edit: 'Can edit',
+                share_send: 'Send invitation', toast_share_sent: 'Invitation sent!',
+                share_invalid_email: 'Enter a valid email',
                 move_to_project: 'Move to', move_to_project_done: 'Moved to project',
                 batch_select: 'Selected:', batch_export: '📥 Export', batch_delete: '🗑 Delete', batch_cancel: 'Cancel',
-                batch_confirm_delete: 'Delete calculations?', batch_month: 'By month', batch_top5: 'Top 5 heaviest', batch_avg: 'Average CO₂', batch_total_count: 'Total calculations'
+                batch_confirm_delete: 'Delete calculations?', batch_month: 'By month', batch_top5: 'Top 5 heaviest', batch_avg: 'Average CO₂', batch_total_count: 'Total calculations',
+                api_keys_title: 'API Keys', api_keys_create: '+ Create key',
+                api_keys_empty: 'No API keys', api_keys_revoke: 'Revoke',
+                api_keys_revoked: 'Key revoked', api_keys_created: 'Key created',
+                webhook_title: 'Webhook', webhook_desc: 'POST request when calculation completes',
+                webhook_test: 'Test', webhook_saved: 'Webhook saved',
+                webhook_ok: 'Webhook works!', webhook_err: 'Webhook error',
+                export_title: 'Export', export_format_label: 'Default format'
             },
             zh: {
                 title: 'LCA·AI — 个人中心',
@@ -692,6 +786,10 @@
                 export_all: '📥 下载所有数据', toast_export_done: '数据已导出',
                 toast_archived: '项目已归档', toast_unarchived: '项目已恢复',
                 archived_title: '归档', show_archived: '显示归档', hide_archived: '隐藏归档',
+                share_title: '分享项目', share_desc: '通过邮件邀请同事',
+                share_email_ph: '同事邮箱', share_role_read: '只读', share_role_edit: '可编辑',
+                share_send: '发送邀请', toast_share_sent: '邀请已发送！',
+                share_invalid_email: '请输入有效的邮箱地址',
                 move_to_project: '移至', move_to_project_done: '已移至项目',
                 batch_select: '已选:', batch_export: '📥 导出', batch_delete: '🗑 删除', batch_cancel: '取消',
                 batch_confirm_delete: '删除计算记录？', batch_month: '按月统计', batch_top5: 'Top 5 最重', batch_avg: '平均 CO₂', batch_total_count: '计算总数'
@@ -784,6 +882,55 @@
         function fmtDate(iso) {
             return new Date(iso).toLocaleDateString(cabinetLang === 'zh' ? 'zh-CN' : cabinetLang, { year: 'numeric', month: 'short', day: 'numeric' });
         }
+
+        /* ── Audit log ── */
+        async function logAudit(action, entity, entityId, details = null) {
+            if (!currentUser || !db) return;
+            try {
+                await db.from('audit_log').insert({
+                    user_id: currentUser.id,
+                    action: action,
+                    entity_type: entity,
+                    entity_id: entityId,
+                    details: details ? JSON.stringify(details) : null,
+                    created_at: new Date().toISOString()
+                });
+            } catch (e) { console.warn('[Audit]', e); }
+        }
+
+        /* ── Share modal ── */
+        let currentShareProjectId = null;
+        function openShareModal(projectId) {
+            currentShareProjectId = projectId;
+            document.getElementById('shareEmail').value = '';
+            document.getElementById('shareRole').value = 'read';
+            document.getElementById('modalShare').classList.add('show');
+            setTimeout(() => document.getElementById('shareEmail').focus(), 60);
+        }
+        function closeShareModal() {
+            document.getElementById('modalShare').classList.remove('show');
+            currentShareProjectId = null;
+        }
+        document.getElementById('shareCancelBtn').addEventListener('click', closeShareModal);
+        document.getElementById('modalShare').addEventListener('click', e => { if (e.target.id === 'modalShare') closeShareModal(); });
+        document.getElementById('shareConfirmBtn').addEventListener('click', async () => {
+            const email = document.getElementById('shareEmail').value.trim();
+            const role = document.getElementById('shareRole').value;
+            if (!email || !currentShareProjectId) return;
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast(t('share_invalid_email')); return; }
+            try {
+                await db.from('project_shares').insert({
+                    project_id: currentShareProjectId,
+                    owner_id: currentUser.id,
+                    shared_email: email,
+                    role: role,
+                    status: 'pending'
+                });
+                logAudit('share', 'project', currentShareProjectId, { email, role });
+                closeShareModal();
+                showToast(t('toast_share_sent'));
+            } catch (e) { showToast(t('err_generic') + (e.message || e)); }
+        });
 
         /* ══════════════════════════════════════════════════
            Universal modal: promptModal / confirmModal / pickProject
@@ -1090,6 +1237,7 @@
                 renderHistory();
                 renderOverview();
                 loadStats();
+                logAudit('delete', 'history', id);
                 showToast(t('toast_deleted'));
             } catch (e) { showToast(t('err_delete') + (e.message || e)); }
         }
@@ -1137,6 +1285,7 @@
                     report_data: reportData
                 });
                 if (insErr) throw insErr;
+                logAudit('create', 'project_calc', null, { project_id: projectId, history_id: historyId });
                 showToast(t('toast_added_to_project'));
             } catch (e) { showToast(t('err_generic') + (e.message || e)); }
         }
@@ -1247,6 +1396,7 @@
             try {
                 const { error } = await db.from('user_projects').insert({ user_id: currentUser.id, name });
                 if (error) throw error;
+                logAudit('create', 'project', null, { name });
                 loadProjects(); loadStats();
                 showToast(t('toast_project_created'));
             } catch (e) { showToast(t('err_create') + (e.message || e)); }
@@ -1270,6 +1420,7 @@
                 const { error: e1 } = await db.from('project_calculations').delete().eq('project_id', id);
                 const { error: e2 } = await db.from('user_projects').delete().eq('id', id);
                 if (e1 || e2) throw (e1 || e2);
+                logAudit('delete', 'project', id);
                 loadProjects(); loadStats();
                 showToast(t('toast_deleted'));
             } catch (e) { showToast(t('err_delete') + (e.message || e)); }
@@ -1281,6 +1432,7 @@
             try {
                 const { error } = await db.from('project_calculations').delete().eq('id', calcId);
                 if (error) throw error;
+                logAudit('delete', 'project_calc', calcId);
                 loadProjects(); loadStats();
                 showToast(t('toast_calc_deleted'));
             } catch (e) { showToast(t('err_delete') + (e.message || e)); }
@@ -1524,8 +1676,7 @@
             const shareProject = e.target.closest('.share-project-btn');
             if (shareProject) {
                 e.stopPropagation();
-                const url = window.location.origin + '/report.html?project=' + shareProject.dataset.id;
-                navigator.clipboard.writeText(url).then(() => showToast(t('toast_link_copied')));
+                openShareModal(shareProject.dataset.id);
                 return;
             }
             const shareHistory = e.target.closest('.share-history-btn');
