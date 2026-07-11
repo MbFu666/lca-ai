@@ -6619,7 +6619,8 @@ async function processExcelFile(file) {
         }
       });
       
-      document.getElementById('productInput').value = description;
+      const pi = document.getElementById('productInput');
+      if (pi) pi.value = description;
       document.getElementById('uploadName').textContent = file.name;
     } catch (err) {
       showError('Ошибка чтения файла: ' + err.message);
@@ -6631,74 +6632,7 @@ async function processExcelFile(file) {
 /* ============================================================
    Main flow
    ============================================================ */
-async function run() {
-  const product = $('#productInput').value.trim();
-  const t = I18N[currentLang];
-
-  if (!product) {
-    showError(t.err_empty);
-    return;
-  }
-  
-  // Сохраняем оригинальное описание (без уточнений)
-  originalProduct = product;
-  
-  hideError();
-  $('#submitBtn').disabled = true;
-  $('#loader').classList.add('show');
-
-  setTimeout(() => $('#loader').scrollIntoView({behavior:'smooth', block:'center'}), 50);
-  phaseTimer = cyclePhases();
-
-  try {
-    // Формируем полный текст для API: оригинальное описание + уточнения
-    const fullText = agentRefinements 
-      ? product + '\n\n' + agentRefinements 
-      : product;
-    
-    // Проверяем кэш
-    let data = getCached(fullText);
-    if (!data) {
-      data = await callClaude(fullText);
-      setCache(fullText, data);
-    }
-    clearInterval(phaseTimer);
-
-    // фильтр «только LCA» — модель сама помечает не-LCA запросы
-    if (data && data.error === 'not_lca') {
-      showError(t.err_not_lca + (data.message ? '<br><i>' + escape(data.message) + '</i>' : ''));
-      return;
-    }
-    
-    // Сохраняем в историю
-    saveToHistory(data);
-    
-    renderReport(data);
-  } catch (err) {
-    clearInterval(phaseTimer);
-    console.error(err);
-    showError(t.err_api + ' <b>' + (err.message || err) + '</b>');
-  } finally {
-    $('#loader').classList.remove('show');
-    $('#submitBtn').disabled = false;
-  }
-}
-
-function cyclePhases() {
-  const phases = I18N[currentLang].phases;
-  let i = 0;
-  $('#loaderMsg').textContent = phases[0];
-  return setInterval(() => {
-    i = (i + 1) % phases.length;
-    const el = $('#loaderMsg');
-    el.style.opacity = 0;
-    setTimeout(() => {
-      el.textContent = phases[i];
-      el.style.transition = 'opacity .25s';
-      el.style.opacity = 1;
-    }, 200);
-  }, 1500);
-}
+// run() and cyclePhases() are in index.html (home page) — report.html uses renderReport() via URL params
 
 /* ============================================================
    DeepSeek API call — only LCA, in selected language
@@ -8172,13 +8106,12 @@ $('#emSave').addEventListener('click', () => {
     : currentLang === 'zh' ? '模型参数:\n'
     :                        'Model parameters:\n') + lines.map(l => '— ' + l).join('\n');
 
-  const cur = $('#productInput').value.trim();
-  // если уже есть похожий блок, отрезаем его перед добавлением
-  const stripped = cur.replace(/(?:^|\n\n)(Параметры модели|模型参数|Model parameters):[\s\S]*?$/m, '').trim();
-  $('#productInput').value = (stripped ? stripped + '\n\n' : '') + block;
-
-  closeModal('modalEdit');
-  run();
+  // Report page: apply refinements directly to lastReport and re-render
+  if (lastReport) {
+    lastReport.product_title = lastReport.product_title || '';
+    closeModal('modalEdit');
+    renderReport(lastReport);
+  }
 });
 
 // Add/remove custom factors
@@ -9275,8 +9208,8 @@ document.addEventListener('DOMContentLoaded', async function() {
       var b = document.createElement('button');
       b.textContent = ex.l;
       b.addEventListener('click', function() {
-        document.getElementById('productInput').value = ex.v;
-        document.getElementById('productInput').focus();
+        var pi = document.getElementById('productInput');
+        if (pi) { pi.value = ex.v; pi.focus(); }
       });
       host.appendChild(b);
     });
