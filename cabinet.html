@@ -305,6 +305,10 @@
         select:focus { border-color: var(--jade); box-shadow: 0 0 0 3px rgba(20,201,151,0.12); }
 
         .load-more-wrap { text-align: center; margin-top: 6px; }
+        .batch-check { position: absolute; top: 10px; right: 10px; z-index: 2; }
+        .batch-check input { width: 18px; height: 18px; accent-color: var(--jade); cursor: pointer; }
+        .batch-bar { display: none; position: sticky; bottom: 0; background: var(--bg-card); border-top: 1px solid var(--rule); padding: 12px 16px; gap: 8px; align-items: center; border-radius: 0 0 var(--radius) var(--radius); z-index: 10; }
+        .move-select { padding: 5px 24px 5px 8px; border: 1px solid var(--rule); border-radius: var(--radius-xs); font-family: inherit; font-size: 12px; background: var(--bg); color: var(--ink); cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%2393A0A6' d='M5 7L0.5 2.5h9z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 6px center; }
 
         /* skeleton loading */
         .skeleton { border-radius: var(--radius); background: linear-gradient(90deg, var(--bg-soft) 25%, var(--rule) 50%, var(--bg-soft) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; height: 92px; margin-bottom: 16px; }
@@ -906,8 +910,8 @@
         });
 
         async function loadTab(tab) {
-            if (tab === 'overview') { await loadHistoryData(); renderOverview(); }
-            if (tab === 'history') { await loadHistoryData(); historyShown = PAGE; renderHistory(); }
+            if (tab === 'overview') { await loadHistoryData(); await loadProjects(); renderOverview(); }
+            if (tab === 'history') { await loadHistoryData(); if (!projectsCache.length) await loadProjects(); historyShown = PAGE; renderHistory(); }
             if (tab === 'projects') await loadProjects();
             if (tab === 'settings') fillProfileFields();
         }
