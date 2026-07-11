@@ -281,13 +281,6 @@
         .calc-date { font-size: 12px; color: var(--ink-mute); margin-top: 2px; }
         .calc-total { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--jade); white-space: nowrap; }
 
-        .archive-btn { background: none; border: none; cursor: pointer; font-size: 14px; padding: 4px 8px; border-radius: var(--radius-xs); transition: var(--transition); opacity: 0.6; }
-        .archive-btn:hover { opacity: 1; background: var(--bg-soft); }
-        .archived-section { margin-top: 20px; border-top: 1px solid var(--rule); padding-top: 16px; }
-        .archived-toggle { background: none; border: 1px solid var(--rule); padding: 8px 16px; border-radius: var(--radius-xs); cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--ink-mute); transition: var(--transition); }
-        .archived-toggle:hover { border-color: var(--jade); color: var(--ink); background: var(--jade-bg); }
-        .archived-toggle.active { border-color: var(--jade); color: var(--jade-deep); background: var(--jade-bg); }
-
         /* ── Password Strength ── */
         .pw-strength { height: 3px; border-radius: 3px; background: var(--rule); margin-top: -6px; margin-bottom: 12px; overflow: hidden; }
         .pw-strength-bar { height: 100%; border-radius: 3px; transition: width .3s, background .3s; width: 0; }
@@ -305,17 +298,6 @@
         select:focus { border-color: var(--jade); box-shadow: 0 0 0 3px rgba(20,201,151,0.12); }
 
         .load-more-wrap { text-align: center; margin-top: 6px; }
-        .batch-check { position: absolute; top: 10px; right: 10px; z-index: 2; }
-        .batch-check input { width: 18px; height: 18px; accent-color: var(--jade); cursor: pointer; }
-        .batch-bar { display: none; position: sticky; bottom: 0; background: var(--bg-card); border-top: 1px solid var(--rule); padding: 12px 16px; gap: 8px; align-items: center; border-radius: 0 0 var(--radius) var(--radius); z-index: 10; }
-        .move-select { padding: 5px 24px 5px 8px; border: 1px solid var(--rule); border-radius: var(--radius-xs); font-family: inherit; font-size: 12px; background: var(--bg); color: var(--ink); cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%2393A0A6' d='M5 7L0.5 2.5h9z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 6px center; }
-        .tag-chip { display: inline-block; padding: 2px 8px; background: var(--jade-bg); color: var(--jade-deep); border-radius: 12px; font-size: 11px; margin: 2px; }
-        .tag-remove { cursor: pointer; margin-left: 4px; font-size: 10px; opacity: 0.6; }
-        .tag-remove:hover { opacity: 1; }
-        .tag-input { border: none; background: transparent; font-size: 11px; width: 80px; padding: 4px; outline: none; }
-        .history-tags { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
-        .filter-bar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
-        .filter-bar input, .filter-bar select { padding: 8px 12px; border: 1px solid var(--rule); border-radius: 8px; font-size: 13px; background: var(--bg); color: var(--ink); font-family: inherit; }
 
         /* skeleton loading */
         .skeleton { border-radius: var(--radius); background: linear-gradient(90deg, var(--bg-soft) 25%, var(--rule) 50%, var(--bg-soft) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; height: 92px; margin-bottom: 16px; }
@@ -418,9 +400,8 @@
                         <h2 class="section-title" data-i18n="history_title">История расчётов</h2>
                         <button class="btn btn-ghost" id="exportCsvBtn" data-i18n="export_csv">⬇ CSV</button>
                     </div>
-                    <div class="filter-bar">
-                        <input type="text" id="historySearch" data-i18n-placeholder="search_ph" placeholder="Поиск по продукту…" style="flex:1;min-width:180px">
-                        <input type="text" id="tagFilter" placeholder="Фильтр по тегу…" style="min-width:140px">
+                    <div class="toolbar">
+                        <div class="search-box"><input type="text" id="historySearch" data-i18n-placeholder="search_ph" placeholder="Поиск по продукту…"></div>
                         <select id="historySort">
                             <option value="date_desc" data-i18n="sort_new">Сначала новые</option>
                             <option value="date_asc" data-i18n="sort_old">Сначала старые</option>
@@ -430,12 +411,6 @@
                     </div>
                     <div id="historyList"></div>
                     <div class="load-more-wrap"><button class="btn btn-ghost" id="loadMoreBtn" style="display:none" data-i18n="load_more">Показать ещё</button></div>
-                    <div class="batch-bar" id="batchBar">
-                        <span class="batch-count" style="font-size:13px;font-weight:600;color:var(--ink-soft)"><span data-i18n="batch_select">Выбрано:</span> <span id="batchCount">0</span></span>
-                        <button class="btn btn-sm btn-ghost" id="batchExport"><span data-i18n="batch_export">📥 Экспорт</span></button>
-                        <button class="btn btn-sm btn-danger" id="batchDelete"><span data-i18n="batch_delete">🗑 Удалить</span></button>
-                        <button class="btn btn-sm btn-ghost" id="batchDeselect"><span data-i18n="batch_cancel">Отменить</span></button>
-                    </div>
                 </div>
 
                 <!-- ══ PROJECTS ══ -->
@@ -476,13 +451,6 @@
                             </div>
                             <button class="btn btn-danger" id="deleteAccountBtn" data-i18n="delete_btn">Удалить</button>
                         </div>
-                        <div class="setting-row">
-                            <div>
-                                <div class="setting-label" data-i18n="export_all">📥 Скачать все данные</div>
-                                <div class="setting-desc">ZIP</div>
-                            </div>
-                            <button class="btn btn-ghost" id="exportAllBtn" data-i18n="export_all">📥 Скачать все данные</button>
-                        </div>
                     </div>
                     <div class="settings-group">
                         <h3><span class="sg-icon">👤</span> <span data-i18n="profile_title">Профиль</span></h3>
@@ -510,28 +478,6 @@
                         <input type="password" id="confirmNewPassword" class="settings-input" data-i18n-placeholder="confirm_pw_ph" placeholder="Подтвердите пароль">
                         <button id="changePasswordBtn" class="btn btn-primary" style="width:100%" data-i18n="change_pw_btn">Изменить пароль</button>
                     </div>
-                    <div class="settings-group">
-                        <h3><span class="sg-icon">🔑</span> <span data-i18n="api_keys_title">API ключи</span></h3>
-                        <div id="apiKeysList"></div>
-                        <button id="createApiKeyBtn" class="btn btn-primary" style="margin-top:12px" data-i18n="api_keys_create">+ Создать ключ</button>
-                    </div>
-                    <div class="settings-group">
-                        <h3><span class="sg-icon">🔔</span> <span data-i18n="webhook_title">Webhook</span></h3>
-                        <p style="font-size:12px;color:var(--ink-mute);margin-bottom:8px" data-i18n="webhook_desc">POST-запрос при завершении расчёта</p>
-                        <div style="display:flex;gap:8px">
-                            <input type="url" id="webhookUrl" placeholder="https://your-api.com/webhook" class="settings-input" style="flex:1;margin-bottom:0">
-                            <button id="testWebhookBtn" class="btn btn-ghost" data-i18n="webhook_test">Тест</button>
-                        </div>
-                    </div>
-                    <div class="settings-group">
-                        <h3><span class="sg-icon">📄</span> <span data-i18n="export_title">Экспорт</span></h3>
-                        <label style="font-size:13px;color:var(--ink-soft)" data-i18n="export_format_label">Формат по умолчанию</label>
-                        <select id="exportFormat" class="settings-input" style="margin-top:6px">
-                            <option value="excel">Excel</option>
-                            <option value="json">JSON</option>
-                            <option value="csv">CSV</option>
-                        </select>
-                    </div>
                 </div>
             </main>
         </div>
@@ -552,69 +498,6 @@
             </div>
         </div>
     </div>
-
-    <!-- ══ Share modal ══ -->
-    <div class="modal-mask" id="modalShare">
-        <div class="modal" style="max-width:400px">
-            <h3 data-i18n="share_title">Поделиться проектом</h3>
-            <p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px" data-i18n="share_desc">Пригласите коллегу по email</p>
-            <input type="email" id="shareEmail" class="settings-input" data-i18n-placeholder="share_email_ph" placeholder="Email коллеги">
-            <select id="shareRole" class="settings-input">
-                <option value="read" data-i18n="share_role_read">Только чтение</option>
-                <option value="edit" data-i18n="share_role_edit">Редактирование</option>
-            </select>
-            <button id="shareConfirmBtn" class="btn btn-primary" style="width:100%;margin-top:4px" data-i18n="share_send">Отправить приглашение</button>
-            <div class="modal-actions" style="margin-top:8px">
-                <button class="btn btn-ghost" id="shareCancelBtn" data-i18n="cancel">Отмена</button>
-            </div>
-        </div>
-    </div>
-
-    <!--
-    ════════════════════════════════════════════════════════════════
-    SQL: project_shares table (run once in Supabase SQL Editor)
-    ════════════════════════════════════════════════════════════════
-    CREATE TABLE project_shares (
-      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      project_id UUID NOT NULL REFERENCES user_projects(id) ON DELETE CASCADE,
-      owner_id UUID NOT NULL REFERENCES auth.users(id),
-      shared_email TEXT NOT NULL,
-      role TEXT DEFAULT 'read',       -- 'read' or 'edit'
-      status TEXT DEFAULT 'pending',  -- 'pending', 'accepted', 'declined'
-      created_at TIMESTAMPTZ DEFAULT now()
-    );
-    ALTER TABLE project_shares ENABLE ROW LEVEL SECURITY;
-    CREATE POLICY "Owner can manage shares" ON project_shares FOR ALL USING (auth.uid() = owner_id);
-
-    ════════════════════════════════════════════════════════════════
-    SQL: audit_log table (run once in Supabase SQL Editor)
-    ════════════════════════════════════════════════════════════════
-    CREATE TABLE audit_log (
-      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      user_id UUID NOT NULL REFERENCES auth.users(id),
-      action TEXT NOT NULL,
-      entity_type TEXT NOT NULL,
-      entity_id UUID,
-      details JSONB,
-      created_at TIMESTAMPTZ DEFAULT now()
-    );
-    ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY;
-    CREATE POLICY "Users can read own logs" ON audit_log FOR SELECT USING (auth.uid() = user_id);
-    CREATE POLICY "Users can insert own logs" ON audit_log FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-    ════════════════════════════════════════════════════════════════
-    SQL: api_keys table (run once in Supabase SQL Editor)
-    ════════════════════════════════════════════════════════════════
-    CREATE TABLE api_keys (
-      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-      name TEXT NOT NULL,
-      key_hash TEXT NOT NULL,
-      created_at TIMESTAMPTZ DEFAULT now()
-    );
-    ALTER TABLE api_keys ENABLE ROW LEVEL SECURITY;
-    CREATE POLICY "Users can manage own keys" ON api_keys FOR ALL USING (auth.uid() = user_id);
-    --
 
     <script>
         const SB_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
@@ -639,7 +522,7 @@
                 load_more: 'Показать ещё', nothing_found: 'Ничего не найдено',
                 dark_theme: 'Тёмная тема', dark_theme_desc: 'Переключить оформление',
                 language: 'Язык', language_desc: 'Язык интерфейса',
-                delete_account: 'Удалить все данные', delete_account_desc: 'Удалить все данные безвозвратно',
+                delete_account: 'Удалить аккаунт', delete_account_desc: 'Удалить все данные безвозвратно',
                 delete_btn: 'Удалить',
                 profile_title: 'Профиль', profile_name_ph: 'Имя',
                 avatar_upload_title: 'Загрузить аватар', avatar_upload_desc: 'JPG, PNG или WebP, до 500 КБ', avatar_remove: 'Удалить фото',
@@ -651,8 +534,8 @@
                 unnamed: 'Без названия', calcs_count: 'расчётов',
                 confirm_delete_calc: 'Удалить расчёт?', confirm_delete_calc_text: 'Это действие нельзя отменить.',
                 confirm_delete_project: 'Удалить проект?', confirm_delete_project_text: 'Все расчёты внутри проекта тоже будут удалены.',
-                confirm_delete_calc_from_proj: 'Удалить расчёт из проекта?', confirm_delete_account: 'Удалить все данные?',
-                confirm_delete_account_text: 'Все данные будут удалены. Аккаунт останется — удалите его вручную через Supabase Dashboard.',
+                confirm_delete_calc_from_proj: 'Удалить расчёт из проекта?', confirm_delete_account: 'Удалить аккаунт и все данные?',
+                confirm_delete_account_text: 'Все расчёты, проекты и профиль будут удалены безвозвратно.',
                 project_name_prompt: 'Название проекта', rename_prompt: 'Новое название проекта',
                 pick_project_title: 'Добавить в проект', pick_project_empty: 'Проектов пока нет — создайте первый на вкладке «Проекты»',
                 cancel: 'Отмена', ok: 'ОК',
@@ -667,24 +550,7 @@
                 err_create: 'Ошибка создания: ', err_generic: 'Ошибка: ',
                 pw_mismatch: 'Пароли не совпадают', pw_min6: 'Минимум 6 символов',
                 pw_wrong_old: 'Неверный текущий пароль', pw_old_required: 'Введите текущий пароль',
-                status_done: 'Готово', status_pending: 'В процессе',
-                move_to_project: 'Переместить', move_to_project_done: 'Перемещено в проект',
-                batch_select: 'Выбрано:', batch_export: '📥 Экспорт', batch_delete: '🗑 Удалить', batch_cancel: 'Отменить',
-                batch_confirm_delete: 'Удалить расчётов?', batch_month: 'По месяцам', batch_top5: 'Топ-5 тяжёлых', batch_avg: 'Средний CO₂', batch_total_count: 'Всего расчётов',
-                export_all: '📥 Скачать все данные', toast_export_done: 'Данные экспортированы',
-                toast_archived: 'Проект архивирован', toast_unarchived: 'Проект восстановлен',
-                archived_title: 'Архив', show_archived: 'Показать архив', hide_archived: 'Скрыть архив',
-                share_title: 'Поделиться проектом', share_desc: 'Пригласите коллегу по email',
-                share_email_ph: 'Email коллеги', share_role_read: 'Только чтение', share_role_edit: 'Редактирование',
-                share_send: 'Отправить приглашение', toast_share_sent: 'Приглашение отправлено!',
-                share_invalid_email: 'Введите корректный email',
-                api_keys_title: 'API ключи', api_keys_create: '+ Создать ключ',
-                api_keys_empty: 'Нет API ключей', api_keys_revoke: 'Отозвать',
-                api_keys_revoked: 'Ключ отозван', api_keys_created: 'Ключ создан',
-                webhook_title: 'Webhook', webhook_desc: 'POST-запрос при завершении расчёта',
-                webhook_test: 'Тест', webhook_saved: 'Webhook сохранён',
-                webhook_ok: 'Webhook работает!', webhook_err: 'Ошибка webhook',
-                export_title: 'Экспорт', export_format_label: 'Формат по умолчанию'
+                status_done: 'Готово', status_pending: 'В процессе'
             },
             en: {
                 title: 'LCA·AI — Dashboard',
@@ -703,7 +569,7 @@
                 load_more: 'Load more', nothing_found: 'Nothing found',
                 dark_theme: 'Dark theme', dark_theme_desc: 'Switch appearance',
                 language: 'Language', language_desc: 'Interface language',
-                delete_account: 'Delete all data', delete_account_desc: 'Permanently delete all data',
+                delete_account: 'Delete account', delete_account_desc: 'Permanently delete all data',
                 delete_btn: 'Delete',
                 profile_title: 'Profile', profile_name_ph: 'Name',
                 avatar_upload_title: 'Upload avatar', avatar_upload_desc: 'JPG, PNG or WebP, up to 500 KB', avatar_remove: 'Remove photo',
@@ -715,8 +581,8 @@
                 unnamed: 'Untitled', calcs_count: 'calculations',
                 confirm_delete_calc: 'Delete calculation?', confirm_delete_calc_text: 'This action cannot be undone.',
                 confirm_delete_project: 'Delete project?', confirm_delete_project_text: 'All calculations inside will be deleted too.',
-                confirm_delete_calc_from_proj: 'Remove calculation from project?', confirm_delete_account: 'Delete all data?',
-                confirm_delete_account_text: 'All data will be deleted. The account will remain — delete it manually via Supabase Dashboard.',
+                confirm_delete_calc_from_proj: 'Remove calculation from project?', confirm_delete_account: 'Delete account and all data?',
+                confirm_delete_account_text: 'All calculations, projects and profile will be permanently deleted.',
                 project_name_prompt: 'Project name', rename_prompt: 'New project name',
                 pick_project_title: 'Add to project', pick_project_empty: 'No projects yet — create one in the Projects tab',
                 cancel: 'Cancel', ok: 'OK',
@@ -731,24 +597,7 @@
                 err_create: 'Create error: ', err_generic: 'Error: ',
                 pw_mismatch: 'Passwords do not match', pw_min6: 'Minimum 6 characters',
                 pw_wrong_old: 'Wrong current password', pw_old_required: 'Enter current password',
-                status_done: 'Done', status_pending: 'In progress',
-                export_all: '📥 Download all data', toast_export_done: 'Data exported',
-                toast_archived: 'Project archived', toast_unarchived: 'Project restored',
-                archived_title: 'Archived', show_archived: 'Show archived', hide_archived: 'Hide archived',
-                share_title: 'Share project', share_desc: 'Invite a colleague by email',
-                share_email_ph: 'Colleague email', share_role_read: 'Read only', share_role_edit: 'Can edit',
-                share_send: 'Send invitation', toast_share_sent: 'Invitation sent!',
-                share_invalid_email: 'Enter a valid email',
-                move_to_project: 'Move to', move_to_project_done: 'Moved to project',
-                batch_select: 'Selected:', batch_export: '📥 Export', batch_delete: '🗑 Delete', batch_cancel: 'Cancel',
-                batch_confirm_delete: 'Delete calculations?', batch_month: 'By month', batch_top5: 'Top 5 heaviest', batch_avg: 'Average CO₂', batch_total_count: 'Total calculations',
-                api_keys_title: 'API Keys', api_keys_create: '+ Create key',
-                api_keys_empty: 'No API keys', api_keys_revoke: 'Revoke',
-                api_keys_revoked: 'Key revoked', api_keys_created: 'Key created',
-                webhook_title: 'Webhook', webhook_desc: 'POST request when calculation completes',
-                webhook_test: 'Test', webhook_saved: 'Webhook saved',
-                webhook_ok: 'Webhook works!', webhook_err: 'Webhook error',
-                export_title: 'Export', export_format_label: 'Default format'
+                status_done: 'Done', status_pending: 'In progress'
             },
             zh: {
                 title: 'LCA·AI — 个人中心',
@@ -767,7 +616,7 @@
                 load_more: '加载更多', nothing_found: '未找到结果',
                 dark_theme: '深色主题', dark_theme_desc: '切换外观',
                 language: '语言', language_desc: '界面语言',
-                delete_account: '删除所有数据', delete_account_desc: '永久删除所有数据',
+                delete_account: '删除账户', delete_account_desc: '永久删除所有数据',
                 delete_btn: '删除',
                 profile_title: '个人资料', profile_name_ph: '名称',
                 avatar_upload_title: '上传头像', avatar_upload_desc: 'JPG、PNG 或 WebP，最大 500 KB', avatar_remove: '删除照片',
@@ -779,8 +628,8 @@
                 unnamed: '未命名', calcs_count: '次计算',
                 confirm_delete_calc: '确定删除此计算？', confirm_delete_calc_text: '此操作无法撤销。',
                 confirm_delete_project: '确定删除此项目？', confirm_delete_project_text: '项目内的所有计算也将被删除。',
-                confirm_delete_calc_from_proj: '确定从项目中删除此计算？', confirm_delete_account: '确定删除所有数据？',
-                confirm_delete_account_text: '所有数据将被删除。账户将保留 — 请通过 Supabase Dashboard 手动删除。',
+                confirm_delete_calc_from_proj: '确定从项目中删除此计算？', confirm_delete_account: '确定删除账户及所有数据？',
+                confirm_delete_account_text: '所有计算、项目和个人资料将被永久删除。',
                 project_name_prompt: '项目名称', rename_prompt: '新项目名称',
                 pick_project_title: '加入项目', pick_project_empty: '暂无项目 — 请先在"项目"页创建',
                 cancel: '取消', ok: '确定',
@@ -795,24 +644,7 @@
                 err_create: '创建出错：', err_generic: '错误：',
                 pw_mismatch: '密码不匹配', pw_min6: '至少6个字符',
                 pw_wrong_old: '当前密码错误', pw_old_required: '请输入当前密码',
-                status_done: '已完成', status_pending: '进行中',
-                export_all: '📥 下载所有数据', toast_export_done: '数据已导出',
-                toast_archived: '项目已归档', toast_unarchived: '项目已恢复',
-                archived_title: '归档', show_archived: '显示归档', hide_archived: '隐藏归档',
-                share_title: '分享项目', share_desc: '通过邮件邀请同事',
-                share_email_ph: '同事邮箱', share_role_read: '只读', share_role_edit: '可编辑',
-                share_send: '发送邀请', toast_share_sent: '邀请已发送！',
-                share_invalid_email: '请输入有效的邮箱地址',
-                move_to_project: '移至', move_to_project_done: '已移至项目',
-                batch_select: '已选:', batch_export: '📥 导出', batch_delete: '🗑 删除', batch_cancel: '取消',
-                batch_confirm_delete: '删除计算记录？', batch_month: '按月统计', batch_top5: 'Top 5 最重', batch_avg: '平均 CO₂', batch_total_count: '计算总数',
-                api_keys_title: 'API 密钥', api_keys_create: '+ 创建密钥',
-                api_keys_empty: '暂无 API 密钥', api_keys_revoke: '撤销',
-                api_keys_revoked: '密钥已撤销', api_keys_created: '密钥已创建',
-                webhook_title: 'Webhook', webhook_desc: '计算完成时发送 POST 请求',
-                webhook_test: '测试', webhook_saved: 'Webhook 已保存',
-                webhook_ok: 'Webhook 正常！', webhook_err: 'Webhook 错误',
-                export_title: '导出', export_format_label: '默认格式'
+                status_done: '已完成', status_pending: '进行中'
             }
         };
         let cabinetLang = 'ru';
@@ -852,39 +684,7 @@
         /* ── Local state ── */
         let historyCache = [];      // все строки user_history (загружаются один раз, фильтруются локально)
         let historyShown = 10;      // пагинация «показать ещё»
-        let projectsCache = [];     // кэш проектов
         const PAGE = 10;
-        let archivedProjectsExpanded = false;
-
-        async function loadJSZip() {
-            if (window.JSZip) return window.JSZip;
-            return new Promise((resolve) => {
-                const s = document.createElement('script');
-                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
-                s.onload = () => resolve(window.JSZip);
-                document.head.appendChild(s);
-            });
-        }
-
-        document.getElementById('exportAllBtn').addEventListener('click', async () => {
-            const JSZip = await loadJSZip();
-            const zip = new JSZip();
-            const historyData = historyCache.map(h => ({
-                id: h.id, product: h.product_title, co2: h.total_co2eq,
-                date: h.created_at, data: h.report_data
-            }));
-            zip.file('history.json', JSON.stringify(historyData, null, 2));
-            const { data: projects } = await db.from('user_projects').select('*').eq('user_id', currentUser.id);
-            const { data: calcs } = await db.from('project_calculations').select('*').eq('user_id', currentUser.id);
-            zip.file('projects.json', JSON.stringify(projects || [], null, 2));
-            zip.file('calculations.json', JSON.stringify(calcs || [], null, 2));
-            const blob = await zip.generateAsync({ type: 'blob' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = 'lca-ai-data.zip'; a.click();
-            URL.revokeObjectURL(url);
-            showToast(t('toast_export_done'));
-        });
 
         function showToast(msg) {
             const el = document.getElementById('toast');
@@ -903,55 +703,6 @@
         function fmtDate(iso) {
             return new Date(iso).toLocaleDateString(cabinetLang === 'zh' ? 'zh-CN' : cabinetLang, { year: 'numeric', month: 'short', day: 'numeric' });
         }
-
-        /* ── Audit log ── */
-        async function logAudit(action, entity, entityId, details = null) {
-            if (!currentUser || !db) return;
-            try {
-                await db.from('audit_log').insert({
-                    user_id: currentUser.id,
-                    action: action,
-                    entity_type: entity,
-                    entity_id: entityId,
-                    details: details ? JSON.stringify(details) : null,
-                    created_at: new Date().toISOString()
-                });
-            } catch (e) { console.warn('[Audit]', e); }
-        }
-
-        /* ── Share modal ── */
-        let currentShareProjectId = null;
-        function openShareModal(projectId) {
-            currentShareProjectId = projectId;
-            document.getElementById('shareEmail').value = '';
-            document.getElementById('shareRole').value = 'read';
-            document.getElementById('modalShare').classList.add('show');
-            setTimeout(() => document.getElementById('shareEmail').focus(), 60);
-        }
-        function closeShareModal() {
-            document.getElementById('modalShare').classList.remove('show');
-            currentShareProjectId = null;
-        }
-        document.getElementById('shareCancelBtn').addEventListener('click', closeShareModal);
-        document.getElementById('modalShare').addEventListener('click', e => { if (e.target.id === 'modalShare') closeShareModal(); });
-        document.getElementById('shareConfirmBtn').addEventListener('click', async () => {
-            const email = document.getElementById('shareEmail').value.trim();
-            const role = document.getElementById('shareRole').value;
-            if (!email || !currentShareProjectId) return;
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast(t('share_invalid_email')); return; }
-            try {
-                await db.from('project_shares').insert({
-                    project_id: currentShareProjectId,
-                    owner_id: currentUser.id,
-                    shared_email: email,
-                    role: role,
-                    status: 'pending'
-                });
-                logAudit('share', 'project', currentShareProjectId, { email, role });
-                closeShareModal();
-                showToast(t('toast_share_sent'));
-            } catch (e) { showToast(t('err_generic') + (e.message || e)); }
-        });
 
         /* ══════════════════════════════════════════════════
            Universal modal: promptModal / confirmModal / pickProject
@@ -1011,12 +762,9 @@
            Init & profile
            ══════════════════════════════════════════════════ */
         async function init() {
-            console.log('[Cabinet] init() called');
             db = getSB();
-            if (!db) { console.error('[Cabinet] getSB() returned null'); showToast(t('err_sb_not_loaded')); return; }
-            console.log('[Cabinet] db created, checking session...');
+            if (!db) { showToast(t('err_sb_not_loaded')); return; }
             const { data: { session }, error } = await db.auth.getSession();
-            console.log('[Cabinet] session:', !!session, 'error:', error?.message);
             if (error) { showToast(t('err_auth') + error.message); return; }
             if (!session) { window.location.href = '/login.html'; return; }
             currentUser = session.user;
@@ -1024,7 +772,6 @@
             fillProfileFields();
             renderGreeting();
             await loadHistoryData();
-            await loadProjects();
             renderOverview();
             loadStats();
         }
@@ -1069,13 +816,12 @@
            Tabs
            ══════════════════════════════════════════════════ */
         document.querySelectorAll('.menu a[data-tab]').forEach(a => {
-            a.addEventListener('click', async e => {
+            a.addEventListener('click', e => {
                 e.preventDefault();
                 const tab = a.dataset.tab;
                 if (tab === 'logout') {
-                    if (db) await db.auth.signOut();
-                    localStorage.removeItem('supabase_user');
-                    localStorage.removeItem('supabase_token');
+                    if (db) db.auth.signOut();
+                    localStorage.clear();
                     window.location.href = '/';
                     return;
                 }
@@ -1088,10 +834,10 @@
         });
 
         async function loadTab(tab) {
-            if (tab === 'overview') { await loadHistoryData(); await loadProjects(); renderOverview(); }
-            if (tab === 'history') { await loadHistoryData(); if (!projectsCache.length) await loadProjects(); historyShown = PAGE; renderHistory(); }
+            if (tab === 'overview') { await loadHistoryData(); renderOverview(); }
+            if (tab === 'history') { await loadHistoryData(); historyShown = PAGE; renderHistory(); }
             if (tab === 'projects') await loadProjects();
-            if (tab === 'settings') { fillProfileFields(); loadApiKeys(); }
+            if (tab === 'settings') fillProfileFields();
         }
 
         /* ══════════════════════════════════════════════════
@@ -1187,11 +933,9 @@
            ══════════════════════════════════════════════════ */
         function filteredHistory() {
             const q = document.getElementById('historySearch').value.trim().toLowerCase();
-            const tagQ = document.getElementById('tagFilter').value.trim().toLowerCase();
             const sort = document.getElementById('historySort').value;
             let rows = historyCache.slice();
             if (q) rows = rows.filter(r => String(r.product_title || '').toLowerCase().includes(q));
-            if (tagQ) rows = rows.filter(r => (r.tags || []).some(tg => tg.toLowerCase().includes(tagQ)));
             rows.sort((a, b) => {
                 if (sort === 'date_asc') return new Date(a.created_at) - new Date(b.created_at);
                 if (sort === 'co2_desc') return (parseFloat(b.total_co2eq) || 0) - (parseFloat(a.total_co2eq) || 0);
@@ -1229,10 +973,6 @@
                         '<span>📦 ' + esc(h.functional_unit || '—') + '</span>' +
                         '<span>🌱 ' + fmtCo2(h.total_co2eq) + ' kgCO₂e</span>' +
                     '</div>' +
-                    '<div class="history-tags">' +
-                        (h.tags || []).map(tg => '<span class="tag-chip">' + esc(tg) + '<span class="tag-remove" data-id="' + h.id + '" data-tag="' + esc(tg) + '">&times;</span></span>').join('') +
-                        '<div class="tag-input-wrap"><input type="text" class="tag-input" placeholder="+ тег" data-id="' + h.id + '"></div>' +
-                    '</div>' +
                     '<div class="card-actions">' +
                         '<a href="/report.html?history=' + h.id + '" class="btn btn-primary btn-sm">' + t('view') + '</a>' +
                         '<button class="btn btn-ghost btn-sm add-to-project-btn" data-id="' + h.id + '">📁 ' + t('to_project') + '</button>' +
@@ -1245,7 +985,6 @@
         }
 
         document.getElementById('historySearch').addEventListener('input', () => { historyShown = PAGE; renderHistory(); });
-        document.getElementById('tagFilter').addEventListener('input', () => { historyShown = PAGE; renderHistory(); });
         document.getElementById('historySort').addEventListener('change', () => { historyShown = PAGE; renderHistory(); });
         document.getElementById('loadMoreBtn').addEventListener('click', () => { historyShown += PAGE; renderHistory(); });
 
@@ -1261,7 +1000,6 @@
                 renderHistory();
                 renderOverview();
                 loadStats();
-                logAudit('delete', 'history', id);
                 showToast(t('toast_deleted'));
             } catch (e) { showToast(t('err_delete') + (e.message || e)); }
         }
@@ -1289,12 +1027,9 @@
         /* Add to project */
         async function addToProject(historyId) {
             try {
-                if (!projectsCache.length) {
-                    const { data: projects, error } = await db.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-                    if (error) throw error;
-                    projectsCache = projects || [];
-                }
-                const projectId = await openModal({ title: t('pick_project_title'), projects: projectsCache });
+                const { data: projects, error } = await db.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+                if (error) throw error;
+                const projectId = await openModal({ title: t('pick_project_title'), projects: projects || [] });
                 if (!projectId) return;
                 const row = historyCache.find(h => String(h.id) === String(historyId));
                 if (!row) return;
@@ -1309,37 +1044,33 @@
                     report_data: reportData
                 });
                 if (insErr) throw insErr;
-                logAudit('create', 'project_calc', null, { project_id: projectId, history_id: historyId });
                 showToast(t('toast_added_to_project'));
             } catch (e) { showToast(t('err_generic') + (e.message || e)); }
         }
 
         /* ══════════════════════════════════════════════════
-           PROJECTS: create / rename / delete / expand / archive
+           PROJECTS: create / rename / delete / expand
            ══════════════════════════════════════════════════ */
         async function loadProjects() {
             if (!currentUser || !db) return;
             try {
-                const { data: allProjects, error: pErr } = await db.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+                const { data: projects, error: pErr } = await db.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
                 if (pErr) throw pErr;
-                const projects = allProjects || [];
-                const visibleProjects = projects.filter(p => !p.archived);
-                const archivedProjects = projects.filter(p => p.archived);
                 const list = document.getElementById('projectsList');
-                if (projects.length === 0) {
+                if (!projects || projects.length === 0) {
                     list.innerHTML = '<div class="empty"><div class="empty-icon">📁</div><div class="empty-text">' + t('no_projects') + '</div><button class="btn btn-primary" id="emptyCreateBtn">' + t('create') + '</button></div>';
                     const b = document.getElementById('emptyCreateBtn');
                     if (b) b.addEventListener('click', createProject);
                     return;
                 }
                 let html = '';
-                for (const p of visibleProjects) {
+                for (const p of projects) {
                     const { data: calcs } = await db.from('project_calculations').select('*').eq('project_id', p.id).order('created_at', { ascending: false });
                     const calcCount = (calcs || []).length;
                     html += '<div class="card" id="proj-' + p.id + '">';
                     html += '<div class="card-header">';
                     html += '<div style="flex:1"><div class="card-title">' + esc(p.name) + '</div></div>';
-                    html += '<div style="display:flex;align-items:center;gap:8px"><span class="badge badge-blue">' + calcCount + ' ' + t('calcs_count') + '</span><button class="archive-btn" data-id="' + p.id + '" title="📦">📦</button><div class="card-date">' + fmtDate(p.created_at) + '</div></div>';
+                    html += '<div style="display:flex;align-items:center;gap:8px"><span class="badge badge-blue">' + calcCount + ' ' + t('calcs_count') + '</span><div class="card-date">' + fmtDate(p.created_at) + '</div></div>';
                     html += '</div>';
                     if (calcs && calcs.length > 0) {
                         html += '<div class="project-calcs" style="display:none">';
@@ -1362,50 +1093,7 @@
                     html += '</div>';
                     html += '</div>';
                 }
-                if (archivedProjects.length > 0) {
-                    html += '<div class="archived-section">';
-                    html += '<button class="archived-toggle' + (archivedProjectsExpanded ? ' active' : '') + '" id="archivedToggle">' + (archivedProjectsExpanded ? t('hide_archived') : t('show_archived')) + ' (' + archivedProjects.length + ')</button>';
-                    html += '<div id="archivedList" style="display:' + (archivedProjectsExpanded ? 'block' : 'none') + ';margin-top:12px">';
-                    for (const p of archivedProjects) {
-                        const { data: calcs } = await db.from('project_calculations').select('*').eq('project_id', p.id).order('created_at', { ascending: false });
-                        const calcCount = (calcs || []).length;
-                        html += '<div class="card" id="proj-' + p.id + '" style="opacity:0.6">';
-                        html += '<div class="card-header">';
-                        html += '<div style="flex:1"><div class="card-title">' + esc(p.name) + ' <span class="badge badge-amber" style="font-size:10px">' + t('archived_title') + '</span></div></div>';
-                        html += '<div style="display:flex;align-items:center;gap:8px"><span class="badge badge-blue">' + calcCount + ' ' + t('calcs_count') + '</span><button class="archive-btn" data-id="' + p.id + '" title="📦">📦</button><div class="card-date">' + fmtDate(p.created_at) + '</div></div>';
-                        html += '</div>';
-                        if (calcs && calcs.length > 0) {
-                            html += '<div class="project-calcs" style="display:none">';
-                            calcs.forEach(c => {
-                                const product = (c.report_data && c.report_data.product_title) || t('unnamed');
-                                const total = (c.report_data && c.report_data.total_co2eq) || 0;
-                                html += '<div class="calc-item">';
-                                html += '<div style="cursor:pointer;flex:1" onclick="window.location.href=\'/report.html?history=' + c.id + '\'"><div class="calc-name">' + esc(product) + '</div><div class="calc-date">' + fmtDate(c.created_at) + '</div></div>';
-                                html += '<div style="display:flex;align-items:center;gap:10px"><div class="calc-total">' + fmtCo2(total) + ' kgCO₂e</div>';
-                                html += '<button class="btn btn-danger btn-sm delete-projcalc-btn" data-id="' + c.id + '" title="' + t('delete') + '">✕</button></div>';
-                                html += '</div>';
-                            });
-                            html += '</div>';
-                        }
-                        html += '<div class="card-actions">';
-                        html += '<button class="btn btn-ghost btn-sm toggle-calcs-btn" data-id="' + p.id + '">▸ ' + t('calculations') + '</button>';
-                        html += '<button class="btn btn-danger btn-sm delete-project-btn" data-id="' + p.id + '">' + t('delete') + '</button>';
-                        html += '</div>';
-                        html += '</div>';
-                    }
-                    html += '</div></div>';
-                }
                 list.innerHTML = html;
-                const archivedToggleBtn = document.getElementById('archivedToggle');
-                if (archivedToggleBtn) {
-                    archivedToggleBtn.addEventListener('click', () => {
-                        archivedProjectsExpanded = !archivedProjectsExpanded;
-                        const archivedList = document.getElementById('archivedList');
-                        archivedList.style.display = archivedProjectsExpanded ? 'block' : 'none';
-                        archivedToggleBtn.textContent = (archivedProjectsExpanded ? t('hide_archived') : t('show_archived')) + ' (' + archivedProjects.length + ')';
-                        archivedToggleBtn.classList.toggle('active', archivedProjectsExpanded);
-                    });
-                }
             } catch (e) {
                 console.error('loadProjects error:', e);
                 showToast(t('err_load_projects') + (e.message || e));
@@ -1420,7 +1108,6 @@
             try {
                 const { error } = await db.from('user_projects').insert({ user_id: currentUser.id, name });
                 if (error) throw error;
-                logAudit('create', 'project', null, { name });
                 loadProjects(); loadStats();
                 showToast(t('toast_project_created'));
             } catch (e) { showToast(t('err_create') + (e.message || e)); }
@@ -1444,7 +1131,6 @@
                 const { error: e1 } = await db.from('project_calculations').delete().eq('project_id', id);
                 const { error: e2 } = await db.from('user_projects').delete().eq('id', id);
                 if (e1 || e2) throw (e1 || e2);
-                logAudit('delete', 'project', id);
                 loadProjects(); loadStats();
                 showToast(t('toast_deleted'));
             } catch (e) { showToast(t('err_delete') + (e.message || e)); }
@@ -1456,22 +1142,9 @@
             try {
                 const { error } = await db.from('project_calculations').delete().eq('id', calcId);
                 if (error) throw error;
-                logAudit('delete', 'project_calc', calcId);
                 loadProjects(); loadStats();
                 showToast(t('toast_calc_deleted'));
             } catch (e) { showToast(t('err_delete') + (e.message || e)); }
-        }
-
-        async function toggleArchive(projectId) {
-            try {
-                const { data: project } = await db.from('user_projects').select('archived').eq('id', projectId).single();
-                if (!project) return;
-                const newArchived = !project.archived;
-                await db.from('user_projects').update({ archived: newArchived }).eq('id', projectId);
-                if (newArchived) archivedProjectsExpanded = true;
-                loadProjects();
-                showToast(newArchived ? t('toast_archived') : t('toast_unarchived'));
-            } catch (e) { showToast(t('err_generic') + (e.message || e)); }
         }
 
         /* ══════════════════════════════════════════════════
@@ -1481,17 +1154,11 @@
             const ok = await confirmModal(t('confirm_delete_account'), t('confirm_delete_account_text'));
             if (!ok) return;
             try {
-                const errs = [];
-                const r1 = await db.from('user_history').delete().eq('user_id', currentUser.id);
-                if (r1.error) errs.push('history: ' + r1.error.message);
-                const r2 = await db.from('project_calculations').delete().eq('user_id', currentUser.id);
-                if (r2.error) errs.push('calculations: ' + r2.error.message);
-                const r3 = await db.from('user_projects').delete().eq('user_id', currentUser.id);
-                if (r3.error) errs.push('projects: ' + r3.error.message);
-                if (errs.length) console.warn('[DeleteAccount] Partial errors:', errs);
+                await db.from('user_history').delete().eq('user_id', currentUser.id);
+                await db.from('project_calculations').delete().eq('user_id', currentUser.id);
+                await db.from('user_projects').delete().eq('user_id', currentUser.id);
                 await db.auth.signOut();
-                localStorage.removeItem('supabase_user');
-                localStorage.removeItem('supabase_token');
+                localStorage.clear();
                 window.location.href = '/';
             } catch (e) { showToast(t('err_generic') + (e.message || e)); }
         });
@@ -1599,93 +1266,6 @@
         });
 
         /* ══════════════════════════════════════════════════
-           API Keys
-           ══════════════════════════════════════════════════ */
-        async function loadApiKeys() {
-            if (!currentUser || !db) return;
-            try {
-                const { data, error } = await db.from('api_keys').select('id, name, created_at').eq('user_id', currentUser.id);
-                if (error) throw error;
-                const host = document.getElementById('apiKeysList');
-                if (!data || !data.length) { host.innerHTML = '<p style="color:var(--ink-mute)">' + esc(t('api_keys_empty')) + '</p>'; return; }
-                host.innerHTML = data.map(k => `
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--rule)">
-                        <div>
-                            <div style="font-weight:600">${esc(k.name || 'Unnamed')}</div>
-                            <div style="font-size:11px;color:var(--ink-mute)">${new Date(k.created_at).toLocaleDateString()}</div>
-                        </div>
-                        <button class="revoke-key-btn" data-id="${k.id}" style="color:var(--c-rust);background:none;border:none;cursor:pointer;font-size:12px">${t('api_keys_revoke')}</button>
-                    </div>
-                `).join('');
-            } catch (e) { console.error('loadApiKeys error:', e); }
-        }
-
-        document.getElementById('createApiKeyBtn')?.addEventListener('click', async () => {
-            const name = await promptModal(t('api_keys_title'));
-            if (!name) return;
-            const key = 'lca-' + Array.from(crypto.getRandomValues(new Uint8Array(24))).map(b => b.toString(16).padStart(2, '0')).join('');
-            try {
-                const { error } = await db.from('api_keys').insert({ user_id: currentUser.id, name, key_hash: key });
-                if (error) throw error;
-                showToast(t('api_keys_created') + ': ' + key + '\n' + (cabinetLang === 'zh' ? '请复制 — 将不再显示' : cabinetLang === 'en' ? 'Copy it — it won\'t be shown again' : 'Скопируйте его — он больше не будет показан'));
-                loadApiKeys();
-            } catch (e) { showToast(t('err_generic') + (e.message || e)); }
-        });
-
-        document.addEventListener('click', async (e) => {
-            const btn = e.target.closest('.revoke-key-btn');
-            if (!btn) return;
-            if (!confirm(t('api_keys_revoke') + '?')) return;
-            try {
-                const { error } = await db.from('api_keys').delete().eq('id', btn.dataset.id);
-                if (error) throw error;
-                showToast(t('api_keys_revoked'));
-                loadApiKeys();
-            } catch (e) { showToast(t('err_generic') + (e.message || e)); }
-        });
-
-        /* ══════════════════════════════════════════════════
-           Webhook
-           ══════════════════════════════════════════════════ */
-        (function() {
-            if (!currentUser) return;
-            const url = (currentUser.user_metadata || {}).webhook_url || '';
-            const input = document.getElementById('webhookUrl');
-            if (input) input.value = url;
-        })();
-
-        document.getElementById('webhookUrl')?.addEventListener('change', async (e) => {
-            if (!currentUser || !db) return;
-            try {
-                const { error } = await db.auth.updateUser({ data: { webhook_url: e.target.value } });
-                if (error) throw error;
-                currentUser.user_metadata = Object.assign({}, currentUser.user_metadata, { webhook_url: e.target.value });
-                showToast(t('webhook_saved'));
-            } catch (e) { showToast(t('err_generic') + (e.message || e)); }
-        });
-
-        document.getElementById('testWebhookBtn')?.addEventListener('click', async () => {
-            const url = document.getElementById('webhookUrl')?.value;
-            if (!url) return;
-            try {
-                await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ test: true, timestamp: Date.now() }) });
-                showToast(t('webhook_ok'));
-            } catch (e) { showToast(t('webhook_err')); }
-        });
-
-        /* ══════════════════════════════════════════════════
-           Export format default
-           ══════════════════════════════════════════════════ */
-        (function() {
-            const saved = localStorage.getItem('lca-export-format');
-            if (saved) document.getElementById('exportFormat').value = saved;
-        })();
-
-        document.getElementById('exportFormat')?.addEventListener('change', (e) => {
-            localStorage.setItem('lca-export-format', e.target.value);
-        });
-
-        /* ══════════════════════════════════════════════════
            Theme
            ══════════════════════════════════════════════════ */
         function syncThemeUI() {
@@ -1735,59 +1315,14 @@
         });
 
         /* ══════════════════════════════════════════════════
-           Tags: add / remove
-           ══════════════════════════════════════════════════ */
-        async function addTag(historyId, tag) {
-            tag = tag.trim();
-            if (!tag) return;
-            const row = historyCache.find(h => String(h.id) === String(historyId));
-            if (!row) return;
-            const tags = Array.isArray(row.tags) ? row.tags.slice() : [];
-            if (tags.some(t => t.toLowerCase() === tag.toLowerCase())) return;
-            tags.push(tag);
-            try {
-                const { error } = await db.from('user_history').update({ tags }).eq('id', historyId);
-                if (error) throw error;
-                row.tags = tags;
-                renderHistory();
-            } catch (e) { showToast(t('err_generic') + (e.message || e)); }
-        }
-
-        async function removeTag(historyId, tag) {
-            const row = historyCache.find(h => String(h.id) === String(historyId));
-            if (!row) return;
-            const tags = (Array.isArray(row.tags) ? row.tags : []).filter(t => t !== tag);
-            try {
-                const { error } = await db.from('user_history').update({ tags }).eq('id', historyId);
-                if (error) throw error;
-                row.tags = tags;
-                renderHistory();
-            } catch (e) { showToast(t('err_generic') + (e.message || e)); }
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if (e.target.classList.contains('tag-input') && e.key === 'Enter') {
-                e.preventDefault();
-                addTag(e.target.dataset.id, e.target.value);
-                e.target.value = '';
-            }
-        });
-
-        /* ══════════════════════════════════════════════════
            Delegated clicks (share / delete / rename / toggle / to-project)
            ══════════════════════════════════════════════════ */
         document.addEventListener('click', (e) => {
-            /* Tag remove */
-            const tagRemove = e.target.closest('.tag-remove');
-            if (tagRemove) {
-                e.stopPropagation();
-                removeTag(tagRemove.dataset.id, tagRemove.dataset.tag);
-                return;
-            }
             const shareProject = e.target.closest('.share-project-btn');
             if (shareProject) {
                 e.stopPropagation();
-                openShareModal(shareProject.dataset.id);
+                const url = window.location.origin + '/report.html?project=' + shareProject.dataset.id;
+                navigator.clipboard.writeText(url).then(() => showToast(t('toast_link_copied')));
                 return;
             }
             const shareHistory = e.target.closest('.share-history-btn');
@@ -1816,200 +1351,7 @@
             if (delProject) { deleteProject(delProject.dataset.id); return; }
             const delProjCalc = e.target.closest('.delete-projcalc-btn');
             if (delProjCalc) { e.stopPropagation(); deleteCalcFromProject(delProjCalc.dataset.id); return; }
-            const archiveBtn = e.target.closest('.archive-btn');
-            if (archiveBtn) {
-                e.stopPropagation();
-                toggleArchive(archiveBtn.dataset.id);
-                return;
-            }
         });
-
-        /* ══════════════════════════════════════════════════
-           Batch operations
-           ══════════════════════════════════════════════════ */
-        document.addEventListener('change', (e) => {
-            if (e.target.classList.contains('history-checkbox')) {
-                const checked = document.querySelectorAll('.history-checkbox:checked').length;
-                const batchBar = document.getElementById('batchBar');
-                if (checked > 0) {
-                    batchBar.style.display = 'flex';
-                } else {
-                    batchBar.style.display = 'none';
-                }
-                document.getElementById('batchCount').textContent = checked;
-            }
-        });
-
-        document.getElementById('batchDelete')?.addEventListener('click', async () => {
-            const ids = [...document.querySelectorAll('.history-checkbox:checked')].map(cb => cb.value);
-            if (!ids.length) return;
-            if (!confirm(t('batch_confirm_delete') + ' ' + ids.length)) return;
-            for (const id of ids) {
-                await db.from('user_history').delete().eq('id', id);
-            }
-            historyCache = historyCache.filter(h => !ids.includes(h.id));
-            document.getElementById('batchBar').style.display = 'none';
-            document.querySelectorAll('.history-checkbox:checked').forEach(cb => cb.checked = false);
-            renderHistory();
-            renderOverview();
-            loadStats();
-            showToast(t('toast_deleted'));
-        });
-
-        document.getElementById('batchExport')?.addEventListener('click', () => {
-            const ids = [...document.querySelectorAll('.history-checkbox:checked')].map(cb => cb.value);
-            const rows = historyCache.filter(h => ids.includes(h.id));
-            if (!rows.length) return;
-            const head = ['date', 'product', 'functional_unit', 'total_co2eq_kg'];
-            const csv = [head.join(';')].concat(rows.map(r => [
-                new Date(r.created_at).toISOString().slice(0, 10),
-                '"' + String(r.product_title || '').replace(/"/g, '""') + '"',
-                '"' + String(r.functional_unit || '').replace(/"/g, '""') + '"',
-                String(parseFloat(r.total_co2eq) || 0).replace('.', ',')
-            ].join(';'))).join('\r\n');
-            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = 'lca-history-batch.csv';
-            document.body.appendChild(a); a.click(); a.remove();
-            URL.revokeObjectURL(url);
-            showToast(t('toast_csv_done'));
-        });
-
-        document.getElementById('batchDeselect')?.addEventListener('click', () => {
-            document.querySelectorAll('.history-checkbox:checked').forEach(cb => cb.checked = false);
-            document.getElementById('batchBar').style.display = 'none';
-        });
-
-        /* ══════════════════════════════════════════════════
-           Move calculation between projects
-           ══════════════════════════════════════════════════ */
-        document.addEventListener('change', async (e) => {
-            if (e.target.classList.contains('move-history-btn')) {
-                const targetProjectId = e.target.value;
-                if (!targetProjectId) return;
-                const historyId = e.target.dataset.id;
-                try {
-                    const row = historyCache.find(h => String(h.id) === String(historyId));
-                    if (!row) return;
-                    const reportData = row.report_data || {
-                        product_title: row.product_title,
-                        functional_unit: row.functional_unit,
-                        total_co2eq: row.total_co2eq
-                    };
-                    // Check if already in this project
-                    const { data: existing } = await db.from('project_calculations').select('id').eq('project_id', targetProjectId).eq('user_id', currentUser.id).limit(1);
-                    const alreadyIn = (existing || []).some(c => {
-                        const rd = c.report_data || {};
-                        return String(rd.product_title) === String(row.product_title) && String(rd.functional_unit) === String(row.functional_unit);
-                    });
-                    if (!alreadyIn) {
-                        const { error } = await db.from('project_calculations').insert({
-                            project_id: targetProjectId,
-                            user_id: currentUser.id,
-                            report_data: reportData
-                        });
-                        if (error) throw error;
-                    }
-                    showToast(t('move_to_project_done'));
-                    e.target.value = '';
-                } catch (err) {
-                    showToast(t('err_generic') + (err.message || err));
-                    e.target.value = '';
-                }
-            }
-        });
-
-        /* ══════════════════════════════════════════════════
-           Extended stats
-           ══════════════════════════════════════════════════ */
-        async function loadExtendedStats() {
-            if (!currentUser || !db) return null;
-            try {
-                const { data, error } = await db.from('user_history').select('total_co2eq, created_at').eq('user_id', currentUser.id);
-                if (error) throw error;
-                if (!data || !data.length) return null;
-
-                // CO2 by month
-                const byMonth = {};
-                data.forEach(d => {
-                    const month = new Date(d.created_at).toISOString().slice(0, 7);
-                    byMonth[month] = (byMonth[month] || 0) + (d.total_co2eq || 0);
-                });
-
-                // Top 5 heaviest
-                const top5 = [...data].sort((a, b) => (b.total_co2eq || 0) - (a.total_co2eq || 0)).slice(0, 5);
-
-                // Average CO2
-                const avg = data.reduce((s, d) => s + (d.total_co2eq || 0), 0) / (data.length || 1);
-
-                return { byMonth, top5, avg, count: data.length };
-            } catch (e) {
-                console.error('loadExtendedStats error:', e);
-                return null;
-            }
-        }
-
-        async function renderExtendedStats() {
-            const stats = await loadExtendedStats();
-            if (!stats) return;
-
-            // Add extended stats panel to overview after sparkline
-            const existingPanel = document.getElementById('extendedStatsPanel');
-            if (existingPanel) existingPanel.remove();
-
-            let html = '<div class="panel" id="extendedStatsPanel" style="margin-top:16px">';
-            html += '<h3>📈 ' + t('batch_total_count') + ': ' + stats.count + '</h3>';
-
-            // By month
-            html += '<div style="margin-top:14px">';
-            html += '<div style="font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:8px">' + t('batch_month') + '</div>';
-            const months = Object.keys(stats.byMonth).sort().slice(-6);
-            months.forEach(m => {
-                const val = stats.byMonth[m];
-                const pct = Math.min(100, (val / Math.max(...Object.values(stats.byMonth))) * 100);
-                html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">';
-                html += '<span style="font-size:12px;color:var(--ink-mute);width:60px;font-family:var(--mono)">' + m + '</span>';
-                html += '<div style="flex:1;height:8px;background:var(--bg-soft);border-radius:4px;overflow:hidden">';
-                html += '<div style="height:100%;width:' + pct + '%;background:var(--jade);border-radius:4px;transition:width .3s"></div>';
-                html += '</div>';
-                html += '<span style="font-size:12px;font-weight:600;color:var(--ink-soft);font-family:var(--mono);min-width:50px;text-align:right">' + fmtCo2(val) + ' kg</span>';
-                html += '</div>';
-            });
-            html += '</div>';
-
-            // Top 5
-            html += '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--rule)">';
-            html += '<div style="font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:8px">' + t('batch_top5') + '</div>';
-            stats.top5.forEach((d, i) => {
-                html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:13px">';
-                html += '<span style="color:var(--ink-soft)">' + (i + 1) + '. ' + esc(d.product_title || t('unnamed')) + '</span>';
-                html += '<span style="font-family:var(--mono);font-weight:700;color:var(--jade)">' + fmtCo2(d.total_co2eq) + ' kg</span>';
-                html += '</div>';
-            });
-            html += '</div>';
-
-            // Average
-            html += '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center">';
-            html += '<span style="font-size:13px;font-weight:600;color:var(--ink-soft)">' + t('batch_avg') + '</span>';
-            html += '<span style="font-family:var(--mono);font-weight:800;color:var(--jade);font-size:16px">' + fmtCo2(stats.avg) + ' kgCO₂e</span>';
-            html += '</div>';
-
-            html += '</div>';
-
-            // Insert after sparkline panel
-            const sparkPanel = document.querySelector('#tab-overview .panel');
-            if (sparkPanel) {
-                sparkPanel.insertAdjacentHTML('afterend', html);
-            }
-        }
-
-        // Hook extended stats into overview render
-        const origRenderOverview = renderOverview;
-        renderOverview = function() {
-            origRenderOverview();
-            renderExtendedStats();
-        };
 
         init();
     </script>
