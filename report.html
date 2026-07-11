@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#14C997">
 <meta name="description" content="LCA·AI — Оценка жизненного цикла продукта с помощью ИИ">
+<script>
+(function(){
+  var t = localStorage.getItem('lca-theme');
+  if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+  }
+})();
+</script>
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <title>LCA·AI — Оценка жизненного цикла</title>
