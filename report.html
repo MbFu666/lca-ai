@@ -1633,6 +1633,10 @@ async function saveToProject(projectId, report) {
     font-size: 9px;
     margin-left: 2px;
   }
+  .confidence-badge { font-size: 10px; margin-left: 4px; }
+  .confidence-high { color: #10B981; }
+  .confidence-medium { color: #F59E0B; }
+  .confidence-low { color: #EF4444; }
   .proc-card .transport {
     margin-top: 6px;
     padding-top: 6px;
@@ -5459,6 +5463,7 @@ body::before {
         <button id="exportJson"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H7a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2 2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h1"/><path d="M16 3h1a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2 2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-1"/></svg> <span data-i18n="export_json">JSON</span></button>
         <button id="exportPdf"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><path d="M9 13h6"/><path d="M9 17h3"/></svg> <span data-i18n="export_pdf">PDF</span></button>
         <button id="exportPrint" class="primary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> <span data-i18n="export_print">Отчёт</span></button>
+        <button id="publicShareBtn" data-i18n="public_share">🔓 Публичная ссылка</button>
       </div>
     </div>
 
@@ -6025,6 +6030,7 @@ const I18N = {
     err_api:      'Не удалось получить расчёт.',
     err_parse:    'Ответ не разобран как JSON.',
     err_not_lca:  'Этот инструмент рассчитывает <b>только оценку жизненного цикла</b> продуктов и материалов. Попробуйте описать конкретный продукт, например: «1 кг хлеба из пшеничной муки».',
+    public_share: '🔓 Публичная ссылка',
     /* example chips */
     examples: [
       { l: 'Ржаной хлеб, 1 кг',  v: '1 кг ржаного хлеба, выпеченного в Польше, упакованного в крафт-пакет' },
@@ -6194,6 +6200,7 @@ const I18N = {
     err_api:      'Failed to fetch the calculation.',
     err_parse:    'Response could not be parsed as JSON.',
     err_not_lca:  'This tool only performs <b>life cycle assessment</b> of products and materials. Please describe a specific product, e.g. “1 kg of wheat flour bread”.',
+    public_share: '🔒 Public link',
     examples: [
       { l: 'Rye bread, 1 kg',     v: '1 kg of rye bread, baked in Poland, wrapped in kraft paper' },
       { l: 'T-shirt, 200 g',      v: '1 cotton T-shirt of 200 g, manufactured in Bangladesh, sold in the EU' },
@@ -6361,6 +6368,7 @@ const I18N = {
     err_api:      '计算请求失败。',
     err_parse:    '响应无法解析为 JSON。',
     err_not_lca:  '本工具仅用于产品与材料的<b>生命周期评价</b>。请描述具体产品,例如 “1 kg 小麦粉面包”。',
+    public_share: '🔒 公开链接',
     examples: [
       { l: '黑麦面包,1 kg',  v: '1 kg 波兰烘焙的黑麦面包,牛皮纸包装' },
       { l: 'T 恤,200 g',      v: '1 件 200 g 棉质 T 恤,孟加拉国生产,欧盟销售' },
@@ -6908,7 +6916,7 @@ Else reply with this exact schema:
       "key_inputs": ["...", "..."],
       "factor_source": "Ecoinvent 3.10",
       "sub_processes": [
-        {"name":"...", "amount":<n>, "unit":"kg", "factor":<n>, "factor_unit":"kg CO2-eq/kg", "factor_source":"...", "co2eq":<n>}
+        {"name":"...", "amount":<n>, "unit":"kg", "factor":<n>, "factor_unit":"kg CO2-eq/kg", "factor_source":"...", "co2eq":<n>, "confidence":"high|medium|low"}
       ]
     }
   ]
@@ -6916,6 +6924,10 @@ Else reply with this exact schema:
 
 5 stages required (in ${langName}): Raw material acquisition, Manufacturing, Distribution, Use phase, End of life.
 Each stage = exactly 2 sub_processes. Numbers in kg CO2-eq. share_pct sums to 100.
+Each sub_process must include "confidence": "high" or "medium" or "low".
+- high: matches published LCA database (Ecoinvent, IPCC, CCDB)
+- medium: industry average or regional estimate
+- low: AI estimate, no direct source
 
 HARD CONSTRAINTS — failure to comply will break the parser:
 - Output must fit within 8000 tokens. Be concise but complete.
@@ -7152,7 +7164,7 @@ function renderFlow(d, t) {
       card.dataset.sub = j;
       card.innerHTML = `
         <div class="proc-card-head">
-          <span class="name">${escape(p.name)}</span>
+          <span class="name">${escape(p.name)}</span><span class="confidence-badge confidence-${p.confidence || 'low'}" title="${p.confidence || 'low'}">${p.confidence === 'high' ? '●' : p.confidence === 'medium' ? '◐' : '○'}</span>
           <span class="pct">${fmtNum(pshare)}%</span>
         </div>
         <div class="value">${fmtNum(p.co2eq)}<span class="unit">kgCO₂e</span></div>
@@ -9190,6 +9202,7 @@ document.addEventListener('DOMContentLoaded', async function() {
           if (data && data.report_data) {
             console.log('[LCA] Found in user_history');
             renderReport(data.report_data);
+            if (lastReport) lastReport._historyId = historyId;
           } else {
             // Try project_calculations table
             supabaseClient.from('project_calculations').select('*').eq('id', historyId).single()
@@ -9197,6 +9210,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 if (pcData && pcData.report_data) {
                   console.log('[LCA] Found in project_calculations');
                   renderReport(pcData.report_data);
+                  if (lastReport) lastReport._historyId = historyId;
                 } else {
                   showToast(currentLang === 'ru' ? 'Расчёт не найден' : 'Calculation not found');
                 }
@@ -9320,7 +9334,26 @@ document.addEventListener('DOMContentLoaded', async function() {
   document.getElementById('exportJson')?.addEventListener('click', function() { if (lastReport) downloadJson(lastReport); });
   document.getElementById('exportPdf')?.addEventListener('click', function() { showPdfPreview(); });
   document.getElementById('exportPrint')?.addEventListener('click', function() { window.print(); });
-  
+
+  document.getElementById('publicShareBtn')?.addEventListener('click', async () => {
+    if (!lastReport || !currentUser) return;
+    const historyId = lastReport._historyId;
+    if (!historyId) {
+      showToast(currentLang === 'ru' ? 'Сначала сохраните расчёт' : currentLang === 'zh' ? '请先保存计算' : 'Save the calculation first');
+      return;
+    }
+    const { data } = await supabaseClient.from('user_history').select('is_public').eq('id', historyId).single();
+    const newState = !(data?.is_public);
+    await supabaseClient.from('user_history').update({ is_public: newState }).eq('id', historyId);
+    const url = window.location.origin + '/report.html?history=' + historyId;
+    if (newState) {
+      await navigator.clipboard.writeText(url);
+      showToast(currentLang === 'ru' ? 'Публичная ссылка скопирована' : currentLang === 'zh' ? '公开链接已复制' : 'Public link copied');
+    } else {
+      showToast(currentLang === 'ru' ? 'Ссылка теперь приватная' : currentLang === 'zh' ? '链接已设为私密' : 'Link is now private');
+    }
+  });
+
   document.getElementById('agentClose')?.addEventListener('click', function() {
     const ag = document.getElementById('agent');
     ag?.classList.remove('show');
