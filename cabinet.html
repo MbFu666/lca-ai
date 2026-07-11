@@ -346,7 +346,8 @@
                             </div>
                             <div class="avatar-upload-info">
                                 <strong data-i18n="avatar_upload_title">Загрузить аватар</strong><br>
-                                <span data-i18n="avatar_upload_desc">JPG, PNG или WebP, до 500 КБ</span>
+                                <span data-i18n="avatar_upload_desc">JPG, PNG или WebP, до 500 КБ</span><br>
+                                <button type="button" id="removeAvatarBtn" style="background:none;border:none;color:var(--c-rust);cursor:pointer;font-size:12px;padding:2px 0;text-decoration:underline;display:none" data-i18n="avatar_remove">Удалить фото</button>
                             </div>
                             <input type="file" id="avatarFileInput" accept="image/jpeg,image/png,image/webp">
                         </div>
@@ -386,6 +387,7 @@
                 delete_btn: 'Удалить',
                 profile_title: 'Профиль', profile_name_ph: 'Имя',
                 avatar_upload_title: 'Загрузить аватар', avatar_upload_desc: 'JPG, PNG или WebP, до 500 КБ',
+                avatar_remove: 'Удалить фото',
                 save_profile: 'Сохранить профиль',
                 change_pw_title: 'Изменить пароль', old_pw_ph: 'Текущий пароль', new_pw_ph: 'Новый пароль', confirm_pw_ph: 'Подтвердите пароль',
                 change_pw_btn: 'Изменить пароль',
@@ -420,6 +422,7 @@
                 delete_btn: 'Delete',
                 profile_title: 'Profile', profile_name_ph: 'Name',
                 avatar_upload_title: 'Upload avatar', avatar_upload_desc: 'JPG, PNG or WebP, up to 500 KB',
+                avatar_remove: 'Remove photo',
                 save_profile: 'Save profile',
                 change_pw_title: 'Change password', old_pw_ph: 'Current password', new_pw_ph: 'New password', confirm_pw_ph: 'Confirm password',
                 change_pw_btn: 'Change password',
@@ -454,6 +457,7 @@
                 delete_btn: '删除',
                 profile_title: '个人资料', profile_name_ph: '名称',
                 avatar_upload_title: '上传头像', avatar_upload_desc: 'JPG、PNG 或 WebP，最大 500 KB',
+                avatar_remove: '删除照片',
                 save_profile: '保存资料',
                 change_pw_title: '修改密码', old_pw_ph: '当前密码', new_pw_ph: '新密码', confirm_pw_ph: '确认密码',
                 change_pw_btn: '修改密码',
@@ -898,7 +902,22 @@
                 placeholder.textContent = name.charAt(0).toUpperCase();
             }
             pendingAvatarBase64 = null;
+            // Show/hide remove button
+            const removeBtn = document.getElementById('removeAvatarBtn');
+            if (removeBtn) removeBtn.style.display = avatarUrl ? 'inline' : 'none';
         }
+
+        // Remove avatar handler
+        document.getElementById('removeAvatarBtn').addEventListener('click', async () => {
+            const { error } = await db.auth.updateUser({ data: { avatar_url: '' } });
+            if (error) { showToast(error.message); return; }
+            currentUser.user_metadata = { ...currentUser.user_metadata, avatar_url: '' };
+            document.getElementById('avatarPreviewImg').style.display = 'none';
+            document.getElementById('avatarPlaceholder').style.display = 'flex';
+            document.getElementById('removeAvatarBtn').style.display = 'none';
+            renderProfile();
+            showToast(t('toast_avatar_saved'));
+        });
 
         document.getElementById('saveProfileBtn').addEventListener('click', async () => {
             const name = document.getElementById('editProfileName').value.trim();
