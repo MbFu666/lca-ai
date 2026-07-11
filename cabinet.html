@@ -540,6 +540,7 @@
                 load_more: 'Показать ещё', nothing_found: 'Ничего не найдено',
                 dark_theme: 'Тёмная тема', dark_theme_desc: 'Переключить оформление',
                 language: 'Язык', language_desc: 'Язык интерфейса',
+                export_all: '📥 Скачать все данные',
                 delete_account: 'Удалить аккаунт', delete_account_desc: 'Удалить все данные безвозвратно',
                 delete_btn: 'Удалить',
                 profile_title: 'Профиль', profile_name_ph: 'Имя',
@@ -587,6 +588,7 @@
                 load_more: 'Load more', nothing_found: 'Nothing found',
                 dark_theme: 'Dark theme', dark_theme_desc: 'Switch appearance',
                 language: 'Language', language_desc: 'Interface language',
+                export_all: '📥 Download all data',
                 delete_account: 'Delete account', delete_account_desc: 'Permanently delete all data',
                 delete_btn: 'Delete',
                 profile_title: 'Profile', profile_name_ph: 'Name',
@@ -634,6 +636,7 @@
                 load_more: '加载更多', nothing_found: '未找到结果',
                 dark_theme: '深色主题', dark_theme_desc: '切换外观',
                 language: '语言', language_desc: '界面语言',
+                export_all: '📥 下载所有数据',
                 delete_account: '删除账户', delete_account_desc: '永久删除所有数据',
                 delete_btn: '删除',
                 profile_title: '个人资料', profile_name_ph: '名称',
@@ -1185,6 +1188,23 @@
                 localStorage.clear();
                 window.location.href = '/';
             } catch (e) { showToast(t('err_generic') + (e.message || e)); }
+        });
+
+        document.getElementById('exportAllBtn').addEventListener('click', async () => {
+          if (!window.JSZip) { showToast('JSZip не загружен'); return; }
+          const zip = new JSZip();
+          const { data: history } = await db.from('user_history').select('*').eq('user_id', currentUser.id);
+          const { data: projects } = await db.from('user_projects').select('*').eq('user_id', currentUser.id);
+          const { data: calcs } = await db.from('project_calculations').select('*').eq('user_id', currentUser.id);
+          zip.file('history.json', JSON.stringify(history || [], null, 2));
+          zip.file('projects.json', JSON.stringify(projects || [], null, 2));
+          zip.file('calculations.json', JSON.stringify(calcs || [], null, 2));
+          const blob = await zip.generateAsync({ type: 'blob' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = 'lca-ai-data.zip'; a.click();
+          URL.revokeObjectURL(url);
+          showToast('Данные экспортированы');
         });
 
         document.getElementById('changePasswordBtn').addEventListener('click', async () => {
