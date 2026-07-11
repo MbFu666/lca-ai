@@ -1,28 +1,26 @@
 const https = require('https');
-// Check if Supabase CDN is accessible
-https.get('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2', { timeout: 10000 }, r => {
-  console.log('Supabase SDK CDN status:', r.statusCode);
-  r.on('data', () => {});
-}).on('error', e => console.log('Supabase SDK CDN error:', e.message));
-
-// Check if the page loads properly
 https.get('https://lca-ai.ru/cabinet', r => {
   let d = '';
   r.on('data', c => d += c);
   r.on('end', () => {
-    // Check if Supabase SDK is loaded
-    console.log('Has supabase CDN:', d.includes('supabase-js'));
+    // Extract inline script
+    const s1 = d.indexOf('<script>\n        const SB_URL');
+    const e1 = d.indexOf('</script>', s1);
+    const script = d.substring(s1 + 8, e1);
     
-    // Check if init() is wrapped in DOMContentLoaded
-    console.log('Has DOMContentLoaded:', d.includes('DOMContentLoaded'));
+    // Check for duplicate const declarations
+    const constMatches = script.match(/^const \w+/gm) || [];
+    const duplicates = constMatches.filter((v, i, a) => a.indexOf(v) !== i);
+    if (duplicates.length) console.log('DUPLICATE CONSTS:', duplicates);
+    else console.log('No duplicate consts');
     
-    // Check if init() is called at script level (not inside DOMContentLoaded)
-    const scriptStart = d.indexOf('<script>\n        const SB_URL');
-    const scriptContent = d.substring(scriptStart, d.indexOf('</script>', scriptStart));
-    const initLine = scriptContent.split('\n').find(l => l.trim() === 'init();');
-    console.log('init() at script level:', initLine ? 'YES' : 'NO');
+    // Check for duplicate function declarations
+    const funcMatches = script.match(/^function \w+|^async function \w+/gm) || [];
+    const funcDups = funcMatches.filter((v, i, a) => a.indexOf(v) !== i);
+    if (funcDups.length) console.log('DUPLICATE FUNCTIONS:', funcDups);
+    else console.log('No duplicate functions');
     
-    // Check if there's a try-catch around init
-    console.log('Has try-catch around init:', scriptContent.includes('try') && scriptContent.includes('init()'));
+    // Check if getSB uses window.supabase
+    console.log('getSB check:', script.substring(script.indexOf('function getSB'), script.indexOf('function getSB') + 200));
   });
 }).on('error', e => console.log(e.message));
