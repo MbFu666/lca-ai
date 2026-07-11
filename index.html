@@ -6438,7 +6438,8 @@ async function saveToHistory(report) {
   if (!currentUser) {
     console.log('[saveToHistory] No currentUser, saved to localStorage only');
   }
-  }
+  return supabaseId;
+}
 
 
 function loadFromHistory(id) {
@@ -6544,13 +6545,9 @@ function renderExampleChips() {
   const host = document.getElementById('exampleChips');
   if (!host) return;
   host.innerHTML = '';
-  const examples = [
-    { l: '黑麦面包, 1 kg', v: '1 kg 波兰烘焙的黑麦面包，牛皮纸包装' },
-    { l: 'T恤, 200g', v: '1 件 200g 棉质 T 恤，孟加拉国生产' },
-    { l: '1 kWh 煤电', v: '1 kWh 来自火力电厂的电力' },
-    { l: '牛奶, 1L', v: '1 升 2.5% 牛奶，白俄罗斯牧场' }
-  ];
-  examples.forEach(function(ex) {
+  const t = I18N[currentLang] || I18N.ru;
+  if (!t.examples) return;
+  t.examples.forEach(function(ex) {
     var b = document.createElement('button');
     b.textContent = ex.l;
     b.addEventListener('click', function() {
@@ -6699,10 +6696,14 @@ async function run() {
       return;
     }
     
-    // Сохраняем в историю
-    saveToHistory(data);
-    
-    renderReport(data);
+    // Сохраняем в историю и перенаправляем на страницу отчёта
+    const historyId = await saveToHistory(data);
+    if (historyId) {
+      window.location.href = '/report.html?history=' + historyId;
+      return;
+    }
+    sessionStorage.setItem('lca-report', JSON.stringify(data));
+    window.location.href = '/report.html';
   } catch (err) {
     clearInterval(phaseTimer);
     console.error(err);
