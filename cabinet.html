@@ -507,6 +507,11 @@
                         <input type="password" id="confirmNewPassword" class="settings-input" data-i18n-placeholder="confirm_pw_ph" placeholder="Подтвердите пароль">
                         <button id="changePasswordBtn" class="btn btn-primary" style="width:100%" data-i18n="change_pw_btn">Изменить пароль</button>
                     </div>
+                    <div class="settings-group">
+                      <div class="sg-header" style="font-size:16px;font-weight:700;display:flex;align-items:center;gap:10px;margin-bottom:18px"><span class="sg-icon" style="font-size:20px">🔑</span> API ключи</div>
+                      <div id="apiKeysList" style="margin-bottom:12px"></div>
+                      <button id="createApiKeyBtn" class="btn" style="width:100%">+ Создать ключ</button>
+                    </div>
                 </div>
             </main>
         </div>
@@ -556,6 +561,16 @@
         //   shared_email TEXT NOT NULL,
         //   role TEXT DEFAULT 'read',
         //   status TEXT DEFAULT 'pending',
+        //   created_at TIMESTAMPTZ DEFAULT now()
+        // );
+        // NOTE: Supabase 'audit_log' table:
+        // CREATE TABLE IF NOT EXISTS audit_log (
+        //   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        //   user_id UUID NOT NULL,
+        //   action TEXT NOT NULL,
+        //   entity_type TEXT NOT NULL,
+        //   entity_id UUID,
+        //   details JSONB,
         //   created_at TIMESTAMPTZ DEFAULT now()
         // );
         const SB_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
@@ -768,6 +783,18 @@
         function fmtDate(iso) {
             return new Date(iso).toLocaleDateString(cabinetLang === 'zh' ? 'zh-CN' : cabinetLang, { year: 'numeric', month: 'short', day: 'numeric' });
         }
+        async function logAudit(action, entity, entityId, details) {
+            if (!currentUser || !db) return;
+            try {
+                await db.from('audit_log').insert({
+                    user_id: currentUser.id,
+                    action: action,
+                    entity_type: entity,
+                    entity_id: entityId || null,
+                    details: details ? JSON.stringify(details) : null
+                });
+            } catch (e) { /* silent */ }
+        }
 
         /* ══════════════════════════════════════════════════
            Universal modal: promptModal / confirmModal / pickProject
@@ -842,6 +869,7 @@
             try {
                 await loadHistoryData();
                 renderOverview();
+                renderExtendedStats();
                 loadStats();
             } catch (e) { console.error('[Cabinet] Data load error:', e); }
         }
@@ -882,6 +910,70 @@
             } catch (e) { console.error('loadStats error:', e); showToast(t('err_load_stats')); }
         }
 
+        async function loadApiKeys() {
+          if (!currentUser || !db) return;
+          try {
+            const { data } = await db.from('api_keys').select('id, name, created_at').eq('user_id', currentUser.id);
+            const host = document.getElementById('apiKeysList');
+            if (!host) return;
+            if (!data || !data.length) { host.innerHTML = '<p style="color:var(--ink-mute);font-size:13px">Нет API ключей</p>'; return; }
+            host.innerHTML = data.map(k => '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--rule)"><div><div style="font-weight:600;font-size:13px">' + (k.name||'—') + '</div><div style="font-size:11px;color:var(--ink-mute)">' + new Date(k.created_at).toLocaleDateString() + '</div></div><button class="revoke-key-btn" data-id="' + k.id + '" style="color:var(--c-rust);background:none;border:none;cursor:pointer;font-size:12px">Отозвать</button></div>').join('');
+          } catch (e) { console.error('loadApiKeys:', e); }
+        }
+
+        async function loadExtendedStats() {
+          if (!currentUser || !db) return null;
+          try {
+            const { data } = await db.from('user_history').select('total_co2eq, created_at, product_title').eq('user_id', currentUser.id);
+            if (!data || !data.length) return null;
+            const byMonth = {};
+            data.forEach(d => {
+              const month = new Date(d.created_at).toISOString().slice(0, 7);
+              byMonth[month] = (byMonth[month] || 0) + (d.total_co2eq || 0);
+            });
+            const top5 = [...data].sort((a, b) => (b.total_co2eq || 0) - (a.total_co2eq || 0)).slice(0, 5);
+            const avg = data.reduce((s, d) => s + (d.total_co2eq || 0), 0) / data.length;
+            return { byMonth, top5, avg, count: data.length };
+          } catch (e) { console.error('loadExtendedStats:', e); return null; }
+        }
+
+        function renderExtendedStats() {
+          loadExtendedStats().then(stats => {
+            if (!stats) return;
+            const existing = document.getElementById('extendedStatsPanel');
+            if (existing) existing.remove();
+            let html = '<div id="extendedStatsPanel" style="margin-top:16px;padding:16px;background:var(--bg-card);border:1px solid var(--rule);border-radius:var(--radius)">';
+            html += '<h3 style="font-size:14px;font-weight:700;margin-bottom:12px">📈 Статистика</h3>';
+            const months = Object.keys(stats.byMonth).sort().slice(-6);
+            const maxVal = Math.max(...Object.values(stats.byMonth), 1);
+            html += '<div style="font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:8px">CO₂ по месяцам</div>';
+            months.forEach(m => {
+              const val = stats.byMonth[m];
+              const pct = (val / maxVal) * 100;
+              html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">';
+              html += '<span style="font-size:11px;color:var(--ink-mute);width:60px;font-family:var(--mono)">' + m + '</span>';
+              html += '<div style="flex:1;height:8px;background:var(--bg-soft);border-radius:4px;overflow:hidden">';
+              html += '<div style="height:100%;width:' + pct + '%;background:var(--jade);border-radius:4px"></div></div>';
+              html += '<span style="font-size:11px;font-weight:600;font-family:var(--mono);min-width:50px;text-align:right">' + val.toFixed(1) + ' kg</span>';
+              html += '</div>';
+            });
+            html += '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--rule)">';
+            html += '<div style="font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:8px">Топ-5</div>';
+            stats.top5.forEach((d, i) => {
+              html += '<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px">';
+              html += '<span>' + (i+1) + '. ' + (d.product_title || '—') + '</span>';
+              html += '<span style="font-family:var(--mono);font-weight:700;color:var(--jade)">' + (d.total_co2eq||0).toFixed(1) + ' kg</span></div>';
+            });
+            html += '</div>';
+            html += '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--rule);display:flex;justify-content:space-between">';
+            html += '<span style="font-size:12px;font-weight:600">Среднее</span>';
+            html += '<span style="font-family:var(--mono);font-weight:800;color:var(--jade)">' + stats.avg.toFixed(1) + ' kg</span></div>';
+            html += '</div>';
+            const overview = document.getElementById('tab-overview');
+            if (overview) overview.insertAdjacentHTML('beforeend', html);
+          });
+        }
+
         /* ══════════════════════════════════════════════════
            Tabs
            ══════════════════════════════════════════════════ */
@@ -904,7 +996,7 @@
         });
 
         async function loadTab(tab) {
-            if (tab === 'overview') { await loadHistoryData(); renderOverview(); }
+            if (tab === 'overview') { await loadHistoryData(); renderOverview(); renderExtendedStats(); }
             if (tab === 'history') { await loadHistoryData(); historyShown = PAGE; renderHistory(); }
             if (tab === 'projects') await loadProjects();
             if (tab === 'settings') fillProfileFields();
