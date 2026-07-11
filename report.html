@@ -7272,7 +7272,9 @@ function showNodeDetail(o, cardEl) {
     </div>
   ` : '';
   
-  $('#detailBody').innerHTML = `
+  const detailBody = $('#detailBody');
+  if (!detailBody) return;
+  detailBody.innerHTML = `
     <div class="detail-eyebrow">${escape(o.typeLbl)}</div>
     <div class="detail-name">${escape(o.name || '—')}</div>
     <div class="detail-co2">${fmtNum(o.co2)} <span class="u">kg CO₂-eq</span></div>
