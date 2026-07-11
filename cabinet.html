@@ -573,6 +573,14 @@
         //   details JSONB,
         //   created_at TIMESTAMPTZ DEFAULT now()
         // );
+        // NOTE: Supabase 'api_keys' table:
+        // CREATE TABLE IF NOT EXISTS api_keys (
+        //   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        //   user_id UUID NOT NULL,
+        //   name TEXT NOT NULL,
+        //   key_hash TEXT NOT NULL,
+        //   created_at TIMESTAMPTZ DEFAULT now()
+        // );
         const SB_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
 
@@ -871,6 +879,7 @@
                 renderOverview();
                 renderExtendedStats();
                 loadStats();
+                loadApiKeys();
             } catch (e) { console.error('[Cabinet] Data load error:', e); }
         }
 
@@ -1189,6 +1198,7 @@
                 renderHistory();
                 renderOverview();
                 loadStats();
+                logAudit('delete', 'history', id);
                 showToast(t('toast_deleted'));
             } catch (e) { showToast(t('err_delete') + (e.message || e)); }
         }
@@ -1233,6 +1243,7 @@
                     report_data: reportData
                 });
                 if (insErr) throw insErr;
+                logAudit('create', 'project_calc', null, { project_id: projectId, product: row.product_title });
                 showToast(t('toast_added_to_project'));
             } catch (e) { showToast(t('err_generic') + (e.message || e)); }
         }
@@ -1318,6 +1329,7 @@
             try {
                 const { error } = await db.from('user_projects').insert({ user_id: currentUser.id, name });
                 if (error) throw error;
+                logAudit('create', 'project', null, { name });
                 loadProjects(); loadStats();
                 showToast(t('toast_project_created'));
             } catch (e) { showToast(t('err_create') + (e.message || e)); }
@@ -1341,6 +1353,7 @@
                 const { error: e1 } = await db.from('project_calculations').delete().eq('project_id', id);
                 const { error: e2 } = await db.from('user_projects').delete().eq('id', id);
                 if (e1 || e2) throw (e1 || e2);
+                logAudit('delete', 'project', id);
                 loadProjects(); loadStats();
                 showToast(t('toast_deleted'));
             } catch (e) { showToast(t('err_delete') + (e.message || e)); }
@@ -1621,6 +1634,27 @@
             document.getElementById('modalShare').style.display = 'none';
             showToast('Приглашение отправлено на ' + email);
           } catch (e) { showToast('Ошибка: ' + (e.message || e)); }
+        });
+
+        /* ══ API Keys ══ */
+        document.getElementById('createApiKeyBtn')?.addEventListener('click', async () => {
+          const name = prompt('Название ключа:');
+          if (!name) return;
+          const key = 'lca-' + Array.from(crypto.getRandomValues(new Uint8Array(24))).map(b => b.toString(16).padStart(2, '0')).join('');
+          try {
+            await db.from('api_keys').insert({ user_id: currentUser.id, name: name, key_hash: key });
+            alert('Ключ создан: ' + key + '\nСкопируйте — он больше не будет показан!');
+            loadApiKeys();
+          } catch (e) { showToast('Ошибка: ' + (e.message || e)); }
+        });
+
+        document.addEventListener('click', async (e) => {
+          const btn = e.target.closest('.revoke-key-btn');
+          if (!btn) return;
+          if (!confirm('Отозвать ключ?')) return;
+          await db.from('api_keys').delete().eq('id', btn.dataset.id);
+          loadApiKeys();
+          showToast('Ключ отозван');
         });
 
         init();
