@@ -56,8 +56,6 @@ async function checkAuth() {
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (session) {
     currentUser = session.user;
-    localStorage.setItem('supabase_user', JSON.stringify(session.user));
-    localStorage.setItem('supabase_token', session.access_token);
     updateAuthUI(true);
     // Load user data from Supabase
     await loadUserData();
@@ -83,10 +81,12 @@ function updateAuthUI(isLoggedIn) {
     const picture = currentUser.user_metadata?.avatar_url || 
                    currentUser.user_metadata?.picture || '';
     
-    authSection.innerHTML = '<a href="/cabinet.html" class="auth-btn">' +
-      (picture ? '<img src="' + picture + '" class="auth-avatar" alt="">' : 
-                 '<span class="auth-avatar-text">' + name.charAt(0).toUpperCase() + '</span>') +
-      '<span>' + name + '</span></a>';
+    authSection.innerHTML = '';
+    const a = document.createElement('a'); a.href='/cabinet.html'; a.className='auth-btn';
+    if (picture) { const img = document.createElement('img'); img.src = picture; img.className='auth-avatar'; a.appendChild(img); }
+    else { const s = document.createElement('span'); s.className='auth-avatar-text'; s.textContent = name.charAt(0).toUpperCase(); a.appendChild(s); }
+    const nameEl = document.createElement('span'); nameEl.textContent = name; a.appendChild(nameEl);
+    authSection.appendChild(a);
   } else {
     authSection.innerHTML = '<a href="/login.html" class="auth-btn">' +
       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
@@ -6836,7 +6836,8 @@ async function apiCall(messages, opts = {}) {
   }
 
   const t0 = Date.now();
-  const token = localStorage.getItem('supabase_token') || SUPABASE_ANON_KEY;
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  const token = session?.access_token || SUPABASE_ANON_KEY;
   const headers = { 
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${token}`
@@ -7967,10 +7968,9 @@ function fmtNum(n) {
 }
 
 function escape(s) {
-  return String(s || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 function showError(msg) {
