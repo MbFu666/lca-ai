@@ -309,6 +309,13 @@
         .batch-check input { width: 18px; height: 18px; accent-color: var(--jade); cursor: pointer; }
         .batch-bar { display: none; position: sticky; bottom: 0; background: var(--bg-card); border-top: 1px solid var(--rule); padding: 12px 16px; gap: 8px; align-items: center; border-radius: 0 0 var(--radius) var(--radius); z-index: 10; }
         .move-select { padding: 5px 24px 5px 8px; border: 1px solid var(--rule); border-radius: var(--radius-xs); font-family: inherit; font-size: 12px; background: var(--bg); color: var(--ink); cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%2393A0A6' d='M5 7L0.5 2.5h9z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 6px center; }
+        .tag-chip { display: inline-block; padding: 2px 8px; background: var(--jade-bg); color: var(--jade-deep); border-radius: 12px; font-size: 11px; margin: 2px; }
+        .tag-remove { cursor: pointer; margin-left: 4px; font-size: 10px; opacity: 0.6; }
+        .tag-remove:hover { opacity: 1; }
+        .tag-input { border: none; background: transparent; font-size: 11px; width: 80px; padding: 4px; outline: none; }
+        .history-tags { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+        .filter-bar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+        .filter-bar input, .filter-bar select { padding: 8px 12px; border: 1px solid var(--rule); border-radius: 8px; font-size: 13px; background: var(--bg); color: var(--ink); font-family: inherit; }
 
         /* skeleton loading */
         .skeleton { border-radius: var(--radius); background: linear-gradient(90deg, var(--bg-soft) 25%, var(--rule) 50%, var(--bg-soft) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; height: 92px; margin-bottom: 16px; }
