@@ -518,6 +518,7 @@
     </div>
 
     <script>
+        // NOTE: Supabase 'user_projects' needs: ALTER TABLE user_projects ADD COLUMN IF NOT EXISTS archived BOOLEAN DEFAULT false;
         const SB_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
 
@@ -563,6 +564,7 @@
                 toast_profile_saved: 'Профиль обновлён', toast_pw_changed: 'Пароль изменён', toast_lang_saved: 'Язык сохранён',
                 toast_link_copied: 'Ссылка скопирована!', toast_avatar_saved: 'Аватар обновлён',
                 toast_avatar_too_big: 'Файл слишком большой (макс. 500 КБ)', toast_csv_done: 'CSV выгружен',
+                toast_archived: 'Проект архивирован', toast_restored: 'Проект восстановлен', archive_title: 'Архив',
                 err_sb_not_loaded: 'Ошибка: Supabase не загружен', err_auth: 'Ошибка авторизации: ',
                 err_load_history: 'Ошибка загрузки истории: ', err_load_projects: 'Ошибка загрузки проектов: ',
                 err_load_stats: 'Ошибка загрузки статистики', err_delete: 'Ошибка удаления: ',
@@ -611,6 +613,7 @@
                 toast_profile_saved: 'Profile updated', toast_pw_changed: 'Password changed', toast_lang_saved: 'Language saved',
                 toast_link_copied: 'Link copied!', toast_avatar_saved: 'Avatar updated',
                 toast_avatar_too_big: 'File too large (max 500 KB)', toast_csv_done: 'CSV exported',
+                toast_archived: 'Project archived', toast_restored: 'Project restored', archive_title: 'Archive',
                 err_sb_not_loaded: 'Error: Supabase not loaded', err_auth: 'Auth error: ',
                 err_load_history: 'Error loading history: ', err_load_projects: 'Error loading projects: ',
                 err_load_stats: 'Error loading stats', err_delete: 'Delete error: ',
@@ -659,6 +662,7 @@
                 toast_profile_saved: '资料已更新', toast_pw_changed: '密码已修改', toast_lang_saved: '语言已保存',
                 toast_link_copied: '链接已复制！', toast_avatar_saved: '头像已更新',
                 toast_avatar_too_big: '文件太大（最大 500 KB）', toast_csv_done: 'CSV 已导出',
+                toast_archived: '项目已归档', toast_restored: '项目已恢复', archive_title: '归档',
                 err_sb_not_loaded: '错误：Supabase 未加载', err_auth: '认证错误：',
                 err_load_history: '加载历史出错：', err_load_projects: '加载项目出错：',
                 err_load_stats: '加载统计数据出错', err_delete: '删除出错：',
@@ -1078,6 +1082,38 @@
         /* ══════════════════════════════════════════════════
            PROJECTS: create / rename / delete / expand
            ══════════════════════════════════════════════════ */
+        async function renderProjectCard(p) {
+            const { data: calcs } = await db.from('project_calculations').select('*').eq('project_id', p.id).order('created_at', { ascending: false });
+            const calcCount = (calcs || []).length;
+            let h = '<div class="card" id="proj-' + p.id + '">';
+            h += '<div class="card-header">';
+            h += '<div style="flex:1"><div class="card-title">' + esc(p.name) + '</div></div>';
+            h += '<div style="display:flex;align-items:center;gap:8px"><span class="badge badge-blue">' + calcCount + ' ' + t('calcs_count') + '</span><div class="card-date">' + fmtDate(p.created_at) + '</div></div>';
+            h += '</div>';
+            if (calcs && calcs.length > 0) {
+                h += '<div class="project-calcs" style="display:none">';
+                calcs.forEach(c => {
+                    const product = (c.report_data && c.report_data.product_title) || t('unnamed');
+                    const total = (c.report_data && c.report_data.total_co2eq) || 0;
+                    h += '<div class="calc-item">';
+                    h += '<div style="cursor:pointer;flex:1" onclick="window.location.href=\'/report.html?history=' + c.id + '\'"><div class="calc-name">' + esc(product) + '</div><div class="calc-date">' + fmtDate(c.created_at) + '</div></div>';
+                    h += '<div style="display:flex;align-items:center;gap:10px"><div class="calc-total">' + fmtCo2(total) + ' kgCO₂e</div>';
+                    h += '<button class="btn btn-danger btn-sm delete-projcalc-btn" data-id="' + c.id + '" title="' + t('delete') + '">✕</button></div>';
+                    h += '</div>';
+                });
+                h += '</div>';
+            }
+            h += '<div class="card-actions">';
+            h += '<button class="btn btn-ghost btn-sm toggle-calcs-btn" data-id="' + p.id + '">▸ ' + t('calculations') + '</button>';
+            h += '<button class="btn btn-ghost btn-sm rename-project-btn" data-id="' + p.id + '" data-name="' + esc(p.name) + '">✏️ ' + t('rename') + '</button>';
+            h += '<button class="share-project-btn btn-icon" data-id="' + p.id + '" title="🔗">🔗</button>';
+            h += '<button class="archive-btn" data-id="' + p.id + '" title="' + (p.archived ? t('toast_restored') : t('toast_archived')) + '" style="background:none;border:none;cursor:pointer;font-size:14px;padding:4px">' + (p.archived ? '📤' : '📦') + '</button>';
+            h += '<button class="btn btn-danger btn-sm delete-project-btn" data-id="' + p.id + '">' + t('delete') + '</button>';
+            h += '</div>';
+            h += '</div>';
+            return h;
+        }
+
         async function loadProjects() {
             if (!currentUser || !db) return;
             try {
@@ -1090,37 +1126,25 @@
                     if (b) b.addEventListener('click', createProject);
                     return;
                 }
+                const activeProjects = projects.filter(p => !p.archived);
+                const archivedProjects = projects.filter(p => p.archived);
                 let html = '';
-                for (const p of projects) {
-                    const { data: calcs } = await db.from('project_calculations').select('*').eq('project_id', p.id).order('created_at', { ascending: false });
-                    const calcCount = (calcs || []).length;
-                    html += '<div class="card" id="proj-' + p.id + '">';
-                    html += '<div class="card-header">';
-                    html += '<div style="flex:1"><div class="card-title">' + esc(p.name) + '</div></div>';
-                    html += '<div style="display:flex;align-items:center;gap:8px"><span class="badge badge-blue">' + calcCount + ' ' + t('calcs_count') + '</span><div class="card-date">' + fmtDate(p.created_at) + '</div></div>';
-                    html += '</div>';
-                    if (calcs && calcs.length > 0) {
-                        html += '<div class="project-calcs" style="display:none">';
-                        calcs.forEach(c => {
-                            const product = (c.report_data && c.report_data.product_title) || t('unnamed');
-                            const total = (c.report_data && c.report_data.total_co2eq) || 0;
-                            html += '<div class="calc-item">';
-                            html += '<div style="cursor:pointer;flex:1" onclick="window.location.href=\'/report.html?history=' + c.id + '\'"><div class="calc-name">' + esc(product) + '</div><div class="calc-date">' + fmtDate(c.created_at) + '</div></div>';
-                            html += '<div style="display:flex;align-items:center;gap:10px"><div class="calc-total">' + fmtCo2(total) + ' kgCO₂e</div>';
-                            html += '<button class="btn btn-danger btn-sm delete-projcalc-btn" data-id="' + c.id + '" title="' + t('delete') + '">✕</button></div>';
-                            html += '</div>';
-                        });
-                        html += '</div>';
+                if (activeProjects.length === 0) {
+                    html += '<div class="empty"><div class="empty-icon">📁</div><div class="empty-text">' + t('no_projects') + '</div><button class="btn btn-primary" id="emptyCreateBtn">' + t('create') + '</button></div>';
+                }
+                for (const p of activeProjects) {
+                    html += await renderProjectCard(p);
+                }
+                if (archivedProjects.length > 0) {
+                    html += '<div style="margin-top:24px"><details><summary style="cursor:pointer;font-size:14px;font-weight:600;color:var(--ink-mute);padding:8px 0">' + t('archive_title') + ' (' + archivedProjects.length + ')</summary>';
+                    for (const p of archivedProjects) {
+                        html += await renderProjectCard(p);
                     }
-                    html += '<div class="card-actions">';
-                    html += '<button class="btn btn-ghost btn-sm toggle-calcs-btn" data-id="' + p.id + '">▸ ' + t('calculations') + '</button>';
-                    html += '<button class="btn btn-ghost btn-sm rename-project-btn" data-id="' + p.id + '" data-name="' + esc(p.name) + '">✏️ ' + t('rename') + '</button>';
-                    html += '<button class="share-project-btn btn-icon" data-id="' + p.id + '" title="🔗">🔗</button>';
-                    html += '<button class="btn btn-danger btn-sm delete-project-btn" data-id="' + p.id + '">' + t('delete') + '</button>';
-                    html += '</div>';
-                    html += '</div>';
+                    html += '</details></div>';
                 }
                 list.innerHTML = html;
+                const emptyBtn = document.getElementById('emptyCreateBtn');
+                if (emptyBtn) emptyBtn.addEventListener('click', createProject);
             } catch (e) {
                 console.error('loadProjects error:', e);
                 showToast(t('err_load_projects') + (e.message || e));
@@ -1172,6 +1196,16 @@
                 loadProjects(); loadStats();
                 showToast(t('toast_calc_deleted'));
             } catch (e) { showToast(t('err_delete') + (e.message || e)); }
+        }
+
+        async function archiveProject(id) {
+            try {
+                const { data: proj } = await db.from('user_projects').select('archived').eq('id', id).single();
+                const newVal = !(proj?.archived);
+                await db.from('user_projects').update({ archived: newVal }).eq('id', id);
+                showToast(newVal ? t('toast_archived') : t('toast_restored'));
+                loadProjects();
+            } catch (e) { showToast(t('err_generic') + (e.message || e)); }
         }
 
         /* ══════════════════════════════════════════════════
@@ -1395,6 +1429,8 @@
             if (delProject) { deleteProject(delProject.dataset.id); return; }
             const delProjCalc = e.target.closest('.delete-projcalc-btn');
             if (delProjCalc) { e.stopPropagation(); deleteCalcFromProject(delProjCalc.dataset.id); return; }
+            const archiveBtn = e.target.closest('.archive-btn');
+            if (archiveBtn) { archiveProject(archiveBtn.dataset.id); return; }
         });
 
         init();
