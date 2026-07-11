@@ -7028,7 +7028,7 @@ function renderReport(d) {
   fillList('#recommendations', d.recommendations);
 
   // hide detail until clicked
-  $('#detailPanel').classList.remove('show');
+  $('#detailPanel')?.classList.remove('show');
 
   // reset to step 1 + graph view
   switchStep(1);
@@ -7136,11 +7136,13 @@ function clearSelected() {
   $$('.flow-root.selected, .stage-card.selected, .proc-card.selected')
     .forEach(el => el.classList.remove('selected'));
   const panel = $('#detailPanel');
-  panel.classList.remove('show');
-  // Move panel back to original position in DOM
-  const output = document.querySelector('#step2 .output') || document.querySelector('#step2');
-  if (output && panel.parentNode !== output) {
-    output.appendChild(panel);
+  if (panel) {
+    panel.classList.remove('show');
+    // Move panel back to original position in DOM
+    const output = document.querySelector('#step2 .output') || document.querySelector('#step2');
+    if (output && panel.parentNode !== output) {
+      output.appendChild(panel);
+    }
   }
 }
 
@@ -7263,10 +7265,10 @@ function showNodeDetail(o, cardEl) {
   
   // Inline expand: move detail panel below the clicked card
   const panel = $('#detailPanel');
-  if (cardEl && cardEl.parentNode) {
+  if (panel && cardEl && cardEl.parentNode) {
     cardEl.parentNode.insertBefore(panel, cardEl.nextSibling);
   }
-  panel.classList.add('show');
+  panel?.classList.add('show');
   
   // Привязка обработчиков для редактирования
   if (o.editable && o.editData) {
@@ -7647,7 +7649,7 @@ document.addEventListener('click', e => {
   const viewBtn = e.target.closest('.cs-view button');
   if (viewBtn) switchView(viewBtn.dataset.view);
   if (e.target.closest('#detailClose')) {
-    $('#detailPanel').classList.remove('show');
+    $('#detailPanel')?.classList.remove('show');
     clearSelected();
   }
   if (e.target.closest('#resetBtn2') || e.target.closest('#backToHome')) {
