@@ -1745,6 +1745,17 @@ async function saveToProject(projectId, report) {
   .detail-edit-actions button.primary:hover {
     background: var(--jade-dark);
   }
+  .detail-slider {
+    width: 100%;
+    margin: 8px 0;
+    accent-color: var(--jade);
+  }
+  .slider-val {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--jade-deep);
+    font-weight: 600;
+  }
   .detail-eyebrow {
     font-family: var(--mono);
     font-size: 10px;
@@ -7257,6 +7268,9 @@ function showNodeDetail(o, cardEl) {
       <div class="detail-edit-title">${currentLang === 'ru' ? 'Редактировать' : currentLang === 'zh' ? '编辑' : 'Edit'}</div>
       <div class="detail-edit-row">
         <label>${t.d_amount || 'Amount'}</label>
+        <input type="range" class="detail-slider" min="0" max="${o.editData.amount * 3}" step="0.01" value="${o.editData.amount}"
+          oninput="sliderRecalc(this, ${currentNodeI}, ${currentNodeJ})">
+        <span class="slider-val">${fmtNum(o.editData.amount)}</span>
         <input type="number" id="detailEditAmount" value="${o.editData.amount}" step="any">
       </div>
       <div class="detail-edit-row">
@@ -7302,6 +7316,22 @@ function showNodeDetail(o, cardEl) {
     document.getElementById('detailEditReset')?.addEventListener('click', () => {
       document.getElementById('detailEditAmount').value = o.editData.amount;
       document.getElementById('detailEditFactor').value = o.editData.factor;
+      // Sync slider with reset value
+      const slider = document.querySelector('.detail-slider');
+      if (slider) {
+        slider.value = o.editData.amount;
+        const valEl = slider.parentNode.querySelector('.slider-val');
+        if (valEl) valEl.textContent = fmtNum(o.editData.amount);
+      }
+    });
+    // Sync slider when number input changes
+    document.getElementById('detailEditAmount')?.addEventListener('input', function() {
+      const slider = document.querySelector('.detail-slider');
+      if (slider) {
+        slider.value = this.value;
+        const valEl = slider.parentNode.querySelector('.slider-val');
+        if (valEl) valEl.textContent = fmtNum(parseFloat(this.value) || 0);
+      }
     });
   }
 }
@@ -7335,6 +7365,45 @@ function applyDetailEdit() {
   // Обновляем отображение
   renderReport(d);
   showToast(currentLang === 'ru' ? 'Значения обновлены' : currentLang === 'zh' ? '已更新' : 'Values updated');
+}
+
+function sliderRecalc(input, stageI, subI) {
+  const d = lastReport;
+  if (!d || !d.stages[stageI]?.sub_processes?.[subI]) return;
+  const newAmount = parseFloat(input.value);
+  const sp = d.stages[stageI].sub_processes[subI];
+  sp.amount = newAmount;
+  sp.co2eq = newAmount * (sp.factor || 0);
+  // Recalculate stage total
+  const stage = d.stages[stageI];
+  stage.co2eq = (stage.sub_processes || []).reduce((s, p) => s + (p.co2eq || 0), 0);
+  // Recalculate overall total
+  d.total_co2eq = (d.stages || []).reduce((s, st) => s + (st.co2eq || 0), 0);
+  // Update percentages
+  const tot = d.total_co2eq || 1;
+  d.stages.forEach(st => st.share_pct = (st.co2eq / tot) * 100);
+  // Update UI: value display, total, donut, ranking
+  const valEl = input.parentNode.querySelector('.slider-val');
+  if (valEl) valEl.textContent = fmtNum(newAmount);
+  const amountInput = document.getElementById('detailEditAmount');
+  if (amountInput) amountInput.value = newAmount;
+  // Update resValue
+  $('#resValue').textContent = fmtNum(d.total_co2eq);
+  // Update stage card value
+  const stageCards = document.querySelectorAll('.stage-card');
+  if (stageCards[stageI]) {
+    stageCards[stageI].querySelector('.value').innerHTML = fmtNum(stage.co2eq) + '<span class="unit">kgCO₂e</span>';
+  }
+  // Update detail panel co2 and share
+  const detailCo2 = document.querySelector('.detail-co2');
+  if (detailCo2) detailCo2.innerHTML = fmtNum(sp.co2eq) + ' <span class="u">kg CO₂-eq</span>';
+  const detailShareNum = document.querySelector('.detail-share-num');
+  if (detailShareNum) detailShareNum.textContent = fmtNum((sp.co2eq / tot) * 100) + '%';
+  // Re-render donut and ranking
+  if (typeof renderDonut === 'function') renderDonut(d);
+  if (typeof renderRanking === 'function') renderRanking(d);
+  // Save to sessionStorage
+  sessionStorage.setItem('lca-last-report', JSON.stringify(d));
 }
 
 /* ── FLOW TABLE (list view) ──────────────────────────── */
@@ -8231,28 +8300,80 @@ $('#compareBtn').addEventListener('click', () => {
 
 function renderCompare() {
   const grid = document.getElementById('compareGrid');
-  grid.innerHTML = `
+  const a = compareList[0], b = compareList[1];
+  
+  let html = `
     <div class="compare-actions-top">
       <button id="compareClearAll" class="compare-clear-btn">${currentLang === 'ru' ? 'Очистить всё' : currentLang === 'zh' ? '清除全部' : 'Clear all'}</button>
-    </div>
-    ${compareList.map((d, i) => `
-      <div class="compare-card">
-        <button class="compare-card-remove" data-idx="${i}" title="Удалить">×</button>
-        <h3>${escape(d.product_title || '-')}</h3>
-        <div class="compare-label">${I18N[currentLang].res_label_short || 'Total emissions'}</div>
-        <div class="compare-value">${fmtNum(d.total_co2eq)} <span style="font-size:14px;color:var(--ink-mute)">kgCO₂e</span></div>
-        <div class="compare-stages">
-          ${(d.stages || []).map(s => `
-            <div class="compare-stage-row">
-              <span class="name">${escape(s.name)}</span>
-              <span class="value">${fmtNum(s.co2eq)}</span>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    `).join('')}
-  `;
-  // Удаление отдельного элемента
+    </div>`;
+  
+  // Product summary cards
+  html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">`;
+  
+  html += `<div class="compare-card">
+    <button class="compare-card-remove" data-idx="0" title="${currentLang === 'ru' ? 'Удалить' : 'Remove'}">×</button>
+    <h3>${escape(a.product_title || '-')}</h3>
+    <div class="compare-label">${I18N[currentLang].res_label_short || 'Total emissions'}</div>
+    <div class="compare-value">${fmtNum(a.total_co2eq)} <span style="font-size:14px;color:var(--ink-mute)">kgCO₂e</span></div>
+    <div style="font-size:12px;color:var(--ink-mute);margin-top:4px">${escape(a.functional_unit || '')}</div>
+  </div>`;
+  
+  html += `<div class="compare-card">
+    <button class="compare-card-remove" data-idx="1" title="${currentLang === 'ru' ? 'Удалить' : 'Remove'}">×</button>
+    <h3>${escape(b.product_title || '-')}</h3>
+    <div class="compare-label">${I18N[currentLang].res_label_short || 'Total emissions'}</div>
+    <div class="compare-value">${fmtNum(b.total_co2eq)} <span style="font-size:14px;color:var(--ink-mute)">kgCO₂e</span></div>
+    <div style="font-size:12px;color:var(--ink-mute);margin-top:4px">${escape(b.functional_unit || '')}</div>
+  </div>`;
+  
+  html += `</div>`;
+  
+  // Delta comparison table
+  const stagesA = a.stages || [];
+  const stagesB = b.stages || [];
+  const maxLen = Math.max(stagesA.length, stagesB.length);
+  
+  html += `<div class="flow-table-wrap" style="margin-top:24px">
+    <table class="flow-table">
+      <thead><tr>
+        <th>${currentLang === 'ru' ? 'Стадия' : currentLang === 'zh' ? '阶段' : 'Stage'}</th>
+        <th class="num">${escape(a.product_title || 'A')}</th>
+        <th class="num">${escape(b.product_title || 'B')}</th>
+        <th class="num">Δ</th>
+      </tr></thead><tbody>`;
+  
+  for (let i = 0; i < maxLen; i++) {
+    const sa = stagesA[i] || {};
+    const sb = stagesB[i] || {};
+    const co2a = sa.co2eq || 0;
+    const co2b = sb.co2eq || 0;
+    const delta = co2b - co2a;
+    const deltaPct = co2a ? ((delta / co2a) * 100).toFixed(1) : '—';
+    const color = delta > 0 ? 'var(--c-rust)' : delta < 0 ? 'var(--jade)' : 'var(--ink-mute)';
+    html += `<tr>
+      <td>${escape(sa.name || sb.name || '—')}</td>
+      <td class="num">${fmtNum(co2a)}</td>
+      <td class="num">${fmtNum(co2b)}</td>
+      <td class="num" style="color:${color}">${delta > 0 ? '+' : ''}${fmtNum(delta)} (${deltaPct}${deltaPct !== '—' ? '%' : ''})</td>
+    </tr>`;
+  }
+  
+  // Total row
+  const deltaTotal = (b.total_co2eq || 0) - (a.total_co2eq || 0);
+  const deltaPctTotal = a.total_co2eq ? ((deltaTotal / a.total_co2eq) * 100).toFixed(1) : '—';
+  const totalColor = deltaTotal > 0 ? 'var(--c-rust)' : deltaTotal < 0 ? 'var(--jade)' : 'var(--ink-mute)';
+  html += `<tr style="font-weight:700;background:var(--jade-bg)">
+    <td>${currentLang === 'ru' ? 'Итого' : currentLang === 'zh' ? '总计' : 'Total'}</td>
+    <td class="num">${fmtNum(a.total_co2eq)}</td>
+    <td class="num">${fmtNum(b.total_co2eq)}</td>
+    <td class="num" style="color:${totalColor}">${deltaTotal > 0 ? '+' : ''}${fmtNum(deltaTotal)} (${deltaPctTotal}${deltaPctTotal !== '—' ? '%' : ''})</td>
+  </tr>`;
+  
+  html += `</tbody></table></div>`;
+  
+  grid.innerHTML = html;
+  
+  // Remove individual items
   grid.querySelectorAll('.compare-card-remove').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -8269,7 +8390,7 @@ function renderCompare() {
       }
     });
   });
-  // Очистить всё
+  // Clear all
   document.getElementById('compareClearAll')?.addEventListener('click', () => {
     compareList = [];
     updateCompareBadge();
