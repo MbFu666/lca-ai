@@ -7160,11 +7160,6 @@ function clearSelected() {
   const panel = $('#detailPanel');
   if (panel) {
     panel.classList.remove('show');
-    // Move panel back to original position in DOM
-    const output = document.querySelector('#step2 .output') || document.querySelector('#step2');
-    if (output && panel.parentNode !== output) {
-      output.appendChild(panel);
-    }
   }
 }
 
@@ -7287,11 +7282,8 @@ function showNodeDetail(o, cardEl) {
     ${editHtml}
   `;
   
-  // Inline expand: move detail panel below the clicked card
+  // Show detail panel (don't move it — keep in #step1)
   const panel = $('#detailPanel');
-  if (panel && cardEl && cardEl.parentNode) {
-    cardEl.parentNode.insertBefore(panel, cardEl.nextSibling);
-  }
   panel?.classList.add('show');
   
   // Привязка обработчиков для редактирования
