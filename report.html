@@ -7123,8 +7123,8 @@ function renderReport(d) {
   switchView('tree');
 
   // Переключаемся на страницу результатов
-  $('#pageHome').classList.add('hidden');
-  $('#pageResults').classList.add('show');
+  if ($('#pageHome')) $('#pageHome').classList.add('hidden');
+  if ($('#pageResults')) $('#pageResults').classList.add('show');
   // Показываем кнопку AI-агента только на странице отчёта
   $('#agentFab').classList.add('show');
   // Открываем панель AI-агента с вопросами
@@ -7740,8 +7740,7 @@ document.addEventListener('click', e => {
   }
   if (e.target.closest('#resetBtn2') || e.target.closest('#backToHome')) {
     // Возвращаемся на домашнюю страницу
-    $('#pageResults').classList.remove('show');
-    $('#pageHome').classList.remove('hidden');
+    window.location.href = '/';
     // Скрываем AI-агента на главной
     $('#agent').classList.remove('show');
     $('#agentFab').classList.remove('show');
@@ -9248,9 +9247,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   document.getElementById('agentFab').addEventListener('click', function() {
     document.getElementById('agent').classList.add('show');
   });
-  // Скрываем FAB на главной странице
-  if (document.getElementById('pageHome') && !document.getElementById('pageHome').classList.contains('hidden')) {
-    document.getElementById('agentFab').classList.remove('show');
+  // На странице отчёта показываем FAB
+  if (document.getElementById('agentFab')) {
+    document.getElementById('agentFab').classList.add('show');
   }
   document.getElementById('agentSend').addEventListener('click', function() {
     var msg = document.getElementById('agentMsg').value.trim();

@@ -401,7 +401,7 @@
                     list.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">' + t('no_history') + '</div><a href="/" class="btn btn-primary">' + t('do_calc') + '</a></div>';
                     return;
                 }
-                list.innerHTML = data.map(h => '<div class="card"><div class="card-header"><div class="card-title">' + esc(h.product_title || '—') + '</div><div class="card-date">' + new Date(h.created_at).toLocaleDateString(cabinetLang === 'zh' ? 'zh-CN' : cabinetLang) + '</div></div><div class="card-meta"><span>📦 ' + esc(h.functional_unit || '—') + '</span><span>🌱 ' + (h.total_co2eq || 0) + ' kgCO₂e</span></div><div class="card-actions"><a href="/?history=' + h.id + '" class="btn btn-primary">' + t('view') + '</a><button class="share-history-btn" data-id="' + h.id + '" title="Скопировать ссылку" style="background:none;border:none;cursor:pointer;padding:4px 8px;font-size:16px">🔗</button><button class="btn btn-danger" onclick="deleteHistory(\'' + h.id + '\')">' + t('delete') + '</button></div></div>').join('');
+                list.innerHTML = data.map(h => '<div class="card"><div class="card-header"><div class="card-title">' + esc(h.product_title || '—') + '</div><div class="card-date">' + new Date(h.created_at).toLocaleDateString(cabinetLang === 'zh' ? 'zh-CN' : cabinetLang) + '</div></div><div class="card-meta"><span>📦 ' + esc(h.functional_unit || '—') + '</span><span>🌱 ' + (h.total_co2eq || 0) + ' kgCO₂e</span></div><div class="card-actions"><a href="/report.html?history=' + h.id + '" class="btn btn-primary">' + t('view') + '</a><button class="share-history-btn" data-id="' + h.id + '" title="Скопировать ссылку" style="background:none;border:none;cursor:pointer;padding:4px 8px;font-size:16px">🔗</button><button class="btn btn-danger" onclick="deleteHistory(\'' + h.id + '\')">' + t('delete') + '</button></div></div>').join('');
             } catch (e) { 
                 console.error('loadHistory error:', e); 
                 showToast(t('err_load_history') + (e.message || e)); 
@@ -454,7 +454,7 @@
                             const total = c.report_data?.total_co2eq || 0;
                             const date = new Date(c.created_at).toLocaleDateString(cabinetLang === 'zh' ? 'zh-CN' : cabinetLang);
                             html += '<div class="calc-item">';
-                            html += '<div class="calc-info" onclick="window.location.href=\'/?history=' + c.id + '\'" style="cursor:pointer;flex:1"><div class="calc-name">' + esc(product) + '</div><div class="calc-date">' + date + '</div></div>';
+                            html += '<div class="calc-info" onclick="window.location.href=\'/report.html?history=' + c.id + '\'" style="cursor:pointer;flex:1"><div class="calc-name">' + esc(product) + '</div><div class="calc-date">' + date + '</div></div>';
                             html += '<div class="calc-total">' + total + ' kgCO₂e</div>';
                             html += '<button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteCalcFromProject(\'' + c.id + '\')" title="' + t('delete') + '">✕</button>';
                             html += '</div>';
@@ -617,14 +617,14 @@
             const shareProject = e.target.closest('.share-project-btn');
             if (shareProject) {
                 e.stopPropagation();
-                const url = window.location.origin + '/?project=' + shareProject.dataset.id;
+                const url = window.location.origin + '/report.html?project=' + shareProject.dataset.id;
                 navigator.clipboard.writeText(url).then(() => showToast(t('toast_link_copied')));
                 return;
             }
             const shareHistory = e.target.closest('.share-history-btn');
             if (shareHistory) {
                 e.stopPropagation();
-                const url = window.location.origin + '/?history=' + shareHistory.dataset.id;
+                const url = window.location.origin + '/report.html?history=' + shareHistory.dataset.id;
                 navigator.clipboard.writeText(url).then(() => showToast(t('toast_link_copied')));
             }
         });
