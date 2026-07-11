@@ -1008,7 +1008,7 @@
             if (tab === 'overview') { await loadHistoryData(); renderOverview(); renderExtendedStats(); }
             if (tab === 'history') { await loadHistoryData(); historyShown = PAGE; renderHistory(); }
             if (tab === 'projects') await loadProjects();
-            if (tab === 'settings') fillProfileFields();
+            if (tab === 'settings') { fillProfileFields(); loadApiKeys(); }
         }
 
         /* ══════════════════════════════════════════════════
