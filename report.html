@@ -7797,10 +7797,10 @@ function escape(s) {
 
 function showError(msg) {
   const e = $('#errorBox');
-  e.innerHTML = msg;
-  e.classList.add('show');
+  if (e) { e.innerHTML = msg; e.classList.add('show'); }
+  else console.warn('[showError]', msg);
 }
-function hideError() { $('#errorBox').classList.remove('show'); }
+function hideError() { const e = $('#errorBox'); if (e) e.classList.remove('show'); }
 
 /* ════════════════════════════════════════════════════════
    AI AGENT — генерация уточняющих вопросов и пересчёт
@@ -8025,7 +8025,7 @@ async function applyAgentAnswers() {
 
   // Задержка перед запуском пересчёта (чтобы пользователь увидел процесс)
   setTimeout(() => {
-    run();
+    if (lastReport) renderReport(lastReport);
   }, 1500);
 }
 
@@ -9137,10 +9137,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   });
   
-  document.getElementById('submitBtn')?.addEventListener('click', run);
-  document.getElementById('productInput')?.addEventListener('keydown', function(e) {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') run();
-  });
+  // submitBtn and productInput are in index.html (home page)
   
   document.getElementById('backToHome')?.addEventListener('click', function() {
     window.location.href = '/';
@@ -9168,7 +9165,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   document.getElementById('exportPrint')?.addEventListener('click', function() { window.print(); });
   
   document.getElementById('agentClose')?.addEventListener('click', function() {
-    document.getElementById('agent')?.classList.remove('show');
+    const ag = document.getElementById('agent');
+    ag?.classList.remove('show');
+    ag?.setAttribute('aria-hidden', 'true');
   });
   // Fallback: delegate click on agent panel for close button
   document.getElementById('agent')?.addEventListener('click', function(e) {
