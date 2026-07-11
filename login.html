@@ -142,8 +142,11 @@
                 <input type="text" id="otpCode" data-i18n-placeholder="code_ph" placeholder="Код из письма" maxlength="6" style="width:100%;padding:12px;border:1px solid var(--rule);border-radius:10px;margin-bottom:8px;background:var(--bg);color:var(--ink);text-align:center;font-size:20px;letter-spacing:8px">
                 <button id="verifyOtpBtn" data-i18n="verify_btn" style="width:100%;padding:12px;background:var(--jade);color:#fff;border:none;border-radius:10px;cursor:pointer">Войти</button>
             </div>
+            <div style="text-align:center;margin-top:12px">
+                <a href="#" id="backToLogin" data-i18n="back_to_login" style="color:var(--jade);font-size:13px">Войти по логину</a>
+            </div>
         </div>
-        <div style="text-align:center;margin-top:12px">
+        <div style="text-align:center;margin-top:12px" id="toggleOtpWrap">
             <a href="#" id="toggleOtp" data-i18n="otp_toggle" style="color:var(--jade);font-size:13px">Войти по коду из письма</a>
         </div>
         <div class="msg" id="msg"></div>
@@ -185,7 +188,8 @@
                 registering: 'Регистрация...',
                 confirmation_sent: 'Письмо с подтверждением отправлено на',
                 account_created: 'Аккаунт создан! Теперь войдите.',
-                code_sent: 'Код отправлен на'
+                code_sent: 'Код отправлен на',
+                back_to_login: 'Войти по логину'
             },
             en: {
                 title: 'LCA·AI — Sign In', subtitle: 'Sign in to access calculations',
@@ -209,7 +213,8 @@
                 registering: 'Registering...',
                 confirmation_sent: 'Confirmation email sent to',
                 account_created: 'Account created! Please sign in.',
-                code_sent: 'Code sent to'
+                code_sent: 'Code sent to',
+                back_to_login: 'Sign in with login'
             },
             zh: {
                 title: 'LCA·AI — 登录', subtitle: '登录以访问计算',
@@ -233,7 +238,8 @@
                 registering: '注册中...',
                 confirmation_sent: '确认邮件已发送至',
                 account_created: '账户已创建！请登录。',
-                code_sent: '验证码已发送至'
+                code_sent: '验证码已发送至',
+                back_to_login: '使用账号登录'
             }
         };
         let loginLang = 'ru';
@@ -265,7 +271,7 @@
             if (!sbClient) { showError(loginT('sb_not_loaded')); return; }
             try {
                 const { error } = await sbClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: REDIRECT } });
-                if (error) showError(error.message);
+                if (error) showError(translateError(error.message));
             } catch (err) { showError('Google: ' + err.message); }
         });
 
@@ -274,7 +280,7 @@
             if (!sbClient) { showError(loginT('sb_not_loaded')); return; }
             try {
                 const { error } = await sbClient.auth.signInWithOAuth({ provider: 'github', options: { redirectTo: REDIRECT } });
-                if (error) showError(error.message);
+                if (error) showError(translateError(error.message));
             } catch (err) { showError('GitHub: ' + err.message); }
         });
 
@@ -283,7 +289,7 @@
             if (!sbClient) { showError(loginT('sb_not_loaded')); return; }
             try {
                 const { error } = await sbClient.auth.signInWithOAuth({ provider: 'twitter', options: { redirectTo: REDIRECT } });
-                if (error) showError(error.message);
+                if (error) showError(translateError(error.message));
             } catch (err) { showError('X/Twitter: ' + err.message); }
         });
 
@@ -301,9 +307,9 @@
             try {
                 const { data, error } = await sbClient.auth.signInWithPassword({ email, password });
                 btn.disabled = false; btn.textContent = loginT('login_btn');
-                if (error) showError(error.message);
+                if (error) showError(translateError(error.message));
                 else { localStorage.setItem('supabase_user', JSON.stringify(data.user)); localStorage.setItem('supabase_token', data.session.access_token); window.location.href = REDIRECT; }
-            } catch (err) { btn.disabled = false; btn.textContent = loginT('login_btn'); showError(err.message); }
+            } catch (err) { btn.disabled = false; btn.textContent = loginT('login_btn'); showError(translateError(err.message)); }
         });
 
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
@@ -319,13 +325,24 @@
             try {
                 const { data, error } = await sbClient.auth.signUp({ email, password });
                 btn.disabled = false; btn.textContent = loginT('reg_btn');
-                if (error) showError(error.message);
+                if (error) showError(translateError(error.message));
                 else if (data.user && data.session) { localStorage.setItem('supabase_user', JSON.stringify(data.user)); localStorage.setItem('supabase_token', data.session.access_token); window.location.href = REDIRECT; }
                 else if (data.user && !data.session) { showSuccess(loginT('confirmation_sent') + ' ' + email); toggleMode(); }
                 else { showSuccess(loginT('account_created')); toggleMode(); }
-            } catch (err) { btn.disabled = false; btn.textContent = loginT('reg_btn'); showError(err.message); }
+            } catch (err) { btn.disabled = false; btn.textContent = loginT('reg_btn'); showError(translateError(err.message)); }
         });
 
+        function translateError(msg) {
+            const errors = {
+                'Invalid login credentials': { ru: 'Неверный логин или пароль', en: 'Invalid login credentials', zh: '登录凭证无效' },
+                'Email not confirmed': { ru: 'Email не подтверждён', en: 'Email not confirmed', zh: '邮箱未确认' },
+                'User already registered': { ru: 'Пользователь уже зарегистрирован', en: 'User already registered', zh: '用户已注册' }
+            };
+            for (const [key, translations] of Object.entries(errors)) {
+                if (msg.includes(key)) return translations[loginLang] || translations.en;
+            }
+            return msg;
+        }
         function showError(msg) { const el = document.getElementById('msg'); el.className = 'msg error'; el.textContent = msg; }
         function showSuccess(msg) { const el = document.getElementById('msg'); el.className = 'msg success'; el.textContent = msg; }
         function hideMsg() { const el = document.getElementById('msg'); el.className = 'msg'; el.textContent = ''; }
@@ -368,8 +385,22 @@
 
         document.getElementById('toggleOtp').addEventListener('click', (e) => {
             e.preventDefault();
-            const otp = document.getElementById('otpSection');
-            otp.style.display = otp.style.display === 'none' ? 'block' : 'none';
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('switchMode').style.display = 'none';
+            document.getElementById('toggleOtpWrap').style.display = 'none';
+            document.getElementById('otpSection').style.display = 'block';
+            document.getElementById('otpEmail').value = document.getElementById('loginEmail').value;
+            hideMsg();
+        });
+
+        document.getElementById('backToLogin').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('otpSection').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'flex';
+            document.getElementById('switchMode').style.display = '';
+            document.getElementById('toggleOtpWrap').style.display = '';
+            hideMsg();
         });
 
         document.getElementById('sendOtpBtn').addEventListener('click', async () => {
@@ -377,7 +408,7 @@
             const email = document.getElementById('otpEmail').value;
             if (!email) return;
             const { error } = await sbClient.auth.signInWithOtp({ email });
-            if (error) { showError(error.message); return; }
+            if (error) { showError(translateError(error.message)); return; }
             showSuccess(loginT('code_sent') + ' ' + email);
             document.getElementById('otpCodeSection').style.display = 'block';
         });
@@ -387,7 +418,7 @@
             const email = document.getElementById('otpEmail').value;
             const token = document.getElementById('otpCode').value;
             const { error } = await sbClient.auth.verifyOtp({ email, token, type: 'email' });
-            if (error) { showError(error.message); return; }
+            if (error) { showError(translateError(error.message)); return; }
             localStorage.setItem('supabase_user', 'true');
             window.location.href = '/';
         });
