@@ -8045,7 +8045,7 @@ function toggleChatMode() {
 }
 
 // Send / apply
-$('#agentSend').addEventListener('click', () => {
+$('#agentSend')?.addEventListener('click', () => {
   const msg = $('#agentMsg').value.trim();
   if (agentChatMode) {
     sendChatMessage(msg);
@@ -8053,7 +8053,7 @@ $('#agentSend').addEventListener('click', () => {
     applyAgentAnswers();
   }
 });
-$('#agentMsg').addEventListener('keydown', e => {
+$('#agentMsg')?.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) { 
     e.preventDefault(); 
     const msg = $('#agentMsg').value.trim();
@@ -8105,7 +8105,7 @@ async function applyAgentAnswers() {
 
 // Open/close
 // Chat mode toggle
-$('#chatModeToggle').addEventListener('click', () => {
+$('#chatModeToggle')?.addEventListener('click', () => {
   toggleChatMode();
   const btn = $('#chatModeToggle');
   btn.classList.toggle('active', agentChatMode);
@@ -8117,7 +8117,7 @@ $('#chatModeToggle').addEventListener('click', () => {
 /* ════════════════════════════════════════════════════════
    EDIT MODEL MODAL
    ════════════════════════════════════════════════════════ */
-$('#editModelBtn').addEventListener('click', () => {
+$('#editModelBtn')?.addEventListener('click', () => {
   if (!lastReport) return;
   const d = lastReport;
   $('#emName').value  = d.product_title || '';
@@ -8138,7 +8138,7 @@ document.addEventListener('click', e => {
   card.classList.add('selected');
 });
 
-$('#emSave').addEventListener('click', () => {
+$('#emSave')?.addEventListener('click', () => {
   const selected = document.querySelector('#emScope .em-scope-card.selected');
   const scope = selected?.dataset.scope || 'full';
   const stages = [];
@@ -8190,7 +8190,7 @@ $('#emSave').addEventListener('click', () => {
 });
 
 // Add/remove custom factors
-$('#emAddFactor').addEventListener('click', () => {
+$('#emAddFactor')?.addEventListener('click', () => {
   const container = document.getElementById('emCustomFactors');
   const row = document.createElement('div');
   row.className = 'em-factor-row';
@@ -8251,7 +8251,7 @@ function updateCompareBadge() {
   }
 }
 
-$('#compareBtn').addEventListener('click', () => {
+$('#compareBtn')?.addEventListener('click', () => {
   if (!lastReport) return;
   // Добавляем текущий отчёт с уникальным ID
   const id = Date.now();
@@ -8316,7 +8316,7 @@ function renderCompare() {
   });
 }
 
-$('#historyBtn').addEventListener('click', () => {
+$('#historyBtn')?.addEventListener('click', () => {
   renderHistory();
   showModal('modalHistory');
 });
@@ -8351,7 +8351,7 @@ function renderHistory() {
   });
 }
 
-$('#clearHistory').addEventListener('click', () => {
+$('#clearHistory')?.addEventListener('click', () => {
   if (confirm(currentLang === 'ru' ? 'Очистить историю?' 
     : currentLang === 'zh' ? '确定清除历史？'
     : 'Clear history?')) {
@@ -8833,12 +8833,12 @@ function showNewProjectModalForSave() {
 /* ════════════════════════════════════════════════════════
    EXCEL EXPORT
    ════════════════════════════════════════════════════════ */
-$('#xlsDownload').addEventListener('click', () => {
+$('#xlsDownload')?.addEventListener('click', () => {
   if (!lastReport) return;
   downloadExcel(lastReport);
 });
 
-$('#wordDownload').addEventListener('click', () => {
+$('#wordDownload')?.addEventListener('click', () => {
   if (!lastReport) return;
   downloadWord(lastReport);
 });
@@ -9198,12 +9198,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   });
   
-  if (document.getElementById('submitBtn')) document.getElementById('submitBtn').addEventListener('click', run);
-  if (document.getElementById('productInput')) document.getElementById('productInput').addEventListener('keydown', function(e) {
+  if (document.getElementById('submitBtn')) document.getElementById('submitBtn')?.addEventListener('click', run);
+  if (document.getElementById('productInput')) document.getElementById('productInput')?.addEventListener('keydown', function(e) {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') run();
   });
   
-  document.getElementById('backToHome').addEventListener('click', function() {
+  document.getElementById('backToHome')?.addEventListener('click', function() {
     window.location.href = '/';
   });
   
@@ -9214,23 +9214,23 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (viewBtn) switchView(viewBtn.dataset.view);
   });
   
-  document.getElementById('exportExcel').addEventListener('click', function() { if (lastReport) { buildExcelPreview(lastReport); showModal('modalExcel'); } });
-  document.getElementById('exportWord').addEventListener('click', function() { if (lastReport) showWordPreview(lastReport); });
-  document.getElementById('exportJson').addEventListener('click', function() { if (lastReport) downloadJson(lastReport); });
-  document.getElementById('exportPdf').addEventListener('click', function() { showPdfPreview(); });
-  document.getElementById('exportPrint').addEventListener('click', function() { window.print(); });
+  document.getElementById('exportExcel')?.addEventListener('click', function() { if (lastReport) { buildExcelPreview(lastReport); showModal('modalExcel'); } });
+  document.getElementById('exportWord')?.addEventListener('click', function() { if (lastReport) showWordPreview(lastReport); });
+  document.getElementById('exportJson')?.addEventListener('click', function() { if (lastReport) downloadJson(lastReport); });
+  document.getElementById('exportPdf')?.addEventListener('click', function() { showPdfPreview(); });
+  document.getElementById('exportPrint')?.addEventListener('click', function() { window.print(); });
   
-  document.getElementById('agentClose').addEventListener('click', function() {
+  document.getElementById('agentClose')?.addEventListener('click', function() {
     document.getElementById('agent').classList.remove('show');
   });
-  document.getElementById('agentFab').addEventListener('click', function() {
+  document.getElementById('agentFab')?.addEventListener('click', function() {
     document.getElementById('agent').classList.add('show');
   });
   // Скрываем FAB на главной странице
   if (document.getElementById('pageHome') && !document.getElementById('pageHome').classList.contains('hidden')) {
     document.getElementById('agentFab').classList.remove('show');
   }
-  document.getElementById('agentSend').addEventListener('click', function() {
+  document.getElementById('agentSend')?.addEventListener('click', function() {
     var msg = document.getElementById('agentMsg').value.trim();
     if (typeof agentChatMode !== 'undefined' && agentChatMode) { sendChatMessage(msg); } else { applyAgentAnswers(); }
   });
