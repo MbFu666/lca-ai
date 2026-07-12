@@ -19,7 +19,7 @@
 <title>LCA·AI — Оценка жизненного цикла</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Source+Serif+4:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/jsonrepair@3.11.2/lib/umd/jsonrepair.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -131,8 +131,8 @@ function requireAuth(action) {
       <h3 style="margin-bottom:12px" data-i18n="auth_required_title">Требуется авторизация</h3>
       <p style="margin-bottom:24px;color:var(--ink-soft)" data-i18n="auth_required_msg">Войдите или зарегистрируйтесь, чтобы использовать эту функцию</p>
       <div style="display:flex;gap:12px;justify-content:center">
-        <a href="/login.html" style="padding:10px 24px;border-radius:8px;background:var(--jade);color:white;text-decoration:none;font-weight:600" data-i18n="auth_required_btn">Войти / Регистрация</a>
-        <button onclick="closeModal('modalAuthRequired')" style="padding:10px 24px;border-radius:8px;border:1px solid var(--rule);background:var(--bg);cursor:pointer" data-i18n="auth_required_close">Закрыть</button>
+        <a href="/login.html" style="padding:10px 24px;border-radius: 0;background:var(--jade);color:white;text-decoration:none;font-weight:600" data-i18n="auth_required_btn">Войти / Регистрация</a>
+        <button onclick="closeModal('modalAuthRequired')" style="padding:10px 24px;border-radius: 0;border:1px solid var(--rule);background:var(--bg);cursor:pointer" data-i18n="auth_required_close">Закрыть</button>
       </div>
     </div>`;
     document.body.appendChild(modal);
@@ -311,50 +311,59 @@ async function saveToProject(projectId, report) {
 }
 </script>
 
-<style>
-  :root {
-    /* white-jade palette */
-    --bg:           #FFFFFF;
-    --bg-soft:      #F8FAFA;
-    --bg-tint:      #F0FBF7;
-    --ink:          #0E2E27;
-    --ink-soft:     #4D5E61;
-    --ink-mute:     #93A0A6;
-    --rule:         #E5E8EB;
-    --rule-soft:    #F0F2F4;
-
-    /* jade green primary */
-    --jade:         #14C997;
-    --jade-dark:    #0FB386;
-    --jade-deep:    #0A8567;
-    --jade-soft:    #B6EFDA;
-    --jade-bg:      #ECFAF4;
-
-    /* stage colors (matching screenshot) */
-    --c-raw:    #14C997;
-    --c-prod:   #4F94DB;
-    --c-dist:   #E97D5C;
-    --c-use:    #6BB6E6;
-    --c-eol:    #9C8AD8;
-    --c-warn:   #E0B856;
-    --c-rust:   #C25450;
-
-    /* type */
-    --sans: 'Manrope', 'Noto Sans SC', system-ui, sans-serif;
-    --mono: 'JetBrains Mono', 'Noto Sans SC', ui-monospace, monospace;
+<style>  :root {
+    --bg: #F2F0EC;
+    --bg-soft: #EAE7E1;
+    --bg-tint: #EAE7E1;
+    --ink: #1C1B19;
+    --ink-soft: #6B6862;
+    --ink-mute: #9B9892;
+    --rule: #D6D2CB;
+    --rule-soft: #E5E2DC;
+    --e-0: #B8B4AC;
+    --e-1: #8A6A4F;
+    --e-2: #B4652A;
+    --e-3: #D9481C;
+    --e-4: #F03B0C;
+    --jade: #1C1B19;
+    --jade-dark: #1C1B19;
+    --jade-deep: #1C1B19;
+    --jade-soft: #E5E2DC;
+    --jade-bg: #F2F0EC;
+    --c-raw: #B8B4AC;
+    --c-prod: #8A6A4F;
+    --c-dist: #B4652A;
+    --c-use: #D9481C;
+    --c-eol: #F03B0C;
+    --c-warn: #B4652A;
+    --c-rust: #D9481C;
+    --sans: 'Oswald', 'Arial Narrow', sans-serif;
+    --body: 'Source Serif 4', Georgia, serif;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
   }
 
-  /* Dark theme */
+    /* Dark theme */
   html.dark {
-    --bg:           #0F1F1B;
-    --bg-soft:      #162B26;
-    --bg-tint:      #1A332D;
-    --ink:          #E8F0ED;
-    --ink-soft:     #A0B0AA;
-    --ink-mute:     #6B7D78;
-    --rule:         #2A3F39;
-    --rule-soft:    #1E332D;
-    --jade-bg:      #1A332D;
+    --bg: #131211;
+    --bg-soft: #1C1B19;
+    --bg-tint: #1C1B19;
+    --ink: #E5E2DC;
+    --ink-soft: #9B9892;
+    --ink-mute: #6B6862;
+    --rule: #2E2C28;
+    --rule-soft: #232220;
+    --e-0: #4A4843;
+    --e-1: #8A6A4F;
+    --e-2: #B4652A;
+    --e-3: #D9481C;
+    --e-4: #F03B0C;
+    --jade: #E5E2DC;
+    --jade-dark: #E5E2DC;
+    --jade-deep: #E5E2DC;
+    --jade-soft: #2E2C28;
+    --jade-bg: #1C1B19;
+    --c-rust: #F03B0C;
+    --c-warn: #D9481C;
   }
 
   /* Dark mode overrides */
@@ -584,7 +593,7 @@ async function saveToProject(projectId, report) {
   .brand .dot {
     width: 22px;
     height: 22px;
-    border-radius: 50%;
+    border-radius: 0;
     background: var(--jade);
     position: relative;
     display: inline-flex;
@@ -595,7 +604,7 @@ async function saveToProject(projectId, report) {
     content: '';
     width: 9px; height: 9px;
     background: white;
-    border-radius: 50%;
+    border-radius: 0;
   }
   .brand em {
     font-style: normal;
@@ -631,7 +640,7 @@ async function saveToProject(projectId, report) {
     width: 400px;
     height: 400px;
     background: radial-gradient(circle, var(--jade-bg) 0%, transparent 70%);
-    border-radius: 50%;
+    border-radius: 0;
     z-index: -1;
     opacity: 0.6;
   }
@@ -646,7 +655,7 @@ async function saveToProject(projectId, report) {
     color: var(--jade-deep);
     background: var(--jade-bg);
     padding: 6px 14px;
-    border-radius: 30px;
+    border-radius: 0;
     margin-bottom: 24px;
     font-weight: 600;
     border: 1px solid var(--jade-soft);
@@ -673,7 +682,7 @@ async function saveToProject(projectId, report) {
     right: 0;
     height: 8px;
     background: var(--jade-soft);
-    border-radius: 4px;
+    border-radius: 0;
     z-index: -1;
     opacity: 0.5;
   }
@@ -694,17 +703,17 @@ async function saveToProject(projectId, report) {
   .preview-card {
     background: var(--bg-soft);
     border: 1px solid var(--rule);
-    border-radius: 16px;
+    border-radius: 0;
     padding: 28px 36px;
     text-align: center;
-    box-shadow: 0 8px 32px -12px rgba(14,46,39,0.12);
+    box-shadow: none;
     position: relative;
   }
   .preview-card::before {
     content: '';
     position: absolute;
     top: -2px; left: -2px; right: -2px; bottom: -2px;
-    border-radius: 18px;
+    border-radius: 0;
     background: linear-gradient(135deg, var(--jade-soft) 0%, transparent 50%);
     z-index: -1;
     opacity: 0.5;
@@ -754,7 +763,7 @@ async function saveToProject(projectId, report) {
   .feature-card {
     text-align: center;
     padding: 28px 20px;
-    border-radius: 12px;
+    border-radius: 0;
     background: var(--bg-soft);
     border: 1px solid var(--rule-soft);
     transition: all .25s ease;
@@ -763,7 +772,7 @@ async function saveToProject(projectId, report) {
     border-color: var(--jade-soft);
     background: var(--jade-bg);
     transform: translateY(-3px);
-    box-shadow: 0 8px 24px -8px rgba(20,201,151,0.15);
+    box-shadow: none;
   }
   .feature-icon {
     margin-bottom: 16px;
@@ -773,7 +782,7 @@ async function saveToProject(projectId, report) {
     width: 64px; height: 64px;
     margin-left: auto;
     margin-right: auto;
-    border-radius: 16px;
+    border-radius: 0;
     background: var(--jade-bg);
     transition: all .25s ease;
   }
@@ -851,16 +860,16 @@ async function saveToProject(projectId, report) {
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    border-radius: 30px;
+    border-radius: 0;
     display: inline-flex;
     align-items: center;
     gap: 8px;
     transition: all .25s ease;
-    box-shadow: 0 4px 16px -4px rgba(20,201,151,0.4);
+    box-shadow: none;
   }
   .cta-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px -4px rgba(20,201,151,0.5);
+    box-shadow: none;
     background: linear-gradient(135deg, var(--jade-dark) 0%, var(--jade-deep) 100%);
   }
 
@@ -891,7 +900,7 @@ async function saveToProject(projectId, report) {
   }
   .step-num {
     width: 48px; height: 48px;
-    border-radius: 50%;
+    border-radius: 0;
     background: var(--jade);
     color: white;
     font-family: var(--mono);
@@ -901,7 +910,7 @@ async function saveToProject(projectId, report) {
     align-items: center;
     justify-content: center;
     margin: 0 auto 16px;
-    box-shadow: 0 4px 12px -4px rgba(20,201,151,0.4);
+    box-shadow: none;
   }
   .step h3 {
     font-size: 15px;
@@ -925,7 +934,7 @@ async function saveToProject(projectId, report) {
     margin-top: 40px;
     background: var(--bg);
     border: 1px solid var(--rule);
-    border-radius: 16px;
+    border-radius: 0;
     padding: 8px 8px 16px;
     box-shadow:
       0 1px 2px rgba(14,46,39,0.04),
@@ -952,7 +961,7 @@ async function saveToProject(projectId, report) {
     margin-bottom: 14px;
     padding: 4px;
     background: var(--bg-soft);
-    border-radius: 10px;
+    border-radius: 0;
     width: fit-content;
   }
   .modes button {
@@ -963,7 +972,7 @@ async function saveToProject(projectId, report) {
     color: var(--ink-mute);
     padding: 8px 16px;
     cursor: pointer;
-    border-radius: 8px;
+    border-radius: 0;
     font-weight: 500;
     transition: all .2s ease;
   }
@@ -971,7 +980,7 @@ async function saveToProject(projectId, report) {
   .modes button.active {
     color: var(--ink);
     background: var(--bg);
-    box-shadow: 0 1px 3px rgba(14,46,39,0.1);
+    box-shadow: none;
   }
   .modes button:hover:not(.active) { color: var(--ink-soft); }
 
@@ -1025,7 +1034,7 @@ async function saveToProject(projectId, report) {
     gap: 6px;
     padding: 7px 14px;
     border: 1px solid var(--rule);
-    border-radius: 30px;
+    border-radius: 0;
     transition: all .2s ease;
     font-weight: 500;
     color: var(--ink-soft);
@@ -1056,12 +1065,12 @@ async function saveToProject(projectId, report) {
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    border-radius: 30px;
+    border-radius: 0;
     display: inline-flex;
     align-items: center;
     gap: 8px;
     transition: all .2s ease;
-    box-shadow: 0 4px 12px -4px rgba(20,201,151,0.4);
+    box-shadow: none;
     position: relative;
     overflow: hidden;
   }
@@ -1081,7 +1090,7 @@ async function saveToProject(projectId, report) {
   #submitBtn:hover:not(:disabled) {
     background: linear-gradient(135deg, var(--jade-dark) 0%, var(--jade-deep) 100%);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px -4px rgba(20,201,151,0.5);
+    box-shadow: none;
   }
   #submitBtn:disabled { opacity: .5; cursor: not-allowed; }
   #submitBtn .arrow { font-size: 14px; transition: transform .2s; }
@@ -1107,7 +1116,7 @@ async function saveToProject(projectId, report) {
   .examples button {
     background: var(--bg-soft);
     border: 1px solid var(--rule);
-    border-radius: 30px;
+    border-radius: 0;
     padding: 6px 14px;
     font-size: 12px;
     color: var(--ink-soft);
@@ -1120,7 +1129,7 @@ async function saveToProject(projectId, report) {
     color: var(--jade-deep);
     background: var(--jade-bg);
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(20,201,151,0.2);
+    box-shadow: none;
   }
 
   /* Drop zone */
@@ -1136,7 +1145,7 @@ async function saveToProject(projectId, report) {
     padding: 12px;
     margin-top: 8px;
     border: 2px dashed var(--jade-soft);
-    border-radius: 8px;
+    border-radius: 0;
     color: var(--jade-deep);
     font-size: 13px;
     background: var(--jade-bg);
@@ -1157,7 +1166,7 @@ async function saveToProject(projectId, report) {
     border-left: 3px solid var(--c-rust);
     color: var(--c-rust);
     font-size: 13px;
-    border-radius: 0 6px 6px 0;
+    border-radius: 0;
   }
   .error.show { display: block; }
   .error b { font-weight: 600; }
@@ -1168,7 +1177,7 @@ async function saveToProject(projectId, report) {
     margin-top: 20px;
     padding: 20px 22px;
     background: var(--bg-soft);
-    border-radius: 10px;
+    border-radius: 0;
   }
   .loader.show { display: block; }
   .loader-status {
@@ -1225,7 +1234,7 @@ async function saveToProject(projectId, report) {
   }
   .crumbs .back {
     width: 22px; height: 22px;
-    border-radius: 50%;
+    border-radius: 0;
     background: var(--bg-soft);
     border: 1px solid var(--rule);
     display: inline-flex;
@@ -1260,7 +1269,7 @@ async function saveToProject(projectId, report) {
   }
   .cs-step .num {
     width: 24px; height: 24px;
-    border-radius: 50%;
+    border-radius: 0;
     border: 1.5px solid var(--rule);
     color: var(--ink-mute);
     display: inline-flex;
@@ -1296,7 +1305,7 @@ async function saveToProject(projectId, report) {
     border: 1px solid var(--rule);
     background: white;
     padding: 8px 16px;
-    border-radius: 30px;
+    border-radius: 0;
     font-size: 13px;
     color: var(--ink-soft);
     cursor: pointer;
@@ -1349,7 +1358,7 @@ async function saveToProject(projectId, report) {
     background: var(--jade-bg);
     color: var(--jade-deep);
     padding: 4px 12px;
-    border-radius: 30px;
+    border-radius: 0;
     font-size: 12px;
     font-weight: 600;
   }
@@ -1361,7 +1370,7 @@ async function saveToProject(projectId, report) {
     background: white;
     border: 1px solid var(--rule);
     padding: 6px 10px;
-    border-radius: 6px;
+    border-radius: 0;
     color: var(--ink-mute);
     cursor: pointer;
     transition: all .15s;
@@ -1395,19 +1404,19 @@ async function saveToProject(projectId, report) {
   .flow-root {
     background: white;
     border: 1px solid var(--jade);
-    border-radius: 10px;
+    border-radius: 0;
     padding: 14px 24px;
     display: grid;
     grid-template-columns: auto auto;
     gap: 30px;
     align-items: center;
     min-width: 320px;
-    box-shadow: 0 4px 12px -6px rgba(20,201,151,0.3);
+    box-shadow: none;
     cursor: pointer;
     transition: all .15s;
     position: relative;
   }
-  .flow-root:hover { box-shadow: 0 8px 20px -8px rgba(20,201,151,0.4); }
+  .flow-root:hover { box-shadow: none; }
   .flow-root.selected { background: var(--jade-bg); }
 
   .flow-root-left .name {
@@ -1422,7 +1431,7 @@ async function saveToProject(projectId, report) {
   .flow-root-left .icon {
     width: 18px; height: 18px;
     background: var(--jade);
-    border-radius: 50%;
+    border-radius: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1440,7 +1449,7 @@ async function saveToProject(projectId, report) {
     background: var(--jade-bg);
     color: var(--jade-deep);
     padding: 2px 8px;
-    border-radius: 30px;
+    border-radius: 0;
     font-weight: 600;
   }
   .flow-root-left .cycle {
@@ -1500,23 +1509,23 @@ async function saveToProject(projectId, report) {
     background: white;
     border: 1px solid var(--rule);
     border-top: 3px solid var(--c-color, var(--jade));
-    border-radius: 10px;
+    border-radius: 0;
     padding: 14px 18px;
     min-width: 180px;
     max-width: 220px;
     cursor: pointer;
     transition: all .2s ease;
     position: relative;
-    box-shadow: 0 2px 6px rgba(14,46,39,0.04);
+    box-shadow: none;
   }
   .stage-card:hover {
-    box-shadow: 0 8px 24px -8px rgba(14,46,39,0.15);
+    box-shadow: none;
     transform: translateY(-3px);
   }
   .stage-card.selected {
     background: var(--jade-bg);
     border-color: var(--jade);
-    box-shadow: 0 8px 24px -8px rgba(20,201,151,0.25);
+    box-shadow: none;
   }
   .stage-card-head {
     display: flex;
@@ -1527,7 +1536,7 @@ async function saveToProject(projectId, report) {
   .stage-card-head .dot {
     width: 16px; height: 16px;
     background: var(--c-color, var(--jade));
-    border-radius: 4px;
+    border-radius: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1595,14 +1604,14 @@ async function saveToProject(projectId, report) {
     background: white;
     border: 1px solid var(--rule);
     border-left: 3px solid var(--c-color, var(--ink-mute));
-    border-radius: 8px;
+    border-radius: 0;
     padding: 12px 14px;
     cursor: pointer;
     transition: all .2s ease;
-    box-shadow: 0 1px 4px rgba(14,46,39,0.03);
+    box-shadow: none;
   }
   .proc-card:hover {
-    box-shadow: 0 4px 12px -4px rgba(14,46,39,0.12);
+    box-shadow: none;
     transform: translateX(2px);
   }
   .proc-card.selected {
@@ -1664,9 +1673,9 @@ async function saveToProject(projectId, report) {
     max-width: 480px;
     background: white;
     border: 1px solid var(--jade);
-    border-radius: 12px;
+    border-radius: 0;
     padding: 20px 24px;
-    box-shadow: 0 8px 24px -8px rgba(20,201,151,0.2);
+    box-shadow: none;
     z-index: 50;
     display: none;
     animation: expandIn 0.25s ease;
@@ -1684,7 +1693,7 @@ async function saveToProject(projectId, report) {
     border: none;
     background: var(--bg-soft);
     color: var(--ink-mute);
-    border-radius: 50%;
+    border-radius: 0;
     cursor: pointer;
     font-size: 13px;
   }
@@ -1717,7 +1726,7 @@ async function saveToProject(projectId, report) {
     width: 100%;
     padding: 8px 10px;
     border: 1px solid var(--rule);
-    border-radius: 6px;
+    border-radius: 0;
     font-family: var(--mono);
     font-size: 13px;
     color: var(--ink);
@@ -1737,7 +1746,7 @@ async function saveToProject(projectId, report) {
   .detail-edit-actions button {
     flex: 1;
     padding: 8px 12px;
-    border-radius: 8px;
+    border-radius: 0;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
@@ -1857,7 +1866,7 @@ async function saveToProject(projectId, report) {
   /* ═══ LIST VIEW (flow table) ═══ */
   .flow-table-wrap {
     border: 1px solid var(--rule);
-    border-radius: 10px;
+    border-radius: 0;
     overflow: hidden;
     background: white;
   }
@@ -1897,7 +1906,7 @@ async function saveToProject(projectId, report) {
   }
   .flow-table tbody tr.stage-row .stage-dot {
     width: 10px; height: 10px;
-    border-radius: 3px;
+    border-radius: 0;
     flex-shrink: 0;
   }
   .flow-table tbody tr.proc-row td:first-child {
@@ -1929,7 +1938,7 @@ async function saveToProject(projectId, report) {
   .res-hero {
     background: linear-gradient(135deg, var(--jade-bg) 0%, var(--bg) 60%);
     border: 1px solid var(--jade-soft);
-    border-radius: 14px;
+    border-radius: 0;
     padding: 28px 32px;
     margin-bottom: 28px;
     position: relative;
@@ -1966,7 +1975,7 @@ async function saveToProject(projectId, report) {
     background: var(--jade-bg);
     color: var(--jade-deep);
     padding: 4px 14px;
-    border-radius: 30px;
+    border-radius: 0;
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
@@ -2015,13 +2024,13 @@ async function saveToProject(projectId, report) {
   .res-card {
     background: white;
     border: 1px solid var(--rule);
-    border-radius: 14px;
+    border-radius: 0;
     padding: 24px 26px;
     transition: all .2s ease;
-    box-shadow: 0 2px 8px rgba(14,46,39,0.04);
+    box-shadow: none;
   }
   .res-card:hover {
-    box-shadow: 0 4px 16px rgba(14,46,39,0.08);
+    box-shadow: none;
     transform: translateY(-2px);
   }
   .res-card-head {
@@ -2044,7 +2053,7 @@ async function saveToProject(projectId, report) {
     color: var(--ink-mute);
     cursor: pointer;
     padding: 5px 10px;
-    border-radius: 6px;
+    border-radius: 0;
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -2119,7 +2128,7 @@ async function saveToProject(projectId, report) {
   }
   .donut-legend-row .sw {
     width: 10px; height: 10px;
-    border-radius: 2px;
+    border-radius: 0;
     flex-shrink: 0;
   }
   .donut-legend-row .lbl {
@@ -2160,7 +2169,7 @@ async function saveToProject(projectId, report) {
   .rank-bar {
     height: 14px;
     background: var(--rule-soft);
-    border-radius: 4px;
+    border-radius: 0;
     overflow: hidden;
     position: relative;
   }
@@ -2168,7 +2177,7 @@ async function saveToProject(projectId, report) {
     height: 100%;
     background: var(--c-color, var(--jade));
     transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-    border-radius: 4px;
+    border-radius: 0;
   }
   .rank-row .val {
     font-family: var(--mono);
@@ -2182,10 +2191,10 @@ async function saveToProject(projectId, report) {
   .ai-section {
     background: white;
     border: 1px solid var(--rule);
-    border-radius: 14px;
+    border-radius: 0;
     padding: 28px 32px;
     margin-bottom: 24px;
-    box-shadow: 0 2px 8px rgba(14,46,39,0.04);
+    box-shadow: none;
     position: relative;
     overflow: hidden;
   }
@@ -2197,7 +2206,7 @@ async function saveToProject(projectId, report) {
     width: 4px;
     height: 100%;
     background: linear-gradient(180deg, var(--jade) 0%, var(--jade-deep) 100%);
-    border-radius: 14px 0 0 14px;
+    border-radius: 0;
   }
   .ai-badge {
     display: inline-flex;
@@ -2206,7 +2215,7 @@ async function saveToProject(projectId, report) {
     background: var(--jade);
     color: white;
     padding: 6px 14px;
-    border-radius: 8px;
+    border-radius: 0;
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.01em;
@@ -2229,7 +2238,7 @@ async function saveToProject(projectId, report) {
     background: linear-gradient(90deg, var(--bg-soft) 25%, var(--rule-soft) 50%, var(--bg-soft) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
-    border-radius: 6px;
+    border-radius: 0;
   }
   .shimmer-line { height: 16px; margin-bottom: 10px; }
   .shimmer-line:last-child { width: 60%; }
@@ -2237,7 +2246,7 @@ async function saveToProject(projectId, report) {
   .ai-thinking {
     background: var(--jade-bg);
     border-left: 3px solid var(--jade);
-    border-radius: 0 8px 8px 0;
+    border-radius: 0;
     padding: 18px 22px;
     margin-bottom: 22px;
     position: relative;
@@ -2251,7 +2260,7 @@ async function saveToProject(projectId, report) {
     border: 1px solid var(--jade-soft);
     width: 26px;
     height: 26px;
-    border-radius: 50%;
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2285,7 +2294,7 @@ async function saveToProject(projectId, report) {
     content: '';
     width: 6px; height: 6px;
     background: var(--jade);
-    border-radius: 50%;
+    border-radius: 0;
   }
   .note ul { list-style: none; }
   .note li {
@@ -2330,7 +2339,7 @@ async function saveToProject(projectId, report) {
   .lang {
     display: inline-flex;
     background: var(--bg-soft);
-    border-radius: 30px;
+    border-radius: 0;
     padding: 3px;
     border: 1px solid var(--rule);
   }
@@ -2338,7 +2347,7 @@ async function saveToProject(projectId, report) {
     background: none;
     border: none;
     padding: 5px 12px;
-    border-radius: 30px;
+    border-radius: 0;
     font-size: 11px;
     font-weight: 600;
     color: var(--ink-mute);
@@ -2350,7 +2359,7 @@ async function saveToProject(projectId, report) {
   .lang button.active {
     background: white;
     color: var(--ink);
-    box-shadow: 0 1px 4px rgba(14,46,39,0.08);
+    box-shadow: none;
   }
   .lang button:hover:not(.active) { color: var(--ink-soft); }
 
@@ -2360,7 +2369,7 @@ async function saveToProject(projectId, report) {
     border: 1px solid var(--rule);
     width: 32px;
     height: 32px;
-    border-radius: 50%;
+    border-radius: 0;
     cursor: pointer;
     font-size: 16px;
     display: inline-flex;
@@ -2386,7 +2395,7 @@ async function saveToProject(projectId, report) {
     gap: 6px;
     padding: 7px 16px;
     border: 1px solid var(--rule);
-    border-radius: 30px;
+    border-radius: 0;
     font-size: 12px;
     font-weight: 600;
     color: var(--ink-soft);
@@ -2407,17 +2416,17 @@ async function saveToProject(projectId, report) {
     gap: 8px;
     padding: 4px 12px 4px 4px;
     border: 1px solid var(--rule);
-    border-radius: 30px;
+    border-radius: 0;
     cursor: default;
   }
   .auth-avatar {
     width: 28px; height: 28px;
-    border-radius: 50%;
+    border-radius: 0;
     object-fit: cover;
   }
   .auth-avatar-text {
     width: 28px; height: 28px;
-    border-radius: 50%;
+    border-radius: 0;
     background: var(--jade);
     color: white;
     font-size: 12px;
@@ -2442,7 +2451,7 @@ async function saveToProject(projectId, report) {
     cursor: pointer;
     font-size: 12px;
     padding: 4px;
-    border-radius: 50%;
+    border-radius: 0;
     transition: all .15s;
   }
   .auth-logout:hover {
@@ -2472,11 +2481,11 @@ async function saveToProject(projectId, report) {
   }
   .modal {
     background: white;
-    border-radius: 12px;
+    border-radius: 0;
     width: min(920px, 94vw);
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 30px 60px -20px rgba(14, 46, 39, 0.35);
+    box-shadow: none;
     transform: translateY(10px);
     transition: transform .2s;
   }
@@ -2495,7 +2504,7 @@ async function saveToProject(projectId, report) {
   }
   .modal-close {
     width: 30px; height: 30px;
-    border-radius: 50%;
+    border-radius: 0;
     background: var(--bg-soft);
     border: none;
     color: var(--ink-soft);
@@ -2516,7 +2525,7 @@ async function saveToProject(projectId, report) {
   }
   .modal-foot button {
     padding: 9px 22px;
-    border-radius: 30px;
+    border-radius: 0;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -2565,7 +2574,7 @@ async function saveToProject(projectId, report) {
     width: 100%;
     padding: 10px 14px;
     border: 1px solid var(--rule);
-    border-radius: 8px;
+    border-radius: 0;
     font-family: inherit;
     font-size: 14px;
     color: var(--ink);
@@ -2595,7 +2604,7 @@ async function saveToProject(projectId, report) {
   }
   .scope-card {
     border: 1.5px solid var(--rule);
-    border-radius: 10px;
+    border-radius: 0;
     padding: 16px;
     cursor: pointer;
     transition: all .15s;
@@ -2650,7 +2659,7 @@ async function saveToProject(projectId, report) {
     background: var(--bg-soft);
     border: 1px solid var(--rule);
     padding: 8px 16px;
-    border-radius: 8px;
+    border-radius: 0;
     color: var(--ink);
     cursor: pointer;
     font-size: 13px;
@@ -2667,7 +2676,7 @@ async function saveToProject(projectId, report) {
   .excel-frame {
     background: var(--bg-soft);
     border: 1px solid var(--rule);
-    border-radius: 8px;
+    border-radius: 0;
     margin: 16px 28px 24px;
     overflow: hidden;
   }
@@ -2743,7 +2752,7 @@ async function saveToProject(projectId, report) {
   .excel-bottom .sheet-tab {
     background: white;
     padding: 4px 14px;
-    border-radius: 4px 4px 0 0;
+    border-radius: 0;
     border: 1px solid var(--rule);
     border-bottom: none;
     font-weight: 600;
@@ -2764,7 +2773,7 @@ async function saveToProject(projectId, report) {
     height: 100vh;
     background: var(--bg);
     border-left: 1px solid var(--rule);
-    box-shadow: -12px 0 32px -12px rgba(14,46,39,0.1);
+    box-shadow: none;
     transform: translateX(100%);
     transition: transform .3s cubic-bezier(0.22, 1, 0.36, 1);
     z-index: 200;
@@ -2787,7 +2796,7 @@ async function saveToProject(projectId, report) {
     width: 36px; height: 36px;
     background: var(--jade);
     border: none;
-    border-radius: 10px;
+    border-radius: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2810,7 +2819,7 @@ async function saveToProject(projectId, report) {
     width: 28px; height: 28px;
     background: var(--bg-soft);
     border: 1px solid var(--rule);
-    border-radius: 8px;
+    border-radius: 0;
     color: var(--ink-mute);
     cursor: pointer;
     font-size: 14px;
@@ -2869,7 +2878,7 @@ async function saveToProject(projectId, report) {
   .agent-option {
     border: 1px solid var(--rule);
     background: white;
-    border-radius: 8px;
+    border-radius: 0;
     padding: 10px 14px;
     cursor: pointer;
     font-size: 12px;
@@ -2898,7 +2907,7 @@ async function saveToProject(projectId, report) {
   .agent-empty .icon {
     width: 56px; height: 56px;
     margin: 0 auto 16px;
-    border-radius: 50%;
+    border-radius: 0;
     background: var(--jade-bg);
     display: flex;
     align-items: center;
@@ -2931,7 +2940,7 @@ async function saveToProject(projectId, report) {
     height: 40px;
     border: 3px solid var(--rule);
     border-top-color: var(--jade);
-    border-radius: 50%;
+    border-radius: 0;
     margin: 0 auto 16px;
     animation: spin 1s linear infinite;
   }
@@ -2944,7 +2953,7 @@ async function saveToProject(projectId, report) {
   .agent-processing-details {
     text-align: left;
     background: var(--bg-soft);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 12px 16px;
   }
   .agent-processing-item {
@@ -2973,7 +2982,7 @@ async function saveToProject(projectId, report) {
     color: white;
     border: none;
     padding: 11px;
-    border-radius: 30px;
+    border-radius: 0;
     font-weight: 700;
     font-size: 13px;
     cursor: pointer;
@@ -2989,7 +2998,7 @@ async function saveToProject(projectId, report) {
   .agent-input-wrap {
     background: white;
     border: 1px solid var(--rule);
-    border-radius: 18px;
+    border-radius: 0;
     padding: 4px 4px 4px 14px;
     display: flex;
     align-items: center;
@@ -3015,7 +3024,7 @@ async function saveToProject(projectId, report) {
     background: var(--jade);
     color: white;
     border: none;
-    border-radius: 50%;
+    border-radius: 0;
     cursor: pointer;
     font-size: 14px;
     display: inline-flex;
@@ -3033,12 +3042,12 @@ async function saveToProject(projectId, report) {
     right: 30px;
     width: 56px;
     height: 56px;
-    border-radius: 50%;
+    border-radius: 0;
     background: var(--jade);
     color: white;
     border: none;
     cursor: pointer;
-    box-shadow: 0 10px 24px -8px rgba(20,201,151,0.5);
+    box-shadow: none;
     z-index: 100;
     font-size: 20px;
     display: none;
@@ -3082,7 +3091,7 @@ async function saveToProject(projectId, report) {
   .recalc-notice {
     background: var(--jade-bg);
     border: 1px solid var(--jade-soft);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 10px 16px;
     margin-bottom: 16px;
     font-size: 13px;
@@ -3098,7 +3107,7 @@ async function saveToProject(projectId, report) {
     color: white;
     border: none;
     padding: 6px 14px;
-    border-radius: 30px;
+    border-radius: 0;
     cursor: pointer;
     font-size: 12px;
     font-weight: 600;
@@ -3117,7 +3126,7 @@ async function saveToProject(projectId, report) {
   }
   .agent-title .face {
     width: 28px; height: 28px;
-    border-radius: 50%;
+    border-radius: 0;
     background: var(--jade);
     color: white;
     font-size: 13px;
@@ -3132,7 +3141,7 @@ async function saveToProject(projectId, report) {
     border: none;
     background: var(--bg-soft);
     color: var(--ink-mute);
-    border-radius: 50%;
+    border-radius: 0;
     cursor: pointer;
     font-size: 14px;
     pointer-events: auto;
@@ -3176,13 +3185,13 @@ async function saveToProject(projectId, report) {
     color: white;
     border: none;
     padding: 9px 22px;
-    border-radius: 30px;
+    border-radius: 0;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     transition: all .15s;
     font-style: normal;
-    box-shadow: 0 4px 10px -4px rgba(20,201,151,0.4);
+    box-shadow: none;
   }
   .agent-gen-btn:hover {
     background: var(--jade-dark);
@@ -3208,7 +3217,7 @@ async function saveToProject(projectId, report) {
     text-align: center;
     padding: 40px;
     border: 1px dashed var(--rule);
-    border-radius: 12px;
+    border-radius: 0;
     max-width: 480px;
   }
   .step2-cta p {
@@ -3221,12 +3230,12 @@ async function saveToProject(projectId, report) {
     color: white;
     border: none;
     padding: 10px 24px;
-    border-radius: 30px;
+    border-radius: 0;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: all .15s;
-    box-shadow: 0 4px 12px -4px rgba(20,201,151,0.4);
+    box-shadow: none;
   }
   .step2-cta button:hover {
     background: var(--jade-dark);
@@ -3251,7 +3260,7 @@ async function saveToProject(projectId, report) {
   .agent-opt {
     background: white;
     border: 1px solid var(--rule);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 12px 14px;
     font-size: 13px;
     color: var(--ink-soft);
@@ -3270,7 +3279,7 @@ async function saveToProject(projectId, report) {
     color: var(--jade-deep);
     background: var(--jade-bg);
     font-weight: 600;
-    box-shadow: 0 0 0 1px var(--jade);
+    box-shadow: none;
   }
 
   .agent-foot {
@@ -3282,7 +3291,7 @@ async function saveToProject(projectId, report) {
   .agent-msg-wrap {
     background: var(--bg-soft);
     border: 1px solid var(--rule);
-    border-radius: 10px;
+    border-radius: 0;
     padding: 10px 12px 8px;
     display: flex;
     flex-direction: column;
@@ -3312,7 +3321,7 @@ async function saveToProject(projectId, report) {
     width: 30px; height: 30px;
     background: var(--jade);
     border: none;
-    border-radius: 8px;
+    border-radius: 0;
     color: white;
     cursor: pointer;
     display: inline-flex;
@@ -3342,7 +3351,7 @@ async function saveToProject(projectId, report) {
   .chat-avatar {
     width: 28px;
     height: 28px;
-    border-radius: 50%;
+    border-radius: 0;
     background: var(--jade-bg);
     display: flex;
     align-items: center;
@@ -3359,7 +3368,7 @@ async function saveToProject(projectId, report) {
   .chat-bubble {
     background: var(--bg-soft);
     border: 1px solid var(--rule);
-    border-radius: 12px;
+    border-radius: 0;
     padding: 10px 14px;
     font-size: 13px;
     color: var(--ink);
@@ -3381,7 +3390,7 @@ async function saveToProject(projectId, report) {
     background: none;
     border: 1px solid var(--rule);
     padding: 4px 10px;
-    border-radius: 20px;
+    border-radius: 0;
     font-size: 11px;
     color: var(--ink-mute);
     cursor: pointer;
@@ -3408,7 +3417,7 @@ async function saveToProject(projectId, report) {
     color: white;
     border: none;
     cursor: pointer;
-    box-shadow: 0 8px 24px -4px rgba(20,201,151,0.5);
+    box-shadow: none;
     font-size: 22px;
     z-index: 39;
     display: none;
@@ -3418,7 +3427,7 @@ async function saveToProject(projectId, report) {
   .agent-fab:hover { 
     background: linear-gradient(135deg, var(--jade-dark) 0%, var(--jade-deep) 100%);
     transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 12px 32px -4px rgba(20,201,151,0.6);
+    box-shadow: none;
   }
 
   /* ═══════════════════════════════════════════════
@@ -3439,14 +3448,14 @@ async function saveToProject(projectId, report) {
   .modal-mask.show { display: flex; }
   .modal {
     background: white;
-    border-radius: 14px;
+    border-radius: 0;
     width: 100%;
     max-width: 920px;
     max-height: 90vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-shadow: 0 30px 80px -16px rgba(14,46,39,0.4);
+    box-shadow: none;
     animation: scaleIn .25s cubic-bezier(0.22, 1, 0.36, 1);
   }
   @keyframes scaleIn {
@@ -3470,7 +3479,7 @@ async function saveToProject(projectId, report) {
     border: none;
     background: transparent;
     color: var(--ink-mute);
-    border-radius: 50%;
+    border-radius: 0;
     cursor: pointer;
     font-size: 18px;
   }
@@ -3485,7 +3494,7 @@ async function saveToProject(projectId, report) {
   }
   .modal-foot button {
     padding: 9px 22px;
-    border-radius: 30px;
+    border-radius: 0;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -3518,7 +3527,7 @@ async function saveToProject(projectId, report) {
     height: 100px;
     background: var(--bg-soft);
     border: 1px solid var(--rule);
-    border-radius: 8px;
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3538,7 +3547,7 @@ async function saveToProject(projectId, report) {
   .em-field input,
   .em-field select {
     border: 1px solid var(--rule);
-    border-radius: 6px;
+    border-radius: 0;
     padding: 9px 12px;
     font-family: inherit;
     font-size: 14px;
@@ -3572,7 +3581,7 @@ async function saveToProject(projectId, report) {
     padding: 6px 14px;
     border: 1px solid var(--jade);
     color: var(--jade-deep);
-    border-radius: 30px;
+    border-radius: 0;
     font-size: 13px;
     font-weight: 600;
     background: white;
@@ -3586,7 +3595,7 @@ async function saveToProject(projectId, report) {
     background: var(--jade);
     color: white;
     width: 16px; height: 16px;
-    border-radius: 50%;
+    border-radius: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -3602,7 +3611,7 @@ async function saveToProject(projectId, report) {
   }
   .em-scope-card {
     border: 1px solid var(--rule);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 16px 18px;
     cursor: pointer;
     background: white;
@@ -3621,7 +3630,7 @@ async function saveToProject(projectId, report) {
     width: 18px; height: 18px;
     background: var(--jade);
     color: white;
-    border-radius: 50%;
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3678,7 +3687,7 @@ async function saveToProject(projectId, report) {
   .em-factor-unit {
     padding: 8px 12px;
     border: 1px solid var(--rule);
-    border-radius: 6px;
+    border-radius: 0;
     font-family: inherit;
     font-size: 13px;
     color: var(--ink);
@@ -3694,7 +3703,7 @@ async function saveToProject(projectId, report) {
     width: 32px;
     height: 32px;
     border: 1px solid var(--rule);
-    border-radius: 6px;
+    border-radius: 0;
     background: white;
     color: var(--ink-mute);
     cursor: pointer;
@@ -3712,7 +3721,7 @@ async function saveToProject(projectId, report) {
   .em-add-factor {
     background: none;
     border: 1px dashed var(--rule);
-    border-radius: 6px;
+    border-radius: 0;
     padding: 8px 16px;
     font-family: inherit;
     font-size: 13px;
@@ -3741,14 +3750,14 @@ async function saveToProject(projectId, report) {
     background: var(--bg);
     border: 1px solid var(--rule);
     padding: 5px 12px;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 12px;
     color: var(--ink);
     font-weight: 500;
   }
   .xls-grid-wrap {
     border: 1px solid var(--rule);
-    border-radius: 6px;
+    border-radius: 0;
     overflow: auto;
     max-height: 60vh;
     background: var(--bg);
@@ -3857,7 +3866,7 @@ async function saveToProject(projectId, report) {
     background: var(--bg-soft);
     border: 1px solid var(--rule);
     padding: 10px 18px;
-    border-radius: 30px;
+    border-radius: 0;
     font-size: 13px;
     color: var(--ink-soft);
     cursor: pointer;
@@ -3881,7 +3890,7 @@ async function saveToProject(projectId, report) {
   .compare-card {
     background: var(--bg-soft);
     border: 1px solid var(--rule);
-    border-radius: 10px;
+    border-radius: 0;
     padding: 20px;
   }
   .compare-card h3 {
@@ -3930,7 +3939,7 @@ async function saveToProject(projectId, report) {
     justify-content: space-between;
     background: var(--bg-soft);
     border: 1px solid var(--rule);
-    border-radius: 10px;
+    border-radius: 0;
     padding: 16px 20px;
     cursor: pointer;
     transition: all .15s;
@@ -3980,7 +3989,7 @@ async function saveToProject(projectId, report) {
     background: linear-gradient(135deg, var(--ink) 0%, #1a3a32 100%);
     color: white;
     padding: 14px 28px;
-    border-radius: 12px;
+    border-radius: 0;
     font-size: 14px;
     font-weight: 500;
     z-index: 300;
@@ -3988,7 +3997,7 @@ async function saveToProject(projectId, report) {
     transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     pointer-events: none;
     white-space: nowrap;
-    box-shadow: 0 8px 24px -8px rgba(0,0,0,0.3);
+    box-shadow: none;
   }
   .toast.show {
     opacity: 1;
@@ -4004,7 +4013,7 @@ async function saveToProject(projectId, report) {
     color: white;
     width: 18px;
     height: 18px;
-    border-radius: 50%;
+    border-radius: 0;
     font-size: 10px;
     font-weight: 700;
     margin-left: 4px;
@@ -4021,7 +4030,7 @@ async function saveToProject(projectId, report) {
     border: none;
     background: var(--bg-soft);
     color: var(--ink-mute);
-    border-radius: 50%;
+    border-radius: 0;
     cursor: pointer;
     font-size: 14px;
     display: flex;
@@ -4042,7 +4051,7 @@ async function saveToProject(projectId, report) {
     background: none;
     border: 1px solid var(--rule);
     padding: 6px 14px;
-    border-radius: 20px;
+    border-radius: 0;
     font-size: 12px;
     color: var(--ink-mute);
     cursor: pointer;
@@ -4056,7 +4065,7 @@ async function saveToProject(projectId, report) {
   /* Projects */
   .project-group {
     border: 1px solid var(--rule);
-    border-radius: 10px;
+    border-radius: 0;
     margin-bottom: 10px;
     overflow: hidden;
   }
@@ -4093,7 +4102,7 @@ async function saveToProject(projectId, report) {
     height: 28px;
     border: 1px solid var(--rule);
     background: white;
-    border-radius: 6px;
+    border-radius: 0;
     cursor: pointer;
     font-size: 12px;
     display: flex;
@@ -4125,7 +4134,7 @@ async function saveToProject(projectId, report) {
     align-items: center;
     justify-content: space-between;
     padding: 10px 14px;
-    border-radius: 8px;
+    border-radius: 0;
     cursor: pointer;
     transition: background 0.15s;
     gap: 12px;
@@ -4155,7 +4164,7 @@ async function saveToProject(projectId, report) {
     border: none;
     background: transparent;
     color: var(--ink-mute);
-    border-radius: 50%;
+    border-radius: 0;
     cursor: pointer;
     font-size: 14px;
     display: flex;
@@ -4176,7 +4185,7 @@ async function saveToProject(projectId, report) {
     justify-content: space-between;
     padding: 14px 18px;
     border: 1px solid var(--rule);
-    border-radius: 10px;
+    border-radius: 0;
     margin-bottom: 8px;
     cursor: pointer;
     transition: all 0.15s;
@@ -4205,7 +4214,7 @@ async function saveToProject(projectId, report) {
     flex: 1;
     padding: 10px 14px;
     border: 1px solid var(--rule);
-    border-radius: 8px;
+    border-radius: 0;
     font-family: inherit;
     font-size: 14px;
     outline: none;
@@ -4218,7 +4227,7 @@ async function saveToProject(projectId, report) {
     color: white;
     border: none;
     padding: 10px 18px;
-    border-radius: 8px;
+    border-radius: 0;
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
@@ -4389,8 +4398,8 @@ h1 {
 }
 
 @keyframes buttonPulse {
-  0%, 100% { box-shadow: 0 4px 15px -3px rgba(20,201,151,0.4); }
-  50% { box-shadow: 0 4px 25px -3px rgba(20,201,151,0.6); }
+  0%, 100% { box-shadow: none; }
+  50% { box-shadow: none; }
 }
 
 /* Stage cards stagger animation */
@@ -4645,7 +4654,7 @@ h1 {
 
 .flow-root:hover {
   transform: translateY(-4px) scale(1.01);
-  box-shadow: 0 20px 40px -10px rgba(20,201,151,0.3);
+  box-shadow: none;
 }
 
 /* Stage card ripple effect on click */
@@ -4661,14 +4670,14 @@ h1 {
 
 .proc-card:hover {
   transform: translateX(8px);
-  box-shadow: 0 4px 12px -2px rgba(14,46,39,0.15);
+  box-shadow: none;
 }
 
 /* Donut legend hover effect */
 .donut-legend-row {
   transition: all 0.2s ease;
   padding: 4px 8px;
-  border-radius: 6px;
+  border-radius: 0;
   cursor: pointer;
 }
 
@@ -4681,7 +4690,7 @@ h1 {
 .rank-row {
   transition: all 0.2s ease;
   padding: 6px 8px;
-  border-radius: 8px;
+  border-radius: 0;
 }
 
 .rank-row:hover {
@@ -4694,8 +4703,8 @@ h1 {
 }
 
 @keyframes badgePulse {
-  0%, 100% { box-shadow: 0 2px 8px rgba(20,201,151,0.3); }
-  50% { box-shadow: 0 2px 16px rgba(20,201,151,0.5); }
+  0%, 100% { box-shadow: none; }
+  50% { box-shadow: none; }
 }
 
 /* Note items stagger */
@@ -4830,8 +4839,8 @@ body:hover ::-webkit-scrollbar-thumb {
 }
 
 @keyframes stepGlow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(20,201,151,0.4); }
-  50% { box-shadow: 0 0 0 6px rgba(20,201,151,0); }
+  0%, 100% { box-shadow: none; }
+  50% { box-shadow: none; }
 }
 
 /* Back button hover arrow */
@@ -4863,7 +4872,7 @@ body:hover ::-webkit-scrollbar-thumb {
   position: absolute;
   inset: -2px;
   background: linear-gradient(135deg, var(--jade, #14C997), var(--jade-dark, #0FB386));
-  border-radius: inherit;
+  border-radius: 0;
   z-index: -1;
   opacity: 0;
   transition: opacity 0.3s;
@@ -4918,7 +4927,7 @@ body::before {
 /* ─── Animated Orbs ──────────────────────────────────── */
 .orb {
   position: fixed;
-  border-radius: 50%;
+  border-radius: 0;
   filter: blur(25px);
   z-index: -1;
   pointer-events: none;
@@ -4995,7 +5004,7 @@ body::before {
   width: 4px;
   height: 4px;
   background: var(--jade, #14C997);
-  border-radius: 50%;
+  border-radius: 0;
   pointer-events: none;
   z-index: -1;
   animation: sparkleFloat 6s ease-in-out infinite;
@@ -5049,7 +5058,7 @@ body::before {
   width: 0;
   height: 0;
   background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
-  border-radius: 50%;
+  border-radius: 0;
   transform: translate(-50%, -50%);
   transition: width 0.6s, height 0.6s;
 }
@@ -5064,7 +5073,7 @@ body::before {
   content: '';
   position: absolute;
   inset: -2px;
-  border-radius: inherit;
+  border-radius: 0;
   background: linear-gradient(135deg, 
     rgba(20,201,151,0.5) 0%, 
     rgba(79,148,219,0.3) 50%, 
@@ -5143,16 +5152,16 @@ body::before {
   width: 12px;
   height: 12px;
   background: var(--jade, #14C997);
-  border-radius: 50%;
+  border-radius: 0;
   margin-right: 8px;
   animation: morphLoader 2s ease-in-out infinite;
 }
 
 @keyframes morphLoader {
-  0%, 100% { border-radius: 50%; transform: rotate(0deg); }
-  25% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; transform: rotate(90deg); }
-  50% { border-radius: 50%; transform: rotate(180deg); }
-  75% { border-radius: 70% 30% 30% 70% / 70% 70% 30% 30%; transform: rotate(270deg); }
+  0%, 100% { border-radius: 0; transform: rotate(0deg); }
+  25% { border-radius: 0; transform: rotate(90deg); }
+  50% { border-radius: 0; transform: rotate(180deg); }
+  75% { border-radius: 0; transform: rotate(270deg); }
 }
 
 /* ─── Res Card Hover Glow ────────────────────────────── */
@@ -5196,7 +5205,7 @@ body::before {
   background: linear-gradient(90deg, var(--jade, #14C997), var(--jade-dark, #0FB386), var(--jade, #14C997));
   background-size: 200% 100%;
   animation: gradientSlide 3s linear infinite;
-  border-radius: 16px 0 0 0;
+  border-radius: 0;
 }
 
 @keyframes gradientSlide {
@@ -5245,7 +5254,7 @@ body::before {
   background: linear-gradient(90deg, var(--bg-soft, #f8f9fa) 25%, var(--bg-muted, #e9ecef) 50%, var(--bg-soft, #f8f9fa) 75%);
   background-size: 200px 100%;
   animation: skeletonPulse 1.5s ease-in-out infinite;
-  border-radius: 4px;
+  border-radius: 0;
 }
 
 /* ─── Floating Action Button Pulse ───────────────────── */
@@ -5290,7 +5299,7 @@ h1 em {
   width: 24px;
   height: 40px;
   border: 2px solid var(--jade, #14C997);
-  border-radius: 12px;
+  border-radius: 0;
   opacity: 0.5;
   z-index: 10;
   animation: scrollBounce 2s ease-in-out infinite;
@@ -5304,7 +5313,7 @@ h1 em {
   width: 4px;
   height: 8px;
   background: var(--jade, #14C997);
-  border-radius: 2px;
+  border-radius: 0;
   transform: translateX(-50%);
   animation: scrollDot 2s ease-in-out infinite;
 }
@@ -5738,7 +5747,7 @@ body::before {
     <div class="modal-head">
       <h2 data-i18n="xls_h">Детальные данные</h2>
       <div style="display:flex;gap:10px;align-items:center">
-        <button id="xlsDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius:30px;font-size:13px;font-weight:600;cursor:pointer">
+        <button id="xlsDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius: 0;font-size:13px;font-weight:600;cursor:pointer">
           ⬇ <span data-i18n="xls_download">Скачать Excel</span>
         </button>
         <button class="modal-close" data-close>×</button>
@@ -5762,7 +5771,7 @@ body::before {
     <div class="modal-head">
       <h2>Word</h2>
       <div style="display:flex;gap:10px;align-items:center">
-        <button id="wordDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius:30px;font-size:13px;font-weight:600;cursor:pointer">
+        <button id="wordDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius: 0;font-size:13px;font-weight:600;cursor:pointer">
           ⬇ <span>Скачать Word</span>
         </button>
         <button class="modal-close" data-close>×</button>
@@ -5770,7 +5779,7 @@ body::before {
     </div>
     <div class="modal-body" style="padding:16px 30px 30px">
       <div style="color:var(--ink-mute);font-size:12px;margin-bottom:12px">Предпросмотр документа</div>
-      <div id="wordPreview" style="border:1px solid var(--rule);border-radius:8px;padding:20px;background:white;max-height:60vh;overflow-y:auto;font-family:Arial,sans-serif;font-size:13px;color:#0E2E27"></div>
+      <div id="wordPreview" style="border:1px solid var(--rule);border-radius: 0;padding:20px;background:white;max-height:60vh;overflow-y:auto;font-family:Arial,sans-serif;font-size:13px;color:#0E2E27"></div>
     </div>
   </div>
 </div>
@@ -5781,7 +5790,7 @@ body::before {
     <div class="modal-head">
       <h2>PDF</h2>
       <div style="display:flex;gap:10px;align-items:center">
-        <button id="pdfDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius:30px;font-size:13px;font-weight:600;cursor:pointer">
+        <button id="pdfDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius: 0;font-size:13px;font-weight:600;cursor:pointer">
           ⬇ <span>Скачать PDF</span>
         </button>
         <button class="modal-close" data-close>×</button>
@@ -5789,7 +5798,7 @@ body::before {
     </div>
     <div class="modal-body" style="padding:16px 30px 30px">
       <div style="color:var(--ink-mute);font-size:12px;margin-bottom:12px">Предпросмотр отчёта</div>
-      <div id="pdfPreview" style="border:1px solid var(--rule);border-radius:8px;overflow:hidden;max-height:70vh"></div>
+      <div id="pdfPreview" style="border:1px solid var(--rule);border-radius: 0;overflow:hidden;max-height:70vh"></div>
     </div>
   </div>
 </div>
@@ -5813,7 +5822,7 @@ body::before {
     <div class="modal-head">
       <h2 data-i18n="history_h">История расчётов</h2>
       <div style="display:flex;gap:10px;align-items:center">
-        <button id="clearHistory" style="background:var(--c-rust);color:white;border:none;padding:6px 14px;border-radius:30px;font-size:12px;font-weight:600;cursor:pointer">
+        <button id="clearHistory" style="background:var(--c-rust);color:white;border:none;padding:6px 14px;border-radius: 0;font-size:12px;font-weight:600;cursor:pointer">
           ✕ <span data-i18n="history_clear">Очистить</span>
         </button>
         <button class="modal-close" data-close>×</button>
@@ -5831,7 +5840,7 @@ body::before {
     <div class="modal-head">
       <h2 data-i18n="projects_h">Проекты</h2>
       <div style="display:flex;gap:10px;align-items:center">
-        <button id="newProjectBtn" style="background:var(--jade);color:white;border:none;padding:6px 14px;border-radius:30px;font-size:12px;font-weight:600;cursor:pointer">
+        <button id="newProjectBtn" style="background:var(--jade);color:white;border:none;padding:6px 14px;border-radius: 0;font-size:12px;font-weight:600;cursor:pointer">
           + <span data-i18n="new_project">Новый</span>
         </button>
         <button class="modal-close" data-close>×</button>
@@ -8741,7 +8750,7 @@ function showNewProjectModal() {
         </div>
         <div class="modal-body" style="padding:24px 30px">
           <label style="font-size:13px;color:var(--ink-soft);font-weight:600;display:block;margin-bottom:8px">${currentLang === 'ru' ? 'Название проекта' : currentLang === 'zh' ? '项目名称' : 'Project name'}</label>
-          <input type="text" id="newProjectNameInput" placeholder="${currentLang === 'ru' ? 'Например: Анализ упаковки' : currentLang === 'zh' ? '例如：包装分析' : 'e.g. Packaging analysis'}" style="width:100%;padding:12px 16px;border:1px solid var(--rule);border-radius:10px;font-family:inherit;font-size:15px;outline:none;transition:border-color 0.15s">
+          <input type="text" id="newProjectNameInput" placeholder="${currentLang === 'ru' ? 'Например: Анализ упаковки' : currentLang === 'zh' ? '例如：包装分析' : 'e.g. Packaging analysis'}" style="width:100%;padding:12px 16px;border:1px solid var(--rule);border-radius: 0;font-family:inherit;font-size:15px;outline:none;transition:border-color 0.15s">
           <div id="newProjectError" style="color:var(--c-rust);font-size:12px;margin-top:6px;display:none"></div>
         </div>
         <div class="modal-foot">
@@ -8879,7 +8888,7 @@ function showNewProjectModalForSave() {
         </div>
         <div class="modal-body" style="padding:24px 30px">
           <label style="font-size:13px;color:var(--ink-soft);font-weight:600;display:block;margin-bottom:8px">${currentLang === 'ru' ? 'Название проекта' : currentLang === 'zh' ? '项目名称' : 'Project name'}</label>
-          <input type="text" id="newProjectSaveInput" placeholder="${currentLang === 'ru' ? 'Например: Анализ упаковки' : currentLang === 'zh' ? '例如：包装分析' : 'e.g. Packaging analysis'}" style="width:100%;padding:12px 16px;border:1px solid var(--rule);border-radius:10px;font-family:inherit;font-size:15px;outline:none;transition:border-color 0.15s">
+          <input type="text" id="newProjectSaveInput" placeholder="${currentLang === 'ru' ? 'Например: Анализ упаковки' : currentLang === 'zh' ? '例如：包装分析' : 'e.g. Packaging analysis'}" style="width:100%;padding:12px 16px;border:1px solid var(--rule);border-radius: 0;font-family:inherit;font-size:15px;outline:none;transition:border-color 0.15s">
           <div id="newProjectSaveError" style="color:var(--c-rust);font-size:12px;margin-top:6px;display:none"></div>
         </div>
         <div class="modal-foot">
