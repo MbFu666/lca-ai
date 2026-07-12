@@ -8,6 +8,7 @@
       var t = localStorage.getItem('lca-theme');
       if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');
+        document.documentElement.style.background = '#0C1A16';
       }
     })();
     </script>
