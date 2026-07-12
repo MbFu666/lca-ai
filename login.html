@@ -328,12 +328,15 @@
             alert(loginT('wechat_alert'));
         });
 
-        // Discord
-        document.getElementById('discordBtn').addEventListener('click', () => {
-            alert(loginT('discord_alert'));
+        // Discord OAuth via Supabase
+        document.getElementById('discordBtn').addEventListener('click', async () => {
+            if (!sbClient) { showError(loginT('sb_not_loaded')); return; }
+            try {
+                await sbClient.auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: REDIRECT } });
+            } catch (e) { showError('Discord: ' + e.message); }
         });
 
-        // Web3 Wallet
+        // Web3 Wallet via MetaMask
         document.getElementById('walletBtn').addEventListener('click', async () => {
             if (!window.ethereum) {
                 alert(loginT('wallet_install'));
@@ -342,9 +345,28 @@
             try {
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                 const address = accounts[0];
-                alert(loginT('wallet_connect') + ': ' + address.slice(0, 6) + '...' + address.slice(-4));
+                const message = 'Sign in to LCA-AI\nWallet: ' + address + '\nTime: ' + Date.now();
+                const signature = await window.ethereum.request({
+                    method: 'personal_sign',
+                    params: [message, address]
+                });
+                // Send to Supabase Edge Function for verification
+                const resp = await fetch(SB_URL + '/functions/v1/web3-auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + SB_KEY
+                    },
+                    body: JSON.stringify({ address, message, signature })
+                });
+                const data = await resp.json();
+                if (data.error) { showError('Web3: ' + data.error); return; }
+                // Save session and redirect
+                localStorage.setItem('supabase_token', data.access_token);
+                window.location.href = REDIRECT;
             } catch (e) {
-                alert(loginT('wallet_fail') + ': ' + e.message);
+                if (e.code === 4001) return; // User rejected
+                showError(loginT('wallet_fail') + ': ' + e.message);
             }
         });
 
