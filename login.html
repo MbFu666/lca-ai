@@ -123,6 +123,18 @@
             <span id="wechatLabel">WeChat (soon)</span>
         </button>
 
+        <!-- Discord OAuth -->
+        <button type="button" id="discordBtn" class="oauth-btn" style="width:100%;padding:12px;border:1px solid var(--rule);border-radius:10px;background:var(--bg);color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;margin-top:10px">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.029 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.057c.5-5.094-.838-9.52-3.549-13.442a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+            Discord
+        </button>
+
+        <!-- Web3 Wallet -->
+        <button type="button" id="walletBtn" class="oauth-btn" style="width:100%;padding:12px;border:1px solid var(--rule);border-radius:10px;background:var(--bg);color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;margin-top:10px">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3v4M8 3v4"/></svg>
+            Web3 Wallet
+        </button>
+
         <div class="divider"><span data-i18n="or">или</span></div>
 
         <form class="form-group" id="loginForm">
@@ -191,6 +203,10 @@
                 has_account: 'Уже есть аккаунт?', login_link: 'Войти',
                 agreement: 'Нажимая «Войти», вы соглашаетесь с', terms: 'условиями использования',
                 wechat_label: 'WeChat (скоро)', wechat_alert: 'WeChat вход будет доступен после настройки WeChat Open Platform',
+                discord_alert: 'Discord OAuth будет доступен после настройки приложения в Discord Developer Portal',
+                wallet_install: 'Установите MetaMask или другой Web3 кошелёк для входа',
+                wallet_connect: 'Кошелёк подключён',
+                wallet_fail: 'Ошибка подключения кошелька',
                 sb_not_loaded: 'Supabase не загружен', sb_sdk_missing: 'Supabase SDK не загружен',
                 logging_in: 'Вход...', passwords_mismatch: 'Пароли не совпадают',
                 min6_chars: 'Пароль должен содержать минимум 6 символов',
@@ -216,6 +232,10 @@
                 has_account: 'Already have an account?', login_link: 'Sign in',
                 agreement: 'By signing in, you agree to the', terms: 'terms of service',
                 wechat_label: 'WeChat (coming soon)', wechat_alert: 'WeChat login will be available after WeChat Open Platform setup',
+                discord_alert: 'Discord OAuth will be available after setting up an app in Discord Developer Portal',
+                wallet_install: 'Install MetaMask or another Web3 wallet to sign in',
+                wallet_connect: 'Wallet connected',
+                wallet_fail: 'Wallet connection failed',
                 sb_not_loaded: 'Supabase not loaded', sb_sdk_missing: 'Supabase SDK not loaded',
                 logging_in: 'Signing in...', passwords_mismatch: 'Passwords do not match',
                 min6_chars: 'Password must be at least 6 characters',
@@ -241,6 +261,10 @@
                 has_account: '已有账户？', login_link: '登录',
                 agreement: '登录即表示您同意', terms: '服务条款',
                 wechat_label: '微信（即将上线）', wechat_alert: '微信登录将在配置微信开放平台后可用',
+                discord_alert: 'Discord OAuth将在Discord Developer Portal配置后可用',
+                wallet_install: '安装MetaMask或其他Web3钱包以登录',
+                wallet_connect: '钱包已连接',
+                wallet_fail: '钱包连接失败',
                 sb_not_loaded: 'Supabase 未加载', sb_sdk_missing: 'Supabase SDK 未加载',
                 logging_in: '登录中...', passwords_mismatch: '密码不匹配',
                 min6_chars: '密码至少需要6个字符',
@@ -302,6 +326,26 @@
 
         document.getElementById('wechatBtn').addEventListener('click', () => {
             alert(loginT('wechat_alert'));
+        });
+
+        // Discord
+        document.getElementById('discordBtn').addEventListener('click', () => {
+            alert(loginT('discord_alert'));
+        });
+
+        // Web3 Wallet
+        document.getElementById('walletBtn').addEventListener('click', async () => {
+            if (!window.ethereum) {
+                alert(loginT('wallet_install'));
+                return;
+            }
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const address = accounts[0];
+                alert(loginT('wallet_connect') + ': ' + address.slice(0, 6) + '...' + address.slice(-4));
+            } catch (e) {
+                alert(loginT('wallet_fail') + ': ' + e.message);
+            }
         });
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
