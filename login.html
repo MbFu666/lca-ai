@@ -321,7 +321,7 @@
         document.getElementById('twitterBtn').addEventListener('click', async () => {
             if (!sbClient) { showError(loginT('sb_not_loaded')); return; }
             try {
-                const { error } = await sbClient.auth.signInWithOAuth({ provider: 'twitter', options: { redirectTo: REDIRECT } });
+                const { error } = await sbClient.auth.signInWithOAuth({ provider: 'x', options: { redirectTo: REDIRECT } });
                 if (error) showError(translateError(error.message));
             } catch (err) { showError(translateError(err.message)); }
         });
