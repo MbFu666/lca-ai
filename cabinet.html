@@ -580,11 +580,7 @@
                             <div class="sg-header"><span class="sg-icon">💾</span> <span data-i18n="data_export">Экспорт данных</span></div>
                             <button id="exportAllBtn" class="btn" style="width:100%">📥 Скачать все данные (ZIP)</button>
                         </div>
-                        <div class="settings-group">
-                            <div class="sg-header"><span class="sg-icon">🔑</span> API ключи</div>
-                            <div id="apiKeysList" style="margin-bottom:12px"></div>
-                            <button id="createApiKeyBtn" class="btn" style="width:100%">+ Создать ключ</button>
-                        </div>
+
                         <div class="settings-group">
                             <div class="sg-header"><span class="sg-icon">🔔</span> <span data-i18n="webhook_title">Webhook</span></div>
                             <input type="url" id="settingWebhook" class="settings-input" data-i18n-placeholder="webhook_url_ph" placeholder="URL для уведомлений">
@@ -650,14 +646,6 @@
         //   entity_type TEXT NOT NULL,
         //   entity_id UUID,
         //   details JSONB,
-        //   created_at TIMESTAMPTZ DEFAULT now()
-        // );
-        // NOTE: Supabase 'api_keys' table:
-        // CREATE TABLE IF NOT EXISTS api_keys (
-        //   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        //   user_id UUID NOT NULL,
-        //   name TEXT NOT NULL,
-        //   key_hash TEXT NOT NULL,
         //   created_at TIMESTAMPTZ DEFAULT now()
         // );
         const SB_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
@@ -976,7 +964,6 @@
                 renderOverview();
                 renderExtendedStats();
                 loadStats();
-                loadApiKeys();
             } catch (e) { console.error('[Cabinet] Data load error:', e); }
         }
 
@@ -1016,16 +1003,6 @@
             } catch (e) { console.error('loadStats error:', e); showToast(t('err_load_stats')); }
         }
 
-        async function loadApiKeys() {
-          if (!currentUser || !db) return;
-          try {
-            const { data } = await db.from('api_keys').select('id, name, created_at').eq('user_id', currentUser.id);
-            const host = document.getElementById('apiKeysList');
-            if (!host) return;
-            if (!data || !data.length) { host.innerHTML = '<p style="color:var(--ink-mute);font-size:13px">Нет API ключей</p>'; return; }
-            host.innerHTML = data.map(k => '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--rule)"><div><div style="font-weight:600;font-size:13px">' + (k.name||'—') + '</div><div style="font-size:11px;color:var(--ink-mute)">' + new Date(k.created_at).toLocaleDateString() + '</div></div><button class="revoke-key-btn" data-id="' + k.id + '" style="color:var(--c-rust);background:none;border:none;cursor:pointer;font-size:12px">Отозвать</button></div>').join('');
-          } catch (e) { console.error('loadApiKeys:', e); }
-        }
 
         async function loadExtendedStats() {
           if (!currentUser || !db) return null;
@@ -1105,7 +1082,7 @@
             if (tab === 'overview') { await loadHistoryData(); renderOverview(); renderExtendedStats(); }
             if (tab === 'history') { await loadHistoryData(); historyShown = PAGE; renderHistory(); }
             if (tab === 'projects') await loadProjects();
-            if (tab === 'settings') { fillProfileFields(); loadApiKeys(); }
+            if (tab === 'settings') { fillProfileFields(); }
         }
 
         /* ══════════════════════════════════════════════════
@@ -1738,27 +1715,6 @@
             document.getElementById('modalShare').style.display = 'none';
             showToast('Приглашение отправлено на ' + email);
           } catch (e) { showToast('Ошибка: ' + (e.message || e)); }
-        });
-
-        /* ══ API Keys ══ */
-        document.getElementById('createApiKeyBtn')?.addEventListener('click', async () => {
-          const name = prompt('Название ключа:');
-          if (!name) return;
-          const key = 'lca-' + Array.from(crypto.getRandomValues(new Uint8Array(24))).map(b => b.toString(16).padStart(2, '0')).join('');
-          try {
-            await db.from('api_keys').insert({ user_id: currentUser.id, name: name, key_hash: key });
-            alert('Ключ создан: ' + key + '\nСкопируйте — он больше не будет показан!');
-            loadApiKeys();
-          } catch (e) { showToast('Ошибка: ' + (e.message || e)); }
-        });
-
-        document.addEventListener('click', async (e) => {
-          const btn = e.target.closest('.revoke-key-btn');
-          if (!btn) return;
-          if (!confirm('Отозвать ключ?')) return;
-          await db.from('api_keys').delete().eq('id', btn.dataset.id);
-          loadApiKeys();
-          showToast('Ключ отозван');
         });
 
         /* ══════════════════════════════════════════════════
