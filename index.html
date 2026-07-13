@@ -83,6 +83,12 @@ function updateAuthUI(isLoggedIn) {
   const authSection = document.getElementById('authSection');
   if (!authSection) return;
   
+  // Hide account section when logged in
+  const accountSection = document.getElementById('accountSection');
+  if (accountSection) {
+    accountSection.style.display = isLoggedIn ? 'none' : '';
+  }
+  
   if (isLoggedIn && currentUser) {
     const name = currentUser.user_metadata?.full_name || 
                  currentUser.user_metadata?.name || 
@@ -3280,8 +3286,8 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
       </div>
     </section>
 
-    <!-- ============== ACCOUNT ============== -->
-    <section class="account-strip">
+    <!-- ============== ACCOUNT (hidden when logged in) ============== -->
+    <section class="account-strip" id="accountSection">
       <div class="account-copy reveal">
         <h2 class="section-title" data-i18n="reg_benefits_title">Аккаунт</h2>
         <p data-i18n="reg_benefits_sub">Расчёт работает и без входа. Аккаунт нужен, чтобы к расчётам можно было вернуться.</p>
