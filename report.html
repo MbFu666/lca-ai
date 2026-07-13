@@ -1790,6 +1790,7 @@ header {
   box-shadow: none;
   margin-top: 12px;
   display: none;
+  position: relative;
   animation: expandIn 0.25s ease;
 }
 .detail-float.show { display: block; }
@@ -5448,6 +5449,15 @@ document.addEventListener('click', e => {
   if (e.target.closest('#detailClose')) {
     $('#detailPanel')?.classList.remove('show');
     clearSelected();
+  }
+  // Close detail panel when clicking outside
+  if (!e.target.closest('#detailPanel') && !e.target.closest('.stage-card') && !e.target.closest('.proc-card') && !e.target.closest('.flow-root')) {
+    const panel = $('#detailPanel');
+    if (panel && panel.classList.contains('show')) {
+      panel.classList.remove('show');
+      clearSelected();
+    }
+  }
   }
   if (e.target.closest('#resetBtn2') || e.target.closest('#backToHome')) {
     // Возвращаемся на домашнюю страницу
