@@ -1567,10 +1567,11 @@ header {
 
 .flow {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
+  align-items: flex-start;
+  gap: 0;
+  overflow-x: auto;
   padding: 32px 0 40px;
+  scrollbar-width: thin;
 }
 
 .flow-root {
@@ -1652,7 +1653,7 @@ header {
    Weight of the mark = weight of the contribution. */
 .stage-card, .proc-card {
   border: 1px solid var(--rule);
-  border-left: 3px solid var(--c-color, var(--e-0));
+  border-left: 3px solid var(--e-0);
   border-radius: 0;
   background: var(--paper-raised);
   padding: 14px 16px;
@@ -5009,11 +5010,14 @@ function showNodeDetail(o, cardEl) {
     ${editHtml}
   `;
   
-  // Show detail panel (fixed overlay)
+  // Show detail panel inline
   const panel = $('#detailPanel');
-  console.log('[detailPanel] panel:', panel, 'classes:', panel?.className);
-  panel?.classList.add('show');
-  console.log('[detailPanel] after add show:', panel?.className);
+  if (panel) {
+    if (cardEl && cardEl.parentNode) {
+      cardEl.parentNode.insertBefore(panel, cardEl.nextSibling);
+    }
+    panel.classList.add('show');
+  }
   
   // Привязка обработчиков для редактирования
   if (o.editable && o.editData) {
@@ -7040,7 +7044,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const { data } = await supabaseClient.from('user_history').select('is_public').eq('id', historyId).single();
     const newState = !(data?.is_public);
     await supabaseClient.from('user_history').update({ is_public: newState }).eq('id', historyId);
-    const url = window.location.origin + '/report?history=' + historyId;
+    const url = window.location.origin + '/report.html?history=' + historyId;
     if (newState) {
       await navigator.clipboard.writeText(url);
       showToast(currentLang === 'ru' ? 'Публичная ссылка скопирована' : currentLang === 'zh' ? '公开链接已复制' : 'Public link copied');
