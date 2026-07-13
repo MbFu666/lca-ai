@@ -5009,14 +5009,9 @@ function showNodeDetail(o, cardEl) {
     ${editHtml}
   `;
   
-  // Show detail panel inline
+  // Show detail panel (fixed overlay)
   const panel = $('#detailPanel');
-  if (panel) {
-    if (cardEl && cardEl.parentNode) {
-      cardEl.parentNode.insertBefore(panel, cardEl.nextSibling);
-    }
-    panel.classList.add('show');
-  }
+  panel?.classList.add('show');
   
   // Привязка обработчиков для редактирования
   if (o.editable && o.editData) {
