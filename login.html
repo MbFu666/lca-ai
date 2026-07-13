@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -8,89 +8,120 @@
       var t = localStorage.getItem('lca-theme');
       if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');
-        document.documentElement.style.background = '#0F1F1B';
+        document.documentElement.style.background = '#131211';
       }
     })();
     </script>
     <title>LCA·AI — Вход</title>
     <script>document.title = {ru:'LCA·AI — Вход',en:'LCA·AI — Sign In',zh:'LCA·AI — 登录'}[localStorage.getItem('lca-lang')||'ru'];</script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #F2F0EC; --bg-soft: #EAE7E1; --ink: #1C1B19; --ink-soft: #6B6862; --ink-mute: #9B9892; --rule: #D6D2CB; --jade: #1C1B19; --jade-dark: #1C1B19; --jade-deep: #1C1B19; --jade-soft: #E5E2DC; --jade-bg: #F2F0EC; --c-rust: #D9481C; }
-        html.dark { --bg: #131211; --bg-soft: #1C1B19; --ink: #E5E2DC; --ink-soft: #9B9892; --ink-mute: #6B6862; --rule: #2E2C28; --jade: #E5E2DC; --jade-dark: #E5E2DC; --jade-deep: #E5E2DC; --jade-soft: #2E2C28; --jade-bg: #1C1B19; --c-rust: #F03B0C; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Oswald', 'Source Serif 4', system-ui, sans-serif; background: var(--bg); color: var(--ink); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 24px; }
-        .login-card { background: var(--bg); border: 1px solid var(--rule); border-radius: 0; padding: 48px 40px; max-width: 400px; width: 100%; text-align: center; box-shadow: none; }
-        .brand { display: inline-flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
-        .brand .dot { width: 28px; height: 28px; border-radius: 0; background: var(--jade); display: inline-flex; align-items: center; justify-content: center; }
-        .brand .dot::after { content: ''; width: 11px; height: 11px; background: white; border-radius: 0; }
-        .subtitle { font-size: 14px; color: var(--ink-mute); margin-bottom: 32px; }
-        .form-group { display: flex; flex-direction: column; gap: 12px; text-align: left; }
-        .form-group label { font-size: 12px; font-weight: 600; color: var(--ink-soft); margin-bottom: -8px; }
-        .form-group input { padding: 12px 16px; border: 1px solid var(--rule); border-radius: 0; font-family: inherit; font-size: 14px; color: var(--ink); background: var(--bg-soft); outline: none; transition: border-color .15s; }
-        .form-group input:focus { border-color: var(--jade); }
-        .submit-btn { background: var(--jade); color: white; border: none; padding: 12px; border-radius: 0; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s; width: 100%; margin-top: 8px; }
-        .submit-btn:hover { background: var(--jade-dark); }
-        .submit-btn:disabled { opacity: .5; cursor: not-allowed; }
-        .switch-mode { margin-top: 20px; font-size: 13px; color: var(--ink-mute); }
-        .switch-mode a { color: var(--jade); cursor: pointer; font-weight: 600; text-decoration: none; }
-        .switch-mode a:hover { text-decoration: underline; }
-        .msg { margin-top: 16px; padding: 12px; border-radius: 0; font-size: 13px; display: none; }
-        .msg.success { display: block; background: var(--jade-bg); color: var(--jade-dark); border: 1px solid var(--jade-bg); }
-        .msg.error { display: block; background: #FEF1EE; color: var(--c-rust); border: 1px solid #FEF1EE; }
-        .footer { margin-top: 24px; font-size: 12px; color: var(--ink-mute); }
-        .footer a { color: var(--jade); text-decoration: none; }
-        .header-bar { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; }
-        .theme-toggle { background: none; border: 1px solid var(--rule); width: 32px; height: 32px; border-radius: 0; cursor: pointer; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; transition: all .15s; padding: 0; }
-        .theme-toggle:hover { border-color: var(--jade); background: var(--jade-bg); }
-        .lang-switch { display: inline-flex; background: var(--bg-soft); border-radius: 0; padding: 3px; border: 1px solid var(--rule); }
-        .lang-switch button { background: none; border: none; padding: 5px 10px; border-radius: 0; font-size: 11px; font-weight: 600; color: var(--ink-mute); cursor: pointer; transition: all .15s; }
-        .lang-switch button.active { background: white; color: var(--ink); box-shadow: none; }
-        .divider { display: flex; align-items: center; margin: 20px 0; color: var(--ink-mute); font-size: 12px; }
-        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
-        .divider span { padding: 0 12px; }
-        .google-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px; border: 1px solid var(--rule); border-radius: 0; background: white; font-family: inherit; font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer; transition: all .15s; margin-top: 10px; }
-        .google-btn:hover { border-color: var(--jade); background: var(--jade-bg); }
-        .oauth-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px; border: 1px solid var(--rule); border-radius: 0; background: var(--bg); font-family: inherit; font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer; transition: all .15s; margin-top: 10px; }
-        .oauth-btn:hover { border-color: var(--jade); background: var(--jade-bg); }
-        html.dark .google-btn,
-        html.dark .submit-btn,
-        html.dark button {
-          background: var(--bg-soft);
-          color: var(--ink);
-          border: 1px solid var(--rule);
-        }
-        html.dark .google-btn:hover,
-        html.dark button:hover {
-          background: var(--jade-bg);
-          border-color: var(--jade);
-        }
-        html.dark .submit-btn {
-          background: var(--jade);
-          color: #fff;
-          border: none;
-        }
-        html.dark .submit-btn:hover {
-          background: var(--jade-dark);
-        }
-        html.dark .lang-switch button.active {
-          background: var(--jade-bg);
-          color: var(--ink);
-          box-shadow: none;
-        }
-        html.dark .oauth-btn { background: var(--bg-soft); color: var(--ink); border-color: var(--rule); }
-        html.dark .oauth-btn:hover { background: var(--jade-bg); border-color: var(--jade); }
-        html.dark .theme-toggle {
-          color: var(--ink);
-        }
-        html.dark .msg.error {
-          background: #2a1a18;
-          color: #e8908a;
-          border-color: #3d2020;
-        }
-        @media (max-width: 480px) { .login-card { padding: 32px 24px; } }
-    </style>
+:root {
+  --bg: #F2F0EC; --bg-soft: #E9E6E0; --ink: #1C1B19; --ink-soft: #6B6862; --ink-mute: #9B978F;
+  --jade: #D9481C; --jade-dark: #F03B0C; --jade-bg: #E9E6E0; --rule: #D6D2CB; --c-rust: #A32E12;
+  --display: 'Oswald', 'Noto Sans SC', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+html.dark {
+  --bg: #131211; --bg-soft: #1B1A18; --ink: #EDEAE4; --ink-soft: #9B978F; --ink-mute: #6B6862;
+  --jade: #F05A23; --jade-dark: #FF6B2C; --jade-bg: #1B1A18; --rule: #2E2C29;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Source Serif 4', 'Noto Sans SC', Georgia, serif;
+  background: var(--bg); color: var(--ink);
+  display: flex; justify-content: center; align-items: center;
+  min-height: 100dvh; padding: 24px;
+}
+/* Drafting grid, same substrate as the rest of the site */
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none;
+  background-image: linear-gradient(var(--rule) 1px, transparent 1px), linear-gradient(90deg, var(--rule) 1px, transparent 1px);
+  background-size: 8px 8px; opacity: 0.35;
+}
+html.dark body::before { opacity: 0.2; }
+
+.login-card {
+  position: relative; z-index: 1;
+  background: var(--bg); border: 1px solid var(--ink); border-radius: 0;
+  padding: 44px 38px; max-width: 400px; width: 100%; text-align: left;
+  box-shadow: none;
+}
+.brand {
+  display: inline-flex; align-items: baseline; gap: 10px;
+  font-family: var(--display); font-size: 20px; font-weight: 600;
+  letter-spacing: 0.02em; text-transform: uppercase; color: var(--ink); margin-bottom: 6px;
+}
+.brand .dot { width: 10px; height: 10px; border-radius: 0; background: var(--jade-dark); flex-shrink: 0; }
+.brand .dot::after { content: none; }
+.subtitle {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-mute); margin-bottom: 30px; padding-bottom: 14px; border-bottom: 1px solid var(--rule);
+}
+.form-group { display: flex; flex-direction: column; gap: 12px; }
+.form-group label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-mute); margin-bottom: -8px;
+}
+.form-group input {
+  padding: 11px 0; border: none; border-bottom: 1px solid var(--rule); border-radius: 0;
+  font-family: 'Source Serif 4', serif; font-size: 15px; color: var(--ink); background: transparent;
+  outline: none; transition: border-color .14s cubic-bezier(.22,1,.36,1);
+}
+.form-group input:focus { border-bottom-color: var(--jade-dark); }
+.submit-btn {
+  background: var(--ink); color: var(--bg); border: 1px solid var(--ink); border-radius: 0;
+  padding: 13px; font-family: var(--display); font-size: 13px; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+  transition: background .14s cubic-bezier(.22,1,.36,1); width: 100%; margin-top: 10px;
+}
+.submit-btn:hover { background: var(--jade-dark); border-color: var(--jade-dark); }
+.submit-btn:disabled { opacity: .4; cursor: not-allowed; }
+.switch-mode { margin-top: 20px; font-family: var(--mono); font-size: 12px; color: var(--ink-mute); }
+.switch-mode a { color: var(--ink); cursor: pointer; font-weight: 600; text-decoration: none; border-bottom: 1px solid var(--rule); }
+.switch-mode a:hover { border-color: var(--jade-dark); color: var(--jade-dark); }
+.msg {
+  margin-top: 16px; padding: 11px 14px; border-radius: 0; font-family: var(--mono);
+  font-size: 12px; display: none; border-left: 3px solid transparent;
+}
+.msg.success { display: block; background: var(--bg-soft); color: var(--ink); border-left-color: var(--jade-dark); }
+.msg.error { display: block; background: var(--bg-soft); color: var(--c-rust); border-left-color: var(--c-rust); }
+.footer { margin-top: 24px; font-family: var(--mono); font-size: 11px; color: var(--ink-mute); }
+.footer a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule); }
+.header-bar { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: flex-end; gap: 10px; padding: 20px 24px; z-index: 2; }
+.theme-toggle {
+  background: none; border: 1px solid var(--rule); width: 30px; height: 30px; border-radius: 0;
+  cursor: pointer; font-size: 0; display: inline-flex; align-items: center; justify-content: center;
+  transition: border-color .14s; padding: 0; position: relative;
+}
+.theme-toggle::after { content: ''; width: 12px; height: 12px; border: 1px solid var(--ink); background: linear-gradient(90deg, var(--ink) 50%, transparent 50%); }
+.theme-toggle:hover { border-color: var(--ink); }
+.lang-switch { display: inline-flex; border: 1px solid var(--rule); border-radius: 0; overflow: hidden; }
+.lang-switch button {
+  background: none; border: none; border-right: 1px solid var(--rule); padding: 5px 10px;
+  font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.04em;
+  color: var(--ink-mute); cursor: pointer; transition: all .14s;
+}
+.lang-switch button:last-child { border-right: none; }
+.lang-switch button.active { background: var(--ink); color: var(--bg); box-shadow: none; }
+.divider { display: flex; align-items: center; margin: 20px 0; font-family: var(--mono); color: var(--ink-mute); font-size: 11px; letter-spacing: 0.06em; }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
+.divider span { padding: 0 12px; text-transform: uppercase; }
+.google-btn, .oauth-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;
+  padding: 11px; border: 1px solid var(--rule); border-radius: 0; background: var(--bg);
+  font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: 0.04em;
+  color: var(--ink); cursor: pointer; transition: all .14s; margin-top: 8px;
+}
+.google-btn:hover, .oauth-btn:hover { border-color: var(--ink); background: var(--bg-soft); }
+html.dark .google-btn, html.dark .submit-btn, html.dark button { background: var(--bg-soft); color: var(--ink); border: 1px solid var(--rule); }
+html.dark .google-btn:hover, html.dark button:hover { background: var(--jade-bg); border-color: var(--jade-dark); }
+html.dark .submit-btn { background: var(--jade-dark); color: #131211; border: 1px solid var(--jade-dark); }
+html.dark .submit-btn:hover { background: var(--jade); }
+html.dark .lang-switch button.active { background: var(--ink); color: var(--bg); box-shadow: none; }
+
+</style>
 </head>
 <body>
     <div class="header-bar">
@@ -131,6 +162,12 @@
             Discord
         </button>
 
+        <!-- Web3 Wallet -->
+        <button type="button" id="walletBtn" class="oauth-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3v4M8 3v4"/></svg>
+            Web3 Wallet
+        </button>
+
         <div class="divider"><span data-i18n="or">или</span></div>
 
         <form class="form-group" id="loginForm">
@@ -153,11 +190,11 @@
 
         <div id="otpSection" style="display:none;margin-top:16px">
             <div style="font-size:13px;color:var(--ink-soft);margin-bottom:8px" data-i18n="otp_title">Вход по коду из письма</div>
-            <input type="email" id="otpEmail" data-i18n-placeholder="email_ph" placeholder="Email" style="width:100%;padding:12px;border:1px solid var(--rule);border-radius: 0;margin-bottom:8px;background:var(--bg);color:var(--ink)">
-            <button id="sendOtpBtn" data-i18n="send_code" style="width:100%;padding:12px;background:var(--jade);color:#fff;border:none;border-radius: 0;cursor:pointer">Отправить код</button>
+            <input type="email" id="otpEmail" data-i18n-placeholder="email_ph" placeholder="Email" style="width:100%;padding:12px;border:1px solid var(--rule);border-radius:10px;margin-bottom:8px;background:var(--bg);color:var(--ink)">
+            <button id="sendOtpBtn" data-i18n="send_code" style="width:100%;padding:12px;background:var(--jade);color:#fff;border:none;border-radius:10px;cursor:pointer">Отправить код</button>
             <div id="otpCodeSection" style="display:none;margin-top:8px">
-                <input type="text" id="otpCode" data-i18n-placeholder="code_ph" placeholder="Код из письма" maxlength="6" style="width:100%;padding:12px;border:1px solid var(--rule);border-radius: 0;margin-bottom:8px;background:var(--bg);color:var(--ink);text-align:center;font-size:20px;letter-spacing:8px">
-                <button id="verifyOtpBtn" data-i18n="verify_btn" style="width:100%;padding:12px;background:var(--jade);color:#fff;border:none;border-radius: 0;cursor:pointer">Войти</button>
+                <input type="text" id="otpCode" data-i18n-placeholder="code_ph" placeholder="Код из письма" maxlength="6" style="width:100%;padding:12px;border:1px solid var(--rule);border-radius:10px;margin-bottom:8px;background:var(--bg);color:var(--ink);text-align:center;font-size:20px;letter-spacing:8px">
+                <button id="verifyOtpBtn" data-i18n="verify_btn" style="width:100%;padding:12px;background:var(--jade);color:#fff;border:none;border-radius:10px;cursor:pointer">Войти</button>
             </div>
             <div style="text-align:center;margin-top:12px">
                 <a href="#" id="backToLogin" data-i18n="back_to_login" style="color:var(--jade);font-size:13px">Войти по логину</a>
@@ -200,6 +237,9 @@
                 agreement: 'Нажимая «Войти», вы соглашаетесь с', terms: 'условиями использования',
                 wechat_label: 'WeChat (скоро)', wechat_alert: 'WeChat вход будет доступен после настройки WeChat Open Platform',
                 discord_alert: 'Discord OAuth будет доступен после настройки приложения в Discord Developer Portal',
+                wallet_install: 'Установите MetaMask или другой Web3 кошелёк для входа',
+                wallet_connect: 'Кошелёк подключён',
+                wallet_fail: 'Ошибка подключения кошелька',
                 sb_not_loaded: 'Supabase не загружен', sb_sdk_missing: 'Supabase SDK не загружен',
                 logging_in: 'Вход...', passwords_mismatch: 'Пароли не совпадают',
                 min6_chars: 'Пароль должен содержать минимум 6 символов',
@@ -226,6 +266,9 @@
                 agreement: 'By signing in, you agree to the', terms: 'terms of service',
                 wechat_label: 'WeChat (coming soon)', wechat_alert: 'WeChat login will be available after WeChat Open Platform setup',
                 discord_alert: 'Discord OAuth will be available after setting up an app in Discord Developer Portal',
+                wallet_install: 'Install MetaMask or another Web3 wallet to sign in',
+                wallet_connect: 'Wallet connected',
+                wallet_fail: 'Wallet connection failed',
                 sb_not_loaded: 'Supabase not loaded', sb_sdk_missing: 'Supabase SDK not loaded',
                 logging_in: 'Signing in...', passwords_mismatch: 'Passwords do not match',
                 min6_chars: 'Password must be at least 6 characters',
@@ -252,6 +295,9 @@
                 agreement: '登录即表示您同意', terms: '服务条款',
                 wechat_label: '微信（即将上线）', wechat_alert: '微信登录将在配置微信开放平台后可用',
                 discord_alert: 'Discord OAuth将在Discord Developer Portal配置后可用',
+                wallet_install: '安装MetaMask或其他Web3钱包以登录',
+                wallet_connect: '钱包已连接',
+                wallet_fail: '钱包连接失败',
                 sb_not_loaded: 'Supabase 未加载', sb_sdk_missing: 'Supabase SDK 未加载',
                 logging_in: '登录中...', passwords_mismatch: '密码不匹配',
                 min6_chars: '密码至少需要6个字符',
@@ -321,6 +367,40 @@
             try {
                 await sbClient.auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: REDIRECT } });
             } catch (e) { showError('Discord: ' + e.message); }
+        });
+
+        // Web3 Wallet via MetaMask
+        document.getElementById('walletBtn').addEventListener('click', async () => {
+            if (!window.ethereum) {
+                alert(loginT('wallet_install'));
+                return;
+            }
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const address = accounts[0];
+                const message = 'Sign in to LCA-AI\nWallet: ' + address + '\nTime: ' + Date.now();
+                const signature = await window.ethereum.request({
+                    method: 'personal_sign',
+                    params: [message, address]
+                });
+                // Send to Supabase Edge Function for verification
+                const resp = await fetch(SB_URL + '/functions/v1/web3-auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + SB_KEY
+                    },
+                    body: JSON.stringify({ address, message, signature })
+                });
+                const data = await resp.json();
+                if (data.error) { showError('Web3: ' + data.error); return; }
+                // Save session and redirect
+                localStorage.setItem('supabase_token', data.access_token);
+                window.location.href = REDIRECT;
+            } catch (e) {
+                if (e.code === 4001) return; // User rejected
+                showError(loginT('wallet_fail') + ': ' + e.message);
+            }
         });
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
