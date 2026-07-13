@@ -446,7 +446,8 @@ html.dark body::before { opacity: 0.28; }
 .orb, .orb-1, .orb-2, .orb-3,
 .aurora, .mesh-grid, .grid-pattern,
 .sparkle, .floating-dot, .pulse-ring, .wave-line,
-.shimmer, .shimmer-line, .scroll-indicator {
+.shimmer, .shimmer-line, .scroll-indicator,
+#particles-canvas {
   display: none !important;
 }
 
@@ -939,6 +940,87 @@ header {
   color: var(--e-ink);
   border-bottom-color: var(--e-3);
   border-bottom-style: solid;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HERO FLOW — the site's signature visual, promised in the
+   design brief and finally built: a worked specimen showing
+   how a real product's footprint splits across stages. Colour
+   intensity = contribution, exactly like the report's own
+   diagrams. This is the one animation budget in the whole
+   page — a single draw-in on load, nothing else moves.
+   ═══════════════════════════════════════════════════════════ */
+
+.hero-flow-section {
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.hero-flow-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.hero-flow-head .preview-num {
+  font-family: var(--mono);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--e-ink);
+  line-height: 1;
+}
+.hero-flow-head .preview-unit {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--graphite-low);
+}
+.hero-flow-head .preview-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--graphite-low);
+  margin-left: 6px;
+  padding-left: 12px;
+  border-left: 1px solid var(--rule);
+}
+
+.hero-flow { width: 100%; }
+.hero-flow svg { width: 100%; height: auto; display: block; }
+
+.hero-flow .flow-root-bar { fill: var(--graphite); }
+
+.hero-flow .flow-lbl-name {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  fill: var(--graphite);
+  font-weight: 600;
+}
+.hero-flow .flow-lbl-val {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--graphite-low);
+}
+
+/* Draw-in on load — the flows measure themselves into view */
+.hero-flow .flow-ribbon {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: flowDraw 720ms var(--ease) forwards;
+}
+.hero-flow .flow-r1 { animation-delay: 0ms; }
+.hero-flow .flow-r2 { animation-delay: 80ms; }
+.hero-flow .flow-r3 { animation-delay: 160ms; }
+.hero-flow .flow-r4 { animation-delay: 240ms; }
+.hero-flow .flow-r5 { animation-delay: 320ms; }
+@keyframes flowDraw { to { stroke-dashoffset: 0; } }
+
+@media (max-width: 640px) {
+  .hero-flow svg { min-width: 620px; }
+  .hero-flow { overflow-x: auto; }
 }
 
 
@@ -3001,55 +3083,21 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
 }
 .composition { margin-top: 20px; }
 
+/* ─── Page transitions: home <-> results ───
+   .page-home.hidden was a compound selector in the original
+   stylesheet — restored here after the design-system rewrite. */
+.page-home {
+  transition: opacity var(--slow) var(--ease), transform var(--slow) var(--ease);
+}
+.page-home.hidden {
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
 </style>
 </head>
 <body>
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-  <div class="mesh-grid"></div>
-  <div class="aurora"></div>
-  <div class="pulse-ring"></div>
-  <div class="pulse-ring"></div>
-  <div class="pulse-ring"></div>
-  <div class="wave-line"></div>
-  <div class="wave-line"></div>
-  <div class="wave-line"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="floating-dot"></div>
-  <div class="floating-dot"></div>
-  <div class="floating-dot"></div>
-  <div class="floating-dot"></div>
-  <div class="floating-dot"></div>
-  <div class="floating-dot"></div>
-  <div class="floating-dot"></div>
-  <canvas id="particles-canvas"></canvas>
-
-  <!-- Live Wallpaper Elements -->
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-  <div class="grid-pattern"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  
-
-
 <div class="frame">
 
   <header>
@@ -7064,81 +7112,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 </script>
 
 
-<script>
-// Particles Animation
-(function() {
-  var canvas = document.getElementById('particles-canvas');
-  if (!canvas) return;
-  var ctx = canvas.getContext('2d');
-  var particles = [];
-  
-  function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  
-  function createParticle() {
-    return {
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      size: Math.random() * 2 + 0.5,
-      speedX: (Math.random() - 0.5) * 0.5,
-      speedY: (Math.random() - 0.5) * 0.5,
-      opacity: Math.random() * 0.5 + 0.1
-    };
-  }
-  
-  function init() {
-    resize();
-    particles = [];
-    for (var i = 0; i < 50; i++) {
-      particles.push(createParticle());
-    }
-  }
-  
-  function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    particles.forEach(function(p) {
-      p.x += p.speedX;
-      p.y += p.speedY;
-      
-      if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
-      if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
-      
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(20, 201, 151, ' + p.opacity + ')';
-      ctx.fill();
-    });
-    
-    // Draw connections
-    for (var i = 0; i < particles.length; i++) {
-      for (var j = i + 1; j < particles.length; j++) {
-        var dx = particles[i].x - particles[j].x;
-        var dy = particles[i].y - particles[j].y;
-        var dist = Math.sqrt(dx * dx + dy * dy);
-        
-        if (dist < 150) {
-          ctx.beginPath();
-          ctx.moveTo(particles[i].x, particles[i].y);
-          ctx.lineTo(particles[j].x, particles[j].y);
-          ctx.strokeStyle = 'rgba(20, 201, 151, ' + (0.1 * (1 - dist / 150)) + ')';
-          ctx.lineWidth = 0.5;
-          ctx.stroke();
-        }
-      }
-    }
-    
-    requestAnimationFrame(animate);
-  }
-  
-  window.addEventListener('resize', resize);
-  init();
-  animate();
-})();
-
-</script>
 
 
 </body>

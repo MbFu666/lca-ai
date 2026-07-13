@@ -447,7 +447,8 @@ html.dark body::before { opacity: 0.28; }
 .orb, .orb-1, .orb-2, .orb-3,
 .aurora, .mesh-grid, .grid-pattern,
 .sparkle, .floating-dot, .pulse-ring, .wave-line,
-.shimmer, .shimmer-line, .scroll-indicator {
+.shimmer, .shimmer-line, .scroll-indicator,
+#particles-canvas {
   display: none !important;
 }
 
@@ -667,12 +668,7 @@ header {
    ═══════════════════════════════════════════════════════════ */
 
 .hero {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 48px;
-  align-items: end;
-  padding: 72px 0 40px;
-  border-bottom: 1px solid var(--rule);
+  padding: 72px 0 32px;
 }
 
 .eyebrow {
@@ -717,51 +713,8 @@ header {
   padding-left: 18px;
 }
 
-/* Specimen card: a real worked example, tagged like a lab sample */
-.hero-preview { flex-shrink: 0; }
-.preview-card {
-  border: 1px solid var(--graphite);
-  border-radius: 0;
-  background: var(--paper-raised);
-  padding: 22px 24px;
-  min-width: 250px;
-  box-shadow: none;
-}
-.preview-top {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--rule);
-}
-.preview-donut { flex-shrink: 0; }
-.preview-num {
-  font-family: var(--mono);
-  font-size: 34px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: var(--e-ink);
-  line-height: 1;
-}
-.preview-unit {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--graphite-low);
-  letter-spacing: 0.06em;
-  margin-top: 4px;
-}
-.preview-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--graphite-low);
-}
-
 @media (max-width: 900px) {
-  .hero { grid-template-columns: 1fr; gap: 32px; padding: 48px 0 32px; }
-  .hero-preview { justify-self: start; }
+  .hero { padding: 48px 0 28px; }
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -940,6 +893,88 @@ header {
   color: var(--e-ink);
   border-bottom-color: var(--e-3);
   border-bottom-style: solid;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HERO FLOW — the site's signature visual, promised in the
+   design brief and finally built: a worked specimen showing
+   how a real product's footprint splits across stages. Colour
+   intensity = contribution, exactly like the report's own
+   diagrams. This is the one animation budget in the whole
+   page — a single draw-in on load, nothing else moves.
+   ═══════════════════════════════════════════════════════════ */
+
+.hero-flow-section {
+  padding-top: 8px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.hero-flow-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.hero-flow-head .preview-num {
+  font-family: var(--mono);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--e-ink);
+  line-height: 1;
+}
+.hero-flow-head .preview-unit {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--graphite-low);
+}
+.hero-flow-head .preview-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--graphite-low);
+  margin-left: 6px;
+  padding-left: 12px;
+  border-left: 1px solid var(--rule);
+}
+
+.hero-flow { width: 100%; }
+.hero-flow svg { width: 100%; height: auto; display: block; }
+
+.hero-flow .flow-root-bar { fill: var(--graphite); }
+
+.hero-flow .flow-lbl-name {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  fill: var(--graphite);
+  font-weight: 600;
+}
+.hero-flow .flow-lbl-val {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--graphite-low);
+}
+
+/* Draw-in on load — the flows measure themselves into view */
+.hero-flow .flow-ribbon {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: flowDraw 720ms var(--ease) forwards;
+}
+.hero-flow .flow-r1 { animation-delay: 0ms; }
+.hero-flow .flow-r2 { animation-delay: 80ms; }
+.hero-flow .flow-r3 { animation-delay: 160ms; }
+.hero-flow .flow-r4 { animation-delay: 240ms; }
+.hero-flow .flow-r5 { animation-delay: 320ms; }
+@keyframes flowDraw { to { stroke-dashoffset: 0; } }
+
+@media (max-width: 640px) {
+  .hero-flow svg { min-width: 620px; }
+  .hero-flow { overflow-x: auto; }
 }
 
 
@@ -3002,55 +3037,21 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
 }
 .composition { margin-top: 20px; }
 
+/* ─── Page transitions: home <-> results ───
+   .page-home.hidden was a compound selector in the original
+   stylesheet — restored here after the design-system rewrite. */
+.page-home {
+  transition: opacity var(--slow) var(--ease), transform var(--slow) var(--ease);
+}
+.page-home.hidden {
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
 </style>
 </head>
 <body>
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-  <div class="mesh-grid"></div>
-  <div class="aurora"></div>
-  <div class="pulse-ring"></div>
-  <div class="pulse-ring"></div>
-  <div class="pulse-ring"></div>
-  <div class="wave-line"></div>
-  <div class="wave-line"></div>
-  <div class="wave-line"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="floating-dot"></div>
-  <div class="floating-dot"></div>
-  <div class="floating-dot"></div>
-  <div class="floating-dot"></div>
-  <div class="floating-dot"></div>
-  <div class="floating-dot"></div>
-  <div class="floating-dot"></div>
-  <canvas id="particles-canvas"></canvas>
-
-  <!-- Live Wallpaper Elements -->
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-  <div class="grid-pattern"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-  
-
-
 <div class="frame">
 
   <header>
@@ -3084,21 +3085,55 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
         <h1 data-i18n-html="h1">Углеродный след<br>продукта <em>за секунду</em>.</h1>
         <p class="hero-sub" data-i18n="hero_sub">Опишите продукт — ИИ рассчитает углеродный след за 10 секунд</p>
       </div>
-      <div class="hero-preview">
-        <div class="preview-card">
-          <div class="preview-top">
-            <svg class="preview-donut" width="64" height="64" viewBox="0 0 36 36">
-              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--c-raw)" stroke-width="3.8" stroke-dasharray="42 58" stroke-dashoffset="25"/>
-              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--c-prod)" stroke-width="3.8" stroke-dasharray="25 75" stroke-dashoffset="83"/>
-              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--c-dist)" stroke-width="3.8" stroke-dasharray="18 82" stroke-dashoffset="58"/>
-              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--c-use)" stroke-width="3.8" stroke-dasharray="10 90" stroke-dashoffset="40"/>
-              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--c-eol)" stroke-width="3.8" stroke-dasharray="5 95" stroke-dashoffset="30"/>
-            </svg>
-            <div class="preview-num">2.47</div>
-          </div>
-          <div class="preview-unit">kg CO₂e</div>
-          <div class="preview-label" data-i18n="preview_label">Пример результата</div>
-        </div>
+    </section>
+
+    <!-- ============== HERO FLOW — worked specimen, the site's signature visual ============== -->
+    <section class="hero-flow-section">
+      <div class="hero-flow-head">
+        <span class="preview-num">0.99</span><span class="preview-unit">kg CO₂e</span>
+        <span class="preview-label" data-i18n="hero_flow_label">пример · 1 кг ржаного хлеба · ISO 14067</span>
+      </div>
+      <div class="hero-flow">
+        <svg viewBox="0 0 900 220" preserveAspectRatio="xMidYMid meet" role="img"
+             aria-label="Пример разбивки углеродного следа по стадиям жизненного цикла">
+          <!-- root bar: the whole product -->
+          <rect class="flow-root-bar" x="0" y="26" width="14" height="168"/>
+
+          <!-- flow ribbons: root -> stage, width = share, colour = emission rank -->
+          <path class="flow-ribbon flow-r1" d="M14,61 C430,61 430,49 846,49"
+                fill="none" stroke="var(--e-4)" stroke-width="70"/>
+          <path class="flow-ribbon flow-r2" d="M14,117 C430,117 430,111 846,111"
+                fill="none" stroke="var(--e-3)" stroke-width="42"/>
+          <path class="flow-ribbon flow-r3" d="M14,153.5 C430,153.5 430,153.5 846,153.5"
+                fill="none" stroke="var(--e-2)" stroke-width="31"/>
+          <path class="flow-ribbon flow-r4" d="M14,177.5 C430,177.5 430,183.5 846,183.5"
+                fill="none" stroke="var(--e-1)" stroke-width="17"/>
+          <path class="flow-ribbon flow-r5" d="M14,190 C430,190 430,202 846,202"
+                fill="none" stroke="var(--e-0)" stroke-width="8"/>
+
+          <!-- stage bars, coloured to match their ribbon -->
+          <rect x="846" y="14" width="14" height="70" fill="var(--e-4)"/>
+          <rect x="846" y="90" width="14" height="42" fill="var(--e-3)"/>
+          <rect x="846" y="138" width="14" height="31" fill="var(--e-2)"/>
+          <rect x="846" y="175" width="14" height="17" fill="var(--e-1)"/>
+          <rect x="846" y="198" width="14" height="8" fill="var(--e-0)"/>
+
+          <!-- stage labels -->
+          <text class="flow-lbl-name" x="872" y="45" data-i18n="stage_raw">Добыча сырья</text>
+          <text class="flow-lbl-val"  x="872" y="59">0.41 kg · 42%</text>
+
+          <text class="flow-lbl-name" x="872" y="107" data-i18n="stage_prod">Производство</text>
+          <text class="flow-lbl-val"  x="872" y="121">0.25 kg · 25%</text>
+
+          <text class="flow-lbl-name" x="872" y="149.5" data-i18n="stage_dist">Дистрибуция</text>
+          <text class="flow-lbl-val"  x="872" y="163.5">0.18 kg · 18%</text>
+
+          <text class="flow-lbl-name" x="872" y="179.5" data-i18n="stage_eol">Конец ЖЦ</text>
+          <text class="flow-lbl-val"  x="872" y="193.5">0.10 kg · 10%</text>
+
+          <text class="flow-lbl-name" x="872" y="196" data-i18n="stage_use">Использование</text>
+          <text class="flow-lbl-val"  x="872" y="210">0.05 kg · 5%</text>
+        </svg>
       </div>
     </section>
 
@@ -3534,6 +3569,7 @@ const I18N = {
     feat_full:    'ISO 14067 из коробки',
     feat_full_d:  'Cradle-to-grave, characterization factors, sensitivity — всё по стандарту',
     preview_label:'Пример результата',
+    hero_flow_label:'пример · 1 кг ржаного хлеба · ISO 14067',
     input_label:  'Описание продукта для расчёта LCA',
     how_title:    'Три шага до отчёта',
     step1_title:  'Опишите продукт',
@@ -3733,6 +3769,7 @@ const I18N = {
     feat_full:    'ISO 14067 out of the box',
     feat_full_d:  'Cradle-to-grave, characterization factors, sensitivity — all by the standard',
     preview_label:'Example result',
+    hero_flow_label:'example · 1 kg wheat bread · ISO 14067',
     input_label:  'Product description for LCA calculation',
     how_title:    'Three steps to your report',
     step1_title:  'Describe the product',
@@ -3918,6 +3955,7 @@ const I18N = {
     feat_full:    '开箱即用的 ISO 14067',
     feat_full_d:  '摇篮到坟墓、特征化因子、敏感性分析 — 全部符合标准',
     preview_label:'结果示例',
+    hero_flow_label:'示例 · 1 千克小麦面包 · ISO 14067',
     input_label:  '用于 LCA 计算的产品描述',
     how_title:    '三步获取报告',
     step1_title:  '描述产品',
@@ -7022,81 +7060,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 </script>
 
 
-<script>
-// Particles Animation
-(function() {
-  var canvas = document.getElementById('particles-canvas');
-  if (!canvas) return;
-  var ctx = canvas.getContext('2d');
-  var particles = [];
-  
-  function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  
-  function createParticle() {
-    return {
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      size: Math.random() * 2 + 0.5,
-      speedX: (Math.random() - 0.5) * 0.5,
-      speedY: (Math.random() - 0.5) * 0.5,
-      opacity: Math.random() * 0.5 + 0.1
-    };
-  }
-  
-  function init() {
-    resize();
-    particles = [];
-    for (var i = 0; i < 50; i++) {
-      particles.push(createParticle());
-    }
-  }
-  
-  function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    particles.forEach(function(p) {
-      p.x += p.speedX;
-      p.y += p.speedY;
-      
-      if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
-      if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
-      
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(20, 201, 151, ' + p.opacity + ')';
-      ctx.fill();
-    });
-    
-    // Draw connections
-    for (var i = 0; i < particles.length; i++) {
-      for (var j = i + 1; j < particles.length; j++) {
-        var dx = particles[i].x - particles[j].x;
-        var dy = particles[i].y - particles[j].y;
-        var dist = Math.sqrt(dx * dx + dy * dy);
-        
-        if (dist < 150) {
-          ctx.beginPath();
-          ctx.moveTo(particles[i].x, particles[i].y);
-          ctx.lineTo(particles[j].x, particles[j].y);
-          ctx.strokeStyle = 'rgba(20, 201, 151, ' + (0.1 * (1 - dist / 150)) + ')';
-          ctx.lineWidth = 0.5;
-          ctx.stroke();
-        }
-      }
-    }
-    
-    requestAnimationFrame(animate);
-  }
-  
-  window.addEventListener('resize', resize);
-  init();
-  animate();
-})();
-
-</script>
 
 
 </body>
