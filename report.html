@@ -5011,7 +5011,9 @@ function showNodeDetail(o, cardEl) {
   
   // Show detail panel (fixed overlay)
   const panel = $('#detailPanel');
+  console.log('[detailPanel] panel:', panel, 'classes:', panel?.className);
   panel?.classList.add('show');
+  console.log('[detailPanel] after add show:', panel?.className);
   
   // Привязка обработчиков для редактирования
   if (o.editable && o.editData) {
