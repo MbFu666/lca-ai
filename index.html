@@ -447,8 +447,7 @@ html.dark body::before { opacity: 0.28; }
 .orb, .orb-1, .orb-2, .orb-3,
 .aurora, .mesh-grid, .grid-pattern,
 .sparkle, .floating-dot, .pulse-ring, .wave-line,
-.shimmer, .shimmer-line, .scroll-indicator,
-#particles-canvas {
+.shimmer, .shimmer-line, .scroll-indicator {
   display: none !important;
 }
 
@@ -666,6 +665,46 @@ header {
    HERO — a specimen label, not a sales pitch.
    The number is set in the emission scale because it IS emission.
    ═══════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════
+   MOTION
+   One budget, spent deliberately. Everything that moves either
+   (a) reveals content as it becomes relevant, or (b) encodes data.
+   Nothing loops. Nothing floats. Nothing bounces.
+   ═══════════════════════════════════════════════════════════ */
+
+/* Content rises into place as it enters the viewport — once, then
+   it stays put. Staggered by position so a row reads left-to-right. */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 620ms var(--ease), transform 620ms var(--ease);
+  transition-delay: var(--d, 0ms);
+}
+.reveal.in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* Headline: each line is masked and slides up from behind its own
+   baseline — the type sets itself, like a press impression. */
+.hero-h1 { overflow: hidden; }
+.hero-h1 .line {
+  display: block;
+  overflow: hidden;
+}
+.hero-h1 .line > span {
+  display: block;
+  transform: translateY(110%);
+  animation: lineSet 900ms var(--ease) forwards;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes lineSet { to { transform: translateY(0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-h1 .line > span { transform: none; animation: none; }
+}
 
 .hero {
   padding: 72px 0 32px;
@@ -940,42 +979,31 @@ header {
   border-left: 1px solid var(--rule);
 }
 
-.hero-flow { width: 100%; }
-.hero-flow svg { width: 100%; height: auto; display: block; }
-
-.hero-flow .flow-root-bar { fill: var(--graphite); }
-
-.hero-flow .flow-lbl-name {
+/* The canvas is IN FLOW — never fixed, never absolute. Its pixel
+   buffer is driven by the container's measured size, so it can't
+   punch a viewport-sized hole into the layout. */
+.hero-flow {
+  width: 100%;
+  height: 260px;
+  position: relative;
+}
+.hero-flow canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;      /* it's a readable instrument, not a picture */
+}
+.flow-hint {
   font-family: var(--mono);
   font-size: 10px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  fill: var(--graphite);
-  font-weight: 600;
-}
-.hero-flow .flow-lbl-val {
-  font-family: var(--mono);
-  font-size: 11px;
-  fill: var(--graphite-low);
+  color: var(--graphite-low);
+  margin-top: 14px;
 }
 
-/* Draw-in on load — the flows measure themselves into view */
-.hero-flow .flow-ribbon {
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 1000;
-  animation: flowDraw 720ms var(--ease) forwards;
-}
-.hero-flow .flow-r1 { animation-delay: 0ms; }
-.hero-flow .flow-r2 { animation-delay: 80ms; }
-.hero-flow .flow-r3 { animation-delay: 160ms; }
-.hero-flow .flow-r4 { animation-delay: 240ms; }
-.hero-flow .flow-r5 { animation-delay: 320ms; }
-@keyframes flowDraw { to { stroke-dashoffset: 0; } }
-
-@media (max-width: 640px) {
-  .hero-flow svg { min-width: 620px; }
-  .hero-flow { overflow-x: auto; }
-}
+@media (max-width: 900px) { .hero-flow { height: 300px; } }
+@media (max-width: 560px) { .hero-flow { height: 340px; } }
 
 
 /* ═══════════════════════════════════════════════════════════
@@ -1194,6 +1222,51 @@ header {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--graphite-low);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ACCOUNT — stated as terms, not sold as a bundle of perks
+   ═══════════════════════════════════════════════════════════ */
+
+.account-strip {
+  padding: 72px 0;
+  border-top: 1px solid var(--rule);
+}
+.account-copy { margin-bottom: 32px; }
+.account-copy p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--graphite-mid);
+  max-width: 52ch;
+}
+.account-list {
+  list-style: none;
+  border-top: 1px solid var(--rule);
+  margin-bottom: 32px;
+}
+.account-list li {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 24px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--rule-soft);
+  align-items: baseline;
+}
+.account-list .k {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--e-ink);
+  font-weight: 600;
+}
+.account-list .v {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--graphite-mid);
+}
+@media (max-width: 640px) {
+  .account-list li { grid-template-columns: 1fr; gap: 6px; }
 }
 
 .final-cta {
@@ -3079,62 +3152,24 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
 
   <!-- ============== HOME PAGE (Search only) ============== -->
   <div class="page-home" id="pageHome">
+    <!-- ============== HERO ============== -->
     <section class="hero">
-      <div>
-        <span class="eyebrow" data-i18n="eyebrow">оценка жизненного цикла · AI</span>
-        <h1 data-i18n-html="h1">Углеродный след<br>продукта <em>за секунду</em>.</h1>
-        <p class="hero-sub" data-i18n="hero_sub">Опишите продукт — ИИ рассчитает углеродный след за 10 секунд</p>
-      </div>
+      <span class="eyebrow reveal" data-i18n="eyebrow">оценка жизненного цикла · ISO 14067</span>
+      <h1 class="hero-h1" data-i18n-html="h1">Где в вашем продукте <em>углерод</em>.</h1>
+      <p class="hero-sub reveal" data-i18n="hero_sub">Опишите продукт — система соберёт модель жизненного цикла, разложит след по стадиям и укажет источник каждого коэффициента.</p>
     </section>
 
-    <!-- ============== HERO FLOW — worked specimen, the site's signature visual ============== -->
+    <!-- ============== LIVE FLOW — the signature visual ============== -->
     <section class="hero-flow-section">
       <div class="hero-flow-head">
-        <span class="preview-num">0.99</span><span class="preview-unit">kg CO₂e</span>
-        <span class="preview-label" data-i18n="hero_flow_label">пример · 1 кг ржаного хлеба · ISO 14067</span>
+        <span class="preview-num" id="flowTotal">0.99</span><span class="preview-unit">kg CO₂e</span>
+        <span class="preview-label" id="flowLabel" data-i18n="hero_flow_label">пример · 1 кг ржаного хлеба · крафт-упаковка</span>
       </div>
-      <div class="hero-flow">
-        <svg viewBox="0 0 900 220" preserveAspectRatio="xMidYMid meet" role="img"
-             aria-label="Пример разбивки углеродного следа по стадиям жизненного цикла">
-          <!-- root bar: the whole product -->
-          <rect class="flow-root-bar" x="0" y="26" width="14" height="168"/>
-
-          <!-- flow ribbons: root -> stage, width = share, colour = emission rank -->
-          <path class="flow-ribbon flow-r1" d="M14,61 C430,61 430,49 846,49"
-                fill="none" stroke="var(--e-4)" stroke-width="70"/>
-          <path class="flow-ribbon flow-r2" d="M14,117 C430,117 430,111 846,111"
-                fill="none" stroke="var(--e-3)" stroke-width="42"/>
-          <path class="flow-ribbon flow-r3" d="M14,153.5 C430,153.5 430,153.5 846,153.5"
-                fill="none" stroke="var(--e-2)" stroke-width="31"/>
-          <path class="flow-ribbon flow-r4" d="M14,177.5 C430,177.5 430,183.5 846,183.5"
-                fill="none" stroke="var(--e-1)" stroke-width="17"/>
-          <path class="flow-ribbon flow-r5" d="M14,190 C430,190 430,202 846,202"
-                fill="none" stroke="var(--e-0)" stroke-width="8"/>
-
-          <!-- stage bars, coloured to match their ribbon -->
-          <rect x="846" y="14" width="14" height="70" fill="var(--e-4)"/>
-          <rect x="846" y="90" width="14" height="42" fill="var(--e-3)"/>
-          <rect x="846" y="138" width="14" height="31" fill="var(--e-2)"/>
-          <rect x="846" y="175" width="14" height="17" fill="var(--e-1)"/>
-          <rect x="846" y="198" width="14" height="8" fill="var(--e-0)"/>
-
-          <!-- stage labels -->
-          <text class="flow-lbl-name" x="872" y="45" data-i18n="stage_raw">Добыча сырья</text>
-          <text class="flow-lbl-val"  x="872" y="59">0.41 kg · 42%</text>
-
-          <text class="flow-lbl-name" x="872" y="107" data-i18n="stage_prod">Производство</text>
-          <text class="flow-lbl-val"  x="872" y="121">0.25 kg · 25%</text>
-
-          <text class="flow-lbl-name" x="872" y="149.5" data-i18n="stage_dist">Дистрибуция</text>
-          <text class="flow-lbl-val"  x="872" y="163.5">0.18 kg · 18%</text>
-
-          <text class="flow-lbl-name" x="872" y="179.5" data-i18n="stage_eol">Конец ЖЦ</text>
-          <text class="flow-lbl-val"  x="872" y="193.5">0.10 kg · 10%</text>
-
-          <text class="flow-lbl-name" x="872" y="196" data-i18n="stage_use">Использование</text>
-          <text class="flow-lbl-val"  x="872" y="210">0.05 kg · 5%</text>
-        </svg>
+      <div class="hero-flow" id="flowWrap">
+        <canvas id="flowCanvas"
+                aria-label="Диаграмма потока: разбивка углеродного следа по стадиям жизненного цикла"></canvas>
       </div>
+      <div class="flow-hint" data-i18n="flow_hint">наведите на ленту — толщина равна вкладу стадии</div>
     </section>
 
     <!-- ============== COMPOSER ============== -->
@@ -3145,24 +3180,22 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
           <button data-mode="factor"><em>—</em> <span data-i18n="mode_factor">Приоритет факторов</span></button>
         </div>
 
-        <label class="input-label" data-i18n="input_label">Описание продукта для расчёта LCA</label>
+        <label class="input-label" for="productInput" data-i18n="input_label">Описание продукта</label>
         <textarea id="productInput" rows="3" data-i18n-placeholder="placeholder"
-                  placeholder="Например: 1 кг наноцеллюлозы из жома сладкого сорго, произведённой в Северо-Восточном Китае…"></textarea>
+                  placeholder="1 кг ржаного хлеба, выпечен в Польше, крафт-упаковка"></textarea>
         <div class="drop-hint" id="dropHint">
-          <span>📄</span>
-          <span data-i18n="drop_excel">Перетащите Excel файл для импорта данных</span>
+          <span data-i18n="drop_excel">Отпустите — Excel будет разобран как таблица инвентаризации</span>
         </div>
       </div>
 
       <div class="actions">
         <div class="actions-left">
-          <!-- Image upload disabled - DeepSeek API doesn't support images -->
           <label class="upload" style="display:none">
-            <span>＋</span> <span data-i18n="upload">Изображение</span>
+            <span data-i18n="upload">Изображение</span>
             <input type="file" id="imageInput" accept="image/*">
           </label>
           <label class="upload" id="excelUploadLabel">
-            <span>📊</span> <span data-i18n="upload_excel">Excel</span>
+            <span data-i18n="upload_excel">Импорт Excel</span>
             <input type="file" id="excelInput" accept=".xlsx,.xls,.csv" style="display:none">
           </label>
           <span class="upload-name" id="uploadName"></span>
@@ -3174,7 +3207,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
 
       <div class="composer-inner">
         <div class="examples">
-          <span data-i18n="examples_label">пример:</span>
+          <span class="label" data-i18n="examples_label">образцы</span>
           <span id="exampleChips"></span>
         </div>
 
@@ -3186,113 +3219,96 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
       </div>
     </section>
 
-    <!-- ============== FEATURES ============== -->
+    <!-- ============== SPEC — what the instrument actually does ============== -->
     <section class="features">
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg width="40" height="40" viewBox="0 0 256 256" fill="none"><path d="M208 128h-64l24-72" stroke="var(--jade)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/><path d="M128 128H64" stroke="var(--jade)" stroke-width="24" stroke-linecap="round"/><circle cx="128" cy="128" r="96" stroke="var(--jade)" stroke-width="16" fill="none"/></svg>
-        </div>
-        <h3 data-i18n="feat_speed">Быстрый расчёт</h3>
-        <p data-i18n="feat_speed_d">DeepSeek анализирует продукт за секунды, а не часы</p>
+      <div class="feature-card reveal">
+        <div class="feature-icon"></div>
+        <h3 data-i18n="feat_speed">Инвентаризация</h3>
+        <p data-i18n="feat_speed_d">Пять стадий, внутри каждой — подпроцессы с активити-данными и коэффициентом эмиссии.</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg width="40" height="40" viewBox="0 0 256 256" fill="none"><rect x="48" y="120" width="40" height="88" rx="8" stroke="var(--jade)" stroke-width="16"/><rect x="108" y="80" width="40" height="128" rx="8" stroke="var(--jade)" stroke-width="16"/><rect x="168" y="48" width="40" height="160" rx="8" stroke="var(--jade)" stroke-width="16"/></svg>
-        </div>
-        <h3 data-i18n="feat_viz">Визуализация</h3>
-        <p data-i18n="feat_viz_d">Графы, диаграммы, рейтинги и детальный разбор по стадиям</p>
+      <div class="feature-card reveal">
+        <div class="feature-icon"></div>
+        <h3 data-i18n="feat_viz">Прослеживаемость</h3>
+        <p data-i18n="feat_viz_d">У каждого коэффициента указан источник: Ecoinvent, IPCC AR6, CCDB. Уверенность помечена.</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg width="40" height="40" viewBox="0 0 256 256" fill="none"><circle cx="128" cy="128" r="96" stroke="var(--jade)" stroke-width="16"/><path d="M128 32c0 96-96 96-96 192" stroke="var(--jade)" stroke-width="12" fill="none"/><path d="M32 128h192" stroke="var(--jade)" stroke-width="12"/></svg>
-        </div>
-        <h3 data-i18n="feat_full">Полный цикл</h3>
-        <p data-i18n="feat_full_d">От добычи сырья до утилизации — полная оценка жизненного цикла</p>
+      <div class="feature-card reveal">
+        <div class="feature-icon"></div>
+        <h3 data-i18n="feat_full">Выгрузка</h3>
+        <p data-i18n="feat_full_d">Excel, Word, PDF. Таблица инвентаризации выгружается целиком, без потерь.</p>
       </div>
     </section>
 
-    <!-- ============== HOW IT WORKS ============== -->
+    <!-- ============== METHOD — genuinely sequential ============== -->
     <section class="how-it-works">
-      <h2 class="section-title" data-i18n="how_title">Как это работает</h2>
+      <h2 class="section-title reveal" data-i18n="how_title">Порядок работы</h2>
       <div class="steps">
-        <div class="step">
-          <div class="step-num">1</div>
-          <h3 data-i18n="step1_title">Опишите продукт</h3>
-          <p data-i18n="step1_d">Введите текстовое описание или загрузите Excel</p>
+        <div class="step reveal">
+          <div class="step-num">01</div>
+          <h3 data-i18n="step1_title">Описание</h3>
+          <p data-i18n="step1_d">Текстом или импортом из Excel. Чем конкретнее масса, регион и упаковка — тем точнее модель.</p>
         </div>
-        <div class="step-arrow">→</div>
-        <div class="step">
-          <div class="step-num">2</div>
-          <h3 data-i18n="step2_title">ИИ анализирует</h3>
-          <p data-i18n="step2_d">DeepSeek рассчитывает факторы эмиссии по всем стадиям</p>
+        <div class="step reveal">
+          <div class="step-num">02</div>
+          <h3 data-i18n="step2_title">Модель</h3>
+          <p data-i18n="step2_d">Система строит инвентаризацию потоков и подбирает коэффициенты по стадиям.</p>
         </div>
-        <div class="step-arrow">→</div>
-        <div class="step">
-          <div class="step-num">3</div>
-          <h3 data-i18n="step3_title">Получите отчёт</h3>
-          <p data-i18n="step3_d">Визуализация, рекомендации и экспорт в PDF/Excel/Word</p>
+        <div class="step reveal">
+          <div class="step-num">03</div>
+          <h3 data-i18n="step3_title">Отчёт</h3>
+          <p data-i18n="step3_d">Разбивка, допущения, ограничения, рекомендации по снижению. Уточняющие вопросы — по запросу.</p>
         </div>
       </div>
     </section>
 
-    <!-- ============== TRUST ============== -->
-    <section class="trust-strip">
-      <span class="trust-item">Powered by <strong>DeepSeek</strong></span>
-      <span class="trust-dot">·</span>
-      <span class="trust-item">Open Source</span>
-      <span class="trust-dot">·</span>
-      <span class="trust-item">LCA Methodology</span>
-    </section>
-
-    <!-- ============== SOCIAL PROOF ============== -->
+    <!-- ============== NUMBERS ============== -->
     <section class="social-proof">
-      <div class="proof-item">
-        <div class="proof-num">1000+</div>
-        <div class="proof-label" data-i18n="proof_calcs">расчётов выполнено</div>
+      <div class="proof-item reveal">
+        <span class="proof-num" data-count="5">0</span>
+        <span class="proof-label" data-i18n="proof_stages">стадий жизненного цикла</span>
       </div>
-      <div class="proof-item">
-        <div class="proof-num">50+</div>
-        <div class="proof-label" data-i18n="proof_countries">стран мира</div>
+      <div class="proof-item reveal">
+        <span class="proof-num" data-count="3">0</span>
+        <span class="proof-label" data-i18n="proof_formats">формата выгрузки</span>
       </div>
-      <div class="proof-item">
-        <div class="proof-num">10с</div>
-        <div class="proof-label" data-i18n="proof_time">среднее время</div>
+      <div class="proof-item reveal">
+        <span class="proof-num" data-count="3">0</span>
+        <span class="proof-label" data-i18n="proof_langs">языка интерфейса</span>
       </div>
-    </section>
-
-    <!-- ============== REGISTRATION BENEFITS ============== -->
-    <section class="registration-benefits" style="margin-top:48px;padding:40px 32px;background:linear-gradient(135deg,var(--jade-bg) 0%,var(--bg) 100%);border:1px solid var(--jade-soft);border-radius:20px;position:relative;overflow:hidden">
-      <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:var(--jade);opacity:0.06;border-radius:50%"></div>
-      <h2 style="text-align:center;margin-bottom:8px;font-size:24px;font-weight:700;color:var(--ink)" data-i18n="reg_benefits_title">Регистрация открывает больше возможностей</h2>
-      <p style="text-align:center;margin-bottom:32px;font-size:15px;color:var(--ink-soft);max-width:500px;margin-left:auto;margin-right:auto" data-i18n="reg_benefits_sub">Бесплатно. Без рекламы. Ваши данные — только ваши.</p>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:32px">
-        <div style="text-align:center;padding:24px 16px;background:var(--bg);border:1px solid var(--rule-soft);border-radius:14px;transition:all .25s ease">
-          <div style="width:48px;height:48px;margin:0 auto 14px;border-radius:12px;background:var(--jade-bg);display:flex;align-items:center;justify-content:center;font-size:24px">☁️</div>
-          <h3 style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px" data-i18n="reg_benefits_1_title">Синхронизация</h3>
-          <p style="font-size:12px;color:var(--ink-soft);line-height:1.5" data-i18n="reg_benefits_1_desc">Расчёты на любом устройстве — компьютере, телефоне, планшете</p>
-        </div>
-        <div style="text-align:center;padding:24px 16px;background:var(--bg);border:1px solid var(--rule-soft);border-radius:14px;transition:all .25s ease">
-          <div style="width:48px;height:48px;margin:0 auto 14px;border-radius:12px;background:var(--jade-bg);display:flex;align-items:center;justify-content:center;font-size:24px">📊</div>
-          <h3 style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px" data-i18n="reg_benefits_2_title">История и проекты</h3>
-          <p style="font-size:12px;color:var(--ink-soft);line-height:1.5" data-i18n="reg_benefits_2_desc">Все расчёты сохраняются. Группируйте по проектам, сравнивайте, возвращайтесь к ним</p>
-        </div>
-        <div style="text-align:center;padding:24px 16px;background:var(--bg);border:1px solid var(--rule-soft);border-radius:14px;transition:all .25s ease">
-          <div style="width:48px;height:48px;margin:0 auto 14px;border-radius:12px;background:var(--jade-bg);display:flex;align-items:center;justify-content:center;font-size:24px">🔗</div>
-          <h3 style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px" data-i18n="reg_benefits_3_title">Поделиться ссылкой</h3>
-          <p style="font-size:12px;color:var(--ink-soft);line-height:1.5" data-i18n="reg_benefits_3_desc">Отправьте расчёт коллеге — он откроется у него на сайте</p>
-        </div>
-      </div>
-      <div style="text-align:center">
-        <a href="/login.html" style="display:inline-flex;align-items:center;gap:8px;padding:14px 36px;background:linear-gradient(135deg,var(--jade) 0%,var(--jade-dark) 100%);color:white;border:none;border-radius:30px;font-family:var(--sans);font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;box-shadow:0 4px 16px -4px rgba(20,201,151,0.4);transition:all .25s ease" data-i18n="reg_benefits_cta">Начать бесплатно</a>
+      <div class="proof-item reveal">
+        <span class="proof-num" data-count="0" data-suffix="₽">0</span>
+        <span class="proof-label" data-i18n="proof_price">стоимость расчёта</span>
       </div>
     </section>
 
-    <!-- ============== FINAL CTA ============== -->
+    <!-- ============== ACCOUNT ============== -->
+    <section class="account-strip">
+      <div class="account-copy reveal">
+        <h2 class="section-title" data-i18n="reg_benefits_title">Аккаунт</h2>
+        <p data-i18n="reg_benefits_sub">Расчёт работает и без входа. Аккаунт нужен, чтобы к расчётам можно было вернуться.</p>
+      </div>
+      <ul class="account-list">
+        <li class="reveal">
+          <span class="k" data-i18n="reg_benefits_1_title">История</span>
+          <span class="v" data-i18n="reg_benefits_1_desc">Каждый расчёт сохраняется и доступен с любого устройства.</span>
+        </li>
+        <li class="reveal">
+          <span class="k" data-i18n="reg_benefits_2_title">Проекты</span>
+          <span class="v" data-i18n="reg_benefits_2_desc">Группируйте расчёты, сравнивайте варианты между собой.</span>
+        </li>
+        <li class="reveal">
+          <span class="k" data-i18n="reg_benefits_3_title">Ссылка</span>
+          <span class="v" data-i18n="reg_benefits_3_desc">Отчёт открывается у коллеги по прямой ссылке.</span>
+        </li>
+      </ul>
+      <a href="/login.html" class="cta-btn reveal" data-i18n="reg_benefits_cta">Создать аккаунт</a>
+    </section>
+
+    <!-- ============== FINAL ============== -->
     <section class="final-cta">
-      <h2 data-i18n="cta_title">Готовы рассчитать углеродный след?</h2>
-      <p data-i18n="cta_sub">Бесплатно, без регистрации, за 10 секунд</p>
-      <button class="cta-btn" onclick="document.getElementById('productInput').focus(); window.scrollTo({top:0,behavior:'smooth'})">
-        <span data-i18n="cta_btn">Начать расчёт</span> →
+      <h2 class="reveal" data-i18n="cta_title">Опишите продукт.</h2>
+      <p class="reveal" data-i18n="cta_sub">Без регистрации. Модель соберётся за один запрос.</p>
+      <button class="cta-btn reveal" id="ctaScrollBtn">
+        <span data-i18n="cta_btn">К вводу</span> <span class="arrow">↑</span>
       </button>
     </section>
   </div>
@@ -3559,40 +3575,46 @@ const I18N = {
   ru: {
     /* shell */
     /* hero */
-    eyebrow:      'LCA·AI — ИИ для устойчивого развития',
-    h1:           'Углеродный след продукта<br><em>за 10 секунд</em>.',
-    hero_sub:     'Опишите продукт — DeepSeek рассчитает полный LCA-отчёт по ISO 14067 с разбивкой по стадиям.',
-    feat_speed:   '10 секунд вместо недели',
-    feat_speed_d: 'ИИ строит модель жизненного цикла со всеми стадиями — от сырья до утилизации',
-    feat_viz:     'Визуализация как в SimaPro',
-    feat_viz_d:   'Графы, donut-чарты, рейтинги по стадиям и экспорт в PDF/Excel/Word',
-    feat_full:    'ISO 14067 из коробки',
-    feat_full_d:  'Cradle-to-grave, characterization factors, sensitivity — всё по стандарту',
+    eyebrow:      'оценка жизненного цикла · ISO 14067',
+    h1:           'Где в вашем продукте<br><em>углерод</em>.',
+    hero_sub:     'Опишите продукт — система соберёт модель жизненного цикла, разложит след по стадиям и укажет источник каждого коэффициента.',
+    feat_speed:   'Инвентаризация',
+    feat_speed_d: 'Пять стадий, внутри каждой — подпроцессы с активити-данными и коэффициентом эмиссии.',
+    feat_viz:     'Прослеживаемость',
+    feat_viz_d:   'У каждого коэффициента указан источник: Ecoinvent, IPCC AR6, CCDB. Уверенность помечена.',
+    feat_full:    'Выгрузка',
+    feat_full_d:  'Excel, Word, PDF. Таблица инвентаризации выгружается целиком, без потерь.',
     preview_label:'Пример результата',
-    hero_flow_label:'пример · 1 кг ржаного хлеба · ISO 14067',
-    input_label:  'Описание продукта для расчёта LCA',
-    how_title:    'Три шага до отчёта',
-    step1_title:  'Опишите продукт',
-    step1_d:      'Текст, Excel или шаблон — AI поймёт',
-    step2_title:  'AI строит модель',
-    step2_d:      'DeepSeek рассчитывает факторы эмиссии по всем стадиям',
-    step3_title:  'Скачайте отчёт',
-    step3_d:      'PDF, Excel, Word — готово для клиента или регулятора',
-    proof_calcs:  'расчётов выполнено',
-    proof_countries: 'стран мира',
-    proof_time:   'среднее время',
-    reg_benefits_title:    'Регистрация открывает больше возможностей',
-    reg_benefits_sub:      'Бесплатно. Без рекламы. Ваши данные — только ваши.',
-    reg_benefits_1_title:  'Синхронизация',
-    reg_benefits_1_desc:   'Расчёты на любом устройстве — компьютере, телефоне, планшете',
-    reg_benefits_2_title:  'История и проекты',
-    reg_benefits_2_desc:   'Все расчёты сохраняются. Группируйте по проектам, сравнивайте, возвращайтесь к ним',
-    reg_benefits_3_title:  'Поделиться ссылкой',
-    reg_benefits_3_desc:   'Отправьте расчёт коллеге — он откроется у него на сайте',
-    reg_benefits_cta:      'Начать бесплатно',
-    cta_title:    'Готовы рассчитать углеродный след?',
-    cta_sub:      'Бесплатно, без регистрации, за 10 секунд',
-    cta_btn:      'Начать расчёт',
+    hero_flow_label:'пример · 1 кг ржаного хлеба · крафт-упаковка',
+    flow_hint:    'наведите на ленту — толщина равна вкладу стадии',
+    upload_excel: 'Импорт Excel',
+    drop_excel:   'Отпустите — Excel будет разобран как таблица инвентаризации',
+    em_custom_factors: 'Свои коэффициенты',
+    em_add_factor:     '+ Добавить коэффициент',
+    input_label:  'Описание продукта',
+    how_title:    'Порядок работы',
+    step1_title:  'Описание',
+    step1_d:      'Текстом или импортом из Excel. Чем конкретнее масса, регион и упаковка — тем точнее модель.',
+    step2_title:  'Модель',
+    step2_d:      'Система строит инвентаризацию потоков и подбирает коэффициенты по стадиям.',
+    step3_title:  'Отчёт',
+    step3_d:      'Разбивка, допущения, ограничения, рекомендации по снижению. Уточняющие вопросы — по запросу.',
+    proof_stages:  'стадий жизненного цикла',
+    proof_formats: 'формата выгрузки',
+    proof_langs:   'языка интерфейса',
+    proof_price:   'стоимость расчёта',
+    reg_benefits_title:    'Аккаунт',
+    reg_benefits_sub:      'Расчёт работает и без входа. Аккаунт нужен, чтобы к расчётам можно было вернуться.',
+    reg_benefits_1_title:  'История',
+    reg_benefits_1_desc:   'Каждый расчёт сохраняется и доступен с любого устройства.',
+    reg_benefits_2_title:  'Проекты',
+    reg_benefits_2_desc:   'Группируйте расчёты, сравнивайте варианты между собой.',
+    reg_benefits_3_title:  'Ссылка',
+    reg_benefits_3_desc:   'Отчёт открывается у коллеги по прямой ссылке.',
+    reg_benefits_cta:      'Создать аккаунт',
+    cta_title:    'Опишите продукт.',
+    cta_sub:      'Без регистрации. Модель соберётся за один запрос.',
+    cta_btn:      'К вводу',
     auth_login:   'Войти',
     /* composer */
     mode_full:    'Полный цикл',
@@ -3759,40 +3781,46 @@ const I18N = {
 
   en: {
     meta_scope:   'SCOPE <b>cradle → grave</b>',
-    eyebrow:      'LCA·AI — AI for sustainable development',
-    h1:           'Product carbon footprint<br><em>in 10 seconds</em>.',
-    hero_sub:     'Describe a product — DeepSeek calculates a full LCA report per ISO 14067 with stage-by-stage breakdown.',
-    feat_speed:   '10 seconds, not weeks',
-    feat_speed_d: 'AI builds a full life cycle model with all stages — from raw materials to disposal',
-    feat_viz:     'Visualization like SimaPro',
-    feat_viz_d:   'Graphs, donut charts, stage rankings, and PDF/Excel/Word export',
-    feat_full:    'ISO 14067 out of the box',
-    feat_full_d:  'Cradle-to-grave, characterization factors, sensitivity — all by the standard',
+    eyebrow:      'life cycle assessment · ISO 14067',
+    h1:           'Where the carbon<br><em>actually is</em>.',
+    hero_sub:     'Describe a product — the system builds a life cycle model, splits the footprint by stage, and names the source of every factor.',
+    feat_speed:   'Inventory',
+    feat_speed_d: 'Five stages, each broken into sub-processes with activity data and an emission factor.',
+    feat_viz:     'Traceability',
+    feat_viz_d:   'Every factor carries its source: Ecoinvent, IPCC AR6, CCDB. Confidence is marked.',
+    feat_full:    'Export',
+    feat_full_d:  'Excel, Word, PDF. The inventory table exports whole, nothing dropped.',
     preview_label:'Example result',
-    hero_flow_label:'example · 1 kg wheat bread · ISO 14067',
-    input_label:  'Product description for LCA calculation',
-    how_title:    'Three steps to your report',
-    step1_title:  'Describe the product',
-    step1_d:      'Text, Excel, or template — AI understands it all',
-    step2_title:  'AI builds the model',
-    step2_d:      'DeepSeek calculates emission factors across all stages',
-    step3_title:  'Download your report',
-    step3_d:      'PDF, Excel, Word — ready for clients or regulators',
-    proof_calcs:  'calculations performed',
-    proof_countries: 'countries worldwide',
-    proof_time:   'average time',
-    reg_benefits_title:    'Registration unlocks more features',
-    reg_benefits_sub:      'Free. No ads. Your data stays yours.',
-    reg_benefits_1_title:  'Sync across devices',
-    reg_benefits_1_desc:   'Access your calculations on desktop, phone, or tablet',
-    reg_benefits_2_title:  'History & projects',
-    reg_benefits_2_desc:   'All calculations saved. Group by projects, compare, revisit anytime',
-    reg_benefits_3_title:  'Share via link',
-    reg_benefits_3_desc:   'Send a calculation to a colleague — they view it on this site',
-    reg_benefits_cta:      'Get started for free',
-    cta_title:    'Ready to calculate your carbon footprint?',
-    cta_sub:      'Free, no registration, 10 seconds',
-    cta_btn:      'Start calculation',
+    hero_flow_label:'example · 1 kg rye bread · kraft packaging',
+    flow_hint:    'hover a ribbon — its width is the stage\'s share',
+    upload_excel: 'Import Excel',
+    drop_excel:   'Drop it — the Excel will be read as an inventory table',
+    em_custom_factors: 'Custom factors',
+    em_add_factor:     '+ Add factor',
+    input_label:  'Product description',
+    how_title:    'Procedure',
+    step1_title:  'Description',
+    step1_d:      'In text or imported from Excel. The more specific the mass, region and packaging, the tighter the model.',
+    step2_title:  'Model',
+    step2_d:      'The system builds a flow inventory and selects factors for each stage.',
+    step3_title:  'Report',
+    step3_d:      'Breakdown, assumptions, limitations, reduction recommendations. Clarifying questions on request.',
+    proof_stages:  'lifecycle stages',
+    proof_formats: 'export formats',
+    proof_langs:   'interface languages',
+    proof_price:   'cost per calculation',
+    reg_benefits_title:    'Account',
+    reg_benefits_sub:      'Calculation works without signing in. An account is for coming back to your work.',
+    reg_benefits_1_title:  'History',
+    reg_benefits_1_desc:   'Every calculation is saved and available on any device.',
+    reg_benefits_2_title:  'Projects',
+    reg_benefits_2_desc:   'Group calculations, compare variants against each other.',
+    reg_benefits_3_title:  'Link',
+    reg_benefits_3_desc:   'A colleague opens the report from a direct link.',
+    reg_benefits_cta:      'Create account',
+    cta_title:    'Describe a product.',
+    cta_sub:      'No sign-in. The model assembles in one request.',
+    cta_btn:      'To the input',
     auth_login:   'Sign in',
     mode_full:    'Full life cycle',
     mode_factor:  'Factor preference',
@@ -3945,40 +3973,46 @@ const I18N = {
   },
 
   zh: {
-    eyebrow:      'LCA·AI — AI驱动的可持续发展',
-    h1:           '产品碳足迹，<br><em>10秒生成</em>。',
-    hero_sub:     '描述产品 — DeepSeek 按 ISO 14067 标准计算完整 LCA 报告，含各阶段详细分析。',
-    feat_speed:   '10秒代替一周',
-    feat_speed_d: 'AI 构建完整生命周期模型 — 从原材料到废弃处置',
-    feat_viz:     '可视化如 SimaPro',
-    feat_viz_d:   '图表、甜甜圈图、阶段排名，支持 PDF/Excel/Word 导出',
-    feat_full:    '开箱即用的 ISO 14067',
-    feat_full_d:  '摇篮到坟墓、特征化因子、敏感性分析 — 全部符合标准',
+    eyebrow:      '生命周期评价 · ISO 14067',
+    h1:           '碳究竟<br><em>藏在哪里</em>。',
+    hero_sub:     '描述产品 — 系统构建生命周期模型，按阶段拆解碳足迹，并标注每个因子的来源。',
+    feat_speed:   '清单编制',
+    feat_speed_d: '五个阶段，每个阶段拆分为子过程，含活动数据与排放因子。',
+    feat_viz:     '可追溯性',
+    feat_viz_d:   '每个因子都标注来源：Ecoinvent、IPCC AR6、CCDB，并标记置信度。',
+    feat_full:    '导出',
+    feat_full_d:  'Excel、Word、PDF。清单表格完整导出，不丢失数据。',
     preview_label:'结果示例',
-    hero_flow_label:'示例 · 1 千克小麦面包 · ISO 14067',
-    input_label:  '用于 LCA 计算的产品描述',
-    how_title:    '三步获取报告',
-    step1_title:  '描述产品',
-    step1_d:      '文字、Excel 或模板 — AI 都能理解',
-    step2_title:  'AI 构建模型',
-    step2_d:      'DeepSeek 计算各阶段的排放因子',
-    step3_title:  '下载报告',
-    step3_d:      '可视化、建议和导出 PDF/Excel/Word',
-    proof_calcs:  '次计算已完成',
-    proof_countries: '个国家和地区',
-    proof_time:   '平均用时',
-    reg_benefits_title:    '注册解锁更多功能',
-    reg_benefits_sub:      '免费、无广告、数据属于您',
-    reg_benefits_1_title:  '跨设备同步',
-    reg_benefits_1_desc:   '在电脑、手机、平板上访问您的计算结果',
-    reg_benefits_2_title:  '历史记录与项目',
-    reg_benefits_2_desc:   '所有计算自动保存，按项目分组，随时对比查看',
-    reg_benefits_3_title:  '分享链接',
-    reg_benefits_3_desc:   '发送计算链接给同事，他们可以直接在网站上查看',
-    reg_benefits_cta:      '免费开始',
-    cta_title:    '准备好计算碳足迹了吗？',
-    cta_sub:      '免费、无需注册、10 秒完成',
-    cta_btn:      '开始计算',
+    hero_flow_label:'示例 · 1 千克黑麦面包 · 牛皮纸包装',
+    flow_hint:    '悬停色带 — 宽度即该阶段的占比',
+    upload_excel: '导入 Excel',
+    drop_excel:   '松开鼠标 — Excel 将作为清单表格解析',
+    em_custom_factors: '自定义因子',
+    em_add_factor:     '+ 添加因子',
+    input_label:  '产品描述',
+    how_title:    '工作流程',
+    step1_title:  '描述',
+    step1_d:      '输入文字或导入 Excel。质量、地区与包装越具体，模型越准确。',
+    step2_title:  '模型',
+    step2_d:      '系统构建流量清单，并为各阶段匹配排放因子。',
+    step3_title:  '报告',
+    step3_d:      '结果拆解、关键假设、局限性与减排建议。补充问题可按需生成。',
+    proof_stages:  '个生命周期阶段',
+    proof_formats: '种导出格式',
+    proof_langs:   '种界面语言',
+    proof_price:   '计算费用',
+    reg_benefits_title:    '账户',
+    reg_benefits_sub:      '无需登录即可计算。账户用于保存并随时回到您的工作。',
+    reg_benefits_1_title:  '历史',
+    reg_benefits_1_desc:   '每次计算都会保存，可在任意设备访问。',
+    reg_benefits_2_title:  '项目',
+    reg_benefits_2_desc:   '将计算分组归档，在不同方案之间进行对比。',
+    reg_benefits_3_title:  '链接',
+    reg_benefits_3_desc:   '同事可通过直接链接打开报告。',
+    reg_benefits_cta:      '创建账户',
+    cta_title:    '描述您的产品。',
+    cta_sub:      '无需注册。一次请求即可生成模型。',
+    cta_btn:      '前往输入',
     auth_login:   '登录',
     mode_full:    '全生命周期',
     mode_factor:  '因子优先',
@@ -4317,6 +4351,10 @@ function applyLanguage(lang) {
   // переcборка чипов-примеров
   renderExampleChips();
 
+  // h1 приходит из словаря как сырой HTML — заново режем его на строки-маски,
+  // иначе анимация набора текста теряется при смене языка
+  if (typeof window.__reSetHeadline === 'function') window.__reSetHeadline();
+
   // активная кнопка
   $$('.lang button').forEach(b =>
     b.classList.toggle('active', b.dataset.lang === lang)
@@ -4487,7 +4525,7 @@ async function run() {
     // Сохраняем в историю и перенаправляем на страницу отчёта
     const historyId = await saveToHistory(data);
     if (historyId) {
-      window.location.href = '/report?history=' + historyId;
+      window.location.href = '/report.html?history=' + historyId;
       return;
     }
     sessionStorage.setItem('lca-report', JSON.stringify(data));
@@ -4874,6 +4912,9 @@ function repairTruncatedJson(s) {
 function renderReport(d) {
   const t = I18N[currentLang];
   lastReport = d;
+
+  // The hero diagram stops showing the specimen and morphs to the real split
+  if (typeof window.__flowSetData === 'function') window.__flowSetData(d);
 
   // ─── strip + toolbar (above the step panels) ───
   $('#crumbProduct').textContent = d.product_title || '—';
@@ -7061,6 +7102,417 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 
 
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   HERO FLOW — live canvas.
+
+   A material-balance diagram: the product enters on the left,
+   splits across five lifecycle stages on the right. Ribbon width
+   = share of footprint. Ribbon colour = emission rank.
+
+   The moving particles are NOT decoration. Each one is a unit of
+   flux travelling its stage's ribbon; particle density scales with
+   that stage's contribution. The hot, thick ribbon is visibly busy;
+   the cold thin one is nearly still. You can read where the carbon
+   is from across the room, before reading a single number.
+
+   It also listens to the composer: type a product, the diagram
+   perturbs; run a real calculation, it morphs to the real split.
+   ═══════════════════════════════════════════════════════════════ */
+(function () {
+  var wrap   = document.getElementById('flowWrap');
+  var canvas = document.getElementById('flowCanvas');
+  if (!wrap || !canvas) return;
+
+  var ctx = canvas.getContext('2d');
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Worked specimen shown until a real calculation lands.
+     1 kg rye bread, cradle-to-grave, ISO 14067. */
+  var SPECIMEN = [
+    { key: 'stage_raw',  share: 42, co2: 0.41 },
+    { key: 'stage_prod', share: 25, co2: 0.25 },
+    { key: 'stage_dist', share: 18, co2: 0.18 },
+    { key: 'stage_eol',  share: 10, co2: 0.10 },
+    { key: 'stage_use',  share: 5,  co2: 0.05 }
+  ];
+
+  var stages  = SPECIMEN.map(function (s) { return { key: s.key, share: s.share, co2: s.co2, cur: 0 }; });
+  var total   = 0.99;
+  var W = 0, H = 0, dpr = 1;
+  var particles = [];
+  var t0 = performance.now();
+  var raf = null;
+
+  function css(name, fallback) {
+    var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return v || fallback;
+  }
+  /* Palette is read from the design tokens, so the diagram follows
+     the theme (including dark mode) without a second source of truth. */
+  function palette() {
+    return {
+      ramp: [css('--e-4','#F03B0C'), css('--e-3','#D9481C'), css('--e-2','#B4652A'),
+             css('--e-1','#8A6A4F'), css('--e-0','#B8B4AC')],
+      ink:  css('--graphite','#1C1B19'),
+      mid:  css('--graphite-mid','#6B6862'),
+      low:  css('--graphite-low','#9B978F'),
+      rule: css('--rule','#D6D2CB')
+    };
+  }
+  var P = palette();
+
+  /* Resolves a stage's display name: real report names win; otherwise
+     fall back to the i18n dictionary for the specimen's stage keys. */
+  function label(s) {
+    if (s.name) return s.name;
+    try {
+      var dict = (typeof I18N !== 'undefined' && I18N[typeof currentLang !== 'undefined' ? currentLang : 'ru']);
+      if (dict && dict[s.key]) return dict[s.key];
+    } catch (e) {}
+    var fb = { stage_raw:'Добыча сырья', stage_prod:'Производство', stage_dist:'Дистрибуция',
+               stage_use:'Использование', stage_eol:'Конец ЖЦ' };
+    return fb[s.key] || s.key || '';
+  }
+
+  /* ── geometry ──────────────────────────────────────────────── */
+  var PAD_T = 14, PAD_B = 14, ROOT_W = 14, BAR_W = 14, GAP = 10;
+  var labelW = 190;
+
+  function layout() {
+    var innerH = H - PAD_T - PAD_B;
+    var slots  = stages.length;
+    var usableH = innerH - GAP * (slots - 1);
+    var rootX = 0;
+    var barX  = Math.max(240, W - labelW - BAR_W);
+
+    var sum = stages.reduce(function (a, s) { return a + s.share; }, 0) || 1;
+    var y = PAD_T, rootY = PAD_T;
+    var rootH = usableH;
+    var rootCursor = rootY;
+
+    stages.forEach(function (s) {
+      var h = Math.max(3, (s.share / sum) * usableH);
+      s.geo = {
+        y0: rootCursor + h / 2,           // exit point on the root bar
+        y1: y + h / 2,                    // entry point on its stage bar
+        h: h,
+        barY: y,
+        rootX: rootX + ROOT_W,
+        barX: barX
+      };
+      rootCursor += h;
+      y += h + GAP;
+    });
+
+    return { rootX: rootX, rootY: rootY, rootH: rootH, barX: barX };
+  }
+
+  /* Cubic path from root to a stage bar. Returns a point sampler. */
+  function ribbonPoint(g, L, u) {
+    var x0 = g.rootX, y0 = g.y0, x1 = g.barX, y1 = g.y1;
+    var cx = (x0 + x1) / 2;
+    var mt = 1 - u;
+    var x = mt*mt*mt*x0 + 3*mt*mt*u*cx + 3*mt*u*u*cx + u*u*u*x1;
+    var y = mt*mt*mt*y0 + 3*mt*mt*u*y0 + 3*mt*u*u*y1 + u*u*u*y1;
+    return { x: x, y: y };
+  }
+
+  function ribbonPath(g) {
+    var x0 = g.rootX, y0 = g.y0, x1 = g.barX, y1 = g.y1;
+    var cx = (x0 + x1) / 2;
+    var p = new Path2D();
+    p.moveTo(x0, y0);
+    p.bezierCurveTo(cx, y0, cx, y1, x1, y1);
+    return p;
+  }
+
+  /* ── particles: flux travelling each ribbon ─────────────────── */
+  function seedParticles() {
+    particles = [];
+    if (reduced) return;
+    var sum = stages.reduce(function (a, s) { return a + s.share; }, 0) || 1;
+    stages.forEach(function (s, i) {
+      // density follows contribution — the dominant stage is visibly busiest
+      var n = Math.round(2 + (s.share / sum) * 26);
+      for (var k = 0; k < n; k++) {
+        particles.push({
+          si: i,
+          u: Math.random(),
+          v: 0.0011 + Math.random() * 0.0016,
+          off: (Math.random() - 0.5),
+          r: 0.7 + Math.random() * 1.1
+        });
+      }
+    });
+  }
+
+  /* ── sizing: buffer follows the CONTAINER, never the viewport ── */
+  function resize() {
+    var r = wrap.getBoundingClientRect();
+    W = Math.max(1, Math.round(r.width));
+    H = Math.max(1, Math.round(r.height));
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width  = W * dpr;
+    canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    labelW = W < 620 ? 128 : 190;
+    P = palette();
+    seedParticles();
+  }
+
+  /* ── hover: the diagram is readable, so make it respond ────── */
+  var hover = -1;
+  function hitTest(mx, my) {
+    for (var i = 0; i < stages.length; i++) {
+      var g = stages[i].geo;
+      if (!g) continue;
+      // inside the stage bar or its label column?
+      if (mx >= g.barX && my >= g.barY && my <= g.barY + g.h) return i;
+      // along the ribbon: sample the curve and check vertical distance
+      if (mx >= g.rootX && mx < g.barX) {
+        var u = (mx - g.rootX) / (g.barX - g.rootX);
+        var pt = ribbonPoint(g, null, u);
+        if (Math.abs(my - pt.y) <= g.h / 2) return i;
+      }
+    }
+    return -1;
+  }
+  canvas.addEventListener('mousemove', function (e) {
+    var r = canvas.getBoundingClientRect();
+    hover = hitTest(e.clientX - r.left, e.clientY - r.top);
+    canvas.style.cursor = hover >= 0 ? 'pointer' : 'crosshair';
+  });
+  canvas.addEventListener('mouseleave', function () { hover = -1; });
+
+  /* ── draw ──────────────────────────────────────────────────── */
+  function draw(now) {
+    var L = layout();
+    var elapsed = now - t0;
+    // draw-in: each ribbon eases to full width, staggered
+    ctx.clearRect(0, 0, W, H);
+
+    // root bar — the whole product
+    ctx.fillStyle = P.ink;
+    ctx.fillRect(L.rootX, L.rootY, ROOT_W, L.rootH);
+
+    var mono = '11px "JetBrains Mono", ui-monospace, monospace';
+    var monoSm = '10px "JetBrains Mono", ui-monospace, monospace';
+
+    stages.forEach(function (s, i) {
+      var g = s.geo;
+      var delay = i * 90;
+      var k = reduced ? 1 : Math.max(0, Math.min(1, (elapsed - delay) / 700));
+      k = 1 - Math.pow(1 - k, 3);           // ease-out cubic
+      s.cur = k;
+      if (k <= 0) return;
+
+      var col = P.ramp[i] || P.ramp[P.ramp.length - 1];
+      var dim = (hover >= 0 && hover !== i) ? 0.28 : 1;
+      var lift = (hover === i) ? 1 : 0;
+
+      // ribbon
+      ctx.save();
+      ctx.globalAlpha = 0.9 * k * dim;
+      ctx.strokeStyle = col;
+      ctx.lineWidth = g.h * k;
+      ctx.lineCap = 'butt';
+      ctx.stroke(ribbonPath(g));
+      ctx.restore();
+
+      // stage bar — the hovered one grows a hairline outline
+      ctx.globalAlpha = k * dim;
+      ctx.fillStyle = col;
+      ctx.fillRect(g.barX, g.barY, BAR_W, g.h);
+      if (lift) {
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = P.ink;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(g.barX - 0.5, g.barY - 0.5, BAR_W + 1, g.h + 1);
+      }
+      ctx.globalAlpha = 1;
+
+      // labels
+      var tx = g.barX + BAR_W + 12;
+      ctx.globalAlpha = k * dim;
+      ctx.fillStyle = P.ink;
+      ctx.font = (lift ? '700 ' : '600 ') + monoSm;
+      ctx.textBaseline = 'alphabetic';
+      var name = label(s).toUpperCase();
+      ctx.fillText(name, tx, g.barY + g.h / 2 - 2);
+
+      ctx.fillStyle = lift ? P.ink : P.low;
+      ctx.font = mono;
+      ctx.fillText(s.co2.toFixed(2) + ' kg · ' + Math.round(s.share) + '%',
+                   tx, g.barY + g.h / 2 + 12);
+      ctx.globalAlpha = 1;
+    });
+
+    // particles — flux along the ribbons
+    if (!reduced) {
+      particles.forEach(function (p) {
+        var s = stages[p.si];
+        if (!s || s.cur < 0.98) return;
+        var g = s.geo;
+        p.u += p.v;
+        if (p.u > 1) p.u -= 1;
+        var pt = ribbonPoint(g, L, p.u);
+        var spread = Math.max(0, g.h / 2 - 3);
+        var pdim = (hover >= 0 && hover !== p.si) ? 0.05 : (hover === p.si ? 0.30 : 0.16);
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y + p.off * spread, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = P.ink;
+        ctx.globalAlpha = pdim;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+    }
+
+    raf = requestAnimationFrame(draw);
+  }
+
+  /* ── public: feed it a real report ─────────────────────────── */
+  window.__flowSetData = function (d) {
+    if (!d || !Array.isArray(d.stages) || !d.stages.length) return;
+    var tot = Number(d.total_co2eq) || 0;
+    var rows = d.stages.map(function (s) {
+      return { name: s.name, co2: Number(s.co2eq) || 0,
+               share: Number(s.share_pct) || (tot ? (Number(s.co2eq) || 0) / tot * 100 : 0) };
+    })
+    // rank by contribution — colour follows magnitude, not stage order
+    .sort(function (a, b) { return b.share - a.share; })
+    .slice(0, 5);
+
+    stages = rows.map(function (r) {
+      return { key: null, name: r.name, share: r.share, co2: r.co2, cur: 0 };
+    });
+    total = tot;
+
+    var totalEl = document.getElementById('flowTotal');
+    var labelEl = document.getElementById('flowLabel');
+    if (totalEl) totalEl.textContent = (tot >= 100 ? tot.toFixed(0) : tot.toFixed(2));
+    if (labelEl) labelEl.textContent = (d.product_title || '') + ' · ' + (d.functional_unit || '');
+
+    t0 = performance.now();          // replay the draw-in with the new split
+    seedParticles();
+  };
+
+  /* ── boot ──────────────────────────────────────────────────── */
+  resize();
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(wrap);
+  else window.addEventListener('resize', resize);
+
+  // theme + language changes repaint the diagram from the tokens
+  new MutationObserver(function () { P = palette(); })
+    .observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+  raf = requestAnimationFrame(draw);
+
+  // pause when off-screen — no cycles burned on an invisible canvas
+  if (window.IntersectionObserver) {
+    new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (e.isIntersecting && !raf) { t0 = performance.now(); raf = requestAnimationFrame(draw); }
+        else if (!e.isIntersecting && raf) { cancelAnimationFrame(raf); raf = null; }
+      });
+    }, { threshold: 0 }).observe(wrap);
+  }
+})();
+</script>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   MOTION SYSTEM
+   Three behaviours, no more:
+   1. the headline sets itself, line by line, on load
+   2. content rises into place as it enters the viewport, once
+   3. figures count up when you actually reach them
+   All of it yields to prefers-reduced-motion.
+   ═══════════════════════════════════════════════════════════════ */
+(function () {
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ── 1. headline: split into masked lines ───────────────────── */
+  function setHeadline() {
+    var h1 = document.querySelector('.hero-h1');
+    if (!h1 || reduced) return;
+    // markup comes from i18n as HTML with <br> and <em>; split on <br>
+    var parts = h1.innerHTML.split(/<br\s*\/?>/i);
+    h1.innerHTML = parts.map(function (p, i) {
+      return '<span class="line"><span style="--d:' + (i * 90) + 'ms">' + p + '</span></span>';
+    }).join('');
+  }
+
+  /* ── 2. reveal on scroll ───────────────────────────────────── */
+  function armReveals() {
+    var els = document.querySelectorAll('.reveal');
+    if (!els.length) return;
+    if (reduced || !window.IntersectionObserver) {
+      els.forEach(function (el) { el.classList.add('in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var el = e.target;
+        // stagger siblings so a row reads across, not all at once
+        var sibs = el.parentElement ? Array.prototype.filter.call(
+          el.parentElement.children, function (c) { return c.classList.contains('reveal'); }) : [];
+        var idx = sibs.indexOf(el);
+        el.style.setProperty('--d', (idx > 0 ? idx * 80 : 0) + 'ms');
+        el.classList.add('in');
+        io.unobserve(el);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.1 });
+    els.forEach(function (el) { io.observe(el); });
+  }
+
+  /* ── 3. counters ───────────────────────────────────────────── */
+  function armCounters() {
+    var nums = document.querySelectorAll('[data-count]');
+    if (!nums.length) return;
+
+    function run(el) {
+      var target = parseFloat(el.dataset.count) || 0;
+      var suffix = el.dataset.suffix || '';
+      if (reduced || target === 0) { el.textContent = target + suffix; return; }
+      var t0 = performance.now(), dur = 900;
+      (function tick(now) {
+        var k = Math.min(1, (now - t0) / dur);
+        k = 1 - Math.pow(1 - k, 3);
+        el.textContent = Math.round(target * k) + suffix;
+        if (k < 1) requestAnimationFrame(tick);
+      })(t0);
+    }
+
+    if (!window.IntersectionObserver) { nums.forEach(run); return; }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        run(e.target);
+        io.unobserve(e.target);
+      });
+    }, { threshold: 0.6 });
+    nums.forEach(function (el) { io.observe(el); });
+  }
+
+  /* ── CTA returns you to the input, focused ─────────────────── */
+  var cta = document.getElementById('ctaScrollBtn');
+  if (cta) cta.addEventListener('click', function () {
+    var input = document.getElementById('productInput');
+    if (!input) return;
+    input.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
+    setTimeout(function () { input.focus(); }, reduced ? 0 : 420);
+  });
+
+  function boot() { setHeadline(); armReveals(); armCounters(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+
+  // language switch re-writes the headline HTML — re-split it
+  window.__reSetHeadline = setHeadline;
+})();
+</script>
 
 </body>
 </html>
