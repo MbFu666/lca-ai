@@ -1588,11 +1588,7 @@ header {
 }
 /* The root emits a hairline into the first stage — the flow starts here */
 .flow-root::after {
-  content: '';
-  position: absolute;
-  bottom: -24px; left: 50%;
-  width: 1px; height: 24px;
-  background: var(--graphite);
+  display: none;
 }
 .flow-root-left .name {
   font-family: var(--display);
@@ -1626,11 +1622,7 @@ header {
 }
 
 .flow-connector {
-  flex-shrink: 0;
-  width: 1px;
-  height: 24px;
-  background: var(--graphite);
-  align-self: center;
+  display: none;
 }
 
 .flow-stages, .flow-columns {
