@@ -12,12 +12,14 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const cors = {
   "Access-Control-Allow-Origin": "https://lca-ai.ru",
-  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, apikey, x-client-info",
   "Access-Control-Allow-Methods": "GET, OPTIONS",
 };
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+
+  try {
 
   const token = new URL(req.url).searchParams.get("token");
   if (!token) {
@@ -26,10 +28,22 @@ Deno.serve(async (req) => {
     });
   }
 
-  const admin = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SECRET_KEY")!,   // service_role
-  );
+  /* Клиент создаём ВНУТРИ обработчика, а не на верхнем уровне.
+     Если создавать снаружи и переменная окружения не задана, функция падает
+     при старте — а шлюз тогда отвечает БЕЗ CORS-заголовков, и в браузере
+     это выглядит как «No Access-Control-Allow-Origin», хотя настоящая
+     причина совсем другая. Внутри же мы можем вернуть внятную ошибку
+     с правильными заголовками. */
+  const SB_URL = Deno.env.get("SUPABASE_URL");
+  const SB_SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!SB_URL || !SB_SERVICE) {
+    return new Response(
+      JSON.stringify({ error: "server_misconfigured", detail: "SUPABASE_SERVICE_ROLE_KEY is not set" }),
+      { status: 500, headers: { ...cors, "Content-Type": "application/json" } },
+    );
+  }
+
+  const admin = createClient(SB_URL, SB_SERVICE);
 
   // 1) Токен: существует, не отозван, не истёк
   const { data: share, error: sErr } = await admin
@@ -59,7 +73,7 @@ Deno.serve(async (req) => {
       .select("id, product_title, functional_unit, total_co2eq, report_data, created_at")
       .eq("id", share.target_id)
       .maybeSingle();
-    payload = { kind: "history", item: data };
+    payload = { kind: "history", item: data, role: share.role || "view" };
   } else if (share.kind === "project") {
     const { data: project } = await admin
       .from("user_projects")
@@ -71,7 +85,9 @@ Deno.serve(async (req) => {
       .select("id, report_data, created_at")
       .eq("project_id", share.target_id)
       .order("created_at", { ascending: true });
-    payload = { kind: "project", project, calculations: calcs || [] };
+    // Проекты редактировать по ссылке нельзя — только отдельные расчёты.
+    // Совместная правка целого проекта требует другой модели конфликтов.
+    payload = { kind: "project", project, calculations: calcs || [], role: "view" };
   }
 
   if (!payload) {
@@ -89,4 +105,14 @@ Deno.serve(async (req) => {
   return new Response(JSON.stringify(payload), {
     headers: { ...cors, "Content-Type": "application/json" },
   });
+
+  } catch (e) {
+    /* Любая неожиданная ошибка тоже должна вернуться с CORS-заголовками.
+       Иначе браузер покажет «No Access-Control-Allow-Origin» и настоящая
+       причина останется невидимой — ровно та ловушка, на которой мы застряли. */
+    return new Response(
+      JSON.stringify({ error: "internal", detail: String((e as Error)?.message || e) }),
+      { status: 500, headers: { ...cors, "Content-Type": "application/json" } },
+    );
+  }
 });

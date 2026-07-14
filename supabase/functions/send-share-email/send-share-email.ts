@@ -12,7 +12,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const cors = {
   "Access-Control-Allow-Origin": "https://lca-ai.ru",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, apikey, x-client-info",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -42,13 +42,13 @@ Deno.serve(async (req) => {
 
   const admin = createClient(
     Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SECRET_KEY")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
   const { data: { user }, error: uErr } = await admin.auth.getUser(auth);
   if (uErr || !user) return json({ error: "unauthorized" }, 401);
 
-  let body: { kind?: string; target_id?: string; email?: string; expires_days?: number };
+  let body: { kind?: string; target_id?: string; email?: string; expires_days?: number; role?: string };
   try { body = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
 
   const { kind, target_id, email } = body;
@@ -71,9 +71,14 @@ Deno.serve(async (req) => {
   const days = Math.min(Math.max(Number(body.expires_days) || 30, 1), 365);
   const expires = new Date(Date.now() + days * 864e5).toISOString();
 
+  /* Право записи выдаётся только явно и только для отдельных расчётов.
+     Проекты — всегда read-only: совместная правка проекта требует другой
+     модели разрешения конфликтов, и обещать её, не реализовав, нельзя. */
+  const role = (body.role === "edit" && kind === "history") ? "edit" : "view";
+
   const { error: insErr } = await admin.from("share_links").insert({
     token, kind, target_id, owner_id: user.id,
-    shared_email: email, expires_at: expires,
+    shared_email: email, expires_at: expires, role,
   });
   if (insErr) return json({ error: insErr.message }, 500);
 
@@ -94,7 +99,10 @@ Deno.serve(async (req) => {
         Открыть отчёт
       </a>
       <p style="font-size:12px;color:#6B6862;margin-top:28px;line-height:1.6">
-        Ссылка доступна только для чтения и перестанет работать через ${days} дн.
+        ${role === "edit"
+          ? "Ссылка даёт право редактировать расчёт — потребуется вход в аккаунт."
+          : "Ссылка доступна только для чтения."}
+        Она перестанет работать через ${days} дн.
         Если вы не ожидали это письмо — просто проигнорируйте его.
       </p>
     </div>`;

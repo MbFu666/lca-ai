@@ -511,6 +511,8 @@
         .vb-vs { font-size: 12px; color: var(--ink-mute); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .vb-cmp { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; padding: 4px 8px; border: 1px solid var(--rule); background: none; color: var(--ink-soft); cursor: pointer; }
         .vb-cmp:hover { border-color: var(--ink); color: var(--ink); }
+
+        .share-role-note { font-size: 12px; color: var(--ink-mute); line-height: 1.5; margin: -6px 0 6px; }
 </style>
 </head>
 <body>
@@ -862,6 +864,13 @@
         <h3 data-i18n="share_title">Поделиться</h3>
         <p class="modal-sub" data-i18n="share_sub">Получатель увидит отчёт только для чтения. Ссылку можно отозвать в любой момент.</p>
 
+        <label data-i18n="share_role_label">Права получателя</label>
+        <select id="shareRole" class="settings-input">
+          <option value="view" data-i18n="share_role_view">Только чтение</option>
+          <option value="edit" data-i18n="share_role_edit">Чтение и редактирование</option>
+        </select>
+        <div class="share-role-note" id="shareRoleNote" data-i18n="share_role_note_view">Получатель сможет только смотреть отчёт.</div>
+
         <label data-i18n="share_expires">Срок действия</label>
         <select id="shareExpires" class="settings-input">
           <option value="7">7 дней</option>
@@ -970,6 +979,10 @@
                 share_failed: 'Письмо не отправилось. Ссылка создана — передайте её вручную.',
                 kpi_median: 'Медианный след',
                 pick_project: 'Выберите проект',
+                share_role_label: 'Права получателя', share_role_view: 'Только чтение', share_role_edit: 'Чтение и редактирование',
+                share_role_note_view: 'Получатель сможет только смотреть отчёт.',
+                share_role_note_edit: 'Получатель сможет изменять количества и коэффициенты. Потребуется вход в аккаунт. Все правки попадут в журнал.',
+                share_role_note_project: 'Проекты можно передавать только для чтения.',
                 vs_parent: 'к исходному:', err_jszip: 'JSZip не загружен', toast_exported: 'Данные экспортированы',
                 xstats_title: 'Статистика', xstats_by_month: 'CO₂ по месяцам', xstats_top5: 'Топ-5 по следу', xstats_avg: 'Среднее',
                 portfolio_title: 'Где углерод в вашем портфеле',
@@ -1079,6 +1092,10 @@
                 share_failed: 'The email did not go out. The link was created — share it manually.',
                 kpi_median: 'Median footprint',
                 pick_project: 'Pick a project',
+                share_role_label: 'Recipient rights', share_role_view: 'Read only', share_role_edit: 'Read and edit',
+                share_role_note_view: 'The recipient can only view the report.',
+                share_role_note_edit: 'The recipient can change amounts and factors. Sign-in required. Every edit is logged.',
+                share_role_note_project: 'Projects can only be shared read-only.',
                 vs_parent: 'vs original:', err_jszip: 'JSZip not loaded', toast_exported: 'Data exported',
                 xstats_title: 'Statistics', xstats_by_month: 'CO₂ by month', xstats_top5: 'Top 5 by footprint', xstats_avg: 'Average',
                 portfolio_title: 'Where the carbon is across your portfolio',
@@ -1188,6 +1205,10 @@
                 share_failed: '邮件未能发出。链接已创建 — 请手动分享。',
                 kpi_median: '中位碳足迹',
                 pick_project: '选择项目',
+                share_role_label: '接收方权限', share_role_view: '仅查看', share_role_edit: '查看并编辑',
+                share_role_note_view: '接收方只能查看报告。',
+                share_role_note_edit: '接收方可修改数量与排放因子。需要登录，所有修改都会记入日志。',
+                share_role_note_project: '项目仅支持只读分享。',
                 vs_parent: '相对原始：', err_jszip: 'JSZip 未加载', toast_exported: '数据已导出',
                 xstats_title: '统计', xstats_by_month: '各月 CO₂', xstats_top5: '碳足迹前五', xstats_avg: '平均值',
                 portfolio_title: '碳集中在您的哪些环节',
@@ -2783,6 +2804,8 @@
         function openShare(id, kind) {
           currentShareProjectId = id;
           currentShareKind = kind;
+          document.getElementById('shareRole').value = 'view';   // право записи — только явно
+          syncShareRoleUI();
           document.getElementById('shareEmail').value = '';
           document.getElementById('shareLinkRow').style.display = 'none';
           document.getElementById('shareLinkInput').value = '';
@@ -2803,9 +2826,26 @@
             return {
                 kind: currentShareKind,
                 target_id: currentShareProjectId,
+                role: document.getElementById('shareRole').value === 'edit' ? 'edit' : 'view',
                 expires_days: days
             };
         }
+
+        /* Роль «редактирование» доступна только для отдельных расчётов.
+           Совместная правка целого проекта требует другой модели разрешения
+           конфликтов — обещать её в UI, не реализовав, нельзя. */
+        function syncShareRoleUI() {
+            const sel  = document.getElementById('shareRole');
+            const note = document.getElementById('shareRoleNote');
+            const isProject = currentShareKind === 'project';
+            const editOpt = sel.querySelector('option[value="edit"]');
+            editOpt.disabled = isProject;
+            if (isProject && sel.value === 'edit') sel.value = 'view';
+            note.textContent = isProject ? t('share_role_note_project')
+                             : sel.value === 'edit' ? t('share_role_note_edit')
+                                                    : t('share_role_note_view');
+        }
+        document.getElementById('shareRole')?.addEventListener('change', syncShareRoleUI);
 
         /* Создать ссылку без письма — работает всегда, даже если почта не настроена */
         document.getElementById('shareLinkBtn')?.addEventListener('click', async () => {
@@ -2813,11 +2853,13 @@
             try {
                 const token = (crypto.randomUUID && crypto.randomUUID()) ||
                               (Date.now() + '-' + Math.random().toString(16).slice(2));
+                const role = document.getElementById('shareRole').value === 'edit' ? 'edit' : 'view';
                 const { error } = await db.from('share_links').insert({
                     token,
                     kind: currentShareKind,
                     target_id: currentShareProjectId,
                     owner_id: currentUser.id,
+                    role,
                     expires_at: new Date(Date.now() + days * 864e5).toISOString()
                 });
                 if (error) throw error;

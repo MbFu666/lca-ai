@@ -143,6 +143,51 @@ footer a:hover { color:var(--e-ink); border-color:var(--e-3); }
   table { font-size:11px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition:none !important; animation:none !important; } }
+
+/* ═══════════════════════════════════════════════════════════
+   Панель действий и режим правки
+   ═══════════════════════════════════════════════════════════ */
+.actions-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+  padding: 14px 0; border-bottom: 1px solid var(--rule);
+}
+.ab-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ab-role {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--graphite-low);
+  border: 1px solid var(--rule); padding: 5px 10px;
+}
+.ab-role.editable { color: var(--e-ink); border-color: var(--e-3); }
+.ab-who { font-family: var(--mono); font-size: 11px; color: var(--graphite-low); }
+.ab-right { display: flex; gap: 8px; flex-wrap: wrap; }
+.ab-btn {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
+  text-transform: uppercase; padding: 8px 14px;
+  border: 1px solid var(--rule); background: var(--paper);
+  color: var(--graphite); cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center;
+  transition: border-color .14s var(--ease), background .14s var(--ease);
+}
+.ab-btn:hover { border-color: var(--graphite); }
+.ab-primary { background: var(--graphite); color: var(--paper); border-color: var(--graphite); }
+.ab-primary:hover { background: var(--e-4); border-color: var(--e-4); }
+.ab-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+/* Правка: инвентаризация становится редактируемой */
+.edit-input {
+  width: 90px; border: 1px solid var(--rule); border-radius: 0;
+  background: var(--paper); padding: 5px 7px;
+  font-family: var(--mono); font-size: 12px; color: var(--graphite);
+  outline: none; text-align: right;
+}
+.edit-input:focus { border-color: var(--e-3); }
+.edit-note {
+  padding: 12px 14px; border-left: 3px solid var(--e-3);
+  background: var(--paper-sunk); font-size: 13px; line-height: 1.55;
+  color: var(--graphite-mid); margin-bottom: 20px;
+}
+.dirty-total { color: var(--e-4); }
 </style>
 </head>
 <body>
@@ -151,6 +196,21 @@ footer a:hover { color:var(--e-ink); border-color:var(--e-3); }
     <a class="brand" href="/"><span class="dot"></span>LCA<em>·</em>AI</a>
     <span class="ro-tag" id="roTag">только чтение</span>
   </header>
+
+  <!-- Панель действий: появляется только когда есть что предложить -->
+  <div class="actions-bar" id="actionsBar" style="display:none">
+    <div class="ab-left">
+      <span class="ab-role" id="abRole"></span>
+      <span class="ab-who" id="abWho"></span>
+    </div>
+    <div class="ab-right">
+      <button class="ab-btn" id="forkBtn" style="display:none">Сохранить себе</button>
+      <button class="ab-btn ab-primary" id="editBtn" style="display:none">Редактировать</button>
+      <button class="ab-btn ab-primary" id="saveBtn" style="display:none">Сохранить изменения</button>
+      <button class="ab-btn" id="cancelBtn" style="display:none">Отменить</button>
+      <a class="ab-btn" id="signInBtn" href="/login.html" style="display:none">Войти</a>
+    </div>
+  </div>
 
   <div id="root">
     <div class="state" id="state">загрузка…</div>
@@ -162,6 +222,7 @@ footer a:hover { color:var(--e-ink); border-color:var(--e-3); }
   </footer>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SB_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
 
@@ -194,22 +255,33 @@ function setState(msg, isErr) {
     '<div class="state' + (isErr ? ' err' : '') + '">' + esc(msg) + '</div>';
 }
 
-function renderHistory(item) {
+function renderHistory(item, editMode) {
   if (!item) return setState('запись не найдена', true);
-  const d = item.report_data || {};
-  const stages = Array.isArray(d.stages) ? d.stages.slice() : [];
-  const total = parseFloat(item.total_co2eq) || 0;
+  // В режиме правки работаем с черновиком, а не с оригиналом
+  const d = (editMode && draft) ? draft : (item.report_data || {});
+  const stagesRaw = Array.isArray(d.stages) ? d.stages : [];
+  const total = (editMode && draft) ? (parseFloat(draft.total_co2eq) || 0)
+                                    : (parseFloat(item.total_co2eq) || 0);
 
-  // Сортируем по вкладу: цвет и порядок следуют величине, а не номеру стадии
-  stages.sort((a, b) => (parseFloat(b.co2eq) || 0) - (parseFloat(a.co2eq) || 0));
-  const max = stages.length ? (parseFloat(stages[0].co2eq) || 0) : 1;
+  /* Запоминаем исходный индекс ДО сортировки: правка адресуется по позиции
+     в draft.stages, а на экране стадии идут по убыванию вклада. Без этого
+     изменение уехало бы не в ту стадию. */
+  const stages = stagesRaw.map((s, si) => ({ s, si }));
+  stages.sort((a, b) => (parseFloat(b.s.co2eq) || 0) - (parseFloat(a.s.co2eq) || 0));
+  const max = stages.length ? (parseFloat(stages[0].s.co2eq) || 0) : 1;
 
   let html = '';
+
+  if (editMode) {
+    html += '<div class="edit-note">Вы правите общий расчёт по ссылке с доступом на редактирование. ' +
+            'Изменения увидит владелец и все, у кого есть эта ссылка. ' +
+            'Итог пересчитывается на сервере из количества × коэффициент.</div>';
+  }
 
   html += '<div class="hero">' +
     '<span class="eyebrow">оценка жизненного цикла · ISO 14067</span>' +
     '<h1>' + esc(item.product_title || '—') + '</h1>' +
-    '<div class="hero-num">' + fmt(total) + '<span class="u">kg CO₂e</span></div>' +
+    '<div class="hero-num"><span id="liveTotal">' + fmt(total) + '</span><span class="u">kg CO₂e</span></div>' +
     '<div class="meta">' +
       '<div><span class="k">функциональная единица</span><span class="v">' + esc(item.functional_unit || '—') + '</span></div>' +
       (d.system_boundary ? '<div><span class="k">границы системы</span><span class="v">' + esc(d.system_boundary) + '</span></div>' : '') +
@@ -219,31 +291,50 @@ function renderHistory(item) {
 
   if (stages.length) {
     html += '<section><h2>Вклад стадий</h2><div class="rank">' +
-      stages.map((s, i) => {
-        const v = parseFloat(s.co2eq) || 0;
+      stages.map((x, i) => {
+        const v = parseFloat(x.s.co2eq) || 0;
         const pct = total ? (v / total * 100) : 0;
         return '<div class="rank-row">' +
-          '<div class="n">' + esc(s.name || '—') + '</div>' +
+          '<div class="n">' + esc(x.s.name || '—') + '</div>' +
           '<div class="rank-bar"><div class="rank-fill" style="width:' + (max ? v / max * 100 : 0).toFixed(1) + '%;background:' + RAMP[Math.min(i, RAMP.length - 1)] + '"></div></div>' +
           '<div class="v">' + fmt(v) + ' kg · ' + pct.toFixed(0) + '%</div>' +
         '</div>';
       }).join('') +
     '</div></section>';
 
-    // Инвентаризация: стадии + подпроцессы
-    const hasSub = stages.some(s => Array.isArray(s.sub_processes) && s.sub_processes.length);
+    const hasSub = stages.some(x => Array.isArray(x.s.sub_processes) && x.s.sub_processes.length);
     if (hasSub) {
       html += '<section><h2>Инвентаризация</h2><table>' +
-        '<thead><tr><th>Процесс</th><th>Данные</th><th style="text-align:right">kg CO₂e</th><th>Источник</th></tr></thead><tbody>';
-      stages.forEach((s, i) => {
-        html += '<tr class="stage-row" style="--e:' + RAMP[Math.min(i, RAMP.length - 1)] + '">' +
-          '<td style="border-left-color:' + RAMP[Math.min(i, RAMP.length - 1)] + '">' + esc(s.name || '—') + '</td>' +
-          '<td></td><td class="num">' + fmt(s.co2eq) + '</td><td></td></tr>';
-        (s.sub_processes || []).forEach(sp => {
-          html += '<tr class="sub"><td>' + esc(sp.name || '—') + '</td>' +
-            '<td class="src">' + esc([sp.amount, sp.unit].filter(Boolean).join(' ')) + '</td>' +
-            '<td class="num">' + fmt(sp.co2eq) + '</td>' +
-            '<td class="src">' + esc(sp.source || sp.factor_source || '—') + '</td></tr>';
+        '<thead><tr><th>Процесс</th><th>' + (editMode ? 'Кол-во' : 'Данные') + '</th>' +
+        (editMode ? '<th>Коэффициент</th>' : '') +
+        '<th style="text-align:right">kg CO₂e</th><th>Источник</th></tr></thead><tbody>';
+
+      stages.forEach((x, i) => {
+        const col = RAMP[Math.min(i, RAMP.length - 1)];
+        const cols = editMode ? 5 : 4;
+        html += '<tr class="stage-row">' +
+          '<td style="border-left-color:' + col + '">' + esc(x.s.name || '—') + '</td>' +
+          (editMode ? '<td></td>' : '') + '<td></td>' +
+          '<td class="num">' + fmt(x.s.co2eq) + '</td><td></td></tr>';
+
+        (x.s.sub_processes || []).forEach((sp, pi) => {
+          if (editMode) {
+            /* si — исходный индекс стадии в draft.stages, а не позиция на экране.
+               Иначе после сортировки правка ушла бы не в ту стадию. */
+            html += '<tr class="sub"><td>' + esc(sp.name || '—') + '</td>' +
+              '<td><input class="edit-input" type="number" step="any" value="' + (parseFloat(sp.amount) || 0) + '" ' +
+                'oninput="__editField(' + x.si + ',' + pi + ',\'amount\',this.value)"> ' +
+                '<span class="src">' + esc(sp.unit || '') + '</span></td>' +
+              '<td><input class="edit-input" type="number" step="any" value="' + (parseFloat(sp.factor) || 0) + '" ' +
+                'oninput="__editField(' + x.si + ',' + pi + ',\'factor\',this.value)"></td>' +
+              '<td class="num">' + fmt(sp.co2eq) + '</td>' +
+              '<td class="src">' + esc(sp.factor_source || sp.source || '—') + '</td></tr>';
+          } else {
+            html += '<tr class="sub"><td>' + esc(sp.name || '—') + '</td>' +
+              '<td class="src">' + esc([sp.amount, sp.unit].filter(Boolean).join(' ')) + '</td>' +
+              '<td class="num">' + fmt(sp.co2eq) + '</td>' +
+              '<td class="src">' + esc(sp.factor_source || sp.source || '—') + '</td></tr>';
+          }
         });
       });
       html += '</tbody></table></section>';
@@ -298,16 +389,195 @@ function renderProject(project, calcs) {
   document.title = (project.name || 'Проект') + ' — LCA·AI';
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   СОСТОЯНИЕ
+   ═══════════════════════════════════════════════════════════════ */
+let sb = null;            // supabase-клиент (нужен для авторизации и форка)
+let me = null;            // текущий пользователь, если вошёл
+let shareToken = null;
+let shareRole = 'view';   // 'view' | 'edit' — приходит от share-view
+let currentItem = null;   // расчёт, открытый по ссылке
+let editing = false;
+let draft = null;         // копия report_data на время правки
+
+const $ = id => document.getElementById(id);
+
+/* ── Пересчёт: единственный источник правды — amount × factor.
+      Тот же расчёт делает и сервер, клиенту доверять нельзя. ── */
+function recompute(d) {
+  let total = 0;
+  (d.stages || []).forEach(st => {
+    let sum = 0;
+    (st.sub_processes || []).forEach(sp => {
+      sp.co2eq = (parseFloat(sp.amount) || 0) * (parseFloat(sp.factor) || 0);
+      sum += sp.co2eq;
+    });
+    st.co2eq = sum;
+    total += sum;
+  });
+  (d.stages || []).forEach(st => { st.share_pct = total ? st.co2eq / total * 100 : 0; });
+  d.total_co2eq = total;
+  return total;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ПАНЕЛЬ ДЕЙСТВИЙ
+   ═══════════════════════════════════════════════════════════════ */
+function renderActions() {
+  const bar = $('actionsBar');
+  if (!currentItem) { bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+
+  const canEdit = shareRole === 'edit';
+  $('abRole').textContent = canEdit ? 'доступ: редактирование' : 'доступ: только чтение';
+  $('abRole').classList.toggle('editable', canEdit);
+  $('abWho').textContent = me ? me.email : '';
+
+  const show = (id, on) => { $(id).style.display = on ? 'inline-flex' : 'none'; };
+
+  if (editing) {
+    show('forkBtn', false); show('editBtn', false); show('signInBtn', false);
+    show('saveBtn', true);  show('cancelBtn', true);
+    return;
+  }
+
+  show('saveBtn', false); show('cancelBtn', false);
+  // Форк доступен любому, кто вошёл: данные он и так уже видит,
+  // копия к себе не даёт ему ничего нового.
+  show('forkBtn', !!me);
+  // Правка — только по ссылке с ролью edit и только авторизованному.
+  show('editBtn', !!me && canEdit);
+  // Аноним видит, ради чего стоит войти.
+  show('signInBtn', !me);
+  $('signInBtn').textContent = canEdit ? 'Войти, чтобы редактировать' : 'Войти, чтобы сохранить себе';
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ФОРК — «Сохранить себе»
+   Простая и безопасная операция: вставка копии в СВОЮ историю.
+   Оригинал не трогаем, права не расширяем.
+   ═══════════════════════════════════════════════════════════════ */
+async function forkToMyAccount() {
+  if (!me || !sb || !currentItem) return;
+  const btn = $('forkBtn');
+  btn.disabled = true;
+  btn.textContent = 'Сохраняем…';
+  try {
+    const copy = JSON.parse(JSON.stringify(currentItem.report_data || {}));
+    const { data, error } = await sb.from('user_history').insert({
+      user_id: me.id,
+      product_title: currentItem.product_title,
+      functional_unit: currentItem.functional_unit,
+      total_co2eq: currentItem.total_co2eq,
+      report_data: copy,
+      notes: 'Скопировано по ссылке'
+    }).select('id').single();
+    if (error) throw error;
+
+    btn.textContent = 'Сохранено ✓';
+    setTimeout(() => {
+      window.location.href = '/report.html?history=' + data.id;
+    }, 700);
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = 'Сохранить себе';
+    alert('Не удалось сохранить: ' + (e.message || e));
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   РЕДАКТИРОВАНИЕ
+   ═══════════════════════════════════════════════════════════════ */
+function enterEdit() {
+  draft = JSON.parse(JSON.stringify(currentItem.report_data || {}));
+  editing = true;
+  renderHistory(currentItem, true);
+  renderActions();
+}
+
+function cancelEdit() {
+  draft = null;
+  editing = false;
+  renderHistory(currentItem, false);
+  renderActions();
+}
+
+/* Правка поля → мгновенный локальный пересчёт, чтобы человек видел
+   последствие сразу, а не после сохранения. */
+window.__editField = function (si, pi, field, value) {
+  if (!draft) return;
+  const sp = draft.stages?.[si]?.sub_processes?.[pi];
+  if (!sp) return;
+  sp[field] = parseFloat(value) || 0;
+  const total = recompute(draft);
+  const el = $('liveTotal');
+  if (el) { el.textContent = fmt(total); el.classList.add('dirty-total'); }
+};
+
+async function saveEdit() {
+  if (!draft || !sb || !me) return;
+  const btn = $('saveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Сохраняем…';
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const res = await fetch(SB_URL + '/functions/v1/share-edit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + (session?.access_token || '')
+      },
+      body: JSON.stringify({ token: shareToken, report_data: draft })
+    });
+    const out = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      const msg = {
+        auth_required:  'Нужно войти заново',
+        read_only:      'Эта ссылка даёт только чтение',
+        not_your_invite:'Приглашение выписано на другой email',
+        expired:        'Срок действия ссылки истёк',
+        not_found:      'Ссылка недействительна или отозвана'
+      }[out.error] || ('Не удалось сохранить: ' + (out.detail || out.error || res.status));
+      throw new Error(msg);
+    }
+
+    // Сервер пересчитал итог сам — берём его значение, не своё
+    draft.total_co2eq = out.total_co2eq;
+    currentItem.report_data = draft;
+    currentItem.total_co2eq = out.total_co2eq;
+    editing = false;
+    draft = null;
+    renderHistory(currentItem, false);
+    renderActions();
+    btn.disabled = false;
+    btn.textContent = 'Сохранить изменения';
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = 'Сохранить изменения';
+    alert(e.message || e);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ЗАГРУЗКА
+   ═══════════════════════════════════════════════════════════════ */
 (async function () {
-  const token = new URLSearchParams(location.search).get('token');
-  if (!token) return setState('ссылка неполная — нет токена', true);
+  shareToken = new URLSearchParams(location.search).get('token');
+  if (!shareToken) return setState('ссылка неполная — нет токена', true);
+
+  // Авторизация: страница работает и без неё (чтение), но с ней
+  // появляются «сохранить себе» и, если разрешено, правка.
+  try {
+    sb = window.supabase.createClient(SB_URL, SB_KEY);
+    const { data: { user } } = await sb.auth.getUser();
+    me = user || null;
+  } catch (e) { sb = null; me = null; }
 
   try {
-    const res = await fetch(SB_URL + '/functions/v1/share-view?token=' + encodeURIComponent(token), {
-      headers: {
-        'apikey': SB_KEY,
-        'Authorization': 'Bearer ' + SB_KEY
-      }
+    const res = await fetch(SB_URL + '/functions/v1/share-view?token=' + encodeURIComponent(shareToken), {
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
     });
     if (res.status === 401) return setState('доступ отклонён сервером', true);
     if (res.status === 404) return setState('ссылка недействительна или отозвана', true);
@@ -315,13 +585,26 @@ function renderProject(project, calcs) {
     if (!res.ok) return setState('не удалось загрузить отчёт', true);
 
     const data = await res.json();
-    if (data.kind === 'history') renderHistory(data.item);
-    else if (data.kind === 'project') renderProject(data.project, data.calculations || []);
-    else setState('неизвестный тип ссылки', true);
+    shareRole = data.role || 'view';
+
+    if (data.kind === 'history') {
+      currentItem = data.item;
+      renderHistory(currentItem, false);
+      renderActions();
+    } else if (data.kind === 'project') {
+      renderProject(data.project, data.calculations || []);
+    } else {
+      setState('неизвестный тип ссылки', true);
+    }
   } catch (e) {
     setState('сеть недоступна', true);
   }
 })();
+
+$('forkBtn')?.addEventListener('click', forkToMyAccount);
+$('editBtn')?.addEventListener('click', enterEdit);
+$('cancelBtn')?.addEventListener('click', cancelEdit);
+$('saveBtn')?.addEventListener('click', saveEdit);
 </script>
 </body>
 </html>

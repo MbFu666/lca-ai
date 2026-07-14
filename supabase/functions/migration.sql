@@ -133,3 +133,22 @@ alter table public.user_history
 
 create index if not exists user_history_parent_idx
   on public.user_history (parent_id);
+
+-- ══════════════════════════════════════════════════════════════
+-- СОВМЕСТНЫЙ ДОСТУП: роль ссылки (чтение / редактирование)
+-- ══════════════════════════════════════════════════════════════
+
+alter table public.share_links
+  -- 'view' по умолчанию: право на запись выдаётся только явно
+  add column if not exists role text not null default 'view'
+    check (role in ('view', 'edit')),
+  -- кто в последний раз правил по этой ссылке (для журнала и для UI)
+  add column if not exists last_edited_by uuid references auth.users(id) on delete set null,
+  add column if not exists last_edited_at timestamptz;
+
+-- ВАЖНО: RLS на user_history НЕ ослабляем.
+-- Запись по ссылке идёт через Edge Function share-edit под service_role,
+-- которая сама проверяет токен, роль, срок и авторизацию редактора.
+-- Если бы мы вместо этого написали RLS-политику «можно писать, если есть
+-- share_link с role=edit», то любой владелец anon-ключа мог бы писать
+-- в чужие строки, зная лишь id — а id утекает в самой ссылке.
