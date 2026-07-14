@@ -83,3 +83,53 @@ alter table public.share_links enable row level security;
 drop policy if exists "own share links" on public.share_links;
 create policy "own share links" on public.share_links
   for all using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
+
+-- ══════════════════════════════════════════════════════════════
+-- ИСПРАВЛЕНИЯ (найдено аудитом кабинета)
+-- ══════════════════════════════════════════════════════════════
+
+-- БАГ: кабинет пишет в user_projects.archived (кнопка 📦 архивации проекта),
+-- фильтрует список по p.archived — но такой колонки не существует.
+-- Архивация проектов не работала вообще: запись падала, p.archived всегда undefined.
+alter table public.user_projects
+  add column if not exists archived boolean not null default false;
+
+create index if not exists user_projects_active_idx
+  on public.user_projects (user_id, created_at desc)
+  where archived = false;
+
+-- БАГ: logAudit() пишет в audit_log, но таблицы нет.
+-- Ошибка глотается в catch — журнал молча не ведётся с самого начала.
+create table if not exists public.audit_log (
+  id          bigserial primary key,
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  action      text not null,
+  entity_type text,
+  entity_id   text,
+  details     jsonb,
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists audit_log_user_idx
+  on public.audit_log (user_id, created_at desc);
+
+alter table public.audit_log enable row level security;
+
+-- Журнал: пользователь может только дописывать и читать свои записи.
+-- UPDATE/DELETE не даём никому — иначе журнал теряет смысл.
+drop policy if exists "own audit insert" on public.audit_log;
+create policy "own audit insert" on public.audit_log
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "own audit read" on public.audit_log;
+create policy "own audit read" on public.audit_log
+  for select using (auth.uid() = user_id);
+
+-- ── Версии расчётов: связь «вариант → родитель» ───────────────
+-- Кнопка «Создать вариант» копирует описание, но связи между
+-- вариантами не сохранялось — сравнить V3 и V4 было нельзя.
+alter table public.user_history
+  add column if not exists parent_id uuid references public.user_history(id) on delete set null;
+
+create index if not exists user_history_parent_idx
+  on public.user_history (parent_id);

@@ -15,7 +15,6 @@
     <title>LCA·AI — Личный кабинет</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
@@ -502,6 +501,16 @@
         .modal-sub { font-size: 13px; color: var(--ink-mute); line-height: 1.55; margin-bottom: 16px; }
         .share-link-row { display: flex; gap: 8px; margin-top: 12px; }
         .share-link-row input { flex: 1; font-family: var(--mono); font-size: 12px; }
+
+        /* Версии */
+        .version-badge { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 8px 10px; border-left: 2px solid var(--rule); background: var(--bg-soft); flex-wrap: wrap; }
+        .vb-arrow { font-family: var(--mono); font-weight: 700; }
+        .vb-delta { font-family: var(--mono); font-size: 13px; font-weight: 700; }
+        .vb-arrow.down, .vb-delta.down { color: #2F6B4F; }
+        .vb-arrow.up,   .vb-delta.up   { color: var(--c-rust); }
+        .vb-vs { font-size: 12px; color: var(--ink-mute); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .vb-cmp { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; padding: 4px 8px; border: 1px solid var(--rule); background: none; color: var(--ink-soft); cursor: pointer; }
+        .vb-cmp:hover { border-color: var(--ink); color: var(--ink); }
 </style>
 </head>
 <body>
@@ -961,6 +970,7 @@
                 share_failed: 'Письмо не отправилось. Ссылка создана — передайте её вручную.',
                 kpi_median: 'Медианный след',
                 pick_project: 'Выберите проект',
+                vs_parent: 'к исходному:', err_jszip: 'JSZip не загружен', toast_exported: 'Данные экспортированы',
                 xstats_title: 'Статистика', xstats_by_month: 'CO₂ по месяцам', xstats_top5: 'Топ-5 по следу', xstats_avg: 'Среднее',
                 portfolio_title: 'Где углерод в вашем портфеле',
                 pf_verdict: 'В {n} из {total} расчётов доминирует «{stage}» — в среднем {pct}% следа. Начинайте снижение отсюда.',
@@ -1069,6 +1079,7 @@
                 share_failed: 'The email did not go out. The link was created — share it manually.',
                 kpi_median: 'Median footprint',
                 pick_project: 'Pick a project',
+                vs_parent: 'vs original:', err_jszip: 'JSZip not loaded', toast_exported: 'Data exported',
                 xstats_title: 'Statistics', xstats_by_month: 'CO₂ by month', xstats_top5: 'Top 5 by footprint', xstats_avg: 'Average',
                 portfolio_title: 'Where the carbon is across your portfolio',
                 pf_verdict: '“{stage}” dominates in {n} of {total} calculations — {pct}% of the footprint on average. Start reducing here.',
@@ -1177,6 +1188,7 @@
                 share_failed: '邮件未能发出。链接已创建 — 请手动分享。',
                 kpi_median: '中位碳足迹',
                 pick_project: '选择项目',
+                vs_parent: '相对原始：', err_jszip: 'JSZip 未加载', toast_exported: '数据已导出',
                 xstats_title: '统计', xstats_by_month: '各月 CO₂', xstats_top5: '碳足迹前五', xstats_avg: '平均值',
                 portfolio_title: '碳集中在您的哪些环节',
                 pf_verdict: '在 {total} 次计算中有 {n} 次以「{stage}」为主导 — 平均占足迹的 {pct}%。减排应从这里入手。',
@@ -1828,6 +1840,7 @@
                         '<span>' + esc(h.functional_unit || '—') + '</span>' +
                         '<span class="card-co2">' + fmtCo2(h.total_co2eq) + ' kgCO₂e</span>' +
                     '</div>' +
+                    versionBadge(h) +
                     (h.notes ? '<div class="card-note">' + esc(h.notes) + '</div>' : '') +
                     '<div class="tag-row">' + tags +
                         (archived ? '' : '<button class="tag-add" data-id="' + h.id + '">+ ' + esc(t('tag')) + '</button>') +
@@ -1912,8 +1925,34 @@
             const d = row.report_data || {};
             const seed = [d.product_title || row.product_title, d.functional_unit || row.functional_unit]
                 .filter(Boolean).join(', ');
-            try { localStorage.setItem('lca_variant_seed', seed); } catch (e) {}
+            try {
+                localStorage.setItem('lca_variant_seed', seed);
+                // связь с исходником: без неё новый расчёт не с чем сравнивать
+                localStorage.setItem('lca_variant_parent', String(row.id));
+            } catch (e) {}
             window.location.href = '/?variant=1';
+        }
+
+        /* ── Версии: вариант знает своего родителя ────────
+           Показываем дельту прямо на карточке: «−18% к исходному».
+           Это замыкает цикл эко-дизайна — поменял, увидел эффект. */
+        function versionBadge(row) {
+            if (!row.parent_id) return '';
+            const parent = historyCache.find(r => String(r.id) === String(row.parent_id));
+            if (!parent) return '';
+            const a = parseFloat(parent.total_co2eq) || 0;
+            const b = parseFloat(row.total_co2eq) || 0;
+            if (!a) return '';
+            const delta = (b - a) / a * 100;
+            const down = delta <= 0;
+            return '<div class="version-badge">' +
+                '<span class="vb-arrow ' + (down ? 'down' : 'up') + '">' + (down ? '↓' : '↑') + '</span>' +
+                '<span class="vb-delta ' + (down ? 'down' : 'up') + '">' +
+                    Math.abs(delta).toFixed(0) + '%</span>' +
+                '<span class="vb-vs">' + esc(t('vs_parent')) + ' ' + esc(parent.product_title || '—') + '</span>' +
+                '<button class="vb-cmp" data-id="' + row.id + '" data-parent="' + row.parent_id + '">' +
+                    esc(t('compare')) + '</button>' +
+            '</div>';
         }
 
         /* ── Заметка к расчёту ───────────────────────────── */
@@ -2390,20 +2429,28 @@
         });
 
         document.getElementById('exportAllBtn').addEventListener('click', async () => {
-          if (!window.JSZip) { showToast('JSZip не загружен'); return; }
+          if (!window.JSZip) { showToast(t('err_jszip')); return; }
           const zip = new JSZip();
-          const { data: history } = await db.from('user_history').select('*').eq('user_id', currentUser.id);
+          const { data: history }  = await db.from('user_history').select('*').eq('user_id', currentUser.id);
           const { data: projects } = await db.from('user_projects').select('*').eq('user_id', currentUser.id);
-          const { data: calcs } = await db.from('project_calculations').select('*').eq('user_id', currentUser.id);
+          const { data: calcs }    = await db.from('project_calculations').select('*').eq('user_id', currentUser.id);
+          const { data: shares }   = await db.from('share_links').select('*').eq('owner_id', currentUser.id);
           zip.file('history.json', JSON.stringify(history || [], null, 2));
           zip.file('projects.json', JSON.stringify(projects || [], null, 2));
           zip.file('calculations.json', JSON.stringify(calcs || [], null, 2));
+          // GDPR: профиль и ссылки — тоже персональные данные
+          zip.file('share_links.json', JSON.stringify(shares || [], null, 2));
+          zip.file('profile.json', JSON.stringify({
+            id: currentUser.id, email: currentUser.email,
+            created_at: currentUser.created_at,
+            metadata: currentUser.user_metadata || {}
+          }, null, 2));
           const blob = await zip.generateAsync({ type: 'blob' });
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url; a.download = 'lca-ai-data.zip'; a.click();
           URL.revokeObjectURL(url);
-          showToast('Данные экспортированы');
+          showToast(t('toast_exported'));
         });
 
         document.getElementById('changePasswordBtn').addEventListener('click', async () => {
@@ -2696,6 +2743,9 @@
 
             const targetBtn = e.target.closest('.target-btn');
             if (targetBtn) { setTarget(targetBtn.dataset.id, targetBtn.dataset.target); return; }
+
+            const vbCmp = e.target.closest('.vb-cmp');
+            if (vbCmp) { compareSelected([vbCmp.dataset.parent, vbCmp.dataset.id]); return; }
         });
 
         /* ── Цель по снижению для проекта ── */
