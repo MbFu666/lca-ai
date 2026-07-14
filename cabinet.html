@@ -54,7 +54,7 @@
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
         }
         .brand { display: inline-flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; color: var(--ink); text-decoration: none; }
-        .brand .dot { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, var(--jade), #0A8567); display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(20,201,151,0.3); }
+        .brand .dot { width: 24px; height: 24px; border-radius: 50%; background: var(--jade); display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(20,201,151,0.3); }
         .brand .dot::after { content: ''; width: 10px; height: 10px; background: white; border-radius: 50%; }
         .brand em { font-style: normal; color: var(--jade); font-weight: 800; }
         .nav { display: flex; gap: 20px; align-items: center; }
@@ -200,13 +200,13 @@
             font-weight: 600; cursor: pointer; transition: var(--transition); border: none;
             text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
         }
-        .btn-primary { background: var(--jade); color: white; box-shadow: 0 2px 8px rgba(20,201,151,0.25); }
+        .btn-primary { background: var(--jade); color: var(--ink); box-shadow: 0 2px 8px rgba(20,201,151,0.25); }
         .btn-primary:hover { background: var(--jade-dark); box-shadow: 0 4px 14px rgba(20,201,151,0.35); transform: translateY(-1px); }
         .btn-ghost { background: var(--bg-soft); color: var(--ink-soft); border: 1px solid var(--rule); }
         .btn-ghost:hover { background: var(--jade-bg); color: var(--jade-deep); border-color: rgba(20,201,151,0.3); }
         .btn-danger { background: none; border: 1px solid var(--c-rust); color: var(--c-rust); }
-        .btn-danger:hover { background: var(--c-rust); color: white; transform: translateY(-1px); }
-        .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 7px; }
+        .btn-danger:hover { background: var(--c-rust); color: var(--ink); transform: translateY(-1px); }
+        .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 0; }
         .btn-icon { width: 34px; height: 34px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: none; border: 1px solid var(--rule); cursor: pointer; transition: var(--transition); font-size: 14px; }
         .btn-icon:hover { border-color: var(--jade); background: var(--jade-bg); }
 
@@ -353,7 +353,8 @@
         }
         .section-title { text-transform: uppercase; font-size: 22px; border-bottom: 1px solid var(--ink); padding-bottom: 10px; }
         .kpi-value, .compare-value, .stat-num, .history-value, .project-calc-value { font-family: var(--mono) !important; }
-        .brand .dot { border-radius: 0; box-shadow: none; background: var(--jade-dark); }
+        .brand .dot { border-radius: 0; box-shadow: none; background: var(--jade); }
+        html.dark .brand .dot { background: var(--jade-dark); }
         .card, .kpi, .panel, .profile-card, .settings-card, .settings-group, .modal {
             box-shadow: none !important;
             border: 1px solid var(--rule);
