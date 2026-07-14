@@ -164,6 +164,14 @@ footer a:hover { color:var(--e-ink); border-color:var(--e-3); }
 
 <script>
 const SB_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
+
+/* Anon-ключ. Он публичный по замыслу — лежит открыто во всех страницах сайта,
+   и сам по себе ничего не открывает: доступ к данным режет RLS.
+   Здесь он нужен только чтобы пройти шлюз Supabase: Edge Functions по умолчанию
+   требуют валидный JWT в заголовке и отбивают запрос с 401 ДО того, как код
+   функции вообще запустится. Именно это и ломало страницу.
+   Сами данные всё равно отдаёт share-view, и только после проверки токена. */
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
 const RAMP = ['#F03B0C', '#D9481C', '#B4652A', '#8A6A4F', '#B8B4AC', '#9B978F'];
 
 const esc = s => String(s == null ? '' : s)
@@ -295,7 +303,13 @@ function renderProject(project, calcs) {
   if (!token) return setState('ссылка неполная — нет токена', true);
 
   try {
-    const res = await fetch(SB_URL + '/functions/v1/share-view?token=' + encodeURIComponent(token));
+    const res = await fetch(SB_URL + '/functions/v1/share-view?token=' + encodeURIComponent(token), {
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY
+      }
+    });
+    if (res.status === 401) return setState('доступ отклонён сервером', true);
     if (res.status === 404) return setState('ссылка недействительна или отозвана', true);
     if (res.status === 410) return setState('срок действия ссылки истёк', true);
     if (!res.ok) return setState('не удалось загрузить отчёт', true);
