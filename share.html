@@ -12,7 +12,8 @@
   /* Тема ставится ДО первой отрисовки — иначе на тёмной теме мигнёт белым */
   (function () {
     try {
-      if (localStorage.getItem('lca_theme') === 'dark') {
+      var t = localStorage.getItem('lca-theme') || localStorage.getItem('lca_theme');
+      if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');
         document.documentElement.style.background = '#131211';
       }
@@ -317,7 +318,7 @@ document.querySelectorAll('.lang button').forEach(function (b) {
 
 $('themeBtn').addEventListener('click', function () {
   const dark = document.documentElement.classList.toggle('dark');
-  try { localStorage.setItem('lca_theme', dark ? 'dark' : 'light'); } catch (e) {}
+  try { localStorage.setItem('lca-theme', dark ? 'dark' : 'light'); } catch (e) {}
   const m = document.querySelector('meta[name=theme-color]');
   if (m) m.setAttribute('content', dark ? '#131211' : '#F2F0EC');
 });
