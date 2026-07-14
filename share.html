@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LCA·AI — общий доступ</title>
+<meta name="theme-color" content="#F2F0EC">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  (function () {
+    try {
+      var th = localStorage.getItem('lca_theme');
+      if (th === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.documentElement.style.background = '#131211';
+      }
+    } catch (e) {}
+  })();
+</script>
+<style>
+:root {
+  --paper: #F2F0EC; --paper-sunk: #E9E6E0; --paper-raised: #F8F7F4;
+  --graphite: #1C1B19; --graphite-mid: #6B6862; --graphite-low: #9B978F;
+  --rule: #D6D2CB; --rule-soft: #E4E1DA;
+  --e-0:#B8B4AC; --e-1:#8A6A4F; --e-2:#B4652A; --e-3:#D9481C; --e-4:#F03B0C; --e-ink:#7A2E10;
+  --display:'Oswald',system-ui,sans-serif;
+  --body:'Source Serif 4',Georgia,serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --ease: cubic-bezier(.22,1,.36,1);
+}
+html.dark {
+  --paper:#131211; --paper-sunk:#0D0C0B; --paper-raised:#1B1A18;
+  --graphite:#EDEAE4; --graphite-mid:#9B978F; --graphite-low:#6B6862;
+  --rule:#2E2C29; --rule-soft:#262421;
+  --e-0:#4A4741; --e-1:#A87F5C; --e-2:#D97B33; --e-3:#F05A23; --e-4:#FF6B2C; --e-ink:#FF8A50;
+}
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+body {
+  font-family:var(--body); background:var(--paper); color:var(--graphite);
+  font-size:16px; line-height:1.6; min-height:100dvh;
+  -webkit-font-smoothing:antialiased; font-variant-numeric:tabular-nums;
+}
+body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:linear-gradient(var(--rule-soft) 1px,transparent 1px),
+                   linear-gradient(90deg,var(--rule-soft) 1px,transparent 1px);
+  background-size:8px 8px; opacity:.5;
+}
+html.dark body::before { opacity:.28; }
+.frame { position:relative; z-index:1; max-width:940px; margin:0 auto; padding:0 24px 80px; }
+
+header {
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding:20px 0; border-bottom:1px solid var(--graphite); flex-wrap:wrap;
+}
+.brand {
+  display:inline-flex; align-items:center; gap:10px;
+  font-family:var(--display); font-size:20px; font-weight:600;
+  letter-spacing:.02em; text-transform:uppercase; color:var(--graphite); text-decoration:none;
+}
+.brand .dot { width:10px; height:10px; background:var(--e-4); flex-shrink:0; }
+.brand em { font-style:normal; color:var(--graphite-low); font-weight:400; }
+.ro-tag {
+  font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--graphite-low); border:1px solid var(--rule); padding:5px 10px;
+}
+
+h1 { font-family:var(--display); font-weight:600; text-transform:uppercase; letter-spacing:-.01em; line-height:1.05; }
+
+.state { padding:96px 0; text-align:center; font-family:var(--mono); font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--graphite-low); }
+.state.err { color:var(--e-ink); }
+.state a { color:var(--graphite); }
+
+.hero { padding:48px 0 32px; border-bottom:1px solid var(--rule); }
+.eyebrow {
+  display:block; font-family:var(--mono); font-size:10px; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--graphite-low); margin-bottom:16px;
+}
+.hero h1 { font-size:clamp(28px,4.4vw,48px); max-width:20ch; }
+.hero-num {
+  font-family:var(--mono); font-size:clamp(36px,6vw,64px); font-weight:700;
+  letter-spacing:-.04em; color:var(--e-ink); line-height:1; margin-top:20px;
+}
+.hero-num .u { font-size:.24em; font-weight:500; color:var(--graphite-low); margin-left:8px; letter-spacing:.06em; }
+.meta { display:flex; gap:32px; flex-wrap:wrap; margin-top:24px; padding-top:18px; border-top:1px solid var(--rule); }
+.meta div { display:flex; flex-direction:column; gap:3px; }
+.meta .k { font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--graphite-low); }
+.meta .v { font-family:var(--mono); font-size:13px; color:var(--graphite); }
+
+section { padding:36px 0; border-bottom:1px solid var(--rule); }
+h2 { font-family:var(--display); font-size:20px; font-weight:500; text-transform:uppercase; letter-spacing:.02em; margin-bottom:20px; }
+
+/* Stage ranking — colour encodes contribution, same rule as the app */
+.rank { display:flex; flex-direction:column; }
+.rank-row {
+  display:grid; grid-template-columns:minmax(110px,1.3fr) 3fr auto;
+  align-items:center; gap:14px; padding:11px 0; border-bottom:1px solid var(--rule-soft);
+}
+.rank-row:last-child { border-bottom:none; }
+.rank-row .n { font-size:13px; color:var(--graphite-mid); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.rank-bar { height:10px; background:var(--paper-sunk); }
+.rank-fill { height:100%; }
+.rank-row .v { font-family:var(--mono); font-size:12px; font-weight:600; text-align:right; white-space:nowrap; }
+
+table { width:100%; border-collapse:collapse; font-family:var(--mono); font-size:12px; }
+thead th {
+  text-align:left; font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--graphite-low); padding:11px 12px; border-bottom:1px solid var(--graphite);
+  background:var(--paper-sunk); white-space:nowrap;
+}
+tbody td { padding:10px 12px; border-bottom:1px solid var(--rule-soft); vertical-align:top; }
+tbody tr:last-child td { border-bottom:none; }
+td.num { text-align:right; white-space:nowrap; font-weight:600; }
+.stage-row td { background:var(--paper-sunk); font-weight:700; }
+.stage-row td:first-child { border-left:3px solid var(--e-0); }
+.sub td:first-child { padding-left:28px; }
+.src { color:var(--graphite-low); font-size:11px; }
+
+/* Project: calculations list */
+.calc {
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding:14px 16px; border:1px solid var(--rule); border-bottom:none;
+}
+.calc:last-child { border-bottom:1px solid var(--rule); }
+.calc .t { font-size:14px; font-weight:600; }
+.calc .d { font-family:var(--mono); font-size:10px; color:var(--graphite-low); margin-top:3px; }
+.calc .c { font-family:var(--mono); font-size:15px; font-weight:700; color:var(--e-ink); white-space:nowrap; }
+
+.prose { font-size:15px; line-height:1.7; color:var(--graphite-mid); max-width:68ch; }
+
+footer {
+  display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  padding:28px 0; font-family:var(--mono); font-size:11px; color:var(--graphite-low);
+}
+footer a { color:var(--graphite-mid); text-decoration:none; border-bottom:1px solid var(--rule); }
+footer a:hover { color:var(--e-ink); border-color:var(--e-3); }
+
+@media (max-width:640px) {
+  .rank-row { grid-template-columns:1fr; gap:6px; }
+  .rank-row .v { text-align:left; }
+  table { font-size:11px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition:none !important; animation:none !important; } }
+</style>
+</head>
+<body>
+<div class="frame">
+  <header>
+    <a class="brand" href="/"><span class="dot"></span>LCA<em>·</em>AI</a>
+    <span class="ro-tag" id="roTag">только чтение</span>
+  </header>
+
+  <div id="root">
+    <div class="state" id="state">загрузка…</div>
+  </div>
+
+  <footer>
+    <span id="footNote">Отчёт передан по ссылке. Данные доступны только для чтения.</span>
+    <a href="/">Сделать свой расчёт →</a>
+  </footer>
+</div>
+
+<script>
+const SB_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
+const RAMP = ['#F03B0C', '#D9481C', '#B4652A', '#8A6A4F', '#B8B4AC', '#9B978F'];
+
+const esc = s => String(s == null ? '' : s)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+const fmt = v => {
+  const n = parseFloat(v) || 0;
+  if (n >= 1000) return n.toFixed(0);
+  if (n >= 10)   return n.toFixed(1);
+  return n.toFixed(2);
+};
+const fmtDate = d => {
+  try { return new Date(d).toLocaleDateString('ru-RU', { day: '2-digit', month: 'short', year: 'numeric' }); }
+  catch (e) { return '—'; }
+};
+
+function setState(msg, isErr) {
+  document.getElementById('root').innerHTML =
+    '<div class="state' + (isErr ? ' err' : '') + '">' + esc(msg) + '</div>';
+}
+
+function renderHistory(item) {
+  if (!item) return setState('запись не найдена', true);
+  const d = item.report_data || {};
+  const stages = Array.isArray(d.stages) ? d.stages.slice() : [];
+  const total = parseFloat(item.total_co2eq) || 0;
+
+  // Сортируем по вкладу: цвет и порядок следуют величине, а не номеру стадии
+  stages.sort((a, b) => (parseFloat(b.co2eq) || 0) - (parseFloat(a.co2eq) || 0));
+  const max = stages.length ? (parseFloat(stages[0].co2eq) || 0) : 1;
+
+  let html = '';
+
+  html += '<div class="hero">' +
+    '<span class="eyebrow">оценка жизненного цикла · ISO 14067</span>' +
+    '<h1>' + esc(item.product_title || '—') + '</h1>' +
+    '<div class="hero-num">' + fmt(total) + '<span class="u">kg CO₂e</span></div>' +
+    '<div class="meta">' +
+      '<div><span class="k">функциональная единица</span><span class="v">' + esc(item.functional_unit || '—') + '</span></div>' +
+      (d.system_boundary ? '<div><span class="k">границы системы</span><span class="v">' + esc(d.system_boundary) + '</span></div>' : '') +
+      '<div><span class="k">дата расчёта</span><span class="v">' + fmtDate(item.created_at) + '</span></div>' +
+    '</div>' +
+  '</div>';
+
+  if (stages.length) {
+    html += '<section><h2>Вклад стадий</h2><div class="rank">' +
+      stages.map((s, i) => {
+        const v = parseFloat(s.co2eq) || 0;
+        const pct = total ? (v / total * 100) : 0;
+        return '<div class="rank-row">' +
+          '<div class="n">' + esc(s.name || '—') + '</div>' +
+          '<div class="rank-bar"><div class="rank-fill" style="width:' + (max ? v / max * 100 : 0).toFixed(1) + '%;background:' + RAMP[Math.min(i, RAMP.length - 1)] + '"></div></div>' +
+          '<div class="v">' + fmt(v) + ' kg · ' + pct.toFixed(0) + '%</div>' +
+        '</div>';
+      }).join('') +
+    '</div></section>';
+
+    // Инвентаризация: стадии + подпроцессы
+    const hasSub = stages.some(s => Array.isArray(s.sub_processes) && s.sub_processes.length);
+    if (hasSub) {
+      html += '<section><h2>Инвентаризация</h2><table>' +
+        '<thead><tr><th>Процесс</th><th>Данные</th><th style="text-align:right">kg CO₂e</th><th>Источник</th></tr></thead><tbody>';
+      stages.forEach((s, i) => {
+        html += '<tr class="stage-row" style="--e:' + RAMP[Math.min(i, RAMP.length - 1)] + '">' +
+          '<td style="border-left-color:' + RAMP[Math.min(i, RAMP.length - 1)] + '">' + esc(s.name || '—') + '</td>' +
+          '<td></td><td class="num">' + fmt(s.co2eq) + '</td><td></td></tr>';
+        (s.sub_processes || []).forEach(sp => {
+          html += '<tr class="sub"><td>' + esc(sp.name || '—') + '</td>' +
+            '<td class="src">' + esc([sp.amount, sp.unit].filter(Boolean).join(' ')) + '</td>' +
+            '<td class="num">' + fmt(sp.co2eq) + '</td>' +
+            '<td class="src">' + esc(sp.source || sp.factor_source || '—') + '</td></tr>';
+        });
+      });
+      html += '</tbody></table></section>';
+    }
+  }
+
+  if (d.total_description) {
+    html += '<section><h2>Анализ</h2><div class="prose">' + esc(d.total_description) + '</div></section>';
+  }
+
+  document.getElementById('root').innerHTML = html;
+  document.title = (item.product_title || 'Отчёт') + ' — LCA·AI';
+}
+
+function renderProject(project, calcs) {
+  if (!project) return setState('проект не найден', true);
+
+  const vals = calcs
+    .map(c => parseFloat(c.report_data && c.report_data.total_co2eq) || 0)
+    .filter(v => v > 0);
+  const median = (() => {
+    if (!vals.length) return 0;
+    const s = vals.slice().sort((a, b) => a - b);
+    return s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2;
+  })();
+
+  let html = '';
+  html += '<div class="hero">' +
+    '<span class="eyebrow">проект · ' + calcs.length + ' расч.</span>' +
+    '<h1>' + esc(project.name || '—') + '</h1>' +
+    '<div class="hero-num">' + fmt(median) + '<span class="u">kg CO₂e</span></div>' +
+    '<div class="meta">' +
+      '<div><span class="k">медианный след</span><span class="v">по ' + calcs.length + ' расчётам</span></div>' +
+      '<div><span class="k">создан</span><span class="v">' + fmtDate(project.created_at) + '</span></div>' +
+    '</div>' +
+  '</div>';
+
+  if (!calcs.length) {
+    html += '<div class="state">в проекте пока нет расчётов</div>';
+  } else {
+    html += '<section><h2>Расчёты</h2>' + calcs.map(c => {
+      const d = c.report_data || {};
+      return '<div class="calc">' +
+        '<div><div class="t">' + esc(d.product_title || '—') + '</div>' +
+        '<div class="d">' + esc(d.functional_unit || '—') + ' · ' + fmtDate(c.created_at) + '</div></div>' +
+        '<div class="c">' + fmt(d.total_co2eq) + ' kgCO₂e</div>' +
+      '</div>';
+    }).join('') + '</section>';
+  }
+
+  document.getElementById('root').innerHTML = html;
+  document.title = (project.name || 'Проект') + ' — LCA·AI';
+}
+
+(async function () {
+  const token = new URLSearchParams(location.search).get('token');
+  if (!token) return setState('ссылка неполная — нет токена', true);
+
+  try {
+    const res = await fetch(SB_URL + '/functions/v1/share-view?token=' + encodeURIComponent(token));
+    if (res.status === 404) return setState('ссылка недействительна или отозвана', true);
+    if (res.status === 410) return setState('срок действия ссылки истёк', true);
+    if (!res.ok) return setState('не удалось загрузить отчёт', true);
+
+    const data = await res.json();
+    if (data.kind === 'history') renderHistory(data.item);
+    else if (data.kind === 'project') renderProject(data.project, data.calculations || []);
+    else setState('неизвестный тип ссылки', true);
+  } catch (e) {
+    setState('сеть недоступна', true);
+  }
+})();
+</script>
+</body>
+</html>

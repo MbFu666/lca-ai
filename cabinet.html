@@ -455,6 +455,53 @@
         .target-fill { height: 100%; background: var(--jade); transition: width .5s cubic-bezier(.22,1,.36,1); }
         .target-fill.reached { background: #2F6B4F; }
         .target-foot { font-family: var(--mono); font-size: 10px; color: var(--ink-mute); margin-top: 6px; }
+
+        /* Расширенная статистика */
+        .xstat-sub { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 10px; }
+        .xstat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+        .xstat-key { font-family: var(--mono); font-size: 11px; color: var(--ink-mute); width: 60px; flex-shrink: 0; }
+        .xstat-bar { flex: 1; height: 8px; background: var(--bg-soft); overflow: hidden; }
+        .xstat-fill { height: 100%; background: var(--jade); }
+        .xstat-val { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--ink); min-width: 54px; text-align: right; }
+        .xstat-block { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--rule); }
+        .xstat-line { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; font-size: 12px; color: var(--ink-soft); }
+        .xstat-avg { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; font-weight: 600; }
+        .filter-clear { background: none; border: none; border-bottom: 1px solid var(--rule); color: var(--ink); font-family: var(--mono); font-size: 11px; cursor: pointer; padding: 0; margin-left: 4px; }
+        .filter-clear:hover { border-color: var(--jade); color: var(--jade-deep); }
+        #filterToggle.active { background: var(--ink); color: var(--bg); }
+
+        /* Профиль: сетка полей */
+        .settings-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 640px) { .settings-grid2 { grid-template-columns: 1fr; } }
+        .field-row { display: flex; align-items: center; gap: 10px; }
+        .field-static { flex: 1; padding: 10px 0; font-size: 14px; color: var(--ink-mute); }
+
+        /* Провайдеры входа */
+        .providers { display: flex; flex-direction: column; gap: 0; }
+        .provider { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+        .provider:last-child { border-bottom: none; }
+        .provider-ic { width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--rule); font-family: var(--mono); font-size: 11px; font-weight: 700; flex-shrink: 0; }
+        .provider-name { flex: 1; font-size: 14px; text-transform: capitalize; }
+        .provider-tag { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #2F6B4F; }
+
+        /* Сессии */
+        .session-info { margin-bottom: 14px; }
+        .session-row { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--rule); font-size: 13px; color: var(--ink-soft); }
+        .session-val { font-family: var(--mono); font-size: 12px; color: var(--ink); }
+        .session-note { font-size: 12px; color: var(--ink-mute); margin-top: 10px; line-height: 1.5; }
+        .pw-hint { font-size: 11px; color: var(--ink-mute); margin: -4px 0 8px; }
+
+        /* Опасная зона — визуально отделена, иначе удаление стоит рядом с тумблером темы */
+        .danger-zone { border: 1px solid var(--c-rust); }
+        .danger-zone .sg-header { color: var(--c-rust); }
+        .danger-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+        .danger-row strong { font-size: 14px; display: block; margin-bottom: 4px; }
+        .danger-row p { font-size: 12px; color: var(--ink-mute); line-height: 1.5; max-width: 42ch; }
+
+        /* Шаринг */
+        .modal-sub { font-size: 13px; color: var(--ink-mute); line-height: 1.55; margin-bottom: 16px; }
+        .share-link-row { display: flex; gap: 8px; margin-top: 12px; }
+        .share-link-row input { flex: 1; font-family: var(--mono); font-size: 12px; }
 </style>
 </head>
 <body>
@@ -650,9 +697,37 @@
                                 </div>
                                 <input type="file" id="avatarFileInput" accept="image/jpeg,image/png,image/webp">
                             </div>
+                            <label data-i18n="profile_name_ph">Имя</label>
                             <input type="text" id="editProfileName" class="settings-input" data-i18n-placeholder="profile_name_ph" placeholder="Имя">
+
                             <label data-i18n="email_label">Email</label>
-                            <div id="settingsEmail" style="padding:10px 0;font-size:14px;color:var(--ink-mute)">—</div>
+                            <div class="field-row">
+                                <div id="settingsEmail" class="field-static">—</div>
+                                <button class="btn btn-ghost btn-sm" id="changeEmailBtn" data-i18n="change">Изменить</button>
+                            </div>
+
+                            <div class="settings-grid2">
+                                <div>
+                                    <label data-i18n="org_label">Организация</label>
+                                    <input type="text" id="editOrg" class="settings-input" data-i18n-placeholder="org_ph" placeholder="Университет, компания">
+                                </div>
+                                <div>
+                                    <label data-i18n="role_label">Должность</label>
+                                    <input type="text" id="editRole" class="settings-input" data-i18n-placeholder="role_ph" placeholder="LCA-аналитик, аспирант">
+                                </div>
+                            </div>
+
+                            <div class="settings-grid2">
+                                <div>
+                                    <label data-i18n="country_label">Страна</label>
+                                    <input type="text" id="editCountry" class="settings-input" data-i18n-placeholder="country_ph" placeholder="Россия">
+                                </div>
+                                <div>
+                                    <label data-i18n="site_label">Сайт / ORCID</label>
+                                    <input type="url" id="editSite" class="settings-input" placeholder="https://">
+                                </div>
+                            </div>
+
                             <label data-i18n="bio_label">О себе</label>
                             <textarea id="editBio" class="settings-input" rows="3" data-i18n-placeholder="bio_ph" placeholder="Расскажите о себе…" style="resize:vertical"></textarea>
                             <button id="saveProfileBtn" class="btn btn-primary" style="width:100%" data-i18n="save_profile">Сохранить профиль</button>
@@ -661,18 +736,42 @@
 
                     <!-- Pane: Security -->
                     <div class="settings-pane" id="pane-security">
+
+                        <!-- Способ входа: пароль есть только у email-аккаунтов -->
                         <div class="settings-group">
+                            <h3><span class="sg-icon">🔑</span> <span data-i18n="providers_title">Способ входа</span></h3>
+                            <div id="providersList" class="providers"></div>
+                        </div>
+
+                        <!-- Скрывается целиком, если вход через OAuth: пароля у такого аккаунта нет -->
+                        <div class="settings-group" id="passwordGroup">
                             <h3><span class="sg-icon">🔒</span> <span data-i18n="change_pw_title">Изменить пароль</span></h3>
-                            <input type="password" id="oldPassword" class="settings-input" data-i18n-placeholder="old_pw_ph" placeholder="Текущий пароль">
-                            <input type="password" id="newPassword" class="settings-input" data-i18n-placeholder="new_pw_ph" placeholder="Новый пароль">
+                            <input type="password" id="oldPassword" class="settings-input" data-i18n-placeholder="old_pw_ph" placeholder="Текущий пароль" autocomplete="current-password">
+                            <input type="password" id="newPassword" class="settings-input" data-i18n-placeholder="new_pw_ph" placeholder="Новый пароль" autocomplete="new-password">
                             <div class="pw-strength"><div class="pw-strength-bar" id="pwStrengthBar"></div></div>
-                            <input type="password" id="confirmNewPassword" class="settings-input" data-i18n-placeholder="confirm_pw_ph" placeholder="Подтвердите пароль">
+                            <div class="pw-hint" id="pwHint"></div>
+                            <input type="password" id="confirmNewPassword" class="settings-input" data-i18n-placeholder="confirm_pw_ph" placeholder="Подтвердите пароль" autocomplete="new-password">
                             <button id="changePasswordBtn" class="btn btn-primary" style="width:100%" data-i18n="change_pw_btn">Изменить пароль</button>
                         </div>
+
+                        <!-- Сессии -->
                         <div class="settings-group">
-                            <div class="sg-header"><span class="sg-icon">⚠️</span> <span data-i18n="delete_account" style="color:var(--c-rust)">Удалить аккаунт</span></div>
-                            <p style="font-size:13px;color:var(--ink-mute);margin-bottom:14px" data-i18n="delete_account_desc">Удалить все данные безвозвратно</p>
-                            <button class="btn btn-danger" id="deleteAccountBtn" data-i18n="delete_btn">Удалить</button>
+                            <h3><span class="sg-icon">🖥</span> <span data-i18n="sessions_title">Активные сессии</span></h3>
+                            <div id="sessionInfo" class="session-info"></div>
+                            <button class="btn btn-ghost" style="width:100%" id="signOutAllBtn" data-i18n="signout_all">Выйти на всех устройствах</button>
+                        </div>
+
+                        <!-- Опасная зона: визуально отделена, без неё удаление стоит рядом с тумблером темы -->
+                        <div class="settings-group danger-zone">
+                            <div class="sg-header"><span class="sg-icon">⚠️</span> <span data-i18n="danger_zone">Опасная зона</span></div>
+
+                            <div class="danger-row">
+                                <div>
+                                    <strong data-i18n="delete_account">Удалить аккаунт</strong>
+                                    <p data-i18n="delete_account_desc">Расчёты, проекты и профиль будут удалены безвозвратно.</p>
+                                </div>
+                                <button class="btn btn-danger" id="deleteAccountBtn" data-i18n="delete_btn">Удалить</button>
+                            </div>
                         </div>
                     </div>
 
@@ -746,19 +845,34 @@
     <div class="toast" id="toast"></div>
 
     <!-- ══ Share by email modal ══ -->
+    <!-- Поделиться: ссылка только для чтения.
+         Роль «Редактирование» убрана — совместного редактирования в системе нет,
+         и обещать его в интерфейсе нельзя. -->
     <div class="modal-mask" id="modalShare" style="display:none">
-      <div class="modal" style="max-width:400px">
-        <div class="modal-head">
-          <h3>Поделиться проектом</h3>
-          <button class="modal-close" onclick="document.getElementById('modalShare').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--ink-mute)">×</button>
+      <div class="modal">
+        <h3 data-i18n="share_title">Поделиться</h3>
+        <p class="modal-sub" data-i18n="share_sub">Получатель увидит отчёт только для чтения. Ссылку можно отозвать в любой момент.</p>
+
+        <label data-i18n="share_expires">Срок действия</label>
+        <select id="shareExpires" class="settings-input">
+          <option value="7">7 дней</option>
+          <option value="30" selected>30 дней</option>
+          <option value="90">90 дней</option>
+          <option value="365">1 год</option>
+        </select>
+
+        <label data-i18n="share_email_label">Отправить на email (необязательно)</label>
+        <input type="email" id="shareEmail" class="settings-input" data-i18n-placeholder="share_email_ph" placeholder="colleague@example.com">
+
+        <div class="share-link-row" id="shareLinkRow" style="display:none">
+          <input type="text" id="shareLinkInput" class="settings-input" readonly>
+          <button class="btn btn-ghost btn-sm" id="shareCopyBtn" data-i18n="copy">Копировать</button>
         </div>
-        <div class="modal-body" style="padding:20px">
-          <input type="email" id="shareEmail" placeholder="Email коллеги" style="width:100%;padding:10px;border:1px solid var(--rule);border-radius:8px;margin-bottom:10px;background:var(--bg);color:var(--ink);font-family:inherit;font-size:14px">
-          <select id="shareRole" style="width:100%;padding:10px;border:1px solid var(--rule);border-radius:8px;background:var(--bg);color:var(--ink)">
-            <option value="read">Только чтение</option>
-            <option value="edit">Редактирование</option>
-          </select>
-          <button id="shareConfirmBtn" style="width:100%;margin-top:12px;padding:10px;background:var(--jade);color:white;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600">Отправить</button>
+
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="shareCancelBtn" data-i18n="cancel">Отменить</button>
+          <button class="btn btn-ghost" id="shareLinkBtn" data-i18n="share_get_link">Создать ссылку</button>
+          <button class="btn btn-primary" id="shareConfirmBtn" data-i18n="share_send">Отправить</button>
         </div>
       </div>
     </div>
@@ -818,8 +932,36 @@
         /* ── i18n ── */
         const CABINET_I18N = {
             ru: {
+                change: 'Изменить', send: 'Отправить', copy: 'Копировать', connected: 'подключён',
+                org_label: 'Организация', org_ph: 'Университет, компания',
+                role_label: 'Должность', role_ph: 'LCA-аналитик, аспирант',
+                country_label: 'Страна', country_ph: 'Россия', site_label: 'Сайт / ORCID',
+                err_site_url: 'Сайт должен начинаться с http:// или https://',
+                providers_title: 'Способ входа',
+                sessions_title: 'Активные сессии', sess_current: 'Текущее устройство', sess_last: 'Последний вход',
+                sess_note: 'Supabase не отдаёт полный список устройств. «Выйти везде» отзывает все токены — на всех устройствах потребуется войти заново.',
+                signout_all: 'Выйти на всех устройствах',
+                signout_all_text: 'Все сессии будут завершены. На этом устройстве тоже потребуется войти заново.',
+                change_email: 'Изменить email',
+                change_email_text: 'На новый адрес придёт письмо для подтверждения. Пока вы не подтвердите — останется старый.',
+                change_email_sent: 'Письмо для подтверждения отправлено',
+                err_email: 'Введите корректный email',
+                danger_zone: 'Опасная зона',
+                delete_type_email: 'Это необратимо. Чтобы подтвердить, введите ваш email: {email}',
+                delete_mismatch: 'Email не совпадает — удаление отменено',
+                delete_partial: 'Данные удалены, но сам аккаунт остался: серверная функция delete-account не задеплоена. Пока она не установлена, полностью удалить аккаунт из браузера невозможно.',
+                share_title: 'Поделиться',
+                share_sub: 'Получатель увидит отчёт только для чтения. Ссылку можно отозвать в любой момент.',
+                share_expires: 'Срок действия', share_email_label: 'Отправить на email (необязательно)',
+                share_email_ph: 'colleague@example.com',
+                share_get_link: 'Создать ссылку', share_send: 'Отправить',
+                share_link_created: 'Ссылка создана и скопирована',
+                share_sent: 'Письмо отправлено на {email}',
+                share_no_mail: 'Отправка почты не настроена на сервере. Ссылка создана — передайте её вручную.',
+                share_failed: 'Письмо не отправилось. Ссылка создана — передайте её вручную.',
                 kpi_median: 'Медианный след',
                 pick_project: 'Выберите проект',
+                xstats_title: 'Статистика', xstats_by_month: 'CO₂ по месяцам', xstats_top5: 'Топ-5 по следу', xstats_avg: 'Среднее',
                 portfolio_title: 'Где углерод в вашем портфеле',
                 pf_verdict: 'В {n} из {total} расчётов доминирует «{stage}» — в среднем {pct}% следа. Начинайте снижение отсюда.',
                 spark_empty: 'Нужно минимум два расчёта, чтобы увидеть тренд',
@@ -898,8 +1040,36 @@
                 toast_saved: 'Сохранено', email_label: 'Email', bio_label: 'О себе', bio_ph: 'Расскажите о себе…'
             },
             en: {
+                change: 'Change', send: 'Send', copy: 'Copy', connected: 'connected',
+                org_label: 'Organisation', org_ph: 'University, company',
+                role_label: 'Role', role_ph: 'LCA analyst, PhD student',
+                country_label: 'Country', country_ph: 'Poland', site_label: 'Website / ORCID',
+                err_site_url: 'The website must start with http:// or https://',
+                providers_title: 'Sign-in method',
+                sessions_title: 'Active sessions', sess_current: 'Current device', sess_last: 'Last sign-in',
+                sess_note: 'Supabase does not expose a full device list. “Sign out everywhere” revokes all tokens — every device will need to sign in again.',
+                signout_all: 'Sign out everywhere',
+                signout_all_text: 'All sessions will end. You will need to sign in again on this device too.',
+                change_email: 'Change email',
+                change_email_text: 'A confirmation email will be sent to the new address. The old one stays active until you confirm.',
+                change_email_sent: 'Confirmation email sent',
+                err_email: 'Enter a valid email',
+                danger_zone: 'Danger zone',
+                delete_type_email: 'This cannot be undone. To confirm, type your email: {email}',
+                delete_mismatch: 'Email does not match — deletion cancelled',
+                delete_partial: 'Your data was deleted, but the account itself remains: the delete-account server function is not deployed. Until it is installed, the account cannot be fully removed from the browser.',
+                share_title: 'Share',
+                share_sub: 'The recipient gets a read-only report. You can revoke the link at any time.',
+                share_expires: 'Expires in', share_email_label: 'Send to email (optional)',
+                share_email_ph: 'colleague@example.com',
+                share_get_link: 'Create link', share_send: 'Send',
+                share_link_created: 'Link created and copied',
+                share_sent: 'Email sent to {email}',
+                share_no_mail: 'Email sending is not configured on the server. The link was created — share it manually.',
+                share_failed: 'The email did not go out. The link was created — share it manually.',
                 kpi_median: 'Median footprint',
                 pick_project: 'Pick a project',
+                xstats_title: 'Statistics', xstats_by_month: 'CO₂ by month', xstats_top5: 'Top 5 by footprint', xstats_avg: 'Average',
                 portfolio_title: 'Where the carbon is across your portfolio',
                 pf_verdict: '“{stage}” dominates in {n} of {total} calculations — {pct}% of the footprint on average. Start reducing here.',
                 spark_empty: 'At least two calculations are needed to see a trend',
@@ -978,8 +1148,36 @@
                 toast_saved: 'Saved', email_label: 'Email', bio_label: 'About you', bio_ph: 'Tell us about yourself…'
             },
             zh: {
+                change: '修改', send: '发送', copy: '复制', connected: '已连接',
+                org_label: '组织', org_ph: '大学、公司',
+                role_label: '职位', role_ph: 'LCA 分析师、研究生',
+                country_label: '国家', country_ph: '中国', site_label: '网站 / ORCID',
+                err_site_url: '网址须以 http:// 或 https:// 开头',
+                providers_title: '登录方式',
+                sessions_title: '活动会话', sess_current: '当前设备', sess_last: '上次登录',
+                sess_note: 'Supabase 不提供完整设备列表。「在所有设备退出」将吊销全部令牌，所有设备均需重新登录。',
+                signout_all: '在所有设备退出',
+                signout_all_text: '所有会话都将结束，本设备也需要重新登录。',
+                change_email: '修改邮箱',
+                change_email_text: '确认邮件将发送至新地址。在您确认之前，原邮箱仍然有效。',
+                change_email_sent: '确认邮件已发送',
+                err_email: '请输入有效的邮箱',
+                danger_zone: '危险区域',
+                delete_type_email: '此操作不可撤销。请输入您的邮箱以确认：{email}',
+                delete_mismatch: '邮箱不匹配 — 已取消删除',
+                delete_partial: '数据已删除，但账户本身仍然存在：服务器端 delete-account 函数尚未部署。在其安装之前，无法从浏览器彻底删除账户。',
+                share_title: '分享',
+                share_sub: '接收方仅可只读查看报告。链接可随时撤销。',
+                share_expires: '有效期', share_email_label: '发送到邮箱（可选）',
+                share_email_ph: 'colleague@example.com',
+                share_get_link: '创建链接', share_send: '发送',
+                share_link_created: '链接已创建并复制',
+                share_sent: '邮件已发送至 {email}',
+                share_no_mail: '服务器未配置邮件发送。链接已创建 — 请手动分享。',
+                share_failed: '邮件未能发出。链接已创建 — 请手动分享。',
                 kpi_median: '中位碳足迹',
                 pick_project: '选择项目',
+                xstats_title: '统计', xstats_by_month: '各月 CO₂', xstats_top5: '碳足迹前五', xstats_avg: '平均值',
                 portfolio_title: '碳集中在您的哪些环节',
                 pf_verdict: '在 {total} 次计算中有 {n} 次以「{stage}」为主导 — 平均占足迹的 {pct}%。减排应从这里入手。',
                 spark_empty: '至少需要两次计算才能看出趋势',
@@ -1276,33 +1474,40 @@
             if (!stats) return;
             const existing = document.getElementById('extendedStatsPanel');
             if (existing) existing.remove();
-            let html = '<div id="extendedStatsPanel" style="margin-top:16px;padding:16px;background:var(--bg-card);border:1px solid var(--rule);border-radius:var(--radius)">';
-            html += '<h3 style="font-size:14px;font-weight:700;margin-bottom:12px">📈 Статистика</h3>';
+
             const months = Object.keys(stats.byMonth).sort().slice(-6);
             const maxVal = Math.max(...Object.values(stats.byMonth), 1);
-            html += '<div style="font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:8px">CO₂ по месяцам</div>';
+
+            let html = '<div class="panel" id="extendedStatsPanel">';
+            html += '<h3>' + esc(t('xstats_title')) + '</h3>';
+
+            html += '<div class="xstat-sub">' + esc(t('xstats_by_month')) + '</div>';
             months.forEach(m => {
               const val = stats.byMonth[m];
               const pct = (val / maxVal) * 100;
-              html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">';
-              html += '<span style="font-size:11px;color:var(--ink-mute);width:60px;font-family:var(--mono)">' + m + '</span>';
-              html += '<div style="flex:1;height:8px;background:var(--bg-soft);border-radius:4px;overflow:hidden">';
-              html += '<div style="height:100%;width:' + pct + '%;background:var(--jade);border-radius:4px"></div></div>';
-              html += '<span style="font-size:11px;font-weight:600;font-family:var(--mono);min-width:50px;text-align:right">' + val.toFixed(1) + ' kg</span>';
-              html += '</div>';
+              html += '<div class="xstat-row">' +
+                '<span class="xstat-key">' + esc(m) + '</span>' +
+                '<div class="xstat-bar"><div class="xstat-fill" style="width:' + pct.toFixed(1) + '%"></div></div>' +
+                '<span class="xstat-val">' + val.toFixed(1) + ' kg</span>' +
+              '</div>';
             });
-            html += '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--rule)">';
-            html += '<div style="font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:8px">Топ-5</div>';
+
+            html += '<div class="xstat-block"><div class="xstat-sub">' + esc(t('xstats_top5')) + '</div>';
             stats.top5.forEach((d, i) => {
-              html += '<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px">';
-              html += '<span>' + (i+1) + '. ' + (d.product_title || '—') + '</span>';
-              html += '<span style="font-family:var(--mono);font-weight:700;color:var(--jade)">' + (d.total_co2eq||0).toFixed(1) + ' kg</span></div>';
+              // esc() обязателен: product_title приходит от пользователя
+              html += '<div class="xstat-line">' +
+                '<span>' + (i + 1) + '. ' + esc(d.product_title || '—') + '</span>' +
+                '<span class="xstat-val">' + (parseFloat(d.total_co2eq) || 0).toFixed(1) + ' kg</span>' +
+              '</div>';
             });
             html += '</div>';
-            html += '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--rule);display:flex;justify-content:space-between">';
-            html += '<span style="font-size:12px;font-weight:600">Среднее</span>';
-            html += '<span style="font-family:var(--mono);font-weight:800;color:var(--jade)">' + stats.avg.toFixed(1) + ' kg</span></div>';
+
+            html += '<div class="xstat-block xstat-avg">' +
+              '<span>' + esc(t('xstats_avg')) + '</span>' +
+              '<span class="xstat-val">' + stats.avg.toFixed(1) + ' kg</span>' +
+            '</div>';
             html += '</div>';
+
             const overview = document.getElementById('tab-overview');
             if (overview) overview.insertAdjacentHTML('beforeend', html);
           });
@@ -1577,15 +1782,21 @@
 
             syncTagFilter();
 
-            const active = [
-                !isNaN(parseFloat(document.getElementById('fCo2Min').value)) || !isNaN(parseFloat(document.getElementById('fCo2Max').value)),
-                document.getElementById('fDateFrom').value || document.getElementById('fDateTo').value,
-                document.getElementById('fTag').value
-            ].filter(Boolean).length;
+            const a = activeFilters();
             const sum = document.getElementById('filterSummary');
-            if (active) {
+            if (a.co2 || a.date || a.tag) {
+                const parts = [];
+                if (a.co2)  parts.push(t('f_co2'));
+                if (a.date) parts.push(t('f_date'));
+                if (a.tag)  parts.push(t('f_tag') + ': ' + document.getElementById('fTag').value);
                 sum.style.display = '';
-                sum.textContent = t('f_active').replace('{n}', rows.length);
+                sum.innerHTML = esc(t('f_active').replace('{n}', rows.length)) +
+                    ' · ' + esc(parts.join(', ')) +
+                    ' <button class="filter-clear" id="filterClearInline">' + esc(t('f_reset')) + '</button>';
+                document.getElementById('filterClearInline').onclick = resetFilters;
+                // фильтры активны — панель обязана быть видна
+                document.getElementById('filtersPanel').style.display = 'grid';
+                document.getElementById('filterToggle').classList.add('active');
             } else sum.style.display = 'none';
 
             if (!historyCache.length) {
@@ -1629,7 +1840,7 @@
                             '<button class="btn btn-ghost btn-sm variant-btn" data-id="' + h.id + '">⎘ ' + esc(t('variant')) + '</button>' +
                             '<button class="btn btn-ghost btn-sm note-btn" data-id="' + h.id + '">✎ ' + esc(t('note')) + '</button>' +
                             '<button class="btn btn-ghost btn-sm add-to-project-btn" data-id="' + h.id + '">📁 ' + esc(t('to_project')) + '</button>' +
-                            '<button class="share-history-btn btn-icon" data-id="' + h.id + '" title="🔗">🔗</button>' +
+                            '<button class="email-share-hist-btn btn-icon" data-id="' + h.id + '" title="' + esc(t('share_title')) + '">🔗</button>' +
                             '<button class="btn btn-ghost btn-sm archive-hist-btn" data-id="' + h.id + '" title="' + esc(t('archive')) + '">🗄</button>') +
                     '</div>' +
                 '</div>';
@@ -1638,20 +1849,41 @@
             loadMoreBtn.style.display = rows.length > historyShown ? 'inline-flex' : 'none';
         }
 
-        /* ── Фильтры ─────────────────────────────────────── */
-        ['fCo2Min','fCo2Max','fDateFrom','fDateTo','fTag'].forEach(id => {
-            document.getElementById(id).addEventListener('input', () => { historyShown = PAGE; renderHistory(); });
-            document.getElementById(id).addEventListener('change', () => { historyShown = PAGE; renderHistory(); });
-        });
+        /* ── Фильтры ──────────────────────────────────────
+           Числовые поля слушаем на input (мгновенно), даты и select — на change:
+           у type=date событие input дёргается на каждой набранной цифре и список
+           дёргается вхолостую. */
+        ['fCo2Min','fCo2Max'].forEach(id =>
+            document.getElementById(id).addEventListener('input', () => { historyShown = PAGE; renderHistory(); }));
+        ['fDateFrom','fDateTo','fTag'].forEach(id =>
+            document.getElementById(id).addEventListener('change', () => { historyShown = PAGE; renderHistory(); }));
+
+        function activeFilters() {
+            return {
+                co2:  !isNaN(parseFloat(document.getElementById('fCo2Min').value)) ||
+                      !isNaN(parseFloat(document.getElementById('fCo2Max').value)),
+                date: !!(document.getElementById('fDateFrom').value || document.getElementById('fDateTo').value),
+                tag:  !!document.getElementById('fTag').value
+            };
+        }
+        function anyFilter() { const a = activeFilters(); return a.co2 || a.date || a.tag; }
+
         document.getElementById('filterToggle').addEventListener('click', () => {
             const p = document.getElementById('filtersPanel');
-            p.style.display = p.style.display === 'none' ? 'grid' : 'none';
+            const open = p.style.display !== 'none';
+            // Закрывать панель с активными фильтрами нельзя — иначе список выглядит
+            // урезанным без единого намёка почему. Закрытие = сброс.
+            if (open && anyFilter()) { resetFilters(); }
+            p.style.display = open ? 'none' : 'grid';
+            document.getElementById('filterToggle').classList.toggle('active', !open);
         });
-        document.getElementById('filterReset').addEventListener('click', () => {
+
+        function resetFilters() {
             ['fCo2Min','fCo2Max','fDateFrom','fDateTo'].forEach(id => document.getElementById(id).value = '');
             document.getElementById('fTag').value = '';
             historyShown = PAGE; renderHistory();
-        });
+        }
+        document.getElementById('filterReset').addEventListener('click', resetFilters);
         document.getElementById('trashToggle').addEventListener('click', e => {
             showArchive = !showArchive;
             e.target.classList.toggle('active', showArchive);
@@ -1666,7 +1898,7 @@
                     .update({ archived_at: restore ? null : new Date().toISOString() })
                     .eq('id', id).eq('user_id', currentUser.id);
                 if (error) throw error;
-                const row = historyCache.find(r => r.id === id);
+                const row = historyCache.find(r => String(r.id) === String(id));
                 if (row) row.archived_at = restore ? null : new Date().toISOString();
                 showToast(t(restore ? 'restored' : 'archived'));
                 renderHistory();
@@ -1675,7 +1907,7 @@
 
         /* ── Дублировать как вариант: копия описания уходит на главную ── */
         function duplicateAsVariant(id) {
-            const row = historyCache.find(r => r.id === id);
+            const row = historyCache.find(r => String(r.id) === String(id));
             if (!row) return;
             const d = row.report_data || {};
             const seed = [d.product_title || row.product_title, d.functional_unit || row.functional_unit]
@@ -1686,7 +1918,7 @@
 
         /* ── Заметка к расчёту ───────────────────────────── */
         async function editNote(id) {
-            const row = historyCache.find(r => r.id === id);
+            const row = historyCache.find(r => String(r.id) === String(id));
             if (!row) return;
             const res = await openModal({
                 title: t('note_title'),
@@ -1708,7 +1940,7 @@
 
         /* ── Теги: плоские, ортогональны проектам ────────── */
         async function addTag(id) {
-            const row = historyCache.find(r => r.id === id);
+            const row = historyCache.find(r => String(r.id) === String(id));
             if (!row) return;
             const val = await openModal({
                 title: t('tag_title'),
@@ -1722,7 +1954,7 @@
             await saveTags(id, [...new Set([...(row.tags || []), tag])]);
         }
         async function removeTag(id, tag) {
-            const row = historyCache.find(r => r.id === id);
+            const row = historyCache.find(r => String(r.id) === String(id));
             if (!row) return;
             await saveTags(id, (row.tags || []).filter(x => x !== tag));
         }
@@ -1731,7 +1963,7 @@
                 const { error } = await db.from('user_history')
                     .update({ tags }).eq('id', id).eq('user_id', currentUser.id);
                 if (error) throw error;
-                const row = historyCache.find(r => r.id === id);
+                const row = historyCache.find(r => String(r.id) === String(id));
                 if (row) row.tags = tags;
                 renderHistory();
             } catch (e) { showToast(String(e.message || e)); }
@@ -1740,7 +1972,7 @@
         /* ── Сравнение из истории: главный рабочий сценарий LCA ──
            Отдельная широкая модалка — универсальная под это не подходит. */
         function compareSelected(ids) {
-            const rows = ids.map(id => historyCache.find(r => r.id === id)).filter(Boolean);
+            const rows = ids.map(id => historyCache.find(r => String(r.id) === String(id))).filter(Boolean);
             if (rows.length < 2) { showToast(t('cmp_need2')); return; }
             if (rows.length > 3) { showToast(t('cmp_max3')); return; }
 
@@ -1823,7 +2055,7 @@
                 const { error } = await db.from('user_history')
                     .delete().in('id', ids).eq('user_id', currentUser.id);
                 if (error) throw error;
-                historyCache = historyCache.filter(r => !ids.includes(r.id));
+                historyCache = historyCache.filter(r => !ids.map(String).includes(String(r.id)));
                 clearSelection();
                 renderHistory(); renderOverview(); loadStats();
                 showToast(t('batch_deleted').replace('{n}', ids.length));
@@ -1838,7 +2070,7 @@
                 const { error } = await db.from('user_history')
                     .update({ archived_at: ts }).in('id', ids).eq('user_id', currentUser.id);
                 if (error) throw error;
-                historyCache.forEach(r => { if (ids.includes(r.id)) r.archived_at = ts; });
+                historyCache.forEach(r => { if (ids.map(String).includes(String(r.id))) r.archived_at = ts; });
                 clearSelection();
                 renderHistory(); renderOverview();
                 showToast(t('batch_archived').replace('{n}', ids.length));
@@ -1855,7 +2087,7 @@
                 const projectId = await openModal({ title: t('pick_project'), projects: projects || [] });
                 if (!projectId) return;
 
-                const rows = ids.map(id => historyCache.find(r => r.id === id)).filter(Boolean);
+                const rows = ids.map(id => historyCache.find(r => String(r.id) === String(id))).filter(Boolean);
                 const payload = rows.map(r => ({
                     project_id: projectId,
                     user_id: currentUser.id,
@@ -1873,7 +2105,7 @@
         });
 
         document.getElementById('batchCsv')?.addEventListener('click', () => {
-            const rows = selectedIds().map(id => historyCache.find(r => r.id === id)).filter(Boolean);
+            const rows = selectedIds().map(id => historyCache.find(r => String(r.id) === String(id))).filter(Boolean);
             if (!rows.length) return;
             exportCsv(rows);
             clearSelection();
@@ -2005,7 +2237,6 @@
             h += '<button class="btn btn-ghost btn-sm toggle-calcs-btn" data-id="' + p.id + '">▸ ' + t('calculations') + '</button>';
             h += '<button class="btn btn-ghost btn-sm target-btn" data-id="' + p.id + '" data-target="' + (p.target_pct || '') + '">◎ ' + t('target_set') + '</button>';
             h += '<button class="btn btn-ghost btn-sm rename-project-btn" data-id="' + p.id + '" data-name="' + esc(p.name) + '">✏️ ' + t('rename') + '</button>';
-            h += '<button class="share-project-btn btn-icon" data-id="' + p.id + '" title="🔗">🔗</button>';
             h += '<button class="archive-btn" data-id="' + p.id + '" title="' + (p.archived ? t('toast_restored') : t('toast_archived')) + '" style="background:none;border:none;cursor:pointer;font-size:14px;padding:4px">' + (p.archived ? '📤' : '📦') + '</button>';
             h += '<button class="email-share-btn" data-id="' + p.id + '" title="Поделиться по email" style="background:none;border:none;cursor:pointer;font-size:14px;padding:4px">👥</button>';
             h += '<button class="btn btn-danger btn-sm delete-project-btn" data-id="' + p.id + '">' + t('delete') + '</button>';
@@ -2114,14 +2345,46 @@
            Account deletion / password / avatar / profile
            ══════════════════════════════════════════════════ */
         document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
-            const ok = await confirmModal(t('confirm_delete_account'), t('confirm_delete_account_text'));
-            if (!ok) return;
+            /* Необратимое действие требует набрать email — одного клика мало.
+               Раньше здесь был просто confirm, и промах по кнопке сносил всё. */
+            const typed = await openModal({
+                title: t('confirm_delete_account'),
+                text: t('delete_type_email').replace('{email}', currentUser.email || ''),
+                input: true,
+                okLabel: t('delete_btn'),
+                danger: true
+            });
+            if (!typed || typeof typed !== 'string') return;
+            if (typed.trim().toLowerCase() !== String(currentUser.email || '').toLowerCase()) {
+                showToast(t('delete_mismatch'));
+                return;
+            }
             try {
+                // 1) данные
                 await db.from('user_history').delete().eq('user_id', currentUser.id);
                 await db.from('project_calculations').delete().eq('user_id', currentUser.id);
                 await db.from('user_projects').delete().eq('user_id', currentUser.id);
+
+                /* 2) сам auth-пользователь. Из браузера его удалить нельзя —
+                   нужен service_role. Дёргаем Edge Function delete-account.
+                   Если она не задеплоена — честно говорим, что аккаунт остался,
+                   вместо того чтобы врать "удалено безвозвратно". */
+                let authDeleted = false;
+                try {
+                    const { data: { session } } = await db.auth.getSession();
+                    const res = await fetch(SB_URL + '/functions/v1/delete-account', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + (session?.access_token || '')
+                        }
+                    });
+                    authDeleted = res.ok;
+                } catch (e) { authDeleted = false; }
+
                 await db.auth.signOut();
                 localStorage.clear();
+                if (!authDeleted) alert(t('delete_partial'));
                 window.location.href = '/';
             } catch (e) { showToast(t('err_generic') + (e.message || e)); }
         });
@@ -2206,6 +2469,12 @@
             if (!currentUser) return;
             const md = currentUser.user_metadata || {};
             document.getElementById('editProfileName').value = md.full_name || '';
+            document.getElementById('editOrg').value     = md.org || '';
+            document.getElementById('editRole').value    = md.role || '';
+            document.getElementById('editCountry').value = md.country || '';
+            document.getElementById('editSite').value    = md.site || '';
+            renderProviders();
+            renderSessionInfo();
             const avatarUrl = md.avatar_url || '';
             const previewImg = document.getElementById('avatarPreviewImg');
             const placeholder = document.getElementById('avatarPlaceholder');
@@ -2240,8 +2509,18 @@
 
         document.getElementById('saveProfileBtn').addEventListener('click', async () => {
             const name = document.getElementById('editProfileName').value.trim();
-            const bio = document.getElementById('editBio').value.trim();
-            const updates = { full_name: name, bio: bio };
+            const bio  = document.getElementById('editBio').value.trim();
+            const site = document.getElementById('editSite').value.trim();
+            // Профиль хранится в user_metadata — миграция БД не нужна
+            const updates = {
+                full_name: name,
+                bio: bio,
+                org:     document.getElementById('editOrg').value.trim(),
+                role:    document.getElementById('editRole').value.trim(),
+                country: document.getElementById('editCountry').value.trim(),
+                site:    site
+            };
+            if (site && !/^https?:\/\//i.test(site)) { showToast(t('err_site_url')); return; }
             if (pendingAvatarBase64) updates.avatar_url = pendingAvatarBase64;
             const { error } = await db.auth.updateUser({ data: updates });
             if (error) { showToast(error.message); return; }
@@ -2250,6 +2529,75 @@
             showToast(t('toast_profile_saved'));
             renderProfile();
             renderGreeting();
+        });
+
+        /* ══════════════════════════════════════════════════
+           SECURITY
+           ══════════════════════════════════════════════════ */
+
+        function authProviders() {
+            const ids = currentUser?.identities || [];
+            if (ids.length) return [...new Set(ids.map(i => i.provider))];
+            const p = currentUser?.app_metadata?.provider;
+            return p ? [p] : ['email'];
+        }
+        function hasPassword() { return authProviders().includes('email'); }
+
+        function renderProviders() {
+            const box = document.getElementById('providersList');
+            if (!box) return;
+            const ICON = { email: '✉', google: 'G', github: '⌥', twitter: '𝕏' };
+            box.innerHTML = authProviders().map(p =>
+                '<div class="provider"><span class="provider-ic">' + (ICON[p] || '•') + '</span>' +
+                '<span class="provider-name">' + esc(p) + '</span>' +
+                '<span class="provider-tag">' + esc(t('connected')) + '</span></div>'
+            ).join('');
+
+            /* У OAuth-аккаунта пароля не существует — форма смены пароля падала бы
+               на signInWithPassword. Прячем её целиком. */
+            const pg = document.getElementById('passwordGroup');
+            if (pg) pg.style.display = hasPassword() ? '' : 'none';
+        }
+
+        function renderSessionInfo() {
+            const box = document.getElementById('sessionInfo');
+            if (!box) return;
+            const last = currentUser?.last_sign_in_at;
+            box.innerHTML =
+                '<div class="session-row"><span>' + esc(t('sess_current')) + '</span>' +
+                '<span class="session-val">' + esc(navigator.platform || '—') + '</span></div>' +
+                (last ? '<div class="session-row"><span>' + esc(t('sess_last')) + '</span>' +
+                        '<span class="session-val">' + fmtDate(last) + '</span></div>' : '') +
+                '<p class="session-note">' + esc(t('sess_note')) + '</p>';
+        }
+
+        document.getElementById('signOutAllBtn')?.addEventListener('click', async () => {
+            const ok = await confirmModal(t('signout_all'), t('signout_all_text'));
+            if (!ok) return;
+            try {
+                // scope: 'global' отзывает refresh-токены на всех устройствах
+                const { error } = await db.auth.signOut({ scope: 'global' });
+                if (error) throw error;
+                window.location.href = '/login.html';
+            } catch (e) { showToast(String(e.message || e)); }
+        });
+
+        document.getElementById('changeEmailBtn')?.addEventListener('click', async () => {
+            const val = await openModal({
+                title: t('change_email'),
+                text: t('change_email_text'),
+                input: true,
+                inputValue: currentUser?.email || '',
+                okLabel: t('send')
+            });
+            if (!val || typeof val !== 'string') return;
+            const email = val.trim();
+            if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { showToast(t('err_email')); return; }
+            try {
+                const { error } = await db.auth.updateUser({ email });
+                if (error) throw error;
+                showToast(t('change_email_sent'));
+            } catch (e) { showToast(String(e.message || e)); }
         });
 
         /* ══════════════════════════════════════════════════
@@ -2305,20 +2653,6 @@
            Delegated clicks (share / delete / rename / toggle / to-project)
            ══════════════════════════════════════════════════ */
         document.addEventListener('click', (e) => {
-            const shareProject = e.target.closest('.share-project-btn');
-            if (shareProject) {
-                e.stopPropagation();
-                const url = window.location.origin + '/report.html?project=' + shareProject.dataset.id;
-                navigator.clipboard.writeText(url).then(() => showToast(t('toast_link_copied')));
-                return;
-            }
-            const shareHistory = e.target.closest('.share-history-btn');
-            if (shareHistory) {
-                e.stopPropagation();
-                const url = window.location.origin + '/report.html?history=' + shareHistory.dataset.id;
-                navigator.clipboard.writeText(url).then(() => showToast(t('toast_link_copied')));
-                return;
-            }
             const delHistory = e.target.closest('.delete-history-btn');
             if (delHistory) { deleteHistory(delHistory.dataset.id); return; }
             const addBtn = e.target.closest('.add-to-project-btn');
@@ -2395,33 +2729,111 @@
 
         /* ══ Project sharing by email ══ */
         let currentShareProjectId = null;
+        let currentShareKind = 'project';
+        function openShare(id, kind) {
+          currentShareProjectId = id;
+          currentShareKind = kind;
+          document.getElementById('shareEmail').value = '';
+          document.getElementById('shareLinkRow').style.display = 'none';
+          document.getElementById('shareLinkInput').value = '';
+          document.getElementById('modalShare').style.display = 'flex';
+        }
         document.addEventListener('click', (e) => {
           const btn = e.target.closest('.email-share-btn');
-          if (!btn) return;
-          currentShareProjectId = btn.dataset.id;
-          document.getElementById('shareEmail').value = '';
-          document.getElementById('modalShare').style.display = 'flex';
+          if (btn) { openShare(btn.dataset.id, 'project'); return; }
+          const hb = e.target.closest('.email-share-hist-btn');
+          if (hb) { openShare(hb.dataset.id, 'history'); return; }
         });
 
         document.getElementById('modalShare')?.addEventListener('click', (e) => {
           if (e.target.id === 'modalShare') e.target.style.display = 'none';
         });
 
-        document.getElementById('shareConfirmBtn')?.addEventListener('click', async () => {
-          const email = document.getElementById('shareEmail').value.trim();
-          const role = document.getElementById('shareRole').value;
-          if (!email || !currentShareProjectId) return;
-          try {
-            await db.from('project_shares').insert({
-              project_id: currentShareProjectId,
-              owner_id: currentUser.id,
-              shared_email: email,
-              role: role,
-              status: 'pending'
-            });
+        function shareBody(days) {
+            return {
+                kind: currentShareKind,
+                target_id: currentShareProjectId,
+                expires_days: days
+            };
+        }
+
+        /* Создать ссылку без письма — работает всегда, даже если почта не настроена */
+        document.getElementById('shareLinkBtn')?.addEventListener('click', async () => {
+            const days = parseInt(document.getElementById('shareExpires').value, 10) || 30;
+            try {
+                const token = (crypto.randomUUID && crypto.randomUUID()) ||
+                              (Date.now() + '-' + Math.random().toString(16).slice(2));
+                const { error } = await db.from('share_links').insert({
+                    token,
+                    kind: currentShareKind,
+                    target_id: currentShareProjectId,
+                    owner_id: currentUser.id,
+                    expires_at: new Date(Date.now() + days * 864e5).toISOString()
+                });
+                if (error) throw error;
+                const link = window.location.origin + '/share.html?token=' + token;
+                document.getElementById('shareLinkInput').value = link;
+                document.getElementById('shareLinkRow').style.display = 'flex';
+                navigator.clipboard?.writeText(link);
+                showToast(t('share_link_created'));
+            } catch (e) { showToast(String(e.message || e)); }
+        });
+
+        document.getElementById('shareCopyBtn')?.addEventListener('click', () => {
+            const v = document.getElementById('shareLinkInput').value;
+            navigator.clipboard.writeText(v).then(() => showToast(t('toast_link_copied')));
+        });
+
+        document.getElementById('shareCancelBtn')?.addEventListener('click', () => {
             document.getElementById('modalShare').style.display = 'none';
-            showToast('Приглашение отправлено на ' + email);
-          } catch (e) { showToast('Ошибка: ' + (e.message || e)); }
+        });
+
+        /* Отправить письмо. Раньше здесь просто писалась строка в БД и показывалось
+           «Приглашение отправлено» — письмо не уходило никогда. Теперь письмо
+           реально шлёт Edge Function; если почта не настроена, честно говорим
+           об этом и отдаём ссылку, чтобы её можно было передать вручную. */
+        document.getElementById('shareConfirmBtn')?.addEventListener('click', async () => {
+            const email = document.getElementById('shareEmail').value.trim();
+            const days  = parseInt(document.getElementById('shareExpires').value, 10) || 30;
+            if (!email || !currentShareProjectId) { showToast(t('err_email')); return; }
+
+            const btn = document.getElementById('shareConfirmBtn');
+            btn.disabled = true;
+            try {
+                const { data: { session } } = await db.auth.getSession();
+                const res = await fetch(SB_URL + '/functions/v1/send-share-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + (session?.access_token || '')
+                    },
+                    body: JSON.stringify(Object.assign(shareBody(days), { email }))
+                });
+                const out = await res.json().catch(() => ({}));
+
+                if (res.ok) {
+                    document.getElementById('modalShare').style.display = 'none';
+                    showToast(t('share_sent').replace('{email}', email));
+                    return;
+                }
+                if (res.status === 501) {           // почта не настроена на сервере
+                    if (out.link) {
+                        document.getElementById('shareLinkInput').value = out.link;
+                        document.getElementById('shareLinkRow').style.display = 'flex';
+                    }
+                    showToast(t('share_no_mail'));
+                    return;
+                }
+                if (out.link) {                      // письмо не ушло, но ссылка есть
+                    document.getElementById('shareLinkInput').value = out.link;
+                    document.getElementById('shareLinkRow').style.display = 'flex';
+                }
+                showToast(t('share_failed'));
+            } catch (e) {
+                showToast(String(e.message || e));
+            } finally {
+                btn.disabled = false;
+            }
         });
 
         /* ══════════════════════════════════════════════════
