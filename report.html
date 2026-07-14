@@ -3560,8 +3560,8 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
       </div>
     </div>
     <div class="modal-body" style="padding:16px 30px 30px">
-      <div style="color:var(--ink-mute);font-size:12px;margin-bottom:12px">Предпросмотр отчёта</div>
-      <div id="pdfPreview" style="border:1px solid var(--rule);border-radius:8px;overflow:hidden;max-height:70vh"></div>
+      <div style="color:var(--ink-mute);font-size:12px;margin-bottom:12px" data-i18n="pdf_preview_note">Предпросмотр отчёта — то же самое, что скачается</div>
+      <div id="pdfPreview" style="border:1px solid var(--rule);border-radius:8px;overflow:hidden;height:70vh;display:flex;align-items:center;justify-content:center"></div>
     </div>
   </div>
 </div>
@@ -3753,6 +3753,9 @@ const I18N = {
     export_pdf:  'PDF',
     preview_word:'Предпросмотр Word',
     preview_pdf: 'Предпросмотр PDF',
+    pdf_preview_note: 'Предпросмотр отчёта — то же самое, что скачается',
+    pdf_generating: 'Формируем документ…',
+    pdf_error: 'Не удалось сформировать документ',
     compare:     'Сравнить',
     history:     'История',
     compare_h:   'Сравнение продуктов',
@@ -3942,6 +3945,9 @@ const I18N = {
     export_pdf:  'PDF',
     preview_word:'Word Preview',
     preview_pdf: 'PDF Preview',
+    pdf_preview_note: 'Preview of the report — exactly what will be downloaded',
+    pdf_generating: 'Building the document…',
+    pdf_error: 'Could not build the document',
     compare:     'Compare',
     history:     'History',
     compare_h:   'Product Comparison',
@@ -4121,6 +4127,9 @@ const I18N = {
     export_pdf:  'PDF',
     preview_word:'Word预览',
     preview_pdf: 'PDF预览',
+    pdf_preview_note: '报告预览 — 与下载内容完全一致',
+    pdf_generating: '正在生成文档…',
+    pdf_error: '文档生成失败',
     compare:     '对比',
     history:     '历史',
     compare_h:   '产品对比',
@@ -4250,6 +4259,8 @@ let currentMode = 'full';
 let uploadedImage = null;
 let phaseTimer = null;
 let lastReport = null;   // последний отрисованный отчёт — для re-render и экспорта
+let previewPdfDoc = null;   // уже собранный PDF-документ — «Скачать» в модалке не пересобирает его заново
+let previewPdfUrl = null;   // blob-URL текущего предпросмотра, отзывается при закрытии модалки
 let originalProduct = ''; // оригинальное описание продукта (без уточнений)
 let agentRefinements = ''; // уточнения от AI агента
 let isAgentRefining = false; // флаг режима уточнений через агента
@@ -4271,11 +4282,25 @@ document.addEventListener('click', e => {
   const closeBtn = e.target.closest('[data-close]');
   if (closeBtn) {
     const mask = closeBtn.closest('.modal-mask');
-    if (mask) mask.classList.remove('show');
+    if (mask) {
+      mask.classList.remove('show');
+      // blob-URL предпросмотра PDF держит память, пока не отозван —
+      // отзываем при закрытии именно этой модалки, не трогая остальные.
+      if (mask.id === 'modalPdf' && previewPdfUrl) {
+        URL.revokeObjectURL(previewPdfUrl);
+        previewPdfUrl = null;
+        previewPdfDoc = null;
+      }
+    }
     return;
   }
   if (e.target.classList.contains('modal-mask')) {
     e.target.classList.remove('show');
+    if (e.target.id === 'modalPdf' && previewPdfUrl) {
+      URL.revokeObjectURL(previewPdfUrl);
+      previewPdfUrl = null;
+      previewPdfDoc = null;
+    }
   }
 });
 
@@ -5870,36 +5895,41 @@ function fillList(sel, arr) {
 
 async function showPdfPreview() {
   if (!lastReport) return;
-  const d = lastReport;
   const preview = document.getElementById('pdfPreview');
   if (!preview) return;
-  
-  // Показываем шаг 2 как превью
-  switchStep(2);
-  
-  // Создаём скриншот шага 2
-  await Promise.all([loadLib('html2canvas')]);
-  
-  setTimeout(async () => {
-    const step2 = document.getElementById('step2');
-    try {
-      const canvas = await html2canvas(step2, {
-        scale: 1.5,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        logging: false
-      });
-      const imgData = canvas.toDataURL('image/png');
-      preview.innerHTML = `<img src="${imgData}" style="width:100%;display:block" alt="PDF Preview">`;
-    } catch (e) {
-      preview.innerHTML = `<div style="padding:40px;text-align:center;color:var(--ink-mute)">Ошибка генерации превью</div>`;
-    }
-    showModal('modalPdf');
-  }, 300);
+
+  const T = I18N[currentLang] || I18N.ru;
+  preview.innerHTML = `<div style="font-family:var(--mono);font-size:12px;color:var(--ink-mute);letter-spacing:.05em">${escape(T.pdf_generating || 'Формируем документ…')}</div>`;
+  showModal('modalPdf');
+
+  try {
+    // Предпросмотр строит РЕАЛЬНЫЙ PDF-файл — тот же, что уйдёт при скачивании,
+    // а не отдельный скриншот экрана. Раньше эти два пути расходились: в модалке
+    // был вид текущего UI, а скачивался другой, формальный документ.
+    previewPdfDoc = await buildFormalPdfDoc(lastReport);
+    if (previewPdfUrl) URL.revokeObjectURL(previewPdfUrl);
+    previewPdfUrl = previewPdfDoc.output('bloburl');
+
+    preview.innerHTML = `<iframe src="${previewPdfUrl}" title="PDF preview" style="width:100%;height:100%;border:none;display:block"></iframe>`;
+  } catch (e) {
+    preview.innerHTML = `<div style="padding:40px;text-align:center;color:var(--ink-mute)">${escape(T.pdf_error || 'Не удалось сформировать документ')}</div>`;
+  }
+
 }
 
-$('#pdfDownload')?.addEventListener('click', () => {
-  exportPdf();
+$('#pdfDownload')?.addEventListener('click', async () => {
+  if (!lastReport) return;
+  const btn = document.getElementById('pdfDownload');
+  const span = btn?.querySelector('span');
+  const orig = span?.textContent;
+  try {
+    // Если предпросмотр уже открыт и документ собран — сохраняем ЕГО,
+    // не пересобирая заново (та же логика, тот же файл, без двойной работы).
+    const doc = previewPdfDoc || await buildFormalPdfDoc(lastReport);
+    doc.save(pdfFileName(lastReport));
+  } finally {
+    if (span && orig) span.textContent = orig;
+  }
 });
 
 /* ═══════════════════════════════════════════════════════════════
@@ -6121,8 +6151,12 @@ function buildPdfTemplate(d) {
   return { root, sections };
 }
 
-async function exportPdf() {
-  if (!lastReport) return;
+/* Собирает готовый jsPDF-документ и возвращает его БЕЗ сохранения на диск —
+   общая точка правды для скачивания и для предпросмотра. Раньше у них были
+   два независимых пути (предпросмотр — скриншот #step2, скачивание —
+   формальный шаблон), и они расходились: человек видел один отчёт,
+   а получал другой. */
+async function buildFormalPdfDoc(d) {
   await Promise.all([loadLib('jspdf'), loadLib('html2canvas')]);
 
   const { jsPDF } = window.jspdf;
@@ -6131,7 +6165,7 @@ async function exportPdf() {
   const pageW = 210, pageH = 297;
   const usableW = pageW - marginX * 2;
 
-  const { root, sections } = buildPdfTemplate(lastReport);
+  const { root, sections } = buildPdfTemplate(d);
   let cy = marginTop;
   let first = true;
 
@@ -6152,7 +6186,7 @@ async function exportPdf() {
 
       if (imgH > pageH - marginTop - marginBottom) {
         // Редкий случай: раздел выше целой страницы (очень длинная инвентаризация) —
-        // нарезаем по высоте, как раньше, только для ЭТОГО раздела, не для всего документа.
+        // нарезаем по высоте, только для ЭТОГО раздела, не для всего документа.
         let heightLeft = imgH, pos = cy;
         doc.addImage(imgData, 'PNG', marginX, pos, imgW, imgH);
         heightLeft -= (pageH - pos - marginBottom);
@@ -6175,18 +6209,29 @@ async function exportPdf() {
 
   // Футер номеров страниц — исключительно латиница/цифры, чтобы не упереться
   // в отсутствие кириллицы/CJK во встроенных шрифтах jsPDF.
-  const total = doc.internal.getNumberOfPages();
-  for (let i = 1; i <= total; i++) {
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     doc.setTextColor(155, 151, 143);
     doc.text('LCA\u00B7AI', marginX, pageH - 8);
-    doc.text(i + ' / ' + total, pageW - marginX, pageH - 8, { align: 'right' });
+    doc.text(i + ' / ' + totalPages, pageW - marginX, pageH - 8, { align: 'right' });
   }
 
-  const fileName = (lastReport.product_title || 'lca-report').replace(/[^\w\-\u0400-\u04FF\u4e00-\u9fff]+/g, '_') + '.pdf';
-  doc.save(fileName);
+  return doc;
+}
+
+function pdfFileName(d) {
+  return (d.product_title || 'lca-report').replace(/[^\w\-\u0400-\u04FF\u4e00-\u9fff]+/g, '_') + '.pdf';
+}
+
+/* Прямое скачивание (например, повторный клик по кнопке PDF, минуя предпросмотр) —
+   собирает документ заново и сразу сохраняет. */
+async function exportPdf() {
+  if (!lastReport) return;
+  const doc = await buildFormalPdfDoc(lastReport);
+  doc.save(pdfFileName(lastReport));
 }
 
 function fmtNum(n) {
