@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LCA·AI — общий доступ</title>
+<title>LCA·AI</title>
 <meta name="theme-color" content="#F2F0EC">
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
 <script>
+  /* Тема ставится ДО первой отрисовки — иначе на тёмной теме мигнёт белым */
   (function () {
     try {
-      var th = localStorage.getItem('lca_theme');
-      if (th === 'dark') {
+      if (localStorage.getItem('lca_theme') === 'dark') {
         document.documentElement.classList.add('dark');
         document.documentElement.style.background = '#131211';
       }
@@ -21,20 +21,20 @@
 </script>
 <style>
 :root {
-  --paper: #F2F0EC; --paper-sunk: #E9E6E0; --paper-raised: #F8F7F4;
-  --graphite: #1C1B19; --graphite-mid: #6B6862; --graphite-low: #9B978F;
-  --rule: #D6D2CB; --rule-soft: #E4E1DA;
-  --e-0:#B8B4AC; --e-1:#8A6A4F; --e-2:#B4652A; --e-3:#D9481C; --e-4:#F03B0C; --e-ink:#7A2E10;
+  --paper:#F2F0EC; --paper-sunk:#E9E6E0;
+  --graphite:#1C1B19; --graphite-mid:#6B6862; --graphite-low:#9B978F;
+  --rule:#D6D2CB; --rule-soft:#E4E1DA;
+  --e-3:#D9481C; --e-4:#F03B0C; --e-ink:#7A2E10;
   --display:'Oswald',system-ui,sans-serif;
-  --body:'Source Serif 4',Georgia,serif;
+  --body:'Source Serif 4','Noto Sans SC',Georgia,serif;
   --mono:'JetBrains Mono',ui-monospace,monospace;
-  --ease: cubic-bezier(.22,1,.36,1);
+  --ease:cubic-bezier(.22,1,.36,1);
 }
 html.dark {
-  --paper:#131211; --paper-sunk:#0D0C0B; --paper-raised:#1B1A18;
+  --paper:#131211; --paper-sunk:#0D0C0B;
   --graphite:#EDEAE4; --graphite-mid:#9B978F; --graphite-low:#6B6862;
   --rule:#2E2C29; --rule-soft:#262421;
-  --e-0:#4A4741; --e-1:#A87F5C; --e-2:#D97B33; --e-3:#F05A23; --e-4:#FF6B2C; --e-ink:#FF8A50;
+  --e-3:#F05A23; --e-4:#FF6B2C; --e-ink:#FF8A50;
 }
 *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
 body {
@@ -51,53 +51,50 @@ body::before {
 html.dark body::before { opacity:.28; }
 .frame { position:relative; z-index:1; max-width:940px; margin:0 auto; padding:0 24px 80px; }
 
-header {
-  display:flex; align-items:center; justify-content:space-between; gap:16px;
-  padding:20px 0; border-bottom:1px solid var(--graphite); flex-wrap:wrap;
-}
-.brand {
-  display:inline-flex; align-items:center; gap:10px;
-  font-family:var(--display); font-size:20px; font-weight:600;
-  letter-spacing:.02em; text-transform:uppercase; color:var(--graphite); text-decoration:none;
-}
+header { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 0; border-bottom:1px solid var(--graphite); flex-wrap:wrap; }
+.brand { display:inline-flex; align-items:center; gap:10px; font-family:var(--display); font-size:20px; font-weight:600; letter-spacing:.02em; text-transform:uppercase; color:var(--graphite); text-decoration:none; }
 .brand .dot { width:10px; height:10px; background:var(--e-4); flex-shrink:0; }
 .brand em { font-style:normal; color:var(--graphite-low); font-weight:400; }
-.ro-tag {
-  font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
-  color:var(--graphite-low); border:1px solid var(--rule); padding:5px 10px;
-}
+.hdr-tools { display:flex; align-items:center; gap:10px; }
+.lang { display:inline-flex; border:1px solid var(--rule); }
+.lang button { background:none; border:none; border-right:1px solid var(--rule); padding:6px 10px; font-family:var(--mono); font-size:11px; color:var(--graphite-low); cursor:pointer; transition:all .14s var(--ease); }
+.lang button:last-child { border-right:none; }
+.lang button.active { background:var(--graphite); color:var(--paper); }
+.theme-btn { width:30px; height:30px; border:1px solid var(--rule); background:none; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:0; }
+.theme-btn::after { content:''; width:12px; height:12px; border:1px solid var(--graphite); background:linear-gradient(90deg,var(--graphite) 50%,transparent 50%); }
+.theme-btn:hover { border-color:var(--graphite); }
 
 h1 { font-family:var(--display); font-weight:600; text-transform:uppercase; letter-spacing:-.01em; line-height:1.05; }
-
+h2 { font-family:var(--display); font-size:20px; font-weight:500; text-transform:uppercase; letter-spacing:.02em; margin-bottom:20px; }
 .state { padding:96px 0; text-align:center; font-family:var(--mono); font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--graphite-low); }
 .state.err { color:var(--e-ink); }
-.state a { color:var(--graphite); }
+
+.actions-bar { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; padding:14px 0; border-bottom:1px solid var(--rule); }
+.ab-left { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.ab-role { font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--graphite-low); border:1px solid var(--rule); padding:5px 10px; }
+.ab-role.editable { color:var(--e-ink); border-color:var(--e-3); }
+.ab-who { font-family:var(--mono); font-size:11px; color:var(--graphite-low); }
+.ab-right { display:flex; gap:8px; flex-wrap:wrap; }
+.ab-btn { font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; padding:8px 14px; border:1px solid var(--rule); background:var(--paper); color:var(--graphite); cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; transition:all .14s var(--ease); }
+.ab-btn:hover { border-color:var(--graphite); }
+.ab-primary { background:var(--graphite); color:var(--paper); border-color:var(--graphite); }
+.ab-primary:hover { background:var(--e-4); border-color:var(--e-4); }
+.ab-btn:disabled { opacity:.45; cursor:not-allowed; }
 
 .hero { padding:48px 0 32px; border-bottom:1px solid var(--rule); }
-.eyebrow {
-  display:block; font-family:var(--mono); font-size:10px; letter-spacing:.2em;
-  text-transform:uppercase; color:var(--graphite-low); margin-bottom:16px;
-}
+.eyebrow { display:block; font-family:var(--mono); font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--graphite-low); margin-bottom:16px; }
 .hero h1 { font-size:clamp(28px,4.4vw,48px); max-width:20ch; }
-.hero-num {
-  font-family:var(--mono); font-size:clamp(36px,6vw,64px); font-weight:700;
-  letter-spacing:-.04em; color:var(--e-ink); line-height:1; margin-top:20px;
-}
+.hero-num { font-family:var(--mono); font-size:clamp(36px,6vw,64px); font-weight:700; letter-spacing:-.04em; color:var(--e-ink); line-height:1; margin-top:20px; }
 .hero-num .u { font-size:.24em; font-weight:500; color:var(--graphite-low); margin-left:8px; letter-spacing:.06em; }
+.dirty { color:var(--e-4); }
 .meta { display:flex; gap:32px; flex-wrap:wrap; margin-top:24px; padding-top:18px; border-top:1px solid var(--rule); }
 .meta div { display:flex; flex-direction:column; gap:3px; }
 .meta .k { font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--graphite-low); }
 .meta .v { font-family:var(--mono); font-size:13px; color:var(--graphite); }
 
 section { padding:36px 0; border-bottom:1px solid var(--rule); }
-h2 { font-family:var(--display); font-size:20px; font-weight:500; text-transform:uppercase; letter-spacing:.02em; margin-bottom:20px; }
-
-/* Stage ranking — colour encodes contribution, same rule as the app */
 .rank { display:flex; flex-direction:column; }
-.rank-row {
-  display:grid; grid-template-columns:minmax(110px,1.3fr) 3fr auto;
-  align-items:center; gap:14px; padding:11px 0; border-bottom:1px solid var(--rule-soft);
-}
+.rank-row { display:grid; grid-template-columns:minmax(110px,1.3fr) 3fr auto; align-items:center; gap:14px; padding:11px 0; border-bottom:1px solid var(--rule-soft); }
 .rank-row:last-child { border-bottom:none; }
 .rank-row .n { font-size:13px; color:var(--graphite-mid); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .rank-bar { height:10px; background:var(--paper-sunk); }
@@ -105,35 +102,35 @@ h2 { font-family:var(--display); font-size:20px; font-weight:500; text-transform
 .rank-row .v { font-family:var(--mono); font-size:12px; font-weight:600; text-align:right; white-space:nowrap; }
 
 table { width:100%; border-collapse:collapse; font-family:var(--mono); font-size:12px; }
-thead th {
-  text-align:left; font-size:10px; letter-spacing:.12em; text-transform:uppercase;
-  color:var(--graphite-low); padding:11px 12px; border-bottom:1px solid var(--graphite);
-  background:var(--paper-sunk); white-space:nowrap;
-}
-tbody td { padding:10px 12px; border-bottom:1px solid var(--rule-soft); vertical-align:top; }
+thead th { text-align:left; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--graphite-low); padding:11px 12px; border-bottom:1px solid var(--graphite); background:var(--paper-sunk); white-space:nowrap; }
+tbody td { padding:10px 12px; border-bottom:1px solid var(--rule-soft); vertical-align:middle; }
 tbody tr:last-child td { border-bottom:none; }
 td.num { text-align:right; white-space:nowrap; font-weight:600; }
 .stage-row td { background:var(--paper-sunk); font-weight:700; }
-.stage-row td:first-child { border-left:3px solid var(--e-0); }
 .sub td:first-child { padding-left:28px; }
 .src { color:var(--graphite-low); font-size:11px; }
 
-/* Project: calculations list */
-.calc {
-  display:flex; align-items:center; justify-content:space-between; gap:16px;
-  padding:14px 16px; border:1px solid var(--rule); border-bottom:none;
-}
-.calc:last-child { border-bottom:1px solid var(--rule); }
+.edit-input { width:92px; border:1px solid var(--rule); background:var(--paper); padding:5px 7px; font-family:var(--mono); font-size:12px; color:var(--graphite); outline:none; text-align:right; }
+.edit-input:focus { border-color:var(--e-3); }
+.edit-note { padding:12px 14px; border-left:3px solid var(--e-3); background:var(--paper-sunk); font-size:13px; line-height:1.55; color:var(--graphite-mid); margin-bottom:20px; }
+
+.calc { border:1px solid var(--rule); border-bottom:none; }
+.calc:last-of-type { border-bottom:1px solid var(--rule); }
+.calc-head { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 16px; cursor:pointer; }
+.calc-head:hover { background:var(--paper-sunk); }
 .calc .t { font-size:14px; font-weight:600; }
 .calc .d { font-family:var(--mono); font-size:10px; color:var(--graphite-low); margin-top:3px; }
+.calc-right { display:flex; align-items:center; gap:12px; }
 .calc .c { font-family:var(--mono); font-size:15px; font-weight:700; color:var(--e-ink); white-space:nowrap; }
+.calc-chev { font-family:var(--mono); color:var(--graphite-low); font-size:12px; }
+.calc-body { display:none; padding:0 16px 18px; border-top:1px solid var(--rule-soft); }
+.calc.open .calc-body { display:block; }
+.calc-body section:first-child { padding-top:20px; }
+.calc-body .hero { padding-top:20px; }
+.calc-actions { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
 
 .prose { font-size:15px; line-height:1.7; color:var(--graphite-mid); max-width:68ch; }
-
-footer {
-  display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap;
-  padding:28px 0; font-family:var(--mono); font-size:11px; color:var(--graphite-low);
-}
+footer { display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; padding:28px 0; font-family:var(--mono); font-size:11px; color:var(--graphite-low); }
 footer a { color:var(--graphite-mid); text-decoration:none; border-bottom:1px solid var(--rule); }
 footer a:hover { color:var(--e-ink); border-color:var(--e-3); }
 
@@ -142,469 +139,543 @@ footer a:hover { color:var(--e-ink); border-color:var(--e-3); }
   .rank-row .v { text-align:left; }
   table { font-size:11px; }
 }
-@media (prefers-reduced-motion: reduce) { * { transition:none !important; animation:none !important; } }
-
-/* ═══════════════════════════════════════════════════════════
-   Панель действий и режим правки
-   ═══════════════════════════════════════════════════════════ */
-.actions-bar {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 16px; flex-wrap: wrap;
-  padding: 14px 0; border-bottom: 1px solid var(--rule);
-}
-.ab-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.ab-role {
-  font-family: var(--mono); font-size: 10px; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--graphite-low);
-  border: 1px solid var(--rule); padding: 5px 10px;
-}
-.ab-role.editable { color: var(--e-ink); border-color: var(--e-3); }
-.ab-who { font-family: var(--mono); font-size: 11px; color: var(--graphite-low); }
-.ab-right { display: flex; gap: 8px; flex-wrap: wrap; }
-.ab-btn {
-  font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
-  text-transform: uppercase; padding: 8px 14px;
-  border: 1px solid var(--rule); background: var(--paper);
-  color: var(--graphite); cursor: pointer; text-decoration: none;
-  display: inline-flex; align-items: center;
-  transition: border-color .14s var(--ease), background .14s var(--ease);
-}
-.ab-btn:hover { border-color: var(--graphite); }
-.ab-primary { background: var(--graphite); color: var(--paper); border-color: var(--graphite); }
-.ab-primary:hover { background: var(--e-4); border-color: var(--e-4); }
-.ab-btn:disabled { opacity: .45; cursor: not-allowed; }
-
-/* Правка: инвентаризация становится редактируемой */
-.edit-input {
-  width: 90px; border: 1px solid var(--rule); border-radius: 0;
-  background: var(--paper); padding: 5px 7px;
-  font-family: var(--mono); font-size: 12px; color: var(--graphite);
-  outline: none; text-align: right;
-}
-.edit-input:focus { border-color: var(--e-3); }
-.edit-note {
-  padding: 12px 14px; border-left: 3px solid var(--e-3);
-  background: var(--paper-sunk); font-size: 13px; line-height: 1.55;
-  color: var(--graphite-mid); margin-bottom: 20px;
-}
-.dirty-total { color: var(--e-4); }
+@media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
 </style>
 </head>
 <body>
 <div class="frame">
   <header>
     <a class="brand" href="/"><span class="dot"></span>LCA<em>·</em>AI</a>
-    <span class="ro-tag" id="roTag">только чтение</span>
+    <div class="hdr-tools">
+      <div class="lang" role="group">
+        <button data-lang="ru">RU</button>
+        <button data-lang="en">EN</button>
+        <button data-lang="zh">中文</button>
+      </div>
+      <button class="theme-btn" id="themeBtn" aria-label="theme"></button>
+    </div>
   </header>
 
-  <!-- Панель действий: появляется только когда есть что предложить -->
   <div class="actions-bar" id="actionsBar" style="display:none">
     <div class="ab-left">
       <span class="ab-role" id="abRole"></span>
       <span class="ab-who" id="abWho"></span>
     </div>
     <div class="ab-right">
-      <button class="ab-btn" id="forkBtn" style="display:none">Сохранить себе</button>
-      <button class="ab-btn ab-primary" id="editBtn" style="display:none">Редактировать</button>
-      <button class="ab-btn ab-primary" id="saveBtn" style="display:none">Сохранить изменения</button>
-      <button class="ab-btn" id="cancelBtn" style="display:none">Отменить</button>
-      <a class="ab-btn" id="signInBtn" href="/login.html" style="display:none">Войти</a>
+      <button class="ab-btn" id="forkBtn" style="display:none"></button>
+      <button class="ab-btn ab-primary" id="editBtn" style="display:none"></button>
+      <button class="ab-btn ab-primary" id="saveBtn" style="display:none"></button>
+      <button class="ab-btn" id="cancelBtn" style="display:none"></button>
+      <a class="ab-btn" id="signInBtn" href="/login.html" style="display:none"></a>
     </div>
   </div>
 
-  <div id="root">
-    <div class="state" id="state">загрузка…</div>
-  </div>
+  <div id="root"><div class="state" id="state">…</div></div>
 
   <footer>
-    <span id="footNote">Отчёт передан по ссылке. Данные доступны только для чтения.</span>
-    <a href="/">Сделать свой расчёт →</a>
+    <span id="footNote"></span>
+    <a href="/" id="footCta"></a>
   </footer>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SB_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
-
-/* Anon-ключ. Он публичный по замыслу — лежит открыто во всех страницах сайта,
-   и сам по себе ничего не открывает: доступ к данным режет RLS.
-   Здесь он нужен только чтобы пройти шлюз Supabase: Edge Functions по умолчанию
-   требуют валидный JWT в заголовке и отбивают запрос с 401 ДО того, как код
-   функции вообще запустится. Именно это и ломало страницу.
-   Сами данные всё равно отдаёт share-view, и только после проверки токена. */
+/* Anon-ключ публичен по замыслу: лежит открыто во всех страницах сайта и сам
+   по себе ничего не открывает — доступ режет RLS. Нужен, чтобы пройти шлюз
+   Supabase и для операций от имени вошедшего пользователя. */
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
-const RAMP = ['#F03B0C', '#D9481C', '#B4652A', '#8A6A4F', '#B8B4AC', '#9B978F'];
+const RAMP = ['#F03B0C','#D9481C','#B4652A','#8A6A4F','#B8B4AC','#9B978F'];
 
-const esc = s => String(s == null ? '' : s)
-  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-  .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-
-const fmt = v => {
-  const n = parseFloat(v) || 0;
-  if (n >= 1000) return n.toFixed(0);
-  if (n >= 10)   return n.toFixed(1);
-  return n.toFixed(2);
+const I18N = {
+  ru: {
+    ro:'доступ: только чтение', rw:'доступ: редактирование',
+    fork:'Сохранить себе', fork_project:'Сохранить проект себе',
+    edit:'Редактировать', save:'Сохранить изменения', cancel:'Отменить',
+    saving:'Сохраняем…', saved:'Сохранено ✓',
+    signin_view:'Войти, чтобы сохранить себе', signin_edit:'Войти, чтобы редактировать',
+    eyebrow:'оценка жизненного цикла · ISO 14067',
+    fu:'функциональная единица', sb:'границы системы', date:'дата расчёта',
+    stages:'Вклад стадий', inventory:'Инвентаризация', analysis:'Анализ',
+    th_proc:'Процесс', th_data:'Данные', th_amount:'Кол-во', th_factor:'Коэффициент', th_src:'Источник',
+    project:'проект', calcs:'расч.', median:'медианный след', by:'по', created:'создан',
+    calculations:'Расчёты', no_calcs:'в проекте пока нет расчётов',
+    edit_note:'Вы правите общий расчёт по ссылке с доступом на редактирование. Изменения увидит владелец и все, у кого есть ссылка. Итог пересчитывается на сервере.',
+    foot:'Отчёт передан по ссылке.', foot_cta:'Сделать свой расчёт →',
+    loading:'загрузка…',
+    e_token:'ссылка неполная — нет токена', e_401:'доступ отклонён сервером',
+    e_404:'ссылка недействительна или отозвана', e_410:'срок действия ссылки истёк',
+    e_load:'не удалось загрузить отчёт', e_net:'сеть недоступна',
+    e_none:'запись не найдена', e_kind:'неизвестный тип ссылки',
+    err_auth:'Нужно войти заново', err_ro:'Эта ссылка даёт только чтение',
+    err_invite:'Приглашение выписано на другой email', err_save:'Не удалось сохранить'
+  },
+  en: {
+    ro:'access: read only', rw:'access: editable',
+    fork:'Save to my account', fork_project:'Save project to my account',
+    edit:'Edit', save:'Save changes', cancel:'Cancel',
+    saving:'Saving…', saved:'Saved ✓',
+    signin_view:'Sign in to save a copy', signin_edit:'Sign in to edit',
+    eyebrow:'life cycle assessment · ISO 14067',
+    fu:'functional unit', sb:'system boundary', date:'calculated on',
+    stages:'Stage contribution', inventory:'Inventory', analysis:'Analysis',
+    th_proc:'Process', th_data:'Data', th_amount:'Amount', th_factor:'Factor', th_src:'Source',
+    project:'project', calcs:'calc.', median:'median footprint', by:'across', created:'created',
+    calculations:'Calculations', no_calcs:'no calculations in this project yet',
+    edit_note:'You are editing a shared calculation via an editable link. The owner and everyone holding the link will see your changes. The total is recomputed on the server.',
+    foot:'Report shared via link.', foot_cta:'Run your own calculation →',
+    loading:'loading…',
+    e_token:'incomplete link — no token', e_401:'rejected by the server',
+    e_404:'link is invalid or revoked', e_410:'link has expired',
+    e_load:'could not load the report', e_net:'network unavailable',
+    e_none:'record not found', e_kind:'unknown link type',
+    err_auth:'Please sign in again', err_ro:'This link is read-only',
+    err_invite:'The invite was issued to a different email', err_save:'Could not save'
+  },
+  zh: {
+    ro:'权限：仅查看', rw:'权限：可编辑',
+    fork:'保存到我的账户', fork_project:'将项目保存到我的账户',
+    edit:'编辑', save:'保存修改', cancel:'取消',
+    saving:'保存中…', saved:'已保存 ✓',
+    signin_view:'登录后可保存副本', signin_edit:'登录后可编辑',
+    eyebrow:'生命周期评价 · ISO 14067',
+    fu:'功能单位', sb:'系统边界', date:'计算日期',
+    stages:'各阶段贡献', inventory:'清单', analysis:'分析',
+    th_proc:'过程', th_data:'数据', th_amount:'数量', th_factor:'排放因子', th_src:'来源',
+    project:'项目', calcs:'项计算', median:'中位碳足迹', by:'基于', created:'创建于',
+    calculations:'计算', no_calcs:'该项目暂无计算',
+    edit_note:'您正在通过可编辑链接修改共享计算。所有者及持有链接的人都会看到您的修改。总量由服务器重新计算。',
+    foot:'报告通过链接分享。', foot_cta:'开始我的计算 →',
+    loading:'加载中…',
+    e_token:'链接不完整 — 缺少令牌', e_401:'服务器拒绝访问',
+    e_404:'链接无效或已撤销', e_410:'链接已过期',
+    e_load:'无法加载报告', e_net:'网络不可用',
+    e_none:'未找到记录', e_kind:'未知的链接类型',
+    err_auth:'请重新登录', err_ro:'此链接仅可查看',
+    err_invite:'邀请发给了另一个邮箱', err_save:'保存失败'
+  }
 };
-const fmtDate = d => {
-  try { return new Date(d).toLocaleDateString('ru-RU', { day: '2-digit', month: 'short', year: 'numeric' }); }
-  catch (e) { return '—'; }
-};
 
-function setState(msg, isErr) {
-  document.getElementById('root').innerHTML =
-    '<div class="state' + (isErr ? ' err' : '') + '">' + esc(msg) + '</div>';
+let lang = (function () {
+  try { const s = localStorage.getItem('lca_lang'); if (s && I18N[s]) return s; } catch (e) {}
+  const n = (navigator.language || 'ru').slice(0, 2);
+  return I18N[n] ? n : 'ru';
+})();
+const T = () => I18N[lang] || I18N.ru;
+
+let sb=null, me=null, token=null, role='view';
+let kind=null, item=null, project=null, calcs=[];
+let editing=null, draft=null;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const fmt = v => { const n=parseFloat(v)||0;
+  return n>=1000?n.toFixed(0):n>=10?n.toFixed(1):n.toFixed(2); };
+const fmtDate = d => { try {
+  return new Date(d).toLocaleDateString(lang==='zh'?'zh-CN':lang==='en'?'en-GB':'ru-RU',
+    {day:'2-digit',month:'short',year:'numeric'});
+} catch(e){ return '—'; } };
+
+function setState(msg, err) {
+  $('root').innerHTML = '<div class="state'+(err?' err':'')+'">'+esc(msg)+'</div>';
 }
 
-function renderHistory(item, editMode) {
-  if (!item) return setState('запись не найдена', true);
-  // В режиме правки работаем с черновиком, а не с оригиналом
-  const d = (editMode && draft) ? draft : (item.report_data || {});
-  const stagesRaw = Array.isArray(d.stages) ? d.stages : [];
-  const total = (editMode && draft) ? (parseFloat(draft.total_co2eq) || 0)
-                                    : (parseFloat(item.total_co2eq) || 0);
+/* Единственный источник правды — amount × factor. Тот же расчёт делает сервер. */
+function recompute(d) {
+  let total = 0;
+  (d.stages||[]).forEach(function (st) {
+    let s = 0;
+    (st.sub_processes||[]).forEach(function (sp) {
+      sp.co2eq = (parseFloat(sp.amount)||0) * (parseFloat(sp.factor)||0);
+      s += sp.co2eq;
+    });
+    st.co2eq = s; total += s;
+  });
+  (d.stages||[]).forEach(function (st) { st.share_pct = total ? st.co2eq/total*100 : 0; });
+  d.total_co2eq = total;
+  return total;
+}
 
-  /* Запоминаем исходный индекс ДО сортировки: правка адресуется по позиции
-     в draft.stages, а на экране стадии идут по убыванию вклада. Без этого
-     изменение уехало бы не в ту стадию. */
-  const stages = stagesRaw.map((s, si) => ({ s, si }));
-  stages.sort((a, b) => (parseFloat(b.s.co2eq) || 0) - (parseFloat(a.s.co2eq) || 0));
-  const max = stages.length ? (parseFloat(stages[0].s.co2eq) || 0) : 1;
+function applyLang() {
+  const t = T();
+  document.documentElement.lang = lang;
+  document.querySelectorAll('.lang button').forEach(function (b) {
+    b.classList.toggle('active', b.dataset.lang === lang);
+  });
+  $('footNote').textContent = t.foot;
+  $('footCta').textContent = t.foot_cta;
+  if (kind) { renderAll(); renderActions(); }
+}
+document.querySelectorAll('.lang button').forEach(function (b) {
+  b.addEventListener('click', function () {
+    lang = b.dataset.lang;
+    try { localStorage.setItem('lca_lang', lang); } catch (e) {}
+    applyLang();
+  });
+});
 
-  let html = '';
+$('themeBtn').addEventListener('click', function () {
+  const dark = document.documentElement.classList.toggle('dark');
+  try { localStorage.setItem('lca_theme', dark ? 'dark' : 'light'); } catch (e) {}
+  const m = document.querySelector('meta[name=theme-color]');
+  if (m) m.setAttribute('content', dark ? '#131211' : '#F2F0EC');
+});
 
-  if (editMode) {
-    html += '<div class="edit-note">Вы правите общий расчёт по ссылке с доступом на редактирование. ' +
-            'Изменения увидит владелец и все, у кого есть эта ссылка. ' +
-            'Итог пересчитывается на сервере из количества × коэффициент.</div>';
+function renderActions() {
+  const t = T(), bar = $('actionsBar');
+  if (!kind) { bar.style.display='none'; return; }
+  bar.style.display = 'flex';
+
+  const canEdit = role === 'edit';
+  $('abRole').textContent = canEdit ? t.rw : t.ro;
+  $('abRole').classList.toggle('editable', canEdit);
+  $('abWho').textContent = me ? (me.email || '') : '';
+
+  function show(id, on, txt) {
+    const e = $(id);
+    e.style.display = on ? 'inline-flex' : 'none';
+    if (txt) e.textContent = txt;
   }
 
-  html += '<div class="hero">' +
-    '<span class="eyebrow">оценка жизненного цикла · ISO 14067</span>' +
-    '<h1>' + esc(item.product_title || '—') + '</h1>' +
+  if (editing) {
+    show('forkBtn',false); show('editBtn',false); show('signInBtn',false);
+    show('saveBtn',true,t.save); show('cancelBtn',true,t.cancel);
+    return;
+  }
+  show('saveBtn',false); show('cancelBtn',false);
+
+  // Форк доступен любому вошедшему: данные он и так видит, копия ничего не добавляет
+  show('forkBtn', !!me, kind==='project' ? t.fork_project : t.fork);
+  // Правка одиночного расчёта — кнопкой в панели. В проекте правится каждый
+  // расчёт отдельно, поэтому там кнопки живут внутри карточек.
+  show('editBtn', !!me && canEdit && kind==='history', t.edit);
+  show('signInBtn', !me, canEdit ? t.signin_edit : t.signin_view);
+  // Вернуть на эту же страницу после входа — иначе человек теряет ссылку
+  $('signInBtn').href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search);
+}
+
+async function fork() {
+  if (!me || !sb) return;
+  const t = T(), btn = $('forkBtn');
+  btn.disabled = true; btn.textContent = t.saving;
+  try {
+    if (kind === 'history') {
+      const r = await sb.from('user_history').insert({
+        user_id: me.id,
+        product_title: item.product_title,
+        functional_unit: item.functional_unit,
+        total_co2eq: item.total_co2eq,
+        report_data: JSON.parse(JSON.stringify(item.report_data||{}))
+      }).select('id').single();
+      if (r.error) throw r.error;
+      btn.textContent = t.saved;
+      setTimeout(function(){ location.href='/report.html?history='+r.data.id; }, 600);
+
+    } else {
+      /* Проект копируется целиком: сам проект + все его расчёты.
+         Копия автономна, оригинал не трогаем. */
+      const p = await sb.from('user_projects').insert({
+        user_id: me.id,
+        name: (project.name || 'Project') + ' (copy)'
+      }).select('id').single();
+      if (p.error) throw p.error;
+
+      if (calcs.length) {
+        const rows = calcs.map(function (c) {
+          return {
+            project_id: p.data.id,
+            user_id: me.id,
+            report_data: JSON.parse(JSON.stringify(c.report_data||{}))
+          };
+        });
+        const c = await sb.from('project_calculations').insert(rows);
+        if (c.error) throw c.error;
+      }
+      btn.textContent = t.saved;
+      setTimeout(function(){ location.href='/cabinet.html'; }, 600);
+    }
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = kind==='project' ? t.fork_project : t.fork;
+    alert(t.err_save + ': ' + (e.message||e));
+  }
+}
+
+function startEdit(calcId) {
+  let src;
+  if (calcId) {
+    const c = calcs.find(function (x) { return String(x.id) === String(calcId); });
+    src = c ? c.report_data : {};
+  } else {
+    src = item.report_data;
+  }
+  draft = JSON.parse(JSON.stringify(src||{}));
+  editing = { calcId: calcId || null };
+  renderAll(); renderActions();
+  window.scrollTo({ top: 0 });
+}
+function cancelEdit() { editing=null; draft=null; renderAll(); renderActions(); }
+
+window.__ed = function (si, pi, field, val) {
+  if (!draft) return;
+  const st = draft.stages && draft.stages[si];
+  const sp = st && st.sub_processes && st.sub_processes[pi];
+  if (!sp) return;
+  sp[field] = parseFloat(val) || 0;
+  const total = recompute(draft);
+  const el = $('liveTotal');
+  if (el) { el.textContent = fmt(total); el.classList.add('dirty'); }
+};
+
+async function saveEdit() {
+  if (!draft || !sb || !me) return;
+  const t = T(), btn = $('saveBtn');
+  btn.disabled = true; btn.textContent = t.saving;
+  try {
+    const s = await sb.auth.getSession();
+    const at = s && s.data && s.data.session ? s.data.session.access_token : '';
+    const res = await fetch(SB_URL + '/functions/v1/share-edit', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'apikey':SB_KEY, 'Authorization':'Bearer '+at },
+      body: JSON.stringify({
+        token: token,
+        report_data: draft,
+        calc_id: editing.calcId || undefined
+      })
+    });
+    const out = await res.json().catch(function(){ return {}; });
+
+    if (!res.ok) {
+      const map = {
+        auth_required: t.err_auth, read_only: t.err_ro, not_your_invite: t.err_invite,
+        expired: t.e_410, not_found: t.e_404
+      };
+      throw new Error(map[out.error] || (t.err_save + ': ' + (out.detail || out.error || res.status)));
+    }
+
+    // Сервер пересчитал итог сам — берём его значение, а не своё
+    draft.total_co2eq = out.total_co2eq;
+    if (editing.calcId) {
+      const c = calcs.find(function (x) { return String(x.id) === String(editing.calcId); });
+      if (c) c.report_data = draft;
+    } else {
+      item.report_data = draft;
+      item.total_co2eq = out.total_co2eq;
+    }
+    editing = null; draft = null;
+    renderAll(); renderActions();
+    btn.disabled = false;
+  } catch (e) {
+    btn.disabled = false; btn.textContent = T().save;
+    alert(e.message || e);
+  }
+}
+
+function reportHtml(d, meta, editMode) {
+  const t = T();
+  const raw = Array.isArray(d.stages) ? d.stages : [];
+  const total = parseFloat(d.total_co2eq) || 0;
+
+  /* Исходный индекс запоминаем ДО сортировки: правка адресуется по позиции
+     в draft.stages, а на экране стадии идут по убыванию вклада. Без этого
+     изменение уехало бы не в ту стадию. */
+  const st = raw.map(function (s, si) { return { s: s, si: si }; })
+    .sort(function (a, b) { return (parseFloat(b.s.co2eq)||0) - (parseFloat(a.s.co2eq)||0); });
+  const max = st.length ? (parseFloat(st[0].s.co2eq)||0) : 1;
+
+  let h = '';
+  if (editMode) h += '<div class="edit-note">' + esc(t.edit_note) + '</div>';
+
+  h += '<div class="hero">' +
+    '<span class="eyebrow">' + esc(t.eyebrow) + '</span>' +
+    '<h1>' + esc(meta.title || '—') + '</h1>' +
     '<div class="hero-num"><span id="liveTotal">' + fmt(total) + '</span><span class="u">kg CO₂e</span></div>' +
     '<div class="meta">' +
-      '<div><span class="k">функциональная единица</span><span class="v">' + esc(item.functional_unit || '—') + '</span></div>' +
-      (d.system_boundary ? '<div><span class="k">границы системы</span><span class="v">' + esc(d.system_boundary) + '</span></div>' : '') +
-      '<div><span class="k">дата расчёта</span><span class="v">' + fmtDate(item.created_at) + '</span></div>' +
-    '</div>' +
-  '</div>';
+      '<div><span class="k">' + esc(t.fu) + '</span><span class="v">' + esc(meta.fu || '—') + '</span></div>' +
+      (d.system_boundary ? '<div><span class="k">' + esc(t.sb) + '</span><span class="v">' + esc(d.system_boundary) + '</span></div>' : '') +
+      (meta.date ? '<div><span class="k">' + esc(t.date) + '</span><span class="v">' + fmtDate(meta.date) + '</span></div>' : '') +
+    '</div></div>';
 
-  if (stages.length) {
-    html += '<section><h2>Вклад стадий</h2><div class="rank">' +
-      stages.map((x, i) => {
+  if (st.length) {
+    h += '<section><h2>' + esc(t.stages) + '</h2><div class="rank">' +
+      st.map(function (x, i) {
         const v = parseFloat(x.s.co2eq) || 0;
-        const pct = total ? (v / total * 100) : 0;
-        return '<div class="rank-row">' +
-          '<div class="n">' + esc(x.s.name || '—') + '</div>' +
-          '<div class="rank-bar"><div class="rank-fill" style="width:' + (max ? v / max * 100 : 0).toFixed(1) + '%;background:' + RAMP[Math.min(i, RAMP.length - 1)] + '"></div></div>' +
-          '<div class="v">' + fmt(v) + ' kg · ' + pct.toFixed(0) + '%</div>' +
-        '</div>';
-      }).join('') +
-    '</div></section>';
+        const pct = total ? v / total * 100 : 0;
+        return '<div class="rank-row"><div class="n">' + esc(x.s.name || '—') + '</div>' +
+          '<div class="rank-bar"><div class="rank-fill" style="width:' + (max ? v/max*100 : 0).toFixed(1) +
+          '%;background:' + RAMP[Math.min(i, RAMP.length-1)] + '"></div></div>' +
+          '<div class="v">' + fmt(v) + ' kg · ' + pct.toFixed(0) + '%</div></div>';
+      }).join('') + '</div></section>';
 
-    const hasSub = stages.some(x => Array.isArray(x.s.sub_processes) && x.s.sub_processes.length);
+    const hasSub = st.some(function (x) {
+      return Array.isArray(x.s.sub_processes) && x.s.sub_processes.length;
+    });
+
     if (hasSub) {
-      html += '<section><h2>Инвентаризация</h2><table>' +
-        '<thead><tr><th>Процесс</th><th>' + (editMode ? 'Кол-во' : 'Данные') + '</th>' +
-        (editMode ? '<th>Коэффициент</th>' : '') +
-        '<th style="text-align:right">kg CO₂e</th><th>Источник</th></tr></thead><tbody>';
+      h += '<section><h2>' + esc(t.inventory) + '</h2><table><thead><tr>' +
+        '<th>' + esc(t.th_proc) + '</th>' +
+        '<th>' + esc(editMode ? t.th_amount : t.th_data) + '</th>' +
+        (editMode ? '<th>' + esc(t.th_factor) + '</th>' : '') +
+        '<th style="text-align:right">kg CO₂e</th><th>' + esc(t.th_src) + '</th></tr></thead><tbody>';
 
-      stages.forEach((x, i) => {
-        const col = RAMP[Math.min(i, RAMP.length - 1)];
-        const cols = editMode ? 5 : 4;
-        html += '<tr class="stage-row">' +
-          '<td style="border-left-color:' + col + '">' + esc(x.s.name || '—') + '</td>' +
-          (editMode ? '<td></td>' : '') + '<td></td>' +
-          '<td class="num">' + fmt(x.s.co2eq) + '</td><td></td></tr>';
+      st.forEach(function (x, i) {
+        const col = RAMP[Math.min(i, RAMP.length-1)];
+        h += '<tr class="stage-row"><td style="border-left:3px solid ' + col + '">' + esc(x.s.name || '—') + '</td>' +
+             (editMode ? '<td></td>' : '') + '<td></td>' +
+             '<td class="num">' + fmt(x.s.co2eq) + '</td><td></td></tr>';
 
-        (x.s.sub_processes || []).forEach((sp, pi) => {
+        (x.s.sub_processes || []).forEach(function (sp, pi) {
           if (editMode) {
-            /* si — исходный индекс стадии в draft.stages, а не позиция на экране.
-               Иначе после сортировки правка ушла бы не в ту стадию. */
-            html += '<tr class="sub"><td>' + esc(sp.name || '—') + '</td>' +
-              '<td><input class="edit-input" type="number" step="any" value="' + (parseFloat(sp.amount) || 0) + '" ' +
-                'oninput="__editField(' + x.si + ',' + pi + ',\'amount\',this.value)"> ' +
+            h += '<tr class="sub"><td>' + esc(sp.name || '—') + '</td>' +
+              '<td><input class="edit-input" type="number" step="any" value="' + (parseFloat(sp.amount)||0) +
+                '" oninput="__ed(' + x.si + ',' + pi + ',&quot;amount&quot;,this.value)"> ' +
                 '<span class="src">' + esc(sp.unit || '') + '</span></td>' +
-              '<td><input class="edit-input" type="number" step="any" value="' + (parseFloat(sp.factor) || 0) + '" ' +
-                'oninput="__editField(' + x.si + ',' + pi + ',\'factor\',this.value)"></td>' +
+              '<td><input class="edit-input" type="number" step="any" value="' + (parseFloat(sp.factor)||0) +
+                '" oninput="__ed(' + x.si + ',' + pi + ',&quot;factor&quot;,this.value)"></td>' +
               '<td class="num">' + fmt(sp.co2eq) + '</td>' +
               '<td class="src">' + esc(sp.factor_source || sp.source || '—') + '</td></tr>';
           } else {
-            html += '<tr class="sub"><td>' + esc(sp.name || '—') + '</td>' +
+            h += '<tr class="sub"><td>' + esc(sp.name || '—') + '</td>' +
               '<td class="src">' + esc([sp.amount, sp.unit].filter(Boolean).join(' ')) + '</td>' +
               '<td class="num">' + fmt(sp.co2eq) + '</td>' +
               '<td class="src">' + esc(sp.factor_source || sp.source || '—') + '</td></tr>';
           }
         });
       });
-      html += '</tbody></table></section>';
+      h += '</tbody></table></section>';
     }
   }
 
   if (d.total_description) {
-    html += '<section><h2>Анализ</h2><div class="prose">' + esc(d.total_description) + '</div></section>';
+    h += '<section><h2>' + esc(t.analysis) + '</h2><div class="prose">' + esc(d.total_description) + '</div></section>';
   }
-
-  document.getElementById('root').innerHTML = html;
-  document.title = (item.product_title || 'Отчёт') + ' — LCA·AI';
+  return h;
 }
 
-function renderProject(project, calcs) {
-  if (!project) return setState('проект не найден', true);
+function renderAll() {
+  if (!kind) return;
+  const t = T();
 
-  const vals = calcs
-    .map(c => parseFloat(c.report_data && c.report_data.total_co2eq) || 0)
-    .filter(v => v > 0);
-  const median = (() => {
-    if (!vals.length) return 0;
-    const s = vals.slice().sort((a, b) => a - b);
-    return s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2;
-  })();
-
-  let html = '';
-  html += '<div class="hero">' +
-    '<span class="eyebrow">проект · ' + calcs.length + ' расч.</span>' +
-    '<h1>' + esc(project.name || '—') + '</h1>' +
-    '<div class="hero-num">' + fmt(median) + '<span class="u">kg CO₂e</span></div>' +
-    '<div class="meta">' +
-      '<div><span class="k">медианный след</span><span class="v">по ' + calcs.length + ' расчётам</span></div>' +
-      '<div><span class="k">создан</span><span class="v">' + fmtDate(project.created_at) + '</span></div>' +
-    '</div>' +
-  '</div>';
-
-  if (!calcs.length) {
-    html += '<div class="state">в проекте пока нет расчётов</div>';
-  } else {
-    html += '<section><h2>Расчёты</h2>' + calcs.map(c => {
-      const d = c.report_data || {};
-      return '<div class="calc">' +
-        '<div><div class="t">' + esc(d.product_title || '—') + '</div>' +
-        '<div class="d">' + esc(d.functional_unit || '—') + ' · ' + fmtDate(c.created_at) + '</div></div>' +
-        '<div class="c">' + fmt(d.total_co2eq) + ' kgCO₂e</div>' +
-      '</div>';
-    }).join('') + '</section>';
-  }
-
-  document.getElementById('root').innerHTML = html;
-  document.title = (project.name || 'Проект') + ' — LCA·AI';
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   СОСТОЯНИЕ
-   ═══════════════════════════════════════════════════════════════ */
-let sb = null;            // supabase-клиент (нужен для авторизации и форка)
-let me = null;            // текущий пользователь, если вошёл
-let shareToken = null;
-let shareRole = 'view';   // 'view' | 'edit' — приходит от share-view
-let currentItem = null;   // расчёт, открытый по ссылке
-let editing = false;
-let draft = null;         // копия report_data на время правки
-
-const $ = id => document.getElementById(id);
-
-/* ── Пересчёт: единственный источник правды — amount × factor.
-      Тот же расчёт делает и сервер, клиенту доверять нельзя. ── */
-function recompute(d) {
-  let total = 0;
-  (d.stages || []).forEach(st => {
-    let sum = 0;
-    (st.sub_processes || []).forEach(sp => {
-      sp.co2eq = (parseFloat(sp.amount) || 0) * (parseFloat(sp.factor) || 0);
-      sum += sp.co2eq;
-    });
-    st.co2eq = sum;
-    total += sum;
-  });
-  (d.stages || []).forEach(st => { st.share_pct = total ? st.co2eq / total * 100 : 0; });
-  d.total_co2eq = total;
-  return total;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   ПАНЕЛЬ ДЕЙСТВИЙ
-   ═══════════════════════════════════════════════════════════════ */
-function renderActions() {
-  const bar = $('actionsBar');
-  if (!currentItem) { bar.style.display = 'none'; return; }
-  bar.style.display = 'flex';
-
-  const canEdit = shareRole === 'edit';
-  $('abRole').textContent = canEdit ? 'доступ: редактирование' : 'доступ: только чтение';
-  $('abRole').classList.toggle('editable', canEdit);
-  $('abWho').textContent = me ? me.email : '';
-
-  const show = (id, on) => { $(id).style.display = on ? 'inline-flex' : 'none'; };
-
-  if (editing) {
-    show('forkBtn', false); show('editBtn', false); show('signInBtn', false);
-    show('saveBtn', true);  show('cancelBtn', true);
+  if (kind === 'history') {
+    if (!item) return setState(t.e_none, true);
+    const editMode = !!editing;
+    const d = editMode ? draft : (item.report_data || {});
+    $('root').innerHTML = reportHtml(d, {
+      title: item.product_title, fu: item.functional_unit, date: item.created_at
+    }, editMode);
+    document.title = (item.product_title || '—') + ' — LCA·AI';
     return;
   }
 
-  show('saveBtn', false); show('cancelBtn', false);
-  // Форк доступен любому, кто вошёл: данные он и так уже видит,
-  // копия к себе не даёт ему ничего нового.
-  show('forkBtn', !!me);
-  // Правка — только по ссылке с ролью edit и только авторизованному.
-  show('editBtn', !!me && canEdit);
-  // Аноним видит, ради чего стоит войти.
-  show('signInBtn', !me);
-  $('signInBtn').textContent = canEdit ? 'Войти, чтобы редактировать' : 'Войти, чтобы сохранить себе';
-}
+  if (!project) return setState(t.e_none, true);
 
-/* ═══════════════════════════════════════════════════════════════
-   ФОРК — «Сохранить себе»
-   Простая и безопасная операция: вставка копии в СВОЮ историю.
-   Оригинал не трогаем, права не расширяем.
-   ═══════════════════════════════════════════════════════════════ */
-async function forkToMyAccount() {
-  if (!me || !sb || !currentItem) return;
-  const btn = $('forkBtn');
-  btn.disabled = true;
-  btn.textContent = 'Сохраняем…';
-  try {
-    const copy = JSON.parse(JSON.stringify(currentItem.report_data || {}));
-    const { data, error } = await sb.from('user_history').insert({
-      user_id: me.id,
-      product_title: currentItem.product_title,
-      functional_unit: currentItem.functional_unit,
-      total_co2eq: currentItem.total_co2eq,
-      report_data: copy,
-      notes: 'Скопировано по ссылке'
-    }).select('id').single();
-    if (error) throw error;
-
-    btn.textContent = 'Сохранено ✓';
-    setTimeout(() => {
-      window.location.href = '/report.html?history=' + data.id;
-    }, 700);
-  } catch (e) {
-    btn.disabled = false;
-    btn.textContent = 'Сохранить себе';
-    alert('Не удалось сохранить: ' + (e.message || e));
+  // Правка конкретного расчёта внутри проекта — показываем только его
+  if (editing && editing.calcId) {
+    const c = calcs.find(function (x) { return String(x.id) === String(editing.calcId); });
+    const cd = c ? (c.report_data || {}) : {};
+    $('root').innerHTML = reportHtml(draft, {
+      title: cd.product_title, fu: cd.functional_unit, date: c && c.created_at
+    }, true);
+    return;
   }
+
+  const vals = calcs
+    .map(function (c) { return parseFloat(c.report_data && c.report_data.total_co2eq) || 0; })
+    .filter(function (v) { return v > 0; });
+  const med = (function () {
+    if (!vals.length) return 0;
+    const s = vals.slice().sort(function (a,b) { return a-b; });
+    return s.length % 2 ? s[(s.length-1)/2] : (s[s.length/2 - 1] + s[s.length/2]) / 2;
+  })();
+
+  let h = '<div class="hero">' +
+    '<span class="eyebrow">' + esc(t.project) + ' · ' + calcs.length + ' ' + esc(t.calcs) + '</span>' +
+    '<h1>' + esc(project.name || '—') + '</h1>' +
+    '<div class="hero-num">' + fmt(med) + '<span class="u">kg CO₂e</span></div>' +
+    '<div class="meta">' +
+      '<div><span class="k">' + esc(t.median) + '</span><span class="v">' + esc(t.by) + ' ' + calcs.length + '</span></div>' +
+      '<div><span class="k">' + esc(t.created) + '</span><span class="v">' + fmtDate(project.created_at) + '</span></div>' +
+    '</div></div>';
+
+  if (!calcs.length) {
+    h += '<div class="state">' + esc(t.no_calcs) + '</div>';
+  } else {
+    h += '<section><h2>' + esc(t.calculations) + '</h2>' + calcs.map(function (c) {
+      const d = c.report_data || {};
+      const canEdit = (role === 'edit' && !!me);
+      return '<div class="calc" data-id="' + esc(c.id) + '">' +
+        '<div class="calc-head" onclick="__toggle(&quot;' + esc(c.id) + '&quot;)">' +
+          '<div><div class="t">' + esc(d.product_title || '—') + '</div>' +
+          '<div class="d">' + esc(d.functional_unit || '—') + ' · ' + fmtDate(c.created_at) + '</div></div>' +
+          '<div class="calc-right"><div class="c">' + fmt(d.total_co2eq) + ' kgCO₂e</div>' +
+          '<span class="calc-chev">▸</span></div>' +
+        '</div>' +
+        '<div class="calc-body">' +
+          reportHtml(d, { title: d.product_title, fu: d.functional_unit, date: c.created_at }, false) +
+          (canEdit
+            ? '<div class="calc-actions"><button class="ab-btn ab-primary" onclick="__editCalc(&quot;' + esc(c.id) + '&quot;)">' + esc(t.edit) + '</button></div>'
+            : '') +
+        '</div></div>';
+    }).join('') + '</section>';
+  }
+
+  $('root').innerHTML = h;
+  document.title = (project.name || '—') + ' — LCA·AI';
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   РЕДАКТИРОВАНИЕ
-   ═══════════════════════════════════════════════════════════════ */
-function enterEdit() {
-  draft = JSON.parse(JSON.stringify(currentItem.report_data || {}));
-  editing = true;
-  renderHistory(currentItem, true);
-  renderActions();
-}
-
-function cancelEdit() {
-  draft = null;
-  editing = false;
-  renderHistory(currentItem, false);
-  renderActions();
-}
-
-/* Правка поля → мгновенный локальный пересчёт, чтобы человек видел
-   последствие сразу, а не после сохранения. */
-window.__editField = function (si, pi, field, value) {
-  if (!draft) return;
-  const sp = draft.stages?.[si]?.sub_processes?.[pi];
-  if (!sp) return;
-  sp[field] = parseFloat(value) || 0;
-  const total = recompute(draft);
-  const el = $('liveTotal');
-  if (el) { el.textContent = fmt(total); el.classList.add('dirty-total'); }
+window.__toggle = function (id) {
+  const el = document.querySelector('.calc[data-id="' + CSS.escape(String(id)) + '"]');
+  if (!el) return;
+  el.classList.toggle('open');
+  const ch = el.querySelector('.calc-chev');
+  if (ch) ch.textContent = el.classList.contains('open') ? '▾' : '▸';
 };
+window.__editCalc = function (id) { startEdit(id); };
 
-async function saveEdit() {
-  if (!draft || !sb || !me) return;
-  const btn = $('saveBtn');
-  btn.disabled = true;
-  btn.textContent = 'Сохраняем…';
-  try {
-    const { data: { session } } = await sb.auth.getSession();
-    const res = await fetch(SB_URL + '/functions/v1/share-edit', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SB_KEY,
-        'Authorization': 'Bearer ' + (session?.access_token || '')
-      },
-      body: JSON.stringify({ token: shareToken, report_data: draft })
-    });
-    const out = await res.json().catch(() => ({}));
+$('forkBtn').addEventListener('click', fork);
+$('editBtn').addEventListener('click', function () { startEdit(null); });
+$('cancelBtn').addEventListener('click', cancelEdit);
+$('saveBtn').addEventListener('click', saveEdit);
 
-    if (!res.ok) {
-      const msg = {
-        auth_required:  'Нужно войти заново',
-        read_only:      'Эта ссылка даёт только чтение',
-        not_your_invite:'Приглашение выписано на другой email',
-        expired:        'Срок действия ссылки истёк',
-        not_found:      'Ссылка недействительна или отозвана'
-      }[out.error] || ('Не удалось сохранить: ' + (out.detail || out.error || res.status));
-      throw new Error(msg);
-    }
-
-    // Сервер пересчитал итог сам — берём его значение, не своё
-    draft.total_co2eq = out.total_co2eq;
-    currentItem.report_data = draft;
-    currentItem.total_co2eq = out.total_co2eq;
-    editing = false;
-    draft = null;
-    renderHistory(currentItem, false);
-    renderActions();
-    btn.disabled = false;
-    btn.textContent = 'Сохранить изменения';
-  } catch (e) {
-    btn.disabled = false;
-    btn.textContent = 'Сохранить изменения';
-    alert(e.message || e);
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   ЗАГРУЗКА
-   ═══════════════════════════════════════════════════════════════ */
 (async function () {
-  shareToken = new URLSearchParams(location.search).get('token');
-  if (!shareToken) return setState('ссылка неполная — нет токена', true);
+  applyLang();
+  token = new URLSearchParams(location.search).get('token');
+  if (!token) return setState(T().e_token, true);
+  setState(T().loading, false);
 
-  // Авторизация: страница работает и без неё (чтение), но с ней
-  // появляются «сохранить себе» и, если разрешено, правка.
+  // Авторизация необязательна: чтение работает и без неё.
+  // С ней появляются «сохранить себе» и, если разрешено, правка.
   try {
     sb = window.supabase.createClient(SB_URL, SB_KEY);
-    const { data: { user } } = await sb.auth.getUser();
-    me = user || null;
+    const u = await sb.auth.getUser();
+    me = (u && u.data && u.data.user) ? u.data.user : null;
   } catch (e) { sb = null; me = null; }
 
   try {
-    const res = await fetch(SB_URL + '/functions/v1/share-view?token=' + encodeURIComponent(shareToken), {
+    const res = await fetch(SB_URL + '/functions/v1/share-view?token=' + encodeURIComponent(token), {
       headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
     });
-    if (res.status === 401) return setState('доступ отклонён сервером', true);
-    if (res.status === 404) return setState('ссылка недействительна или отозвана', true);
-    if (res.status === 410) return setState('срок действия ссылки истёк', true);
-    if (!res.ok) return setState('не удалось загрузить отчёт', true);
+    const t = T();
+    if (res.status === 401) return setState(t.e_401, true);
+    if (res.status === 404) return setState(t.e_404, true);
+    if (res.status === 410) return setState(t.e_410, true);
+    if (!res.ok)            return setState(t.e_load, true);
 
     const data = await res.json();
-    shareRole = data.role || 'view';
+    role = data.role || 'view';
+    kind = data.kind;
 
-    if (data.kind === 'history') {
-      currentItem = data.item;
-      renderHistory(currentItem, false);
-      renderActions();
-    } else if (data.kind === 'project') {
-      renderProject(data.project, data.calculations || []);
-    } else {
-      setState('неизвестный тип ссылки', true);
-    }
+    if (kind === 'history')      { item = data.item; }
+    else if (kind === 'project') { project = data.project; calcs = data.calculations || []; }
+    else return setState(t.e_kind, true);
+
+    renderAll();
+    renderActions();
   } catch (e) {
-    setState('сеть недоступна', true);
+    setState(T().e_net, true);
   }
 })();
-
-$('forkBtn')?.addEventListener('click', forkToMyAccount);
-$('editBtn')?.addEventListener('click', enterEdit);
-$('cancelBtn')?.addEventListener('click', cancelEdit);
-$('saveBtn')?.addEventListener('click', saveEdit);
 </script>
 </body>
 </html>

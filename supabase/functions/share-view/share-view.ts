@@ -85,9 +85,7 @@ Deno.serve(async (req) => {
       .select("id, report_data, created_at")
       .eq("project_id", share.target_id)
       .order("created_at", { ascending: true });
-    // Проекты редактировать по ссылке нельзя — только отдельные расчёты.
-    // Совместная правка целого проекта требует другой модели конфликтов.
-    payload = { kind: "project", project, calculations: calcs || [], role: "view" };
+    payload = { kind: "project", project, calculations: calcs || [], role: share.role || "view" };
   }
 
   if (!payload) {

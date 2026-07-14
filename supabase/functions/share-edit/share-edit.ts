@@ -47,10 +47,10 @@ Deno.serve(async (req) => {
     const { data: { user }, error: uErr } = await admin.auth.getUser(jwt);
     if (uErr || !user) return json({ error: "auth_required" }, 401);
 
-    let body: { token?: string; report_data?: Record<string, unknown> };
+    let body: { token?: string; report_data?: Record<string, unknown>; calc_id?: string };
     try { body = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
 
-    const { token, report_data } = body;
+    const { token, report_data, calc_id } = body;
     if (!token || !report_data) return json({ error: "missing_fields" }, 400);
 
     // ── 2. Ссылка: существует, не отозвана, не истекла, даёт право записи
@@ -66,7 +66,6 @@ Deno.serve(async (req) => {
       return json({ error: "expired" }, 410);
     }
     if (share.role !== "edit") return json({ error: "read_only" }, 403);
-    if (share.kind !== "history") return json({ error: "unsupported_kind" }, 400);
 
     // ── 3. Если ссылка выписана на конкретный email — только этот человек.
     //    Ссылка без адреса (созданная кнопкой «Создать ссылку») работает
@@ -97,17 +96,44 @@ Deno.serve(async (req) => {
     }
     (report_data as any).total_co2eq = total;
 
-    // ── 5. Запись
-    const { error: wErr } = await admin
-      .from("user_history")
-      .update({
-        report_data,
-        total_co2eq: total,
-        product_title: (report_data as any).product_title ?? undefined,
-      })
-      .eq("id", share.target_id);
+    // ── 5. Запись — в зависимости от того, что расшарено
+    if (share.kind === "history") {
+      const { error: wErr } = await admin
+        .from("user_history")
+        .update({
+          report_data,
+          total_co2eq: total,
+          product_title: (report_data as any).product_title ?? undefined,
+        })
+        .eq("id", share.target_id);
+      if (wErr) return json({ error: wErr.message }, 500);
 
-    if (wErr) return json({ error: wErr.message }, 500);
+    } else if (share.kind === "project") {
+      // Правим КОНКРЕТНЫЙ расчёт внутри проекта, а не проект целиком.
+      if (!calc_id) return json({ error: "calc_id_required" }, 400);
+
+      /* Расчёт обязан принадлежать именно этому проекту. Без проверки
+         владелец edit-ссылки на свой проект мог бы прислать чужой calc_id
+         и переписать расчёт в чужом проекте. */
+      const { data: calc } = await admin
+        .from("project_calculations")
+        .select("id, project_id")
+        .eq("id", calc_id)
+        .maybeSingle();
+
+      if (!calc || String(calc.project_id) !== String(share.target_id)) {
+        return json({ error: "calc_not_in_project" }, 403);
+      }
+
+      const { error: wErr } = await admin
+        .from("project_calculations")
+        .update({ report_data })
+        .eq("id", calc_id);
+      if (wErr) return json({ error: wErr.message }, 500);
+
+    } else {
+      return json({ error: "unsupported_kind" }, 400);
+    }
 
     await admin.from("share_links")
       .update({ last_edited_by: user.id, last_edited_at: new Date().toISOString() })
@@ -117,12 +143,13 @@ Deno.serve(async (req) => {
     await admin.from("audit_log").insert({
       user_id: share.owner_id,           // пишем в журнал ВЛАДЕЛЬЦА
       action: "share_edit",
-      entity_type: "history",
-      entity_id: String(share.target_id),
+      entity_type: share.kind,
+      entity_id: String(calc_id || share.target_id),
       details: {
         editor_id: user.id,
         editor_email: user.email,
         new_total: total,
+        project_id: share.kind === "project" ? share.target_id : undefined,
       },
     });
 

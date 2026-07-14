@@ -982,7 +982,7 @@
                 share_role_label: 'Права получателя', share_role_view: 'Только чтение', share_role_edit: 'Чтение и редактирование',
                 share_role_note_view: 'Получатель сможет только смотреть отчёт.',
                 share_role_note_edit: 'Получатель сможет изменять количества и коэффициенты. Потребуется вход в аккаунт. Все правки попадут в журнал.',
-                share_role_note_project: 'Проекты можно передавать только для чтения.',
+                share_role_note_edit_proj: 'Получатель сможет изменять любой расчёт внутри проекта. Потребуется вход. Все правки попадут в журнал.',
                 vs_parent: 'к исходному:', err_jszip: 'JSZip не загружен', toast_exported: 'Данные экспортированы',
                 xstats_title: 'Статистика', xstats_by_month: 'CO₂ по месяцам', xstats_top5: 'Топ-5 по следу', xstats_avg: 'Среднее',
                 portfolio_title: 'Где углерод в вашем портфеле',
@@ -1095,7 +1095,7 @@
                 share_role_label: 'Recipient rights', share_role_view: 'Read only', share_role_edit: 'Read and edit',
                 share_role_note_view: 'The recipient can only view the report.',
                 share_role_note_edit: 'The recipient can change amounts and factors. Sign-in required. Every edit is logged.',
-                share_role_note_project: 'Projects can only be shared read-only.',
+                share_role_note_edit_proj: 'The recipient can edit any calculation inside the project. Sign-in required. Every edit is logged.',
                 vs_parent: 'vs original:', err_jszip: 'JSZip not loaded', toast_exported: 'Data exported',
                 xstats_title: 'Statistics', xstats_by_month: 'CO₂ by month', xstats_top5: 'Top 5 by footprint', xstats_avg: 'Average',
                 portfolio_title: 'Where the carbon is across your portfolio',
@@ -1208,7 +1208,7 @@
                 share_role_label: '接收方权限', share_role_view: '仅查看', share_role_edit: '查看并编辑',
                 share_role_note_view: '接收方只能查看报告。',
                 share_role_note_edit: '接收方可修改数量与排放因子。需要登录，所有修改都会记入日志。',
-                share_role_note_project: '项目仅支持只读分享。',
+                share_role_note_edit_proj: '接收方可编辑项目内任意计算。需要登录，所有修改都会记入日志。',
                 vs_parent: '相对原始：', err_jszip: 'JSZip 未加载', toast_exported: '数据已导出',
                 xstats_title: '统计', xstats_by_month: '各月 CO₂', xstats_top5: '碳足迹前五', xstats_avg: '平均值',
                 portfolio_title: '碳集中在您的哪些环节',
@@ -1434,7 +1434,7 @@
             console.log('[Cabinet] Supabase client created, getting session...');
             const { data: { session }, error } = await db.auth.getSession();
             if (error) { console.error('[Cabinet] Session error:', error); showToast(t('err_auth') + error.message); return; }
-            if (!session) { console.log('[Cabinet] No session, redirecting to login'); window.location.href = '/login.html'; return; }
+            if (!session) { window.location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search); return; }
             console.log('[Cabinet] Session OK, user:', session.user.id);
             currentUser = session.user;
             renderProfile();
@@ -2831,19 +2831,15 @@
             };
         }
 
-        /* Роль «редактирование» доступна только для отдельных расчётов.
-           Совместная правка целого проекта требует другой модели разрешения
-           конфликтов — обещать её в UI, не реализовав, нельзя. */
         function syncShareRoleUI() {
             const sel  = document.getElementById('shareRole');
             const note = document.getElementById('shareRoleNote');
-            const isProject = currentShareKind === 'project';
             const editOpt = sel.querySelector('option[value="edit"]');
-            editOpt.disabled = isProject;
-            if (isProject && sel.value === 'edit') sel.value = 'view';
-            note.textContent = isProject ? t('share_role_note_project')
-                             : sel.value === 'edit' ? t('share_role_note_edit')
-                                                    : t('share_role_note_view');
+            editOpt.disabled = false;   // теперь проекты тоже редактируемы
+            note.textContent = sel.value === 'edit'
+                ? (currentShareKind === 'project' ? t('share_role_note_edit_proj')
+                                                  : t('share_role_note_edit'))
+                : t('share_role_note_view');
         }
         document.getElementById('shareRole')?.addEventListener('change', syncShareRoleUI);
 

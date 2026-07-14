@@ -209,7 +209,26 @@ html.dark .lang-switch button.active { background: var(--ink); color: var(--bg);
     <script>
         const SB_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
-        const REDIRECT = window.location.origin + '/';
+        /* Куда вернуть человека после входа.
+           Раньше здесь было жёстко '/' — и любой, кто заходил залогиниться
+           со страницы расшаренного отчёта или из кабинета, оказывался
+           на главной и терял то, ради чего вообще шёл.
+
+           Берём ?next= из адреса. Принимаем ТОЛЬКО относительные пути
+           (начинается с одного '/'), иначе это open-redirect: злоумышленник
+           дал бы ссылку /login.html?next=https://зло.сайт и увёл человека
+           сразу после успешного входа. */
+        function safeNext() {
+            try {
+                const raw = new URLSearchParams(location.search).get('next');
+                if (!raw) return '/';
+                const dec = decodeURIComponent(raw);
+                if (!dec.startsWith('/') || dec.startsWith('//')) return '/';
+                return dec;
+            } catch (e) { return '/'; }
+        }
+        const NEXT = safeNext();
+        const REDIRECT = window.location.origin + NEXT;
         let sbClient = null;
         let isLoginMode = true;
 

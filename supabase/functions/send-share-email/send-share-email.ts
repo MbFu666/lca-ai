@@ -71,10 +71,9 @@ Deno.serve(async (req) => {
   const days = Math.min(Math.max(Number(body.expires_days) || 30, 1), 365);
   const expires = new Date(Date.now() + days * 864e5).toISOString();
 
-  /* Право записи выдаётся только явно и только для отдельных расчётов.
-     Проекты — всегда read-only: совместная правка проекта требует другой
-     модели разрешения конфликтов, и обещать её, не реализовав, нельзя. */
-  const role = (body.role === "edit" && kind === "history") ? "edit" : "view";
+  // Право записи выдаётся только явно. Работает и для расчётов, и для проектов
+  // (внутри проекта правится каждый расчёт по отдельности).
+  const role = body.role === "edit" ? "edit" : "view";
 
   const { error: insErr } = await admin.from("share_links").insert({
     token, kind, target_id, owner_id: user.id,
