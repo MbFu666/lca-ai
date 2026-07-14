@@ -15,7 +15,6 @@
     <title>LCA·AI — Личный кабинет</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
@@ -371,6 +370,149 @@
         .btn-primary { background: var(--ink); border: 1px solid var(--ink); box-shadow: none; }
         .btn-primary:hover { background: var(--jade-dark); border-color: var(--jade-dark); box-shadow: none; }
         .modal { animation: none; }
+
+        /* ══════════════════════════════════════════════════════
+           Новые функции кабинета
+           ══════════════════════════════════════════════════════ */
+
+        /* Портфельная аналитика */
+        .portfolio-bars { display: flex; flex-direction: column; gap: 2px; margin-top: 16px; }
+        .pf-row { display: grid; grid-template-columns: minmax(90px,1.3fr) 3fr auto; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--rule); }
+        .pf-row:last-child { border-bottom: none; }
+        .pf-name { font-size: 13px; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .pf-bar { height: 10px; background: var(--bg-soft); }
+        .pf-fill { height: 100%; transition: width .5s cubic-bezier(.22,1,.36,1); }
+        .pf-val { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--ink); text-align: right; }
+
+        /* Спарклайн: линия тренда + легенда */
+        .spark-trend { stroke: var(--ink-mute); stroke-width: 1.5; stroke-dasharray: 4 3; }
+        .spark-legend { display: flex; justify-content: space-between; margin-top: 10px; font-family: var(--mono); font-size: 11px; color: var(--ink-mute); }
+        .spark-legend b { font-weight: 700; }
+        .trend-down { color: #2F6B4F; }
+        .trend-up   { color: var(--c-rust); }
+        .spark-empty { padding: 32px 0; text-align: center; font-family: var(--mono); font-size: 12px; color: var(--ink-mute); }
+
+        /* Фильтры */
+        .filters-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 16px; align-items: end; padding: 16px; border: 1px solid var(--rule); margin-bottom: 12px; }
+        .filter-field { display: flex; flex-direction: column; gap: 6px; }
+        .filter-field label { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); }
+        .filter-range { display: flex; align-items: center; gap: 6px; }
+        .filter-range input { flex: 1; min-width: 0; padding: 7px 9px; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); font-family: var(--mono); font-size: 12px; }
+        .filter-range span { color: var(--ink-mute); font-size: 12px; }
+        .filters-panel select { padding: 7px 9px; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); font-family: var(--mono); font-size: 12px; }
+        .filter-summary { font-family: var(--mono); font-size: 11px; color: var(--ink-mute); padding: 6px 0 10px; }
+
+        /* Теги */
+        .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+        .tag { display: inline-flex; align-items: center; gap: 4px; font-family: var(--mono); font-size: 10px; letter-spacing: .04em; padding: 3px 6px; border: 1px solid var(--rule); color: var(--ink-soft); }
+        .tag-x { background: none; border: none; color: var(--ink-mute); cursor: pointer; font-size: 12px; line-height: 1; padding: 0 0 0 2px; }
+        .tag-x:hover { color: var(--c-rust); }
+        .tag-add { font-family: var(--mono); font-size: 10px; padding: 3px 8px; border: 1px dashed var(--rule); background: none; color: var(--ink-mute); cursor: pointer; }
+        .tag-add:hover { border-style: solid; color: var(--ink); }
+
+        /* Заметка */
+        .card-note { margin-top: 10px; padding: 8px 10px; border-left: 2px solid var(--jade); background: var(--bg-soft); font-size: 13px; line-height: 1.5; color: var(--ink-soft); }
+        .modal-textarea { width: 100%; resize: vertical; font-family: var(--sans); font-size: 14px; line-height: 1.5; }
+
+        /* Архив */
+        .card-archived { opacity: .6; }
+        .card-archived .card-title { text-decoration: line-through; text-decoration-thickness: 1px; }
+        #trashToggle.active { background: var(--ink); color: var(--bg); }
+
+        /* Пакетная панель */
+        .batch-bar { flex-wrap: wrap; gap: 8px; }
+
+        /* Сравнение */
+        .modal-wide { max-width: 900px; width: 100%; }
+        .cmp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 0; border: 1px solid var(--rule); }
+        .cmp-col { padding: 18px; border-right: 1px solid var(--rule); display: flex; flex-direction: column; }
+        .cmp-col:last-child { border-right: none; }
+        .cmp-badge { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 8px; }
+        .cmp-title { font-size: 14px; font-weight: 700; color: var(--ink); min-height: 2.6em; line-height: 1.3; }
+        .cmp-fu { font-family: var(--mono); font-size: 10px; color: var(--ink-mute); margin-top: 4px; }
+        .cmp-val { font-family: var(--mono); font-size: 26px; font-weight: 700; color: var(--jade-deep); margin: 12px 0 4px; letter-spacing: -.02em; }
+        .cmp-val .u { font-size: 11px; font-weight: 500; color: var(--ink-mute); margin-left: 4px; }
+        .cmp-delta { font-family: var(--mono); font-size: 12px; font-weight: 700; }
+        .cmp-delta.down { color: #2F6B4F; }
+        .cmp-delta.up { color: var(--c-rust); }
+        .cmp-delta.muted { color: var(--ink-mute); font-weight: 400; }
+        .cmp-stages { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--rule); }
+        .cmp-stage { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 12px; }
+        .cmp-sw { width: 8px; height: 8px; flex-shrink: 0; }
+        .cmp-sname { flex: 1; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .cmp-spct { font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--ink); }
+        .cmp-nodata { font-family: var(--mono); font-size: 11px; color: var(--ink-mute); }
+        .cmp-warn { padding: 10px 12px; border-left: 3px solid var(--c-rust); background: var(--bg-soft); font-size: 13px; color: var(--ink-soft); margin-bottom: 16px; }
+
+        /* Цель проекта */
+        .target { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--rule); }
+        .target-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+        .target-label { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); }
+        .target-stat { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--c-rust); }
+        .target-stat.reached { color: #2F6B4F; }
+        .target-bar { height: 6px; background: var(--bg-soft); overflow: hidden; }
+        .target-fill { height: 100%; background: var(--jade); transition: width .5s cubic-bezier(.22,1,.36,1); }
+        .target-fill.reached { background: #2F6B4F; }
+        .target-foot { font-family: var(--mono); font-size: 10px; color: var(--ink-mute); margin-top: 6px; }
+
+        /* Расширенная статистика */
+        .xstat-sub { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 10px; }
+        .xstat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+        .xstat-key { font-family: var(--mono); font-size: 11px; color: var(--ink-mute); width: 60px; flex-shrink: 0; }
+        .xstat-bar { flex: 1; height: 8px; background: var(--bg-soft); overflow: hidden; }
+        .xstat-fill { height: 100%; background: var(--jade); }
+        .xstat-val { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--ink); min-width: 54px; text-align: right; }
+        .xstat-block { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--rule); }
+        .xstat-line { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; font-size: 12px; color: var(--ink-soft); }
+        .xstat-avg { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; font-weight: 600; }
+        .filter-clear { background: none; border: none; border-bottom: 1px solid var(--rule); color: var(--ink); font-family: var(--mono); font-size: 11px; cursor: pointer; padding: 0; margin-left: 4px; }
+        .filter-clear:hover { border-color: var(--jade); color: var(--jade-deep); }
+        #filterToggle.active { background: var(--ink); color: var(--bg); }
+
+        /* Профиль: сетка полей */
+        .settings-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 640px) { .settings-grid2 { grid-template-columns: 1fr; } }
+        .field-row { display: flex; align-items: center; gap: 10px; }
+        .field-static { flex: 1; padding: 10px 0; font-size: 14px; color: var(--ink-mute); }
+
+        /* Провайдеры входа */
+        .providers { display: flex; flex-direction: column; gap: 0; }
+        .provider { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+        .provider:last-child { border-bottom: none; }
+        .provider-ic { width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--rule); font-family: var(--mono); font-size: 11px; font-weight: 700; flex-shrink: 0; }
+        .provider-name { flex: 1; font-size: 14px; text-transform: capitalize; }
+        .provider-tag { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #2F6B4F; }
+
+        /* Сессии */
+        .session-info { margin-bottom: 14px; }
+        .session-row { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--rule); font-size: 13px; color: var(--ink-soft); }
+        .session-val { font-family: var(--mono); font-size: 12px; color: var(--ink); }
+        .session-note { font-size: 12px; color: var(--ink-mute); margin-top: 10px; line-height: 1.5; }
+        .pw-hint { font-size: 11px; color: var(--ink-mute); margin: -4px 0 8px; }
+
+        /* Опасная зона — визуально отделена, иначе удаление стоит рядом с тумблером темы */
+        .danger-zone { border: 1px solid var(--c-rust); }
+        .danger-zone .sg-header { color: var(--c-rust); }
+        .danger-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+        .danger-row strong { font-size: 14px; display: block; margin-bottom: 4px; }
+        .danger-row p { font-size: 12px; color: var(--ink-mute); line-height: 1.5; max-width: 42ch; }
+
+        /* Шаринг */
+        .modal-sub { font-size: 13px; color: var(--ink-mute); line-height: 1.55; margin-bottom: 16px; }
+        .share-link-row { display: flex; gap: 8px; margin-top: 12px; }
+        .share-link-row input { flex: 1; font-family: var(--mono); font-size: 12px; }
+
+        /* Версии */
+        .version-badge { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 8px 10px; border-left: 2px solid var(--rule); background: var(--bg-soft); flex-wrap: wrap; }
+        .vb-arrow { font-family: var(--mono); font-weight: 700; }
+        .vb-delta { font-family: var(--mono); font-size: 13px; font-weight: 700; }
+        .vb-arrow.down, .vb-delta.down { color: #2F6B4F; }
+        .vb-arrow.up,   .vb-delta.up   { color: var(--c-rust); }
+        .vb-vs { font-size: 12px; color: var(--ink-mute); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .vb-cmp { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; padding: 4px 8px; border: 1px solid var(--rule); background: none; color: var(--ink-soft); cursor: pointer; }
+        .vb-cmp:hover { border-color: var(--ink); color: var(--ink); }
+
+        .share-role-note { font-size: 12px; color: var(--ink-mute); line-height: 1.5; margin: -6px 0 6px; }
 </style>
 </head>
 <body>
@@ -436,9 +578,9 @@
                             <div class="kpi-label" data-i18n="kpi_calcs">Всего расчётов</div>
                         </div>
                         <div class="kpi" style="--kpi-tint: #DBEAFE">
-                            <div class="kpi-icon">🌱</div>
+                            <div class="kpi-icon">📐</div>
                             <div class="kpi-value" id="kpiTotal">0<span class="u">kgCO₂e</span></div>
-                            <div class="kpi-label" data-i18n="kpi_total">Суммарный след</div>
+                            <div class="kpi-label" data-i18n="kpi_median">Медианный след</div>
                         </div>
                         <div class="kpi" style="--kpi-tint: #FEF3C7">
                             <div class="kpi-icon">⚖️</div>
@@ -452,9 +594,16 @@
                         </div>
                     </div>
                     <div class="panel">
-                        <h3 data-i18n="chart_title">Активность за 30 дней</h3>
-                        <div class="panel-sub" data-i18n="chart_sub">Количество расчётов по дням</div>
+                        <h3 data-i18n="chart_title">След во времени</h3>
+                        <div class="panel-sub" data-i18n="chart_sub">Каждая точка — расчёт. Тренд показывает, снижается ли след ваших продуктов</div>
                         <div class="sparkline-wrap" id="sparklineWrap"></div>
+                    </div>
+
+                    <!-- Портфельная аналитика: то, чего не даст ни один отдельный отчёт -->
+                    <div class="panel" id="portfolioPanel" style="display:none">
+                        <h3 data-i18n="portfolio_title">Где углерод в вашем портфеле</h3>
+                        <div class="panel-sub" id="portfolioVerdict"></div>
+                        <div class="portfolio-bars" id="portfolioBars"></div>
                     </div>
                     <div class="panel">
                         <h3 data-i18n="recent_title">Недавние расчёты</h3>
@@ -477,13 +626,48 @@
                             <option value="co2_desc" data-i18n="sort_co2_desc">CO₂ по убыванию</option>
                             <option value="co2_asc" data-i18n="sort_co2_asc">CO₂ по возрастанию</option>
                         </select>
+                        <button class="btn btn-ghost btn-sm" id="filterToggle" data-i18n="filters">⚙ Фильтры</button>
+                        <button class="btn btn-ghost btn-sm" id="trashToggle" data-i18n="show_archive">🗄 Архив</button>
                     </div>
+
+                    <!-- Расширенные фильтры -->
+                    <div class="filters-panel" id="filtersPanel" style="display:none">
+                        <div class="filter-field">
+                            <label data-i18n="f_co2">CO₂, kg</label>
+                            <div class="filter-range">
+                                <input type="number" id="fCo2Min" placeholder="0" step="0.01">
+                                <span>—</span>
+                                <input type="number" id="fCo2Max" placeholder="∞" step="0.01">
+                            </div>
+                        </div>
+                        <div class="filter-field">
+                            <label data-i18n="f_date">Дата</label>
+                            <div class="filter-range">
+                                <input type="date" id="fDateFrom">
+                                <span>—</span>
+                                <input type="date" id="fDateTo">
+                            </div>
+                        </div>
+                        <div class="filter-field">
+                            <label data-i18n="f_tag">Тег</label>
+                            <select id="fTag"><option value="" data-i18n="f_any">любой</option></select>
+                        </div>
+                        <button class="btn btn-ghost btn-sm" id="filterReset" data-i18n="f_reset">Сбросить</button>
+                    </div>
+
+                    <div class="filter-summary" id="filterSummary" style="display:none"></div>
+
                     <div id="historyList"></div>
                     <div class="load-more-wrap"><button class="btn btn-ghost" id="loadMoreBtn" style="display:none" data-i18n="load_more">Показать ещё</button></div>
+
                     <div class="batch-bar" id="batchBar">
-                        <span>Выбрано: <span id="batchCount">0</span></span>
-                        <button class="btn btn-sm" id="batchDelete" style="color:var(--c-rust)">🗑 Удалить</button>
-                        <button class="btn btn-sm" id="batchDeselect">Отменить</button>
+                        <span><span data-i18n="selected">Выбрано</span>: <span id="batchCount">0</span></span>
+                        <button class="btn btn-sm" id="batchCompare" data-i18n="compare">⇄ Сравнить</button>
+                        <button class="btn btn-sm" id="batchProject" data-i18n="to_project">📁 В проект</button>
+                        <button class="btn btn-sm" id="batchCsv" data-i18n="export_csv">⬇ CSV</button>
+                        <button class="btn btn-sm" id="batchArchive" data-i18n="archive">🗄 В архив</button>
+                        <button class="btn btn-sm" id="batchDelete" style="color:var(--c-rust)" data-i18n="delete">🗑 Удалить</button>
+                        <button class="btn btn-sm" id="batchDeselect" data-i18n="cancel">Отменить</button>
                     </div>
                 </div>
 
@@ -524,9 +708,37 @@
                                 </div>
                                 <input type="file" id="avatarFileInput" accept="image/jpeg,image/png,image/webp">
                             </div>
+                            <label data-i18n="profile_name_ph">Имя</label>
                             <input type="text" id="editProfileName" class="settings-input" data-i18n-placeholder="profile_name_ph" placeholder="Имя">
+
                             <label data-i18n="email_label">Email</label>
-                            <div id="settingsEmail" style="padding:10px 0;font-size:14px;color:var(--ink-mute)">—</div>
+                            <div class="field-row">
+                                <div id="settingsEmail" class="field-static">—</div>
+                                <button class="btn btn-ghost btn-sm" id="changeEmailBtn" data-i18n="change">Изменить</button>
+                            </div>
+
+                            <div class="settings-grid2">
+                                <div>
+                                    <label data-i18n="org_label">Организация</label>
+                                    <input type="text" id="editOrg" class="settings-input" data-i18n-placeholder="org_ph" placeholder="Университет, компания">
+                                </div>
+                                <div>
+                                    <label data-i18n="role_label">Должность</label>
+                                    <input type="text" id="editRole" class="settings-input" data-i18n-placeholder="role_ph" placeholder="LCA-аналитик, аспирант">
+                                </div>
+                            </div>
+
+                            <div class="settings-grid2">
+                                <div>
+                                    <label data-i18n="country_label">Страна</label>
+                                    <input type="text" id="editCountry" class="settings-input" data-i18n-placeholder="country_ph" placeholder="Россия">
+                                </div>
+                                <div>
+                                    <label data-i18n="site_label">Сайт / ORCID</label>
+                                    <input type="url" id="editSite" class="settings-input" placeholder="https://">
+                                </div>
+                            </div>
+
                             <label data-i18n="bio_label">О себе</label>
                             <textarea id="editBio" class="settings-input" rows="3" data-i18n-placeholder="bio_ph" placeholder="Расскажите о себе…" style="resize:vertical"></textarea>
                             <button id="saveProfileBtn" class="btn btn-primary" style="width:100%" data-i18n="save_profile">Сохранить профиль</button>
@@ -535,18 +747,42 @@
 
                     <!-- Pane: Security -->
                     <div class="settings-pane" id="pane-security">
+
+                        <!-- Способ входа: пароль есть только у email-аккаунтов -->
                         <div class="settings-group">
+                            <h3><span class="sg-icon">🔑</span> <span data-i18n="providers_title">Способ входа</span></h3>
+                            <div id="providersList" class="providers"></div>
+                        </div>
+
+                        <!-- Скрывается целиком, если вход через OAuth: пароля у такого аккаунта нет -->
+                        <div class="settings-group" id="passwordGroup">
                             <h3><span class="sg-icon">🔒</span> <span data-i18n="change_pw_title">Изменить пароль</span></h3>
-                            <input type="password" id="oldPassword" class="settings-input" data-i18n-placeholder="old_pw_ph" placeholder="Текущий пароль">
-                            <input type="password" id="newPassword" class="settings-input" data-i18n-placeholder="new_pw_ph" placeholder="Новый пароль">
+                            <input type="password" id="oldPassword" class="settings-input" data-i18n-placeholder="old_pw_ph" placeholder="Текущий пароль" autocomplete="current-password">
+                            <input type="password" id="newPassword" class="settings-input" data-i18n-placeholder="new_pw_ph" placeholder="Новый пароль" autocomplete="new-password">
                             <div class="pw-strength"><div class="pw-strength-bar" id="pwStrengthBar"></div></div>
-                            <input type="password" id="confirmNewPassword" class="settings-input" data-i18n-placeholder="confirm_pw_ph" placeholder="Подтвердите пароль">
+                            <div class="pw-hint" id="pwHint"></div>
+                            <input type="password" id="confirmNewPassword" class="settings-input" data-i18n-placeholder="confirm_pw_ph" placeholder="Подтвердите пароль" autocomplete="new-password">
                             <button id="changePasswordBtn" class="btn btn-primary" style="width:100%" data-i18n="change_pw_btn">Изменить пароль</button>
                         </div>
+
+                        <!-- Сессии -->
                         <div class="settings-group">
-                            <div class="sg-header"><span class="sg-icon">⚠️</span> <span data-i18n="delete_account" style="color:var(--c-rust)">Удалить аккаунт</span></div>
-                            <p style="font-size:13px;color:var(--ink-mute);margin-bottom:14px" data-i18n="delete_account_desc">Удалить все данные безвозвратно</p>
-                            <button class="btn btn-danger" id="deleteAccountBtn" data-i18n="delete_btn">Удалить</button>
+                            <h3><span class="sg-icon">🖥</span> <span data-i18n="sessions_title">Активные сессии</span></h3>
+                            <div id="sessionInfo" class="session-info"></div>
+                            <button class="btn btn-ghost" style="width:100%" id="signOutAllBtn" data-i18n="signout_all">Выйти на всех устройствах</button>
+                        </div>
+
+                        <!-- Опасная зона: визуально отделена, без неё удаление стоит рядом с тумблером темы -->
+                        <div class="settings-group danger-zone">
+                            <div class="sg-header"><span class="sg-icon">⚠️</span> <span data-i18n="danger_zone">Опасная зона</span></div>
+
+                            <div class="danger-row">
+                                <div>
+                                    <strong data-i18n="delete_account">Удалить аккаунт</strong>
+                                    <p data-i18n="delete_account_desc">Расчёты, проекты и профиль будут удалены безвозвратно.</p>
+                                </div>
+                                <button class="btn btn-danger" id="deleteAccountBtn" data-i18n="delete_btn">Удалить</button>
+                            </div>
                         </div>
                     </div>
 
@@ -620,29 +856,64 @@
     <div class="toast" id="toast"></div>
 
     <!-- ══ Share by email modal ══ -->
+    <!-- Поделиться: ссылка только для чтения.
+         Роль «Редактирование» убрана — совместного редактирования в системе нет,
+         и обещать его в интерфейсе нельзя. -->
     <div class="modal-mask" id="modalShare" style="display:none">
-      <div class="modal" style="max-width:400px">
-        <div class="modal-head">
-          <h3>Поделиться проектом</h3>
-          <button class="modal-close" onclick="document.getElementById('modalShare').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--ink-mute)">×</button>
+      <div class="modal">
+        <h3 data-i18n="share_title">Поделиться</h3>
+        <p class="modal-sub" data-i18n="share_sub">Получатель увидит отчёт только для чтения. Ссылку можно отозвать в любой момент.</p>
+
+        <label data-i18n="share_role_label">Права получателя</label>
+        <select id="shareRole" class="settings-input">
+          <option value="view" data-i18n="share_role_view">Только чтение</option>
+          <option value="edit" data-i18n="share_role_edit">Чтение и редактирование</option>
+        </select>
+        <div class="share-role-note" id="shareRoleNote" data-i18n="share_role_note_view">Получатель сможет только смотреть отчёт.</div>
+
+        <label data-i18n="share_expires">Срок действия</label>
+        <select id="shareExpires" class="settings-input">
+          <option value="7">7 дней</option>
+          <option value="30" selected>30 дней</option>
+          <option value="90">90 дней</option>
+          <option value="365">1 год</option>
+        </select>
+
+        <label data-i18n="share_email_label">Отправить на email (необязательно)</label>
+        <input type="email" id="shareEmail" class="settings-input" data-i18n-placeholder="share_email_ph" placeholder="colleague@example.com">
+
+        <div class="share-link-row" id="shareLinkRow" style="display:none">
+          <input type="text" id="shareLinkInput" class="settings-input" readonly>
+          <button class="btn btn-ghost btn-sm" id="shareCopyBtn" data-i18n="copy">Копировать</button>
         </div>
-        <div class="modal-body" style="padding:20px">
-          <input type="email" id="shareEmail" placeholder="Email коллеги" style="width:100%;padding:10px;border:1px solid var(--rule);border-radius:8px;margin-bottom:10px;background:var(--bg);color:var(--ink);font-family:inherit;font-size:14px">
-          <select id="shareRole" style="width:100%;padding:10px;border:1px solid var(--rule);border-radius:8px;background:var(--bg);color:var(--ink)">
-            <option value="read">Только чтение</option>
-            <option value="edit">Редактирование</option>
-          </select>
-          <button id="shareConfirmBtn" style="width:100%;margin-top:12px;padding:10px;background:var(--jade);color:white;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600">Отправить</button>
+
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="shareCancelBtn" data-i18n="cancel">Отменить</button>
+          <button class="btn btn-ghost" id="shareLinkBtn" data-i18n="share_get_link">Создать ссылку</button>
+          <button class="btn btn-primary" id="shareConfirmBtn" data-i18n="share_send">Отправить</button>
         </div>
       </div>
     </div>
 
     <!-- ══ Universal modal (input / confirm / project picker) ══ -->
+    <!-- Сравнение расчётов -->
+    <div class="modal-mask" id="compareMask">
+        <div class="modal modal-wide">
+            <h3 id="compareTitle">Сравнение</h3>
+            <div id="compareBody"></div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" id="compareClose" data-i18n="close">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-mask" id="modalMask">
         <div class="modal">
             <h3 id="modalTitle"></h3>
             <p id="modalText" style="display:none"></p>
             <input type="text" class="modal-input" id="modalInput" style="display:none">
+            <textarea class="modal-input modal-textarea" id="modalTextarea" rows="4" style="display:none"></textarea>
+            <datalist id="tagList"></datalist>
             <div class="project-pick" id="modalProjects" style="display:none"></div>
             <div class="modal-actions">
                 <button class="btn btn-ghost" id="modalCancel" data-i18n="cancel">Отмена</button>
@@ -679,6 +950,64 @@
         /* ── i18n ── */
         const CABINET_I18N = {
             ru: {
+                change: 'Изменить', send: 'Отправить', copy: 'Копировать', connected: 'подключён',
+                org_label: 'Организация', org_ph: 'Университет, компания',
+                role_label: 'Должность', role_ph: 'LCA-аналитик, аспирант',
+                country_label: 'Страна', country_ph: 'Россия', site_label: 'Сайт / ORCID',
+                err_site_url: 'Сайт должен начинаться с http:// или https://',
+                providers_title: 'Способ входа',
+                sessions_title: 'Активные сессии', sess_current: 'Текущее устройство', sess_last: 'Последний вход',
+                sess_note: 'Supabase не отдаёт полный список устройств. «Выйти везде» отзывает все токены — на всех устройствах потребуется войти заново.',
+                signout_all: 'Выйти на всех устройствах',
+                signout_all_text: 'Все сессии будут завершены. На этом устройстве тоже потребуется войти заново.',
+                change_email: 'Изменить email',
+                change_email_text: 'На новый адрес придёт письмо для подтверждения. Пока вы не подтвердите — останется старый.',
+                change_email_sent: 'Письмо для подтверждения отправлено',
+                err_email: 'Введите корректный email',
+                danger_zone: 'Опасная зона',
+                delete_type_email: 'Это необратимо. Чтобы подтвердить, введите ваш email: {email}',
+                delete_mismatch: 'Email не совпадает — удаление отменено',
+                delete_partial: 'Данные удалены, но сам аккаунт остался: серверная функция delete-account не задеплоена. Пока она не установлена, полностью удалить аккаунт из браузера невозможно.',
+                share_title: 'Поделиться',
+                share_sub: 'Получатель увидит отчёт только для чтения. Ссылку можно отозвать в любой момент.',
+                share_expires: 'Срок действия', share_email_label: 'Отправить на email (необязательно)',
+                share_email_ph: 'colleague@example.com',
+                share_get_link: 'Создать ссылку', share_send: 'Отправить',
+                share_link_created: 'Ссылка создана и скопирована',
+                share_sent: 'Письмо отправлено на {email}',
+                share_no_mail: 'Отправка почты не настроена на сервере. Ссылка создана — передайте её вручную.',
+                share_failed: 'Письмо не отправилось. Ссылка создана — передайте её вручную.',
+                kpi_median: 'Медианный след',
+                pick_project: 'Выберите проект',
+                share_role_label: 'Права получателя', share_role_view: 'Только чтение', share_role_edit: 'Чтение и редактирование',
+                share_role_note_view: 'Получатель сможет только смотреть отчёт.',
+                share_role_note_edit: 'Получатель сможет изменять количества и коэффициенты. Потребуется вход в аккаунт. Все правки попадут в журнал.',
+                share_role_note_edit_proj: 'Получатель сможет изменять любой расчёт внутри проекта. Потребуется вход. Все правки попадут в журнал.',
+                vs_parent: 'к исходному:', err_jszip: 'JSZip не загружен', toast_exported: 'Данные экспортированы',
+                xstats_title: 'Статистика', xstats_by_month: 'CO₂ по месяцам', xstats_top5: 'Топ-5 по следу', xstats_avg: 'Среднее',
+                portfolio_title: 'Где углерод в вашем портфеле',
+                pf_verdict: 'В {n} из {total} расчётов доминирует «{stage}» — в среднем {pct}% следа. Начинайте снижение отсюда.',
+                spark_empty: 'Нужно минимум два расчёта, чтобы увидеть тренд',
+                spark_trend: 'Тренд', spark_falling: 'снижается', spark_rising: 'растёт',
+                filters: '⚙ Фильтры', f_co2: 'CO₂, kg', f_date: 'Дата', f_tag: 'Тег', f_any: 'любой',
+                f_reset: 'Сбросить', f_active: 'Найдено: {n}',
+                show_archive: '🗄 Архив', back_to_history: 'К истории', archive_empty: 'Архив пуст',
+                archive: 'В архив', archived: 'Перенесено в архив', restore: 'Вернуть', restored: 'Восстановлено',
+                delete_forever: 'Удалить навсегда',
+                selected: 'Выбрано', cancel: 'Отменить',
+                variant: 'Вариант', note: 'Заметка', tag: 'Тег',
+                note_title: 'Заметка к расчёту', note_ph: 'Например: допущение по транспорту согласовано с поставщиком 12.03',
+                tag_title: 'Добавить тег', tag_ph: 'упаковка, клиент А, черновик…', add: 'Добавить',
+                save: 'Сохранить', saved: 'Сохранено', close: 'Закрыть',
+                compare: '⇄ Сравнить', cmp_title: 'Сравнение расчётов',
+                cmp_need2: 'Выберите минимум два расчёта', cmp_max3: 'Не больше трёх за раз',
+                cmp_base: 'база', cmp_is_base: 'точка отсчёта', cmp_vs_base: 'к базе',
+                cmp_nodata: 'нет разбивки по стадиям',
+                cmp_warn_fu: 'У расчётов разные функциональные единицы. Сравнение абсолютных значений некорректно — смотрите на структуру стадий, а не на итоговое число.',
+                batch_delete_text: 'Удалить {n} расчётов безвозвратно?',
+                batch_deleted: 'Удалено: {n}', batch_archived: 'В архив: {n}', batch_to_project: 'Добавлено в проект: {n}',
+                target: 'Цель', target_set: 'Цель', target_base: 'база',
+                target_title: 'Цель по снижению', target_text: 'На сколько процентов снизить след относительно первого расчёта в проекте? Пусто — убрать цель.',
                 title: 'LCA·AI — Личный кабинет',
                 nav_home: 'Главная', nav_cabinet: 'Кабинет',
                 loading: 'Загрузка...', stat_calcs: 'Расчётов', stat_projects: 'Проектов',
@@ -734,6 +1063,64 @@
                 toast_saved: 'Сохранено', email_label: 'Email', bio_label: 'О себе', bio_ph: 'Расскажите о себе…'
             },
             en: {
+                change: 'Change', send: 'Send', copy: 'Copy', connected: 'connected',
+                org_label: 'Organisation', org_ph: 'University, company',
+                role_label: 'Role', role_ph: 'LCA analyst, PhD student',
+                country_label: 'Country', country_ph: 'Poland', site_label: 'Website / ORCID',
+                err_site_url: 'The website must start with http:// or https://',
+                providers_title: 'Sign-in method',
+                sessions_title: 'Active sessions', sess_current: 'Current device', sess_last: 'Last sign-in',
+                sess_note: 'Supabase does not expose a full device list. “Sign out everywhere” revokes all tokens — every device will need to sign in again.',
+                signout_all: 'Sign out everywhere',
+                signout_all_text: 'All sessions will end. You will need to sign in again on this device too.',
+                change_email: 'Change email',
+                change_email_text: 'A confirmation email will be sent to the new address. The old one stays active until you confirm.',
+                change_email_sent: 'Confirmation email sent',
+                err_email: 'Enter a valid email',
+                danger_zone: 'Danger zone',
+                delete_type_email: 'This cannot be undone. To confirm, type your email: {email}',
+                delete_mismatch: 'Email does not match — deletion cancelled',
+                delete_partial: 'Your data was deleted, but the account itself remains: the delete-account server function is not deployed. Until it is installed, the account cannot be fully removed from the browser.',
+                share_title: 'Share',
+                share_sub: 'The recipient gets a read-only report. You can revoke the link at any time.',
+                share_expires: 'Expires in', share_email_label: 'Send to email (optional)',
+                share_email_ph: 'colleague@example.com',
+                share_get_link: 'Create link', share_send: 'Send',
+                share_link_created: 'Link created and copied',
+                share_sent: 'Email sent to {email}',
+                share_no_mail: 'Email sending is not configured on the server. The link was created — share it manually.',
+                share_failed: 'The email did not go out. The link was created — share it manually.',
+                kpi_median: 'Median footprint',
+                pick_project: 'Pick a project',
+                share_role_label: 'Recipient rights', share_role_view: 'Read only', share_role_edit: 'Read and edit',
+                share_role_note_view: 'The recipient can only view the report.',
+                share_role_note_edit: 'The recipient can change amounts and factors. Sign-in required. Every edit is logged.',
+                share_role_note_edit_proj: 'The recipient can edit any calculation inside the project. Sign-in required. Every edit is logged.',
+                vs_parent: 'vs original:', err_jszip: 'JSZip not loaded', toast_exported: 'Data exported',
+                xstats_title: 'Statistics', xstats_by_month: 'CO₂ by month', xstats_top5: 'Top 5 by footprint', xstats_avg: 'Average',
+                portfolio_title: 'Where the carbon is across your portfolio',
+                pf_verdict: '“{stage}” dominates in {n} of {total} calculations — {pct}% of the footprint on average. Start reducing here.',
+                spark_empty: 'At least two calculations are needed to see a trend',
+                spark_trend: 'Trend', spark_falling: 'falling', spark_rising: 'rising',
+                filters: '⚙ Filters', f_co2: 'CO₂, kg', f_date: 'Date', f_tag: 'Tag', f_any: 'any',
+                f_reset: 'Reset', f_active: 'Found: {n}',
+                show_archive: '🗄 Archive', back_to_history: 'Back to history', archive_empty: 'Archive is empty',
+                archive: 'Archive', archived: 'Moved to archive', restore: 'Restore', restored: 'Restored',
+                delete_forever: 'Delete forever',
+                selected: 'Selected', cancel: 'Cancel',
+                variant: 'Variant', note: 'Note', tag: 'Tag',
+                note_title: 'Note on calculation', note_ph: 'e.g. transport assumption confirmed with supplier on 12 Mar',
+                tag_title: 'Add tag', tag_ph: 'packaging, client A, draft…', add: 'Add',
+                save: 'Save', saved: 'Saved', close: 'Close',
+                compare: '⇄ Compare', cmp_title: 'Compare calculations',
+                cmp_need2: 'Select at least two calculations', cmp_max3: 'Three at most',
+                cmp_base: 'base', cmp_is_base: 'baseline', cmp_vs_base: 'vs base',
+                cmp_nodata: 'no stage breakdown',
+                cmp_warn_fu: 'These calculations use different functional units. Comparing absolute values is not valid — read the stage structure, not the bottom-line number.',
+                batch_delete_text: 'Delete {n} calculations permanently?',
+                batch_deleted: 'Deleted: {n}', batch_archived: 'Archived: {n}', batch_to_project: 'Added to project: {n}',
+                target: 'Target', target_set: 'Target', target_base: 'base',
+                target_title: 'Reduction target', target_text: 'By what percentage should the footprint drop against the first calculation in this project? Leave empty to remove the target.',
                 title: 'LCA·AI — Dashboard',
                 nav_home: 'Home', nav_cabinet: 'Dashboard',
                 loading: 'Loading...', stat_calcs: 'Calcs', stat_projects: 'Projects',
@@ -789,6 +1176,64 @@
                 toast_saved: 'Saved', email_label: 'Email', bio_label: 'About you', bio_ph: 'Tell us about yourself…'
             },
             zh: {
+                change: '修改', send: '发送', copy: '复制', connected: '已连接',
+                org_label: '组织', org_ph: '大学、公司',
+                role_label: '职位', role_ph: 'LCA 分析师、研究生',
+                country_label: '国家', country_ph: '中国', site_label: '网站 / ORCID',
+                err_site_url: '网址须以 http:// 或 https:// 开头',
+                providers_title: '登录方式',
+                sessions_title: '活动会话', sess_current: '当前设备', sess_last: '上次登录',
+                sess_note: 'Supabase 不提供完整设备列表。「在所有设备退出」将吊销全部令牌，所有设备均需重新登录。',
+                signout_all: '在所有设备退出',
+                signout_all_text: '所有会话都将结束，本设备也需要重新登录。',
+                change_email: '修改邮箱',
+                change_email_text: '确认邮件将发送至新地址。在您确认之前，原邮箱仍然有效。',
+                change_email_sent: '确认邮件已发送',
+                err_email: '请输入有效的邮箱',
+                danger_zone: '危险区域',
+                delete_type_email: '此操作不可撤销。请输入您的邮箱以确认：{email}',
+                delete_mismatch: '邮箱不匹配 — 已取消删除',
+                delete_partial: '数据已删除，但账户本身仍然存在：服务器端 delete-account 函数尚未部署。在其安装之前，无法从浏览器彻底删除账户。',
+                share_title: '分享',
+                share_sub: '接收方仅可只读查看报告。链接可随时撤销。',
+                share_expires: '有效期', share_email_label: '发送到邮箱（可选）',
+                share_email_ph: 'colleague@example.com',
+                share_get_link: '创建链接', share_send: '发送',
+                share_link_created: '链接已创建并复制',
+                share_sent: '邮件已发送至 {email}',
+                share_no_mail: '服务器未配置邮件发送。链接已创建 — 请手动分享。',
+                share_failed: '邮件未能发出。链接已创建 — 请手动分享。',
+                kpi_median: '中位碳足迹',
+                pick_project: '选择项目',
+                share_role_label: '接收方权限', share_role_view: '仅查看', share_role_edit: '查看并编辑',
+                share_role_note_view: '接收方只能查看报告。',
+                share_role_note_edit: '接收方可修改数量与排放因子。需要登录，所有修改都会记入日志。',
+                share_role_note_edit_proj: '接收方可编辑项目内任意计算。需要登录，所有修改都会记入日志。',
+                vs_parent: '相对原始：', err_jszip: 'JSZip 未加载', toast_exported: '数据已导出',
+                xstats_title: '统计', xstats_by_month: '各月 CO₂', xstats_top5: '碳足迹前五', xstats_avg: '平均值',
+                portfolio_title: '碳集中在您的哪些环节',
+                pf_verdict: '在 {total} 次计算中有 {n} 次以「{stage}」为主导 — 平均占足迹的 {pct}%。减排应从这里入手。',
+                spark_empty: '至少需要两次计算才能看出趋势',
+                spark_trend: '趋势', spark_falling: '下降', spark_rising: '上升',
+                filters: '⚙ 筛选', f_co2: 'CO₂, kg', f_date: '日期', f_tag: '标签', f_any: '任意',
+                f_reset: '重置', f_active: '找到 {n} 条',
+                show_archive: '🗄 归档', back_to_history: '返回历史', archive_empty: '归档为空',
+                archive: '归档', archived: '已归档', restore: '恢复', restored: '已恢复',
+                delete_forever: '永久删除',
+                selected: '已选', cancel: '取消',
+                variant: '变体', note: '备注', tag: '标签',
+                note_title: '计算备注', note_ph: '例如：运输假设已于 3 月 12 日与供应商确认',
+                tag_title: '添加标签', tag_ph: '包装、客户 A、草稿…', add: '添加',
+                save: '保存', saved: '已保存', close: '关闭',
+                compare: '⇄ 对比', cmp_title: '对比计算结果',
+                cmp_need2: '请至少选择两项计算', cmp_max3: '一次最多三项',
+                cmp_base: '基准', cmp_is_base: '基准项', cmp_vs_base: '相对基准',
+                cmp_nodata: '无阶段拆解数据',
+                cmp_warn_fu: '这些计算使用了不同的功能单位，直接比较绝对数值并不可靠 — 请关注阶段构成，而非最终数字。',
+                batch_delete_text: '永久删除 {n} 条计算记录？',
+                batch_deleted: '已删除 {n} 条', batch_archived: '已归档 {n} 条', batch_to_project: '已添加到项目 {n} 条',
+                target: '目标', target_set: '目标', target_base: '基准',
+                target_title: '减排目标', target_text: '相对项目中第一次计算，碳足迹需下降多少百分比？留空则取消目标。',
                 title: 'LCA·AI — 个人中心',
                 nav_home: '首页', nav_cabinet: '个人中心',
                 loading: '加载中...', stat_calcs: '计算', stat_projects: '项目',
@@ -918,7 +1363,7 @@
            Universal modal: promptModal / confirmModal / pickProject
            ══════════════════════════════════════════════════ */
         let modalResolve = null;
-        function openModal({ title, text, input, inputValue, okLabel, danger, projects }) {
+        function openModal({ title, text, input, textarea, inputValue, okLabel, danger, projects, datalist }) {
             const mask = document.getElementById('modalMask');
             document.getElementById('modalTitle').textContent = title || '';
             const txt = document.getElementById('modalText');
@@ -926,7 +1371,15 @@
             txt.textContent = text || '';
             const inp = document.getElementById('modalInput');
             inp.style.display = input ? 'block' : 'none';
-            inp.value = inputValue || '';
+            inp.value = input ? (inputValue || '') : '';
+            if (datalist) {
+                inp.setAttribute('list', 'tagList');
+                document.getElementById('tagList').innerHTML =
+                    datalist.map(x => '<option value="' + esc(x) + '">').join('');
+            } else inp.removeAttribute('list');
+            const ta = document.getElementById('modalTextarea');
+            ta.style.display = textarea ? 'block' : 'none';
+            ta.value = textarea ? (inputValue || '') : '';
             const pick = document.getElementById('modalProjects');
             pick.style.display = projects ? 'flex' : 'none';
             pick.innerHTML = '';
@@ -948,6 +1401,7 @@
             }
             mask.classList.add('show');
             if (input) setTimeout(() => inp.focus(), 60);
+            if (textarea) setTimeout(() => ta.focus(), 60);
             return new Promise(res => { modalResolve = res; });
         }
         function closeModal(result) {
@@ -957,6 +1411,8 @@
         document.getElementById('modalCancel').addEventListener('click', () => closeModal(null));
         document.getElementById('modalOk').addEventListener('click', () => {
             const inp = document.getElementById('modalInput');
+            const ta  = document.getElementById('modalTextarea');
+            if (ta.style.display !== 'none') return closeModal({ text: ta.value });
             closeModal(inp.style.display !== 'none' ? inp.value : true);
         });
         document.getElementById('modalMask').addEventListener('click', e => { if (e.target.id === 'modalMask') closeModal(null); });
@@ -978,7 +1434,7 @@
             console.log('[Cabinet] Supabase client created, getting session...');
             const { data: { session }, error } = await db.auth.getSession();
             if (error) { console.error('[Cabinet] Session error:', error); showToast(t('err_auth') + error.message); return; }
-            if (!session) { console.log('[Cabinet] No session, redirecting to login'); window.location.href = '/login.html'; return; }
+            if (!session) { window.location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search); return; }
             console.log('[Cabinet] Session OK, user:', session.user.id);
             currentUser = session.user;
             renderProfile();
@@ -1020,7 +1476,8 @@
         async function loadStats() {
             if (!currentUser || !db) return;
             try {
-                const { count: c } = await db.from('user_history').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
+                // архивные не считаем — иначе счётчик в сайдбаре разойдётся с KPI в Обзоре
+                const { count: c } = await db.from('user_history').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id).is('archived_at', null);
                 const { count: p } = await db.from('user_projects').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
                 document.getElementById('statCalcs').textContent = c || 0;
                 document.getElementById('statProjects').textContent = p || 0;
@@ -1050,33 +1507,40 @@
             if (!stats) return;
             const existing = document.getElementById('extendedStatsPanel');
             if (existing) existing.remove();
-            let html = '<div id="extendedStatsPanel" style="margin-top:16px;padding:16px;background:var(--bg-card);border:1px solid var(--rule);border-radius:var(--radius)">';
-            html += '<h3 style="font-size:14px;font-weight:700;margin-bottom:12px">📈 Статистика</h3>';
+
             const months = Object.keys(stats.byMonth).sort().slice(-6);
             const maxVal = Math.max(...Object.values(stats.byMonth), 1);
-            html += '<div style="font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:8px">CO₂ по месяцам</div>';
+
+            let html = '<div class="panel" id="extendedStatsPanel">';
+            html += '<h3>' + esc(t('xstats_title')) + '</h3>';
+
+            html += '<div class="xstat-sub">' + esc(t('xstats_by_month')) + '</div>';
             months.forEach(m => {
               const val = stats.byMonth[m];
               const pct = (val / maxVal) * 100;
-              html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">';
-              html += '<span style="font-size:11px;color:var(--ink-mute);width:60px;font-family:var(--mono)">' + m + '</span>';
-              html += '<div style="flex:1;height:8px;background:var(--bg-soft);border-radius:4px;overflow:hidden">';
-              html += '<div style="height:100%;width:' + pct + '%;background:var(--jade);border-radius:4px"></div></div>';
-              html += '<span style="font-size:11px;font-weight:600;font-family:var(--mono);min-width:50px;text-align:right">' + val.toFixed(1) + ' kg</span>';
-              html += '</div>';
+              html += '<div class="xstat-row">' +
+                '<span class="xstat-key">' + esc(m) + '</span>' +
+                '<div class="xstat-bar"><div class="xstat-fill" style="width:' + pct.toFixed(1) + '%"></div></div>' +
+                '<span class="xstat-val">' + val.toFixed(1) + ' kg</span>' +
+              '</div>';
             });
-            html += '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--rule)">';
-            html += '<div style="font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:8px">Топ-5</div>';
+
+            html += '<div class="xstat-block"><div class="xstat-sub">' + esc(t('xstats_top5')) + '</div>';
             stats.top5.forEach((d, i) => {
-              html += '<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px">';
-              html += '<span>' + (i+1) + '. ' + (d.product_title || '—') + '</span>';
-              html += '<span style="font-family:var(--mono);font-weight:700;color:var(--jade)">' + (d.total_co2eq||0).toFixed(1) + ' kg</span></div>';
+              // esc() обязателен: product_title приходит от пользователя
+              html += '<div class="xstat-line">' +
+                '<span>' + (i + 1) + '. ' + esc(d.product_title || '—') + '</span>' +
+                '<span class="xstat-val">' + (parseFloat(d.total_co2eq) || 0).toFixed(1) + ' kg</span>' +
+              '</div>';
             });
             html += '</div>';
-            html += '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--rule);display:flex;justify-content:space-between">';
-            html += '<span style="font-size:12px;font-weight:600">Среднее</span>';
-            html += '<span style="font-family:var(--mono);font-weight:800;color:var(--jade)">' + stats.avg.toFixed(1) + ' kg</span></div>';
+
+            html += '<div class="xstat-block xstat-avg">' +
+              '<span>' + esc(t('xstats_avg')) + '</span>' +
+              '<span class="xstat-val">' + stats.avg.toFixed(1) + ' kg</span>' +
+            '</div>';
             html += '</div>';
+
             const overview = document.getElementById('tab-overview');
             if (overview) overview.insertAdjacentHTML('beforeend', html);
           });
@@ -1135,51 +1599,147 @@
            OVERVIEW
            ══════════════════════════════════════════════════ */
         function renderOverview() {
-            const rows = historyCache;
-            const totalCo2 = rows.reduce((s, r) => s + (parseFloat(r.total_co2eq) || 0), 0);
-            const avg = rows.length ? totalCo2 / rows.length : 0;
+            const rows = activeHistory();
+
+            /* Медиана, а не сумма. Складывать kgCO₂e по разным функциональным
+               единицам (1 кг хлеба + 1 футболка + 1 кВт·ч) бессмысленно —
+               это как складывать километры с килограммами. Медиана хотя бы
+               отвечает на осмысленный вопрос: "какой у меня типичный расчёт". */
+            const vals = rows.map(r => parseFloat(r.total_co2eq) || 0).filter(v => v > 0).sort((a, b) => a - b);
+            const median = vals.length
+                ? (vals.length % 2 ? vals[(vals.length - 1) / 2]
+                                   : (vals[vals.length / 2 - 1] + vals[vals.length / 2]) / 2)
+                : 0;
+            const avg = vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : 0;
+
             document.getElementById('kpiCalcs').textContent = rows.length;
-            document.getElementById('kpiTotal').innerHTML = fmtCo2(totalCo2) + '<span class="u">kgCO₂e</span>';
-            document.getElementById('kpiAvg').innerHTML = fmtCo2(avg) + '<span class="u">kgCO₂e</span>';
+            document.getElementById('kpiTotal').innerHTML = fmtCo2(median) + '<span class="u">kgCO₂e</span>';
+            document.getElementById('kpiAvg').innerHTML   = fmtCo2(avg)    + '<span class="u">kgCO₂e</span>';
+
             renderSparkline(rows);
+            renderPortfolio(rows);
             renderRecent(rows);
         }
 
-        function renderSparkline(rows) {
-            // Агрегация по дням за последние 30 дней
-            const days = [];
-            const counts = {};
-            const now = new Date();
-            for (let i = 29; i >= 0; i--) {
-                const d = new Date(now); d.setDate(now.getDate() - i);
-                const key = d.toISOString().slice(0, 10);
-                days.push(key);
-                counts[key] = 0;
-            }
-            rows.forEach(r => {
-                const key = String(r.created_at).slice(0, 10);
-                if (key in counts) counts[key]++;
+        /* ══════════════════════════════════════════════════
+           PORTFOLIO — единственное, что кабинет знает, а отдельный
+           отчёт нет: все расчёты сразу. Отсюда виден системный
+           паттерн — куда бить, чтобы снизить след по всей линейке.
+           Читает report_data.stages, миграция БД не нужна.
+           ══════════════════════════════════════════════════ */
+        function renderPortfolio(rows) {
+            const panel = document.getElementById('portfolioPanel');
+            const withStages = rows.filter(r => r.report_data && Array.isArray(r.report_data.stages) && r.report_data.stages.length);
+            if (withStages.length < 2) { panel.style.display = 'none'; return; }
+            panel.style.display = '';
+
+            // Доля каждой стадии внутри своего расчёта, усреднённая по портфелю.
+            // Именно доли, а не абсолютные kg — их можно сравнивать между разными ФЕ.
+            const acc = {};      // stage -> { sumShare, dominantCount }
+            withStages.forEach(r => {
+                const st = r.report_data.stages;
+                const tot = st.reduce((s, x) => s + (parseFloat(x.co2eq) || 0), 0) || 1;
+                let top = null, topShare = -1;
+                st.forEach(x => {
+                    const name = String(x.name || '—').trim();
+                    const share = (parseFloat(x.share_pct) || (parseFloat(x.co2eq) || 0) / tot * 100);
+                    if (!acc[name]) acc[name] = { sum: 0, dom: 0 };
+                    acc[name].sum += share;
+                    if (share > topShare) { topShare = share; top = name; }
+                });
+                if (top) acc[top].dom++;
             });
-            const values = days.map(k => counts[k]);
-            const max = Math.max(1, ...values);
-            const W = 600, H = 120, PAD = 8;
-            const stepX = (W - PAD * 2) / (values.length - 1);
-            const y = v => H - PAD - (v / max) * (H - PAD * 2);
-            const pts = values.map((v, i) => [PAD + i * stepX, y(v)]);
+
+            const list = Object.entries(acc)
+                .map(([name, v]) => ({ name, avg: v.sum / withStages.length, dom: v.dom }))
+                .sort((a, b) => b.avg - a.avg);
+
+            const RAMP = ['#F03B0C', '#D9481C', '#B4652A', '#8A6A4F', '#B8B4AC', '#9B978F'];
+            const max = list[0] ? list[0].avg : 1;
+
+            document.getElementById('portfolioBars').innerHTML = list.map((s, i) =>
+                '<div class="pf-row">' +
+                    '<div class="pf-name">' + esc(s.name) + '</div>' +
+                    '<div class="pf-bar"><div class="pf-fill" style="width:' + (s.avg / max * 100).toFixed(1) + '%;background:' + RAMP[Math.min(i, RAMP.length - 1)] + '"></div></div>' +
+                    '<div class="pf-val">' + s.avg.toFixed(0) + '%</div>' +
+                '</div>'
+            ).join('');
+
+            // Вердикт словами — то, ради чего это вообще нужно
+            const lead = list[0];
+            if (lead && lead.dom > 0) {
+                document.getElementById('portfolioVerdict').textContent =
+                    t('pf_verdict')
+                        .replace('{n}', lead.dom)
+                        .replace('{total}', withStages.length)
+                        .replace('{stage}', lead.name)
+                        .replace('{pct}', lead.avg.toFixed(0));
+            } else {
+                document.getElementById('portfolioVerdict').textContent = '';
+            }
+        }
+
+        /* ══════════════════════════════════════════════════
+           SPARKLINE — след во времени, а не количество кликов.
+           Показывает, снижается ли след продуктов по мере работы.
+           ══════════════════════════════════════════════════ */
+        function renderSparkline(rows) {
+            const wrap = document.getElementById('sparklineWrap');
+            const pts0 = rows
+                .filter(r => (parseFloat(r.total_co2eq) || 0) > 0)
+                .map(r => ({ t: new Date(r.created_at).getTime(), v: parseFloat(r.total_co2eq) }))
+                .sort((a, b) => a.t - b.t);
+
+            if (pts0.length < 2) {
+                wrap.innerHTML = '<div class="spark-empty">' + esc(t('spark_empty')) + '</div>';
+                return;
+            }
+
+            const W = 600, H = 120, PAD = 10;
+            const t0 = pts0[0].t, t1 = pts0[pts0.length - 1].t || t0 + 1;
+            const vmax = Math.max(...pts0.map(p => p.v));
+            const vmin = Math.min(...pts0.map(p => p.v));
+            const span = (vmax - vmin) || vmax || 1;
+
+            const x = p => PAD + (t1 === t0 ? 0.5 : (p.t - t0) / (t1 - t0)) * (W - PAD * 2);
+            const y = p => H - PAD - ((p.v - vmin) / span) * (H - PAD * 2);
+
+            const pts = pts0.map(p => [x(p), y(p)]);
             const line = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
-            const area = line + ' L' + pts[pts.length - 1][0].toFixed(1) + ' ' + (H - PAD) + ' L' + PAD + ' ' + (H - PAD) + ' Z';
-            // точки только там где есть активность
-            const dots = pts.filter((_, i) => values[i] > 0).map(p => '<circle class="spark-dot" cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="3.5"/>').join('');
-            document.getElementById('sparklineWrap').innerHTML =
+            const area = line + ' L' + pts[pts.length - 1][0].toFixed(1) + ' ' + (H - PAD) + ' L' + pts[0][0].toFixed(1) + ' ' + (H - PAD) + ' Z';
+
+            // Линия тренда (МНК) — падает ли след со временем
+            const n = pts0.length;
+            const mx = pts0.reduce((s, p) => s + p.t, 0) / n;
+            const my = pts0.reduce((s, p) => s + p.v, 0) / n;
+            let num = 0, den = 0;
+            pts0.forEach(p => { num += (p.t - mx) * (p.v - my); den += (p.t - mx) ** 2; });
+            const slope = den ? num / den : 0;
+            const fit = tt => my + slope * (tt - mx);
+            const tl = [[x({t:t0}), y({v: fit(t0)})], [x({t:t1}), y({v: fit(t1)})]];
+
+            const dots = pts.map((p, i) =>
+                '<circle class="spark-dot" cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="3">' +
+                '<title>' + fmtCo2(pts0[i].v) + ' kgCO₂e · ' + fmtDate(new Date(pts0[i].t).toISOString()) + '</title></circle>'
+            ).join('');
+
+            wrap.innerHTML =
                 '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">' +
                 '<defs><linearGradient id="sparkGradient" x1="0" y1="0" x2="0" y2="1">' +
-                '<stop offset="0%" stop-color="#F03B0C" stop-opacity="0.25"/>' +
+                '<stop offset="0%" stop-color="#F03B0C" stop-opacity="0.22"/>' +
                 '<stop offset="100%" stop-color="#F03B0C" stop-opacity="0"/></linearGradient></defs>' +
                 '<line class="spark-grid-line" x1="' + PAD + '" y1="' + (H - PAD) + '" x2="' + (W - PAD) + '" y2="' + (H - PAD) + '"/>' +
                 '<path class="spark-area" d="' + area + '"/>' +
                 '<path class="spark-line" d="' + line + '"/>' +
+                '<line class="spark-trend" x1="' + tl[0][0].toFixed(1) + '" y1="' + tl[0][1].toFixed(1) +
+                    '" x2="' + tl[1][0].toFixed(1) + '" y2="' + tl[1][1].toFixed(1) + '"/>' +
                 dots +
-                '</svg>';
+                '</svg>' +
+                '<div class="spark-legend">' +
+                    '<span>' + esc(t('spark_trend')) + ': <b class="' + (slope <= 0 ? 'trend-down' : 'trend-up') + '">' +
+                    (slope <= 0 ? '↓ ' + esc(t('spark_falling')) : '↑ ' + esc(t('spark_rising'))) + '</b></span>' +
+                    '<span>' + fmtCo2(vmin) + ' — ' + fmtCo2(vmax) + ' kgCO₂e</span>' +
+                '</div>';
         }
 
         function renderRecent(rows) {
@@ -1190,7 +1750,7 @@
                 return;
             }
             list.innerHTML = recent.map(h =>
-                '<a class="recent-item" href="/report?history=' + h.id + '">' +
+                '<a class="recent-item" href="/report.html?history=' + h.id + '">' +
                 '<div><div class="recent-name">' + esc(h.product_title || t('unnamed')) + '</div>' +
                 '<div class="recent-date">' + fmtDate(h.created_at) + '</div></div>' +
                 '<div class="recent-co2">' + fmtCo2(h.total_co2eq) + ' kgCO₂e</div>' +
@@ -1201,18 +1761,50 @@
         /* ══════════════════════════════════════════════════
            HISTORY tab: search + sort + paginate + CSV + to-project
            ══════════════════════════════════════════════════ */
+        /* Архивные записи скрыты везде, кроме режима "Архив" (мягкое удаление). */
+        let showArchive = false;
+        function activeHistory() { return historyCache.filter(r => !r.archived_at); }
+
         function filteredHistory() {
-            const q = document.getElementById('historySearch').value.trim().toLowerCase();
-            const sort = document.getElementById('historySort').value;
-            let rows = historyCache.slice();
-            if (q) rows = rows.filter(r => String(r.product_title || '').toLowerCase().includes(q));
+            const q     = document.getElementById('historySearch').value.trim().toLowerCase();
+            const sort  = document.getElementById('historySort').value;
+            const cMin  = parseFloat(document.getElementById('fCo2Min').value);
+            const cMax  = parseFloat(document.getElementById('fCo2Max').value);
+            const dFrom = document.getElementById('fDateFrom').value;
+            const dTo   = document.getElementById('fDateTo').value;
+            const tag   = document.getElementById('fTag').value;
+
+            let rows = historyCache.filter(r => showArchive ? !!r.archived_at : !r.archived_at);
+
+            if (q)   rows = rows.filter(r => String(r.product_title || '').toLowerCase().includes(q)
+                                          || String(r.notes || '').toLowerCase().includes(q));
+            if (!isNaN(cMin)) rows = rows.filter(r => (parseFloat(r.total_co2eq) || 0) >= cMin);
+            if (!isNaN(cMax)) rows = rows.filter(r => (parseFloat(r.total_co2eq) || 0) <= cMax);
+            if (dFrom) rows = rows.filter(r => String(r.created_at).slice(0, 10) >= dFrom);
+            if (dTo)   rows = rows.filter(r => String(r.created_at).slice(0, 10) <= dTo);
+            if (tag)   rows = rows.filter(r => Array.isArray(r.tags) && r.tags.includes(tag));
+
             rows.sort((a, b) => {
                 if (sort === 'date_asc') return new Date(a.created_at) - new Date(b.created_at);
                 if (sort === 'co2_desc') return (parseFloat(b.total_co2eq) || 0) - (parseFloat(a.total_co2eq) || 0);
-                if (sort === 'co2_asc') return (parseFloat(a.total_co2eq) || 0) - (parseFloat(b.total_co2eq) || 0);
-                return new Date(b.created_at) - new Date(a.created_at); // date_desc
+                if (sort === 'co2_asc')  return (parseFloat(a.total_co2eq) || 0) - (parseFloat(b.total_co2eq) || 0);
+                return new Date(b.created_at) - new Date(a.created_at);
             });
             return rows;
+        }
+
+        function allTags() {
+            const s = new Set();
+            historyCache.forEach(r => (r.tags || []).forEach(x => s.add(x)));
+            return [...s].sort();
+        }
+
+        function syncTagFilter() {
+            const sel = document.getElementById('fTag');
+            const cur = sel.value;
+            sel.innerHTML = '<option value="">' + esc(t('f_any')) + '</option>' +
+                allTags().map(x => '<option value="' + esc(x) + '">' + esc(x) + '</option>').join('');
+            sel.value = cur;
         }
 
         function renderHistory() {
@@ -1220,19 +1812,44 @@
             const rows = filteredHistory();
             const shown = rows.slice(0, historyShown);
             const loadMoreBtn = document.getElementById('loadMoreBtn');
+
+            syncTagFilter();
+
+            const a = activeFilters();
+            const sum = document.getElementById('filterSummary');
+            if (a.co2 || a.date || a.tag) {
+                const parts = [];
+                if (a.co2)  parts.push(t('f_co2'));
+                if (a.date) parts.push(t('f_date'));
+                if (a.tag)  parts.push(t('f_tag') + ': ' + document.getElementById('fTag').value);
+                sum.style.display = '';
+                sum.innerHTML = esc(t('f_active').replace('{n}', rows.length)) +
+                    ' · ' + esc(parts.join(', ')) +
+                    ' <button class="filter-clear" id="filterClearInline">' + esc(t('f_reset')) + '</button>';
+                document.getElementById('filterClearInline').onclick = resetFilters;
+                // фильтры активны — панель обязана быть видна
+                document.getElementById('filtersPanel').style.display = 'grid';
+                document.getElementById('filterToggle').classList.add('active');
+            } else sum.style.display = 'none';
+
             if (!historyCache.length) {
-                list.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">' + t('no_history') + '</div><a href="/" class="btn btn-primary">' + t('do_calc') + '</a></div>';
+                list.innerHTML = '<div class="empty"><div class="empty-text">' + esc(t('no_history')) + '</div><a href="/" class="btn btn-primary">' + esc(t('do_calc')) + '</a></div>';
                 loadMoreBtn.style.display = 'none';
                 return;
             }
             if (!rows.length) {
-                list.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">' + t('nothing_found') + '</div></div>';
+                list.innerHTML = '<div class="empty"><div class="empty-text">' +
+                    esc(showArchive ? t('archive_empty') : t('nothing_found')) + '</div></div>';
                 loadMoreBtn.style.display = 'none';
                 return;
             }
-            list.innerHTML = shown.map(h =>
-                '<div class="card">' +
-                    '<label class="batch-check"><input type="checkbox" class="history-checkbox" data-id="' + h.id + '"></label>' +
+
+            list.innerHTML = shown.map(h => {
+                const tags = (h.tags || []).map(x =>
+                    '<span class="tag">' + esc(x) + '<button class="tag-x" data-id="' + h.id + '" data-tag="' + esc(x) + '">×</button></span>').join('');
+                const archived = !!h.archived_at;
+                return '<div class="card' + (archived ? ' card-archived' : '') + '">' +
+                    (archived ? '' : '<label class="batch-check"><input type="checkbox" class="history-checkbox" data-id="' + h.id + '"></label>') +
                     '<div class="card-header">' +
                         '<div style="flex:1"><div class="card-title">' + esc(h.product_title || '—') + '</div></div>' +
                         '<div style="display:flex;align-items:center;gap:8px">' +
@@ -1241,18 +1858,221 @@
                         '</div>' +
                     '</div>' +
                     '<div class="card-meta">' +
-                        '<span>📦 ' + esc(h.functional_unit || '—') + '</span>' +
-                        '<span>🌱 ' + fmtCo2(h.total_co2eq) + ' kgCO₂e</span>' +
+                        '<span>' + esc(h.functional_unit || '—') + '</span>' +
+                        '<span class="card-co2">' + fmtCo2(h.total_co2eq) + ' kgCO₂e</span>' +
+                    '</div>' +
+                    versionBadge(h) +
+                    (h.notes ? '<div class="card-note">' + esc(h.notes) + '</div>' : '') +
+                    '<div class="tag-row">' + tags +
+                        (archived ? '' : '<button class="tag-add" data-id="' + h.id + '">+ ' + esc(t('tag')) + '</button>') +
                     '</div>' +
                     '<div class="card-actions">' +
-                        '<a href="/report?history=' + h.id + '" class="btn btn-primary btn-sm">' + t('view') + '</a>' +
-                        '<button class="btn btn-ghost btn-sm add-to-project-btn" data-id="' + h.id + '">📁 ' + t('to_project') + '</button>' +
-                        '<button class="share-history-btn btn-icon" data-id="' + h.id + '" title="🔗">🔗</button>' +
-                        '<button class="btn btn-danger btn-sm delete-history-btn" data-id="' + h.id + '">' + t('delete') + '</button>' +
+                        (archived
+                          ? '<button class="btn btn-primary btn-sm restore-btn" data-id="' + h.id + '">' + esc(t('restore')) + '</button>' +
+                            '<button class="btn btn-danger btn-sm delete-history-btn" data-id="' + h.id + '">' + esc(t('delete_forever')) + '</button>'
+                          : '<a href="/report.html?history=' + h.id + '" class="btn btn-primary btn-sm">' + esc(t('view')) + '</a>' +
+                            '<button class="btn btn-ghost btn-sm variant-btn" data-id="' + h.id + '">⎘ ' + esc(t('variant')) + '</button>' +
+                            '<button class="btn btn-ghost btn-sm note-btn" data-id="' + h.id + '">✎ ' + esc(t('note')) + '</button>' +
+                            '<button class="btn btn-ghost btn-sm add-to-project-btn" data-id="' + h.id + '">📁 ' + esc(t('to_project')) + '</button>' +
+                            '<button class="email-share-hist-btn btn-icon" data-id="' + h.id + '" title="' + esc(t('share_title')) + '">🔗</button>' +
+                            '<button class="btn btn-ghost btn-sm archive-hist-btn" data-id="' + h.id + '" title="' + esc(t('archive')) + '">🗄</button>') +
                     '</div>' +
-                '</div>'
-            ).join('');
+                '</div>';
+            }).join('');
+
             loadMoreBtn.style.display = rows.length > historyShown ? 'inline-flex' : 'none';
+        }
+
+        /* ── Фильтры ──────────────────────────────────────
+           Числовые поля слушаем на input (мгновенно), даты и select — на change:
+           у type=date событие input дёргается на каждой набранной цифре и список
+           дёргается вхолостую. */
+        ['fCo2Min','fCo2Max'].forEach(id =>
+            document.getElementById(id).addEventListener('input', () => { historyShown = PAGE; renderHistory(); }));
+        ['fDateFrom','fDateTo','fTag'].forEach(id =>
+            document.getElementById(id).addEventListener('change', () => { historyShown = PAGE; renderHistory(); }));
+
+        function activeFilters() {
+            return {
+                co2:  !isNaN(parseFloat(document.getElementById('fCo2Min').value)) ||
+                      !isNaN(parseFloat(document.getElementById('fCo2Max').value)),
+                date: !!(document.getElementById('fDateFrom').value || document.getElementById('fDateTo').value),
+                tag:  !!document.getElementById('fTag').value
+            };
+        }
+        function anyFilter() { const a = activeFilters(); return a.co2 || a.date || a.tag; }
+
+        document.getElementById('filterToggle').addEventListener('click', () => {
+            const p = document.getElementById('filtersPanel');
+            const open = p.style.display !== 'none';
+            // Закрывать панель с активными фильтрами нельзя — иначе список выглядит
+            // урезанным без единого намёка почему. Закрытие = сброс.
+            if (open && anyFilter()) { resetFilters(); }
+            p.style.display = open ? 'none' : 'grid';
+            document.getElementById('filterToggle').classList.toggle('active', !open);
+        });
+
+        function resetFilters() {
+            ['fCo2Min','fCo2Max','fDateFrom','fDateTo'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('fTag').value = '';
+            historyShown = PAGE; renderHistory();
+        }
+        document.getElementById('filterReset').addEventListener('click', resetFilters);
+        document.getElementById('trashToggle').addEventListener('click', e => {
+            showArchive = !showArchive;
+            e.target.classList.toggle('active', showArchive);
+            e.target.textContent = showArchive ? '← ' + t('back_to_history') : '🗄 ' + t('show_archive');
+            historyShown = PAGE; renderHistory();
+        });
+
+        /* ── Мягкое удаление: архив вместо безвозвратного стирания ── */
+        async function archiveCalc(id, restore) {
+            try {
+                const { error } = await db.from('user_history')
+                    .update({ archived_at: restore ? null : new Date().toISOString() })
+                    .eq('id', id).eq('user_id', currentUser.id);
+                if (error) throw error;
+                const row = historyCache.find(r => String(r.id) === String(id));
+                if (row) row.archived_at = restore ? null : new Date().toISOString();
+                showToast(t(restore ? 'restored' : 'archived'));
+                renderHistory();
+            } catch (e) { showToast(t('err_generic') + (e.message || e)); }
+        }
+
+        /* ── Дублировать как вариант: копия описания уходит на главную ── */
+        function duplicateAsVariant(id) {
+            const row = historyCache.find(r => String(r.id) === String(id));
+            if (!row) return;
+            const d = row.report_data || {};
+            const seed = [d.product_title || row.product_title, d.functional_unit || row.functional_unit]
+                .filter(Boolean).join(', ');
+            try {
+                localStorage.setItem('lca_variant_seed', seed);
+                // связь с исходником: без неё новый расчёт не с чем сравнивать
+                localStorage.setItem('lca_variant_parent', String(row.id));
+            } catch (e) {}
+            window.location.href = '/?variant=1';
+        }
+
+        /* ── Версии: вариант знает своего родителя ────────
+           Показываем дельту прямо на карточке: «−18% к исходному».
+           Это замыкает цикл эко-дизайна — поменял, увидел эффект. */
+        function versionBadge(row) {
+            if (!row.parent_id) return '';
+            const parent = historyCache.find(r => String(r.id) === String(row.parent_id));
+            if (!parent) return '';
+            const a = parseFloat(parent.total_co2eq) || 0;
+            const b = parseFloat(row.total_co2eq) || 0;
+            if (!a) return '';
+            const delta = (b - a) / a * 100;
+            const down = delta <= 0;
+            return '<div class="version-badge">' +
+                '<span class="vb-arrow ' + (down ? 'down' : 'up') + '">' + (down ? '↓' : '↑') + '</span>' +
+                '<span class="vb-delta ' + (down ? 'down' : 'up') + '">' +
+                    Math.abs(delta).toFixed(0) + '%</span>' +
+                '<span class="vb-vs">' + esc(t('vs_parent')) + ' ' + esc(parent.product_title || '—') + '</span>' +
+                '<button class="vb-cmp" data-id="' + row.id + '" data-parent="' + row.parent_id + '">' +
+                    esc(t('compare')) + '</button>' +
+            '</div>';
+        }
+
+        /* ── Заметка к расчёту ───────────────────────────── */
+        async function editNote(id) {
+            const row = historyCache.find(r => String(r.id) === String(id));
+            if (!row) return;
+            const res = await openModal({
+                title: t('note_title'),
+                textarea: true,
+                inputValue: row.notes || '',
+                okLabel: t('save')
+            });
+            if (res === null || res === undefined) return;
+            const val = String(res.text != null ? res.text : res).trim();
+            try {
+                const { error } = await db.from('user_history')
+                    .update({ notes: val || null }).eq('id', id).eq('user_id', currentUser.id);
+                if (error) throw error;
+                row.notes = val || null;
+                showToast(t('saved'));
+                renderHistory();
+            } catch (e) { showToast(String(e.message || e)); }
+        }
+
+        /* ── Теги: плоские, ортогональны проектам ────────── */
+        async function addTag(id) {
+            const row = historyCache.find(r => String(r.id) === String(id));
+            if (!row) return;
+            const val = await openModal({
+                title: t('tag_title'),
+                input: true,
+                datalist: allTags(),
+                okLabel: t('add')
+            });
+            if (!val || typeof val !== 'string') return;
+            const tag = val.trim();
+            if (!tag) return;
+            await saveTags(id, [...new Set([...(row.tags || []), tag])]);
+        }
+        async function removeTag(id, tag) {
+            const row = historyCache.find(r => String(r.id) === String(id));
+            if (!row) return;
+            await saveTags(id, (row.tags || []).filter(x => x !== tag));
+        }
+        async function saveTags(id, tags) {
+            try {
+                const { error } = await db.from('user_history')
+                    .update({ tags }).eq('id', id).eq('user_id', currentUser.id);
+                if (error) throw error;
+                const row = historyCache.find(r => String(r.id) === String(id));
+                if (row) row.tags = tags;
+                renderHistory();
+            } catch (e) { showToast(String(e.message || e)); }
+        }
+
+        /* ── Сравнение из истории: главный рабочий сценарий LCA ──
+           Отдельная широкая модалка — универсальная под это не подходит. */
+        function compareSelected(ids) {
+            const rows = ids.map(id => historyCache.find(r => String(r.id) === String(id))).filter(Boolean);
+            if (rows.length < 2) { showToast(t('cmp_need2')); return; }
+            if (rows.length > 3) { showToast(t('cmp_max3')); return; }
+
+            const RAMP = ['#F03B0C', '#D9481C', '#B4652A', '#8A6A4F', '#B8B4AC', '#9B978F'];
+            const base = parseFloat(rows[0].total_co2eq) || 0;
+
+            const cols = rows.map((r, ri) => {
+                const v = parseFloat(r.total_co2eq) || 0;
+                const delta = (ri > 0 && base) ? ((v - base) / base * 100) : null;
+                const st = (r.report_data && Array.isArray(r.report_data.stages)) ? r.report_data.stages : [];
+                const tot = st.reduce((s, x) => s + (parseFloat(x.co2eq) || 0), 0) || 1;
+                const stages = st.slice()
+                    .sort((a, b) => (parseFloat(b.co2eq) || 0) - (parseFloat(a.co2eq) || 0))
+                    .map((x, i) =>
+                        '<div class="cmp-stage">' +
+                            '<span class="cmp-sw" style="background:' + RAMP[Math.min(i, RAMP.length - 1)] + '"></span>' +
+                            '<span class="cmp-sname">' + esc(x.name || '—') + '</span>' +
+                            '<span class="cmp-spct">' + Math.round((parseFloat(x.co2eq) || 0) / tot * 100) + '%</span>' +
+                        '</div>').join('');
+                return '<div class="cmp-col">' +
+                    '<div class="cmp-badge">' + (ri === 0 ? esc(t('cmp_base')) : String.fromCharCode(65 + ri)) + '</div>' +
+                    '<div class="cmp-title">' + esc(r.product_title || '—') + '</div>' +
+                    '<div class="cmp-fu">' + esc(r.functional_unit || '—') + '</div>' +
+                    '<div class="cmp-val">' + fmtCo2(v) + '<span class="u">kgCO₂e</span></div>' +
+                    (delta !== null
+                        ? '<div class="cmp-delta ' + (delta <= 0 ? 'down' : 'up') + '">' +
+                          (delta <= 0 ? '↓ ' : '↑ ') + Math.abs(delta).toFixed(0) + '% ' + esc(t('cmp_vs_base')) + '</div>'
+                        : '<div class="cmp-delta muted">' + esc(t('cmp_is_base')) + '</div>') +
+                    '<div class="cmp-stages">' + (stages || '<span class="cmp-nodata">' + esc(t('cmp_nodata')) + '</span>') + '</div>' +
+                '</div>';
+            }).join('');
+
+            /* Разные функциональные единицы сравнивать некорректно.
+               Не прячем это — предупреждаем прямо. */
+            const fus = [...new Set(rows.map(r => String(r.functional_unit || '').trim().toLowerCase()).filter(Boolean))];
+            const warn = fus.length > 1 ? '<div class="cmp-warn">' + esc(t('cmp_warn_fu')) + '</div>' : '';
+
+            document.getElementById('compareTitle').textContent = t('cmp_title');
+            document.getElementById('compareBody').innerHTML = warn + '<div class="cmp-grid">' + cols + '</div>';
+            document.getElementById('compareMask').classList.add('show');
         }
 
         document.getElementById('historySearch').addEventListener('input', () => { historyShown = PAGE; renderHistory(); });
@@ -1267,22 +2087,88 @@
             if (bar) { bar.classList.toggle('active', checked > 0); document.getElementById('batchCount').textContent = checked; }
         });
 
-        document.getElementById('batchDeselect')?.addEventListener('click', () => {
+        function selectedIds() {
+            return [...document.querySelectorAll('.history-checkbox:checked')].map(cb => cb.dataset.id);
+        }
+        function clearSelection() {
             document.querySelectorAll('.history-checkbox:checked').forEach(cb => cb.checked = false);
             document.getElementById('batchBar')?.classList.remove('active');
+        }
+
+        document.getElementById('batchDeselect')?.addEventListener('click', clearSelection);
+
+        document.getElementById('batchCompare')?.addEventListener('click', () => {
+            compareSelected(selectedIds());
         });
 
+        /* Пакетное удаление — теперь через модалку, а не нативный confirm,
+           и с фильтром по user_id (иначе RLS-политика молча отбрасывала бы строки). */
         document.getElementById('batchDelete')?.addEventListener('click', async () => {
-            const ids = [...document.querySelectorAll('.history-checkbox:checked')].map(cb => cb.dataset.id);
-            if (!ids.length || !confirm('Удалить ' + ids.length + ' расчётов?')) return;
-            for (const id of ids) {
-                await db.from('user_history').delete().eq('id', id);
-            }
-            historyCache = historyCache.filter(h => !ids.includes(h.id));
-            renderHistory();
-            renderOverview();
-            loadStats();
-            showToast('Удалено: ' + ids.length);
+            const ids = selectedIds();
+            if (!ids.length) return;
+            const ok = await confirmModal(
+                t('confirm_delete_calc'),
+                t('batch_delete_text').replace('{n}', ids.length)
+            );
+            if (!ok) return;
+            try {
+                const { error } = await db.from('user_history')
+                    .delete().in('id', ids).eq('user_id', currentUser.id);
+                if (error) throw error;
+                historyCache = historyCache.filter(r => !ids.map(String).includes(String(r.id)));
+                clearSelection();
+                renderHistory(); renderOverview(); loadStats();
+                showToast(t('batch_deleted').replace('{n}', ids.length));
+            } catch (e) { showToast(String(e.message || e)); }
+        });
+
+        document.getElementById('batchArchive')?.addEventListener('click', async () => {
+            const ids = selectedIds();
+            if (!ids.length) return;
+            try {
+                const ts = new Date().toISOString();
+                const { error } = await db.from('user_history')
+                    .update({ archived_at: ts }).in('id', ids).eq('user_id', currentUser.id);
+                if (error) throw error;
+                historyCache.forEach(r => { if (ids.map(String).includes(String(r.id))) r.archived_at = ts; });
+                clearSelection();
+                renderHistory(); renderOverview();
+                showToast(t('batch_archived').replace('{n}', ids.length));
+            } catch (e) { showToast(String(e.message || e)); }
+        });
+
+        document.getElementById('batchProject')?.addEventListener('click', async () => {
+            const ids = selectedIds();
+            if (!ids.length) return;
+            try {
+                const { data: projects, error } = await db.from('user_projects')
+                    .select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+                if (error) throw error;
+                const projectId = await openModal({ title: t('pick_project'), projects: projects || [] });
+                if (!projectId) return;
+
+                const rows = ids.map(id => historyCache.find(r => String(r.id) === String(id))).filter(Boolean);
+                const payload = rows.map(r => ({
+                    project_id: projectId,
+                    user_id: currentUser.id,
+                    report_data: r.report_data || {
+                        product_title: r.product_title,
+                        functional_unit: r.functional_unit,
+                        total_co2eq: r.total_co2eq
+                    }
+                }));
+                const { error: insErr } = await db.from('project_calculations').insert(payload);
+                if (insErr) throw insErr;
+                clearSelection();
+                showToast(t('batch_to_project').replace('{n}', rows.length));
+            } catch (e) { showToast(String(e.message || e)); }
+        });
+
+        document.getElementById('batchCsv')?.addEventListener('click', () => {
+            const rows = selectedIds().map(id => historyCache.find(r => String(r.id) === String(id))).filter(Boolean);
+            if (!rows.length) return;
+            exportCsv(rows);
+            clearSelection();
         });
 
         async function deleteHistory(id) {
@@ -1302,16 +2188,20 @@
             } catch (e) { showToast(t('err_delete') + (e.message || e)); }
         }
 
-        /* CSV export (BOM для кириллицы в Excel) */
-        document.getElementById('exportCsvBtn').addEventListener('click', () => {
-            const rows = filteredHistory();
-            if (!rows.length) return;
-            const head = ['date', 'product', 'functional_unit', 'total_co2eq_kg'];
+        /* CSV export (BOM для кириллицы в Excel).
+           Вынесен в функцию — используется и кнопкой в шапке, и пакетным действием.
+           Теперь выгружает также теги и заметку. */
+        function exportCsv(rows) {
+            if (!rows || !rows.length) return;
+            const head = ['date', 'product', 'functional_unit', 'total_co2eq_kg', 'tags', 'notes'];
+            const q = s => '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"';
             const csv = [head.join(';')].concat(rows.map(r => [
                 new Date(r.created_at).toISOString().slice(0, 10),
-                '"' + String(r.product_title || '').replace(/"/g, '""') + '"',
-                '"' + String(r.functional_unit || '').replace(/"/g, '""') + '"',
-                String(parseFloat(r.total_co2eq) || 0).replace('.', ',')
+                q(r.product_title),
+                q(r.functional_unit),
+                String(parseFloat(r.total_co2eq) || 0).replace('.', ','),
+                q((r.tags || []).join(', ')),
+                q(r.notes)
             ].join(';'))).join('\r\n');
             const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
             const url = URL.createObjectURL(blob);
@@ -1320,7 +2210,8 @@
             document.body.appendChild(a); a.click(); a.remove();
             URL.revokeObjectURL(url);
             showToast(t('toast_csv_done'));
-        });
+        }
+        document.getElementById('exportCsvBtn').addEventListener('click', () => exportCsv(filteredHistory()));
 
         /* Add to project */
         async function addToProject(historyId) {
@@ -1364,17 +2255,48 @@
                     const product = (c.report_data && c.report_data.product_title) || t('unnamed');
                     const total = (c.report_data && c.report_data.total_co2eq) || 0;
                     h += '<div class="calc-item">';
-                    h += '<div style="cursor:pointer;flex:1" onclick="window.location.href=\'/report?history=' + c.id + '\'"><div class="calc-name">' + esc(product) + '</div><div class="calc-date">' + fmtDate(c.created_at) + '</div></div>';
+                    h += '<div style="cursor:pointer;flex:1" onclick="window.location.href=\'/report.html?history=' + c.id + '\'"><div class="calc-name">' + esc(product) + '</div><div class="calc-date">' + fmtDate(c.created_at) + '</div></div>';
                     h += '<div style="display:flex;align-items:center;gap:10px"><div class="calc-total">' + fmtCo2(total) + ' kgCO₂e</div>';
                     h += '<button class="btn btn-danger btn-sm delete-projcalc-btn" data-id="' + c.id + '" title="' + t('delete') + '">✕</button></div>';
                     h += '</div>';
                 });
                 h += '</div>';
             }
+            /* ── Цель по снижению: превращает проект из папки в инструмент ──
+               База = первый (самый старый) расчёт в проекте, текущее = последний.
+               Прогресс считается от фактически достигнутого снижения. */
+            const tgt = parseFloat(p.target_pct);
+            if (!isNaN(tgt) && tgt > 0 && calcs && calcs.length) {
+                const ordered = calcs.slice().sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                const val = c => parseFloat(c.report_data && c.report_data.total_co2eq) || 0;
+                const baseline = parseFloat(p.baseline_co2) || val(ordered[0]);
+                const current  = val(ordered[ordered.length - 1]);
+                if (baseline > 0) {
+                    const goal    = baseline * (1 - tgt / 100);
+                    const cut     = (baseline - current) / baseline * 100;   // достигнутое снижение, %
+                    const pct     = Math.max(0, Math.min(100, cut / tgt * 100));
+                    const reached = current <= goal;
+                    h += '<div class="target">';
+                    h += '<div class="target-head">';
+                    h += '<span class="target-label">' + esc(t('target')) + ' −' + tgt + '%' +
+                         (p.target_date ? ' · ' + fmtDate(p.target_date) : '') + '</span>';
+                    h += '<span class="target-stat' + (reached ? ' reached' : '') + '">' +
+                         (cut >= 0 ? '−' : '+') + Math.abs(cut).toFixed(0) + '%</span>';
+                    h += '</div>';
+                    h += '<div class="target-bar"><div class="target-fill' + (reached ? ' reached' : '') +
+                         '" style="width:' + pct.toFixed(1) + '%"></div></div>';
+                    h += '<div class="target-foot">' +
+                         fmtCo2(current) + ' → ' + fmtCo2(goal) + ' kgCO₂e · ' +
+                         esc(t('target_base')) + ' ' + fmtCo2(baseline) +
+                         '</div>';
+                    h += '</div>';
+                }
+            }
+
             h += '<div class="card-actions">';
             h += '<button class="btn btn-ghost btn-sm toggle-calcs-btn" data-id="' + p.id + '">▸ ' + t('calculations') + '</button>';
+            h += '<button class="btn btn-ghost btn-sm target-btn" data-id="' + p.id + '" data-target="' + (p.target_pct || '') + '">◎ ' + t('target_set') + '</button>';
             h += '<button class="btn btn-ghost btn-sm rename-project-btn" data-id="' + p.id + '" data-name="' + esc(p.name) + '">✏️ ' + t('rename') + '</button>';
-            h += '<button class="share-project-btn btn-icon" data-id="' + p.id + '" title="🔗">🔗</button>';
             h += '<button class="archive-btn" data-id="' + p.id + '" title="' + (p.archived ? t('toast_restored') : t('toast_archived')) + '" style="background:none;border:none;cursor:pointer;font-size:14px;padding:4px">' + (p.archived ? '📤' : '📦') + '</button>';
             h += '<button class="email-share-btn" data-id="' + p.id + '" title="Поделиться по email" style="background:none;border:none;cursor:pointer;font-size:14px;padding:4px">👥</button>';
             h += '<button class="btn btn-danger btn-sm delete-project-btn" data-id="' + p.id + '">' + t('delete') + '</button>';
@@ -1483,33 +2405,73 @@
            Account deletion / password / avatar / profile
            ══════════════════════════════════════════════════ */
         document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
-            const ok = await confirmModal(t('confirm_delete_account'), t('confirm_delete_account_text'));
-            if (!ok) return;
+            /* Необратимое действие требует набрать email — одного клика мало.
+               Раньше здесь был просто confirm, и промах по кнопке сносил всё. */
+            const typed = await openModal({
+                title: t('confirm_delete_account'),
+                text: t('delete_type_email').replace('{email}', currentUser.email || ''),
+                input: true,
+                okLabel: t('delete_btn'),
+                danger: true
+            });
+            if (!typed || typeof typed !== 'string') return;
+            if (typed.trim().toLowerCase() !== String(currentUser.email || '').toLowerCase()) {
+                showToast(t('delete_mismatch'));
+                return;
+            }
             try {
+                // 1) данные
                 await db.from('user_history').delete().eq('user_id', currentUser.id);
                 await db.from('project_calculations').delete().eq('user_id', currentUser.id);
                 await db.from('user_projects').delete().eq('user_id', currentUser.id);
+
+                /* 2) сам auth-пользователь. Из браузера его удалить нельзя —
+                   нужен service_role. Дёргаем Edge Function delete-account.
+                   Если она не задеплоена — честно говорим, что аккаунт остался,
+                   вместо того чтобы врать "удалено безвозвратно". */
+                let authDeleted = false;
+                try {
+                    const { data: { session } } = await db.auth.getSession();
+                    const res = await fetch(SB_URL + '/functions/v1/delete-account', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + (session?.access_token || '')
+                        }
+                    });
+                    authDeleted = res.ok;
+                } catch (e) { authDeleted = false; }
+
                 await db.auth.signOut();
                 localStorage.clear();
+                if (!authDeleted) alert(t('delete_partial'));
                 window.location.href = '/';
             } catch (e) { showToast(t('err_generic') + (e.message || e)); }
         });
 
         document.getElementById('exportAllBtn').addEventListener('click', async () => {
-          if (!window.JSZip) { showToast('JSZip не загружен'); return; }
+          if (!window.JSZip) { showToast(t('err_jszip')); return; }
           const zip = new JSZip();
-          const { data: history } = await db.from('user_history').select('*').eq('user_id', currentUser.id);
+          const { data: history }  = await db.from('user_history').select('*').eq('user_id', currentUser.id);
           const { data: projects } = await db.from('user_projects').select('*').eq('user_id', currentUser.id);
-          const { data: calcs } = await db.from('project_calculations').select('*').eq('user_id', currentUser.id);
+          const { data: calcs }    = await db.from('project_calculations').select('*').eq('user_id', currentUser.id);
+          const { data: shares }   = await db.from('share_links').select('*').eq('owner_id', currentUser.id);
           zip.file('history.json', JSON.stringify(history || [], null, 2));
           zip.file('projects.json', JSON.stringify(projects || [], null, 2));
           zip.file('calculations.json', JSON.stringify(calcs || [], null, 2));
+          // GDPR: профиль и ссылки — тоже персональные данные
+          zip.file('share_links.json', JSON.stringify(shares || [], null, 2));
+          zip.file('profile.json', JSON.stringify({
+            id: currentUser.id, email: currentUser.email,
+            created_at: currentUser.created_at,
+            metadata: currentUser.user_metadata || {}
+          }, null, 2));
           const blob = await zip.generateAsync({ type: 'blob' });
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url; a.download = 'lca-ai-data.zip'; a.click();
           URL.revokeObjectURL(url);
-          showToast('Данные экспортированы');
+          showToast(t('toast_exported'));
         });
 
         document.getElementById('changePasswordBtn').addEventListener('click', async () => {
@@ -1575,6 +2537,12 @@
             if (!currentUser) return;
             const md = currentUser.user_metadata || {};
             document.getElementById('editProfileName').value = md.full_name || '';
+            document.getElementById('editOrg').value     = md.org || '';
+            document.getElementById('editRole').value    = md.role || '';
+            document.getElementById('editCountry').value = md.country || '';
+            document.getElementById('editSite').value    = md.site || '';
+            renderProviders();
+            renderSessionInfo();
             const avatarUrl = md.avatar_url || '';
             const previewImg = document.getElementById('avatarPreviewImg');
             const placeholder = document.getElementById('avatarPlaceholder');
@@ -1609,8 +2577,18 @@
 
         document.getElementById('saveProfileBtn').addEventListener('click', async () => {
             const name = document.getElementById('editProfileName').value.trim();
-            const bio = document.getElementById('editBio').value.trim();
-            const updates = { full_name: name, bio: bio };
+            const bio  = document.getElementById('editBio').value.trim();
+            const site = document.getElementById('editSite').value.trim();
+            // Профиль хранится в user_metadata — миграция БД не нужна
+            const updates = {
+                full_name: name,
+                bio: bio,
+                org:     document.getElementById('editOrg').value.trim(),
+                role:    document.getElementById('editRole').value.trim(),
+                country: document.getElementById('editCountry').value.trim(),
+                site:    site
+            };
+            if (site && !/^https?:\/\//i.test(site)) { showToast(t('err_site_url')); return; }
             if (pendingAvatarBase64) updates.avatar_url = pendingAvatarBase64;
             const { error } = await db.auth.updateUser({ data: updates });
             if (error) { showToast(error.message); return; }
@@ -1619,6 +2597,75 @@
             showToast(t('toast_profile_saved'));
             renderProfile();
             renderGreeting();
+        });
+
+        /* ══════════════════════════════════════════════════
+           SECURITY
+           ══════════════════════════════════════════════════ */
+
+        function authProviders() {
+            const ids = currentUser?.identities || [];
+            if (ids.length) return [...new Set(ids.map(i => i.provider))];
+            const p = currentUser?.app_metadata?.provider;
+            return p ? [p] : ['email'];
+        }
+        function hasPassword() { return authProviders().includes('email'); }
+
+        function renderProviders() {
+            const box = document.getElementById('providersList');
+            if (!box) return;
+            const ICON = { email: '✉', google: 'G', github: '⌥', twitter: '𝕏' };
+            box.innerHTML = authProviders().map(p =>
+                '<div class="provider"><span class="provider-ic">' + (ICON[p] || '•') + '</span>' +
+                '<span class="provider-name">' + esc(p) + '</span>' +
+                '<span class="provider-tag">' + esc(t('connected')) + '</span></div>'
+            ).join('');
+
+            /* У OAuth-аккаунта пароля не существует — форма смены пароля падала бы
+               на signInWithPassword. Прячем её целиком. */
+            const pg = document.getElementById('passwordGroup');
+            if (pg) pg.style.display = hasPassword() ? '' : 'none';
+        }
+
+        function renderSessionInfo() {
+            const box = document.getElementById('sessionInfo');
+            if (!box) return;
+            const last = currentUser?.last_sign_in_at;
+            box.innerHTML =
+                '<div class="session-row"><span>' + esc(t('sess_current')) + '</span>' +
+                '<span class="session-val">' + esc(navigator.platform || '—') + '</span></div>' +
+                (last ? '<div class="session-row"><span>' + esc(t('sess_last')) + '</span>' +
+                        '<span class="session-val">' + fmtDate(last) + '</span></div>' : '') +
+                '<p class="session-note">' + esc(t('sess_note')) + '</p>';
+        }
+
+        document.getElementById('signOutAllBtn')?.addEventListener('click', async () => {
+            const ok = await confirmModal(t('signout_all'), t('signout_all_text'));
+            if (!ok) return;
+            try {
+                // scope: 'global' отзывает refresh-токены на всех устройствах
+                const { error } = await db.auth.signOut({ scope: 'global' });
+                if (error) throw error;
+                window.location.href = '/login.html';
+            } catch (e) { showToast(String(e.message || e)); }
+        });
+
+        document.getElementById('changeEmailBtn')?.addEventListener('click', async () => {
+            const val = await openModal({
+                title: t('change_email'),
+                text: t('change_email_text'),
+                input: true,
+                inputValue: currentUser?.email || '',
+                okLabel: t('send')
+            });
+            if (!val || typeof val !== 'string') return;
+            const email = val.trim();
+            if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { showToast(t('err_email')); return; }
+            try {
+                const { error } = await db.auth.updateUser({ email });
+                if (error) throw error;
+                showToast(t('change_email_sent'));
+            } catch (e) { showToast(String(e.message || e)); }
         });
 
         /* ══════════════════════════════════════════════════
@@ -1674,20 +2721,6 @@
            Delegated clicks (share / delete / rename / toggle / to-project)
            ══════════════════════════════════════════════════ */
         document.addEventListener('click', (e) => {
-            const shareProject = e.target.closest('.share-project-btn');
-            if (shareProject) {
-                e.stopPropagation();
-                const url = window.location.origin + '/report?project=' + shareProject.dataset.id;
-                navigator.clipboard.writeText(url).then(() => showToast(t('toast_link_copied')));
-                return;
-            }
-            const shareHistory = e.target.closest('.share-history-btn');
-            if (shareHistory) {
-                e.stopPropagation();
-                const url = window.location.origin + '/report?history=' + shareHistory.dataset.id;
-                navigator.clipboard.writeText(url).then(() => showToast(t('toast_link_copied')));
-                return;
-            }
             const delHistory = e.target.closest('.delete-history-btn');
             if (delHistory) { deleteHistory(delHistory.dataset.id); return; }
             const addBtn = e.target.closest('.add-to-project-btn');
@@ -1709,37 +2742,186 @@
             if (delProjCalc) { e.stopPropagation(); deleteCalcFromProject(delProjCalc.dataset.id); return; }
             const archiveBtn = e.target.closest('.archive-btn');
             if (archiveBtn) { archiveProject(archiveBtn.dataset.id); return; }
+
+            /* ── история: вариант / заметка / теги / архив ── */
+            const variantBtn = e.target.closest('.variant-btn');
+            if (variantBtn) { duplicateAsVariant(variantBtn.dataset.id); return; }
+
+            const noteBtn = e.target.closest('.note-btn');
+            if (noteBtn) { editNote(noteBtn.dataset.id); return; }
+
+            const archHist = e.target.closest('.archive-hist-btn');
+            if (archHist) { archiveCalc(archHist.dataset.id, false); return; }
+
+            const restoreBtn = e.target.closest('.restore-btn');
+            if (restoreBtn) { archiveCalc(restoreBtn.dataset.id, true); return; }
+
+            const tagAdd = e.target.closest('.tag-add');
+            if (tagAdd) { addTag(tagAdd.dataset.id); return; }
+
+            const tagX = e.target.closest('.tag-x');
+            if (tagX) { removeTag(tagX.dataset.id, tagX.dataset.tag); return; }
+
+            const targetBtn = e.target.closest('.target-btn');
+            if (targetBtn) { setTarget(targetBtn.dataset.id, targetBtn.dataset.target); return; }
+
+            const vbCmp = e.target.closest('.vb-cmp');
+            if (vbCmp) { compareSelected([vbCmp.dataset.parent, vbCmp.dataset.id]); return; }
+        });
+
+        /* ── Цель по снижению для проекта ── */
+        async function setTarget(id, cur) {
+            const val = await openModal({
+                title: t('target_title'),
+                text: t('target_text'),
+                input: true,
+                inputValue: cur || '',
+                okLabel: t('save')
+            });
+            if (val === null || val === undefined || typeof val !== 'string') return;
+            const num = parseFloat(String(val).replace(',', '.'));
+            const payload = (!val.trim() || isNaN(num) || num <= 0)
+                ? { target_pct: null }
+                : { target_pct: Math.min(100, num) };
+            try {
+                const { error } = await db.from('user_projects')
+                    .update(payload).eq('id', id).eq('user_id', currentUser.id);
+                if (error) throw error;
+                showToast(t('saved'));
+                loadProjects();
+            } catch (e) { showToast(String(e.message || e)); }
+        }
+
+        document.getElementById('compareClose')?.addEventListener('click',
+            () => document.getElementById('compareMask').classList.remove('show'));
+        document.getElementById('compareMask')?.addEventListener('click', e => {
+            if (e.target.id === 'compareMask') e.target.classList.remove('show');
         });
 
         /* ══ Project sharing by email ══ */
         let currentShareProjectId = null;
+        let currentShareKind = 'project';
+        function openShare(id, kind) {
+          currentShareProjectId = id;
+          currentShareKind = kind;
+          document.getElementById('shareRole').value = 'view';   // право записи — только явно
+          syncShareRoleUI();
+          document.getElementById('shareEmail').value = '';
+          document.getElementById('shareLinkRow').style.display = 'none';
+          document.getElementById('shareLinkInput').value = '';
+          document.getElementById('modalShare').style.display = 'flex';
+        }
         document.addEventListener('click', (e) => {
           const btn = e.target.closest('.email-share-btn');
-          if (!btn) return;
-          currentShareProjectId = btn.dataset.id;
-          document.getElementById('shareEmail').value = '';
-          document.getElementById('modalShare').style.display = 'flex';
+          if (btn) { openShare(btn.dataset.id, 'project'); return; }
+          const hb = e.target.closest('.email-share-hist-btn');
+          if (hb) { openShare(hb.dataset.id, 'history'); return; }
         });
 
         document.getElementById('modalShare')?.addEventListener('click', (e) => {
           if (e.target.id === 'modalShare') e.target.style.display = 'none';
         });
 
-        document.getElementById('shareConfirmBtn')?.addEventListener('click', async () => {
-          const email = document.getElementById('shareEmail').value.trim();
-          const role = document.getElementById('shareRole').value;
-          if (!email || !currentShareProjectId) return;
-          try {
-            await db.from('project_shares').insert({
-              project_id: currentShareProjectId,
-              owner_id: currentUser.id,
-              shared_email: email,
-              role: role,
-              status: 'pending'
-            });
+        function shareBody(days) {
+            return {
+                kind: currentShareKind,
+                target_id: currentShareProjectId,
+                role: document.getElementById('shareRole').value === 'edit' ? 'edit' : 'view',
+                expires_days: days
+            };
+        }
+
+        function syncShareRoleUI() {
+            const sel  = document.getElementById('shareRole');
+            const note = document.getElementById('shareRoleNote');
+            const editOpt = sel.querySelector('option[value="edit"]');
+            editOpt.disabled = false;   // теперь проекты тоже редактируемы
+            note.textContent = sel.value === 'edit'
+                ? (currentShareKind === 'project' ? t('share_role_note_edit_proj')
+                                                  : t('share_role_note_edit'))
+                : t('share_role_note_view');
+        }
+        document.getElementById('shareRole')?.addEventListener('change', syncShareRoleUI);
+
+        /* Создать ссылку без письма — работает всегда, даже если почта не настроена */
+        document.getElementById('shareLinkBtn')?.addEventListener('click', async () => {
+            const days = parseInt(document.getElementById('shareExpires').value, 10) || 30;
+            try {
+                const token = (crypto.randomUUID && crypto.randomUUID()) ||
+                              (Date.now() + '-' + Math.random().toString(16).slice(2));
+                const role = document.getElementById('shareRole').value === 'edit' ? 'edit' : 'view';
+                const { error } = await db.from('share_links').insert({
+                    token,
+                    kind: currentShareKind,
+                    target_id: currentShareProjectId,
+                    owner_id: currentUser.id,
+                    role,
+                    expires_at: new Date(Date.now() + days * 864e5).toISOString()
+                });
+                if (error) throw error;
+                const link = window.location.origin + '/share.html?token=' + token;
+                document.getElementById('shareLinkInput').value = link;
+                document.getElementById('shareLinkRow').style.display = 'flex';
+                navigator.clipboard?.writeText(link);
+                showToast(t('share_link_created'));
+            } catch (e) { showToast(String(e.message || e)); }
+        });
+
+        document.getElementById('shareCopyBtn')?.addEventListener('click', () => {
+            const v = document.getElementById('shareLinkInput').value;
+            navigator.clipboard.writeText(v).then(() => showToast(t('toast_link_copied')));
+        });
+
+        document.getElementById('shareCancelBtn')?.addEventListener('click', () => {
             document.getElementById('modalShare').style.display = 'none';
-            showToast('Приглашение отправлено на ' + email);
-          } catch (e) { showToast('Ошибка: ' + (e.message || e)); }
+        });
+
+        /* Отправить письмо. Раньше здесь просто писалась строка в БД и показывалось
+           «Приглашение отправлено» — письмо не уходило никогда. Теперь письмо
+           реально шлёт Edge Function; если почта не настроена, честно говорим
+           об этом и отдаём ссылку, чтобы её можно было передать вручную. */
+        document.getElementById('shareConfirmBtn')?.addEventListener('click', async () => {
+            const email = document.getElementById('shareEmail').value.trim();
+            const days  = parseInt(document.getElementById('shareExpires').value, 10) || 30;
+            if (!email || !currentShareProjectId) { showToast(t('err_email')); return; }
+
+            const btn = document.getElementById('shareConfirmBtn');
+            btn.disabled = true;
+            try {
+                const { data: { session } } = await db.auth.getSession();
+                const res = await fetch(SB_URL + '/functions/v1/send-share-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + (session?.access_token || '')
+                    },
+                    body: JSON.stringify(Object.assign(shareBody(days), { email }))
+                });
+                const out = await res.json().catch(() => ({}));
+
+                if (res.ok) {
+                    document.getElementById('modalShare').style.display = 'none';
+                    showToast(t('share_sent').replace('{email}', email));
+                    return;
+                }
+                if (res.status === 501) {           // почта не настроена на сервере
+                    if (out.link) {
+                        document.getElementById('shareLinkInput').value = out.link;
+                        document.getElementById('shareLinkRow').style.display = 'flex';
+                    }
+                    showToast(t('share_no_mail'));
+                    return;
+                }
+                if (out.link) {                      // письмо не ушло, но ссылка есть
+                    document.getElementById('shareLinkInput').value = out.link;
+                    document.getElementById('shareLinkRow').style.display = 'flex';
+                }
+                showToast(t('share_failed'));
+            } catch (e) {
+                showToast(String(e.message || e));
+            } finally {
+                btn.disabled = false;
+            }
         });
 
         /* ══════════════════════════════════════════════════

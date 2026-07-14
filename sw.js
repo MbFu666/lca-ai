@@ -1,9 +1,16 @@
-const CACHE_NAME = 'lca-ai-v4';
+/* Бампайте версию на КАЖДЫЙ деплой, иначе у вернувшихся пользователей
+   останется старая версия страниц из кэша. */
+const CACHE_NAME = 'lca-ai-v5';
 const urlsToCache = [
   '/',
   '/index.html',
+  '/report.html',
+  '/cabinet.html',
+  '/share.html',
   '/manifest.json',
-  'https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap',
+  // Шрифты дизайн-системы. Раньше здесь висел Manrope — его в проекте больше нет,
+  // SW тянул мёртвый файл и не кэшировал реально используемые начертания.
+  'https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap',
   'https://cdn.jsdelivr.net/npm/jsonrepair@3.11.2/lib/umd/jsonrepair.js'
 ];
 

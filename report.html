@@ -100,7 +100,8 @@ function updateAuthUI(isLoggedIn) {
     logoutBtn.addEventListener('click', logout);
     authSection.appendChild(logoutBtn);
   } else {
-    authSection.innerHTML = '<a href="/login.html" class="auth-btn">' +
+    const nextQ = '?next=' + encodeURIComponent(location.pathname + location.search);
+    authSection.innerHTML = '<a href="/login.html' + nextQ + '" class="auth-btn">' +
       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
       '<span>Войти</span></a>';
   }
@@ -3213,8 +3214,12 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
             <span class="scope" id="resScope" data-i18n="scope_full">Полный жизненный цикл</span>
           </div>
           <div class="res-hero-num">
-            <div class="label" data-i18n="res_label">Углеродный след продукта (kgCO₂e):</div>
+            <div class="label"><span data-i18n="res_label_bare">Углеродный след продукта</span> (<span id="resUnit">kg CO₂e</span>):</div>
             <div class="value" id="resValue">—</div>
+            <div class="uncertainty" id="uncertainty" style="display:none">
+              <span class="unc-range" id="uncRange">—</span>
+              <span class="unc-note" data-i18n="unc_note">90% интервал · Монте-Карло</span>
+            </div>
           </div>
         </div>
         <div class="res-meta">
@@ -3260,6 +3265,25 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
           <div class="ranking" id="ranking"></div>
         </section>
       </div>
+
+      <!-- Чувствительность: где точность данных реально важна -->
+      <section class="ai-section" id="sensSection" style="display:none">
+        <div class="ai-badge" data-i18n="sens_title">Что двигает результат</div>
+        <div class="sens-hint" data-i18n="sens_hint">на сколько сдвинется итог, если коэффициент ошибается на 10%</div>
+        <div class="sens" id="sensList"></div>
+      </section>
+
+      <!-- Обратная задача: не «что будет, если», а «что нужно, чтобы» -->
+      <section class="ai-section" id="pathSection" style="display:none">
+        <div class="ai-badge" data-i18n="path_title">Как достичь цели</div>
+        <div class="goal-input">
+          <label for="goalPct" data-i18n="path_goal">Снизить след на</label>
+          <input type="number" id="goalPct" min="1" max="90" step="1" value="20">
+          <label>%</label>
+          <span class="unc-note" id="goalTarget"></span>
+        </div>
+        <div class="path" id="pathList"></div>
+      </section>
 
       <!-- AI Reduction Suggestion -->
       <section class="ai-section">
@@ -3541,6 +3565,57 @@ const MODEL   = "deepseek-v4-flash";      // мультимодальная, д�
 const STAGE_COLORS = ["#F03B0C", "#D9481C", "#B4652A", "#8A6A4F", "#B8B4AC", "#9B978F"];
 
 /* ============================================================
+   Дефолты расчёта из кабинета (Настройки → Расчёты).
+   Кабинет писал их в localStorage['lca-calc-settings'], но никто
+   не читал: настройка сохранялась и не влияла ни на что.
+   ============================================================ */
+const REGION_NAMES = {
+  europe:        'Europe (EU-27 average grid and supply chains)',
+  north_america: 'North America (US/Canada average grid and supply chains)',
+  asia:          'Asia (CN/IN/SEA average grid and supply chains)'
+};
+
+function calcSettings() {
+  try {
+    const s = JSON.parse(localStorage.getItem('lca-calc-settings') || '{}');
+    return {
+      unit:      s.unit === 't' ? 't' : 'kg',
+      precision: s.precision === 'deep' ? 'deep' : 'fast',
+      region:    REGION_NAMES[s.region] ? s.region : 'auto'
+    };
+  } catch (e) {
+    return { unit: 'kg', precision: 'fast', region: 'auto' };
+  }
+}
+
+function modelForPrecision() {
+  return calcSettings().precision === 'deep' ? 'deepseek-v4-pro' : MODEL;
+}
+
+function settingsPromptNote() {
+  const s = calcSettings();
+  const bits = [];
+  if (s.region !== 'auto') {
+    bits.push('Unless the product description names a region explicitly, assume: ' +
+              REGION_NAMES[s.region] + '. Reflect it in the "region" field.');
+  }
+  if (s.precision === 'deep') {
+    bits.push('Depth: full LCA. Give 3 sub_processes per stage instead of 2, and cite a specific factor database for each.');
+  }
+  return bits.join(' ');
+}
+
+/* Единицы — только отображение итога. Считаем всегда в кг:
+   инвентаризация в кг это стандарт, тонны имеют смысл лишь
+   для крупных итогов. */
+function displayTotal(kg) {
+  const v = parseFloat(kg) || 0;
+  return calcSettings().unit === 't'
+    ? { value: v / 1000, unit: 't CO₂e' }
+    : { value: v, unit: 'kg CO₂e' };
+}
+
+/* ============================================================
    i18n — словарь интерфейса
    ============================================================ */
 const I18N = {
@@ -3624,6 +3699,17 @@ const I18N = {
     crumb_suffix:'· Углеродный след',
     scope_full:  'Полный жизненный цикл',
     res_label:   'Углеродный след продукта (kgCO₂e):',
+    res_label_bare: 'Углеродный след продукта',
+    share_save_first: 'Сначала сохраните расчёт',
+    share_link_copied: 'Публичная ссылка скопирована (30 дней)',
+    unc_note:        '90% интервал · Монте-Карло',
+    sens_title:      'Что двигает результат',
+    sens_hint:       'на сколько сдвинется итог, если коэффициент ошибается на 10%',
+    path_title:      'Как достичь цели',
+    path_goal:       'Снизить след на',
+    path_reduce_to:  'сократить с {from} до {to}',
+    path_not_enough: 'даже полное обнуление закрывает лишь {pct}% цели',
+    path_insufficient: 'недостаточно',
     res_label_short: 'Итого выбросы (kgCO₂e)',
     m_cycle:     'Период учёта',
     m_date:      'Дата расчёта',
@@ -3802,6 +3888,17 @@ const I18N = {
     crumb_suffix:'· Carbon Footprint',
     scope_full:  'Full lifecycle',
     res_label:   'Product carbon footprint (kgCO₂e):',
+    res_label_bare: 'Product carbon footprint',
+    share_save_first: 'Save the calculation first',
+    share_link_copied: 'Public link copied (30 days)',
+    unc_note:        '90% interval · Monte Carlo',
+    sens_title:      'What moves the result',
+    sens_hint:       'how far the total shifts if the factor is off by 10%',
+    path_title:      'How to hit the target',
+    path_goal:       'Cut the footprint by',
+    path_reduce_to:  'reduce from {from} to {to}',
+    path_not_enough: 'even zeroing it out covers only {pct}% of the target',
+    path_insufficient: 'not enough',
     res_label_short: 'Total emissions (kgCO₂e)',
     m_cycle:     'Accounting cycle',
     m_date:      'Calculation date',
@@ -3970,6 +4067,17 @@ const I18N = {
     crumb_suffix:'· 碳足迹',
     scope_full:  '全生命周期',
     res_label:   '产品碳足迹 (kgCO₂e):',
+    res_label_bare: '产品碳足迹',
+    share_save_first: '请先保存计算',
+    share_link_copied: '公开链接已复制（30 天）',
+    unc_note:        '90% 区间 · 蒙特卡洛',
+    sens_title:      '哪些因素影响结果',
+    sens_hint:       '若该因子偏差 10%，总量将随之变动多少',
+    path_title:      '如何达成目标',
+    path_goal:       '将碳足迹降低',
+    path_reduce_to:  '从 {from} 减少到 {to}',
+    path_not_enough: '即使完全归零也仅能覆盖目标的 {pct}%',
+    path_insufficient: '不足',
     res_label_short: '总排放 (kgCO₂e)',
     m_cycle:     '核算周期',
     m_date:      '计算日期',
@@ -4124,12 +4232,22 @@ async function saveToHistory(report) {
   if (currentUser && supabaseClient) {
     console.log('[saveToHistory] Saving to Supabase...');
     try {
+      /* parent_id связывает вариант с исходным расчётом. Кабинет кладёт
+         id родителя в lca_variant_parent при нажатии «Создать вариант».
+         Без этой связи сравнить V3 и V4 было невозможно. */
+      let parentId = null;
+      try {
+        parentId = localStorage.getItem('lca_variant_parent') || null;
+        localStorage.removeItem('lca_variant_parent');
+      } catch (e) {}
+
       const { data, error } = await supabaseClient.from('user_history').insert({
         user_id: currentUser.id,
         product_title: report.product_title,
         functional_unit: report.functional_unit,
         total_co2eq: report.total_co2eq,
-        report_data: report
+        report_data: report,
+        parent_id: parentId
       }).select('id').single();
       
       if (error) {
@@ -4375,7 +4493,7 @@ async function processExcelFile(file) {
    Возвращает строку content или бросает Error с диагностикой. */
 async function apiCall(messages, opts = {}) {
   const body = {
-    model: MODEL,
+    model: modelForPrecision(),   // «Глубокая» точность → более сильная модель
     messages,
     max_tokens: opts.max_tokens || 5000,
     temperature: opts.temperature ?? 0.2,
@@ -4577,10 +4695,11 @@ async function callClaude(productText) {
   const modeNote = currentMode === 'factor'
     ? 'Prefer well-known emission factor databases (Ecoinvent, IPCC AR6, CCDB, GREET).'
     : '';
+  const setNote = settingsPromptNote();
 
   // КОМПАКТНЫЙ промпт — только структура, БЕЗ analytical text.
   const systemPrompt =
-`LCA expert (ISO 14067, PAS 2050). Reply with VALID JSON ONLY in ${langName}. ${modeNote}
+`LCA expert (ISO 14067, PAS 2050). Reply with VALID JSON ONLY in ${langName}. ${modeNote} ${setNote}
 
 If input is not a product/material/process/energy carrier for LCA → reply:
 {"error":"not_lca","message":"<one-sentence reason in ${langName}>"}
@@ -4610,7 +4729,7 @@ Else reply with this exact schema:
 }
 
 5 stages required (in ${langName}): Raw material acquisition, Manufacturing, Distribution, Use phase, End of life.
-Each stage = exactly 2 sub_processes. Numbers in kg CO2-eq. share_pct sums to 100.
+Each stage = exactly ${calcSettings().precision === 'deep' ? '3' : '2'} sub_processes. Numbers in kg CO2-eq (always compute in kg regardless of display units). share_pct sums to 100.
 Each sub_process must include "confidence": "high" or "medium" or "low".
 - high: matches published LCA database (Ecoinvent, IPCC, CCDB)
 - medium: industry average or regional estimate
@@ -4720,10 +4839,183 @@ function repairTruncatedJson(s) {
 /* ============================================================
    Renderer
    ============================================================ */
+
+/* ═══════════════════════════════════════════════════════════════
+   АНАЛИТИКА ПОВЕРХ МОДЕЛИ
+   Всё считается локально из report_data: amount × factor уже есть.
+   Ни одного запроса к API — ноль стоимости, мгновенный отклик.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Разброс коэффициента по его надёжности. Числа — не «точные»,
+   а честный порядок: AI-оценка неизбежно шире, чем совпадение
+   с Ecoinvent. Это допущение, и оно названо в интерфейсе. */
+const CONF_SPREAD = { high: 0.10, medium: 0.30, low: 0.50 };
+
+function allSubProcesses(d) {
+  const out = [];
+  (d.stages || []).forEach((s, si) => {
+    (s.sub_processes || []).forEach((p, pi) => out.push({ p, s, si, pi }));
+  });
+  return out;
+}
+
+/* ── Монте-Карло: интервал вместо точки ───────────────────────
+   Одно число создаёт ложную точность. За итогом стоят коэффициенты
+   разной надёжности; прогоняем их разброс и показываем распределение. */
+function monteCarlo(d, runs) {
+  const subs = allSubProcesses(d);
+  if (!subs.length) return null;
+  runs = runs || 4000;
+
+  const totals = new Float64Array(runs);
+  for (let r = 0; r < runs; r++) {
+    let sum = 0;
+    for (let i = 0; i < subs.length; i++) {
+      const p = subs[i].p;
+      const base = (parseFloat(p.amount) || 0) * (parseFloat(p.factor) || 0);
+      const spread = CONF_SPREAD[p.confidence] !== undefined ? CONF_SPREAD[p.confidence] : CONF_SPREAD.low;
+      /* Треугольное распределение вокруг базового значения: пик в центре,
+         без ухода в отрицательные величины и без вида ложной научности,
+         который придало бы нормальное. */
+      const tri = (Math.random() + Math.random()) - 1;   // [-1, 1], пик в 0
+      sum += base * (1 + tri * spread);
+    }
+    totals[r] = sum;
+  }
+
+  const arr = Array.from(totals).sort((a, b) => a - b);
+  const q = f => arr[Math.min(arr.length - 1, Math.max(0, Math.floor(f * arr.length)))];
+  return { p05: q(0.05), p50: q(0.50), p95: q(0.95) };
+}
+
+function renderUncertainty(d) {
+  const box = document.getElementById('uncertainty');
+  if (!box) return;
+  const mc = monteCarlo(d);
+  if (!mc) { box.style.display = 'none'; return; }
+
+  const lo = displayTotal(mc.p05), hi = displayTotal(mc.p95);
+  const el = document.getElementById('uncRange');
+  if (el) el.textContent = fmtNum(lo.value) + ' — ' + fmtNum(hi.value) + ' ' + lo.unit;
+  box.style.display = 'flex';
+}
+
+/* ── Чувствительность: где точность данных реально важна ──────
+   Эластичность: сдвиг коэффициента на 10% → сдвиг итога на X%.
+   Отвечает на «какие данные стоит перепроверять, а какие нет». */
+function renderSensitivity(d) {
+  const sec = document.getElementById('sensSection');
+  const list = document.getElementById('sensList');
+  if (!sec || !list) return;
+
+  const total = parseFloat(d.total_co2eq) || 0;
+  const subs = allSubProcesses(d);
+  if (!total || subs.length < 2) { sec.style.display = 'none'; return; }
+
+  const rows = subs.map(function (x) {
+    const p = x.p;
+    const co2 = (parseFloat(p.amount) || 0) * (parseFloat(p.factor) || 0);
+    return {
+      name: p.name || '—',
+      stage: x.s.name || '',
+      elasticity: (co2 * 0.10) / total * 100,
+      conf: p.confidence || 'low'
+    };
+  })
+  .filter(function (r) { return r.elasticity > 0.01; })
+  .sort(function (a, b) { return b.elasticity - a.elasticity; })
+  .slice(0, 8);
+
+  if (!rows.length) { sec.style.display = 'none'; return; }
+  const max = rows[0].elasticity;
+
+  list.innerHTML = rows.map(function (r) {
+    return '<div class="sens-row">' +
+      '<div class="sens-name" title="' + escape(r.stage) + '">' + escape(r.name) +
+        '<span class="confidence-badge confidence-' + escape(r.conf) + '">' +
+        (r.conf === 'high' ? '●' : r.conf === 'medium' ? '◐' : '○') + '</span>' +
+      '</div>' +
+      '<div class="sens-bar"><div class="sens-fill" style="width:' + (r.elasticity / max * 100).toFixed(1) + '%"></div></div>' +
+      '<div class="sens-val">' + r.elasticity.toFixed(2) + '%</div>' +
+    '</div>';
+  }).join('');
+  sec.style.display = '';
+}
+
+/* ── Обратная задача: что нужно, чтобы достичь цели ───────────
+   Слайдер отвечает «что будет, если». Это — «что нужно, чтобы».
+   Для каждого рычага считаем, на сколько его надо сократить, чтобы
+   вытянуть цель в одиночку. Не хватает даже при обнулении — говорим прямо. */
+function renderPathways(d) {
+  const sec  = document.getElementById('pathSection');
+  const list = document.getElementById('pathList');
+  const inp  = document.getElementById('goalPct');
+  if (!sec || !list || !inp) return;
+
+  const total = parseFloat(d.total_co2eq) || 0;
+  const subs = allSubProcesses(d);
+  if (!total || !subs.length) { sec.style.display = 'none'; return; }
+
+  const goalPct = Math.min(90, Math.max(1, parseFloat(inp.value) || 20));
+  const needKg = total * goalPct / 100;
+
+  const shown = displayTotal(total - needKg);
+  const tgtEl = document.getElementById('goalTarget');
+  if (tgtEl) tgtEl.textContent = '→ ' + fmtNum(shown.value) + ' ' + shown.unit;
+
+  const rows = subs.map(function (x) {
+    const p = x.p;
+    const co2 = (parseFloat(p.amount) || 0) * (parseFloat(p.factor) || 0);
+    return { name: p.name || '—', co2: co2,
+             amount: parseFloat(p.amount) || 0, unit: p.unit || '' };
+  })
+  .filter(function (r) { return r.co2 > 0; })
+  .sort(function (a, b) { return b.co2 - a.co2; })
+  .slice(0, 6);
+
+  const T = I18N[currentLang] || I18N.ru;
+  list.innerHTML = rows.map(function (r) {
+    if (r.co2 < needKg) {
+      const covers = r.co2 / needKg * 100;
+      return '<div class="path-row">' +
+        '<div class="path-lever"><b>' + escape(r.name) + '</b> — ' +
+          escape((T.path_not_enough || '').replace('{pct}', covers.toFixed(0))) + '</div>' +
+        '<div class="path-need path-impossible">' + escape(T.path_insufficient || '') + '</div>' +
+      '</div>';
+    }
+    const cutFrac = needKg / r.co2;
+    const newAmount = r.amount * (1 - cutFrac);
+    return '<div class="path-row">' +
+      '<div class="path-lever"><b>' + escape(r.name) + '</b> — ' +
+        escape((T.path_reduce_to || '')
+          .replace('{from}', fmtNum(r.amount) + ' ' + r.unit)
+          .replace('{to}', fmtNum(newAmount) + ' ' + r.unit)) + '</div>' +
+      '<div class="path-need">−' + (cutFrac * 100).toFixed(0) + '%</div>' +
+    '</div>';
+  }).join('');
+
+  sec.style.display = '';
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  const inp = document.getElementById('goalPct');
+  if (inp) inp.addEventListener('input', function () {
+    if (lastReport) renderPathways(lastReport);
+  });
+});
+
 function renderReport(d) {
   sessionStorage.setItem('lca-last-report', JSON.stringify(d));
   const t = I18N[currentLang];
   lastReport = d;
+
+  // Локальная аналитика: интервал, чувствительность, пути к цели.
+  // Всё из уже имеющихся amount × factor — ни одного запроса к API.
+  try {
+    renderUncertainty(d);
+    renderSensitivity(d);
+    renderPathways(d);
+  } catch (e) { console.warn('analytics:', e); }
 
   // ─── strip + toolbar (above the step panels) ───
   $('#crumbProduct').textContent = d.product_title || '—';
@@ -4733,11 +5025,15 @@ function renderReport(d) {
   // ─── step 2 hero ───
   $('#resName').textContent   = d.product_title || '—';
   // Count-up animation for CO2 value
-  const target = parseFloat(d.total_co2eq) || 0;
+  const shown = displayTotal(d.total_co2eq);
+  const target = shown.value;
   const el = $('#resValue');
+  const unitEl = $('#resUnit');
+  if (unitEl) unitEl.textContent = shown.unit;
   const duration = 1200;
   const start = performance.now();
   function countUp(now) {
+    if (!el) return;
     const elapsed = now - start;
     const progress = Math.min(elapsed / duration, 1);
     const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
@@ -5084,8 +5380,13 @@ function sliderRecalc(input, stageI, subI) {
   if (valEl) valEl.textContent = fmtNum(newAmount);
   const amountInput = document.getElementById('detailEditAmount');
   if (amountInput) amountInput.value = newAmount;
-  // Update resValue
-  $('#resValue').textContent = fmtNum(d.total_co2eq);
+  // Update resValue (в выбранных единицах)
+  const shownTotal = displayTotal(d.total_co2eq);
+  $('#resValue').textContent = fmtNum(shownTotal.value);
+  const uEl = document.getElementById('resUnit');
+  if (uEl) uEl.textContent = shownTotal.unit;
+  // Аналитика зависит от значений — пересчитываем вместе с ними
+  try { renderUncertainty(d); renderSensitivity(d); renderPathways(d); } catch (e) {}
   // Update stage card value
   const stageCards = document.querySelectorAll('.stage-card');
   if (stageCards[stageI]) {
@@ -6804,7 +7105,59 @@ async function downloadWord(d) {
         .legend-item { margin: 6px 0; font-size: 12px; }
         .legend-color { width: 12px; height: 12px; display: inline-block; margin-right: 8px; vertical-align: middle; }
         .footer { color: #93A0A6; font-size: 10px; margin-top: 30px; border-top: 1px solid #D6D2CB; padding-top: 10px; }
-      </style>
+      
+/* ═══════════════════════════════════════════════════════════
+   UNCERTAINTY — интервал вместо точки.
+   Одно число создаёт ложную точность: за ним стоят коэффициенты
+   разной надёжности. Показываем распределение, а не точку.
+   ═══════════════════════════════════════════════════════════ */
+.uncertainty {
+  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--rule);
+}
+.unc-range {
+  font-family: var(--mono); font-size: 15px; font-weight: 600; color: var(--graphite);
+}
+.unc-note {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--graphite-low);
+}
+
+/* Sensitivity — что реально двигает результат */
+.sens { display: flex; flex-direction: column; }
+.sens-row {
+  display: grid; grid-template-columns: minmax(120px,1.4fr) 3fr auto;
+  align-items: center; gap: 14px; padding: 10px 0;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.sens-row:last-child { border-bottom: none; }
+.sens-name { font-size: 13px; color: var(--graphite-mid); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sens-bar { height: 8px; background: var(--paper-sunk); }
+.sens-fill { height: 100%; background: var(--e-3); }
+.sens-val { font-family: var(--mono); font-size: 12px; font-weight: 600; text-align: right; white-space: nowrap; }
+.sens-hint { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--graphite-low); margin-bottom: 16px; }
+
+/* Reduction pathways — обратная задача к цели */
+.path { border: 1px solid var(--rule); margin-top: 8px; }
+.path-row {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
+  padding: 13px 16px; border-bottom: 1px solid var(--rule-soft);
+}
+.path-row:last-child { border-bottom: none; }
+.path-lever { font-size: 14px; color: var(--graphite); flex: 1; }
+.path-lever b { font-weight: 600; }
+.path-need { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--e-ink); white-space: nowrap; }
+.path-impossible { color: var(--graphite-low); font-weight: 400; }
+.goal-input {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap;
+}
+.goal-input input {
+  width: 80px; border: 1px solid var(--rule); border-radius: 0; background: var(--paper);
+  padding: 8px 10px; font-family: var(--mono); font-size: 14px; color: var(--graphite); outline: none;
+}
+.goal-input input:focus { border-color: var(--e-3); }
+.goal-input label { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--graphite-low); }
+</style>
     </head>
     <body>
       <h1>LCA Report: ${escW(d.product_title || '-')}</h1>
@@ -7029,22 +7382,35 @@ document.addEventListener('DOMContentLoaded', async function() {
   document.getElementById('exportPdf')?.addEventListener('click', function() { showPdfPreview(); });
   document.getElementById('exportPrint')?.addEventListener('click', function() { window.print(); });
 
+  /* Публичная ссылка.
+     Раньше эта кнопка переключала user_history.is_public — колонки, которой
+     не существует (оба запроса падали молча), и копировала ссылку на
+     /report.html?history=…, закрытую RLS: посторонний её всё равно не открыл бы.
+     Теперь используем настоящую систему: токен в share_links + /share.html,
+     которую читает Edge Function share-view под service_role. */
   document.getElementById('publicShareBtn')?.addEventListener('click', async () => {
     if (!lastReport || !currentUser) return;
+    const T = I18N[currentLang] || I18N.ru;
     const historyId = lastReport._historyId;
-    if (!historyId) {
-      showToast(currentLang === 'ru' ? 'Сначала сохраните расчёт' : currentLang === 'zh' ? '请先保存计算' : 'Save the calculation first');
-      return;
-    }
-    const { data } = await supabaseClient.from('user_history').select('is_public').eq('id', historyId).single();
-    const newState = !(data?.is_public);
-    await supabaseClient.from('user_history').update({ is_public: newState }).eq('id', historyId);
-    const url = window.location.origin + '/report.html?history=' + historyId;
-    if (newState) {
+    if (!historyId) { showToast(T.share_save_first); return; }
+
+    try {
+      const token = (crypto.randomUUID && crypto.randomUUID()) ||
+                    (Date.now() + '-' + Math.random().toString(16).slice(2));
+      const { error } = await supabaseClient.from('share_links').insert({
+        token,
+        kind: 'history',
+        target_id: historyId,
+        owner_id: currentUser.id,
+        expires_at: new Date(Date.now() + 30 * 864e5).toISOString()   // 30 дней
+      });
+      if (error) throw error;
+
+      const url = window.location.origin + '/share.html?token=' + token;
       await navigator.clipboard.writeText(url);
-      showToast(currentLang === 'ru' ? 'Публичная ссылка скопирована' : currentLang === 'zh' ? '公开链接已复制' : 'Public link copied');
-    } else {
-      showToast(currentLang === 'ru' ? 'Ссылка теперь приватная' : currentLang === 'zh' ? '链接已设为私密' : 'Link is now private');
+      showToast(T.share_link_copied);
+    } catch (e) {
+      showToast(String(e.message || e));
     }
   });
 

@@ -19,7 +19,10 @@
       "type": "image/png"
     }
   ],
-  "categories": ["utilities", "productivity"],
-  "lang": "zh",
+  "categories": [
+    "utilities",
+    "productivity"
+  ],
+  "lang": "ru",
   "dir": "ltr"
 }

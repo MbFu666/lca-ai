@@ -103,7 +103,8 @@ function updateAuthUI(isLoggedIn) {
     const nameEl = document.createElement('span'); nameEl.textContent = name; a.appendChild(nameEl);
     authSection.appendChild(a);
   } else {
-    authSection.innerHTML = '<a href="/login.html" class="auth-btn">' +
+    const nextQ = '?next=' + encodeURIComponent(location.pathname + location.search);
+    authSection.innerHTML = '<a href="/login.html' + nextQ + '" class="auth-btn">' +
       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
       '<span>Войти</span></a>';
   }
@@ -3575,6 +3576,53 @@ const MODEL   = "deepseek-v4-flash";      // мультимодальная, д�
 const STAGE_COLORS = ["#F03B0C", "#D9481C", "#B4652A", "#8A6A4F", "#B8B4AC", "#9B978F"];
 
 /* ============================================================
+   Дефолты расчёта из кабинета (Настройки → Расчёты).
+   Кабинет пишет их в localStorage['lca-calc-settings'], но раньше
+   их никто не читал: пользователь выставлял регион, настройка
+   сохранялась — и не влияла ни на что. Теперь она реально
+   доезжает до промпта и до выбора модели.
+   ============================================================ */
+const REGION_NAMES = {
+  europe:        'Europe (EU-27 average grid and supply chains)',
+  north_america: 'North America (US/Canada average grid and supply chains)',
+  asia:          'Asia (CN/IN/SEA average grid and supply chains)'
+};
+
+function calcSettings() {
+  try {
+    const s = JSON.parse(localStorage.getItem('lca-calc-settings') || '{}');
+    return {
+      unit:      s.unit === 't' ? 't' : 'kg',
+      precision: s.precision === 'deep' ? 'deep' : 'fast',
+      region:    REGION_NAMES[s.region] ? s.region : 'auto'
+    };
+  } catch (e) {
+    return { unit: 'kg', precision: 'fast', region: 'auto' };
+  }
+}
+
+/* Точность → модель. "Глубокая" берёт более сильную модель;
+   она дороже и медленнее, поэтому по умолчанию остаётся flash. */
+function modelForPrecision() {
+  return calcSettings().precision === 'deep' ? 'deepseek-v4-pro' : MODEL;
+}
+
+/* Дефолты, вшиваемые в системный промпт */
+function settingsPromptNote() {
+  const s = calcSettings();
+  const bits = [];
+  if (s.region !== 'auto') {
+    // Регион — только дефолт: если в описании продукта регион назван явно, он главнее
+    bits.push('Unless the product description names a region explicitly, assume: ' +
+              REGION_NAMES[s.region] + '. Reflect it in the "region" field.');
+  }
+  if (s.precision === 'deep') {
+    bits.push('Depth: full LCA. Give 3 sub_processes per stage instead of 2, and cite a specific factor database for each.');
+  }
+  return bits.join(' ');
+}
+
+/* ============================================================
    i18n — словарь интерфейса
    ============================================================ */
 const I18N = {
@@ -4230,12 +4278,22 @@ async function saveToHistory(report) {
   if (currentUser && supabaseClient) {
     console.log('[saveToHistory] Saving to Supabase...');
     try {
+      /* parent_id связывает вариант с исходным расчётом. Кабинет кладёт
+         id родителя в lca_variant_parent при нажатии «Создать вариант».
+         Без этой связи сравнить V3 и V4 было невозможно. */
+      let parentId = null;
+      try {
+        parentId = localStorage.getItem('lca_variant_parent') || null;
+        localStorage.removeItem('lca_variant_parent');
+      } catch (e) {}
+
       const { data, error } = await supabaseClient.from('user_history').insert({
         user_id: currentUser.id,
         product_title: report.product_title,
         functional_unit: report.functional_unit,
         total_co2eq: report.total_co2eq,
-        report_data: report
+        report_data: report,
+        parent_id: parentId
       }).select('id').single();
       
       if (error) {
@@ -4574,7 +4632,7 @@ function cyclePhases() {
    Возвращает строку content или бросает Error с диагностикой. */
 async function apiCall(messages, opts = {}) {
   const body = {
-    model: MODEL,
+    model: modelForPrecision(),   // «Глубокая» точность → более сильная модель
     messages,
     max_tokens: opts.max_tokens || 5000,
     temperature: opts.temperature ?? 0.2,
@@ -4776,10 +4834,11 @@ async function callClaude(productText) {
   const modeNote = currentMode === 'factor'
     ? 'Prefer well-known emission factor databases (Ecoinvent, IPCC AR6, CCDB, GREET).'
     : '';
+  const setNote = settingsPromptNote();
 
   // КОМПАКТНЫЙ промпт — только структура, БЕЗ analytical text.
   const systemPrompt =
-`LCA expert (ISO 14067, PAS 2050). Reply with VALID JSON ONLY in ${langName}. ${modeNote}
+`LCA expert (ISO 14067, PAS 2050). Reply with VALID JSON ONLY in ${langName}. ${modeNote} ${setNote}
 
 If input is not a product/material/process/energy carrier for LCA → reply:
 {"error":"not_lca","message":"<one-sentence reason in ${langName}>"}
@@ -4809,7 +4868,7 @@ Else reply with this exact schema:
 }
 
 5 stages required (in ${langName}): Raw material acquisition, Manufacturing, Distribution, Use phase, End of life.
-Each stage = exactly 2 sub_processes. Numbers in kg CO2-eq. share_pct sums to 100.
+Each stage = exactly ${calcSettings().precision === 'deep' ? '3' : '2'} sub_processes. Numbers in kg CO2-eq (always compute in kg regardless of display units). share_pct sums to 100.
 
 HARD CONSTRAINTS — failure to comply will break the parser:
 - Output must fit within 8000 tokens. Be concise but complete.
@@ -4935,6 +4994,7 @@ function renderReport(d) {
   const duration = 1200;
   const start = performance.now();
   function countUp(now) {
+    if (!el) return;
     const elapsed = now - start;
     const progress = Math.min(elapsed / duration, 1);
     const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
@@ -5709,6 +5769,17 @@ async function exportPdf() {
     const fileName = (lastReport.product_title || 'lca-report').replace(/[^\w\-\u0400-\u04FF\u4e00-\u9fff]+/g, '_') + '.pdf';
     doc.save(fileName);
   }, 500);
+}
+
+/* Единицы отображения. Считаем ВСЕГДА в кг (так корректнее: таблица
+   инвентаризации в кг — стандартная практика), а в тонны переводим
+   только крупные итоговые числа, если пользователь так настроил. */
+function displayTotal(kg) {
+  const v = parseFloat(kg) || 0;
+  if (calcSettings().unit === 't') {
+    return { value: v / 1000, unit: 't CO₂e' };
+  }
+  return { value: v, unit: 'kg CO₂e' };
 }
 
 function fmtNum(n) {
@@ -6943,76 +7014,19 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Ждём завершения авторизации
   await checkAuth();
 
-  // URL parameter handler for opening saved calculations
-  // Deep-link handler for ?history=ID and ?project=ID
-  (function() {
+  /* Deep-link ?history= / ?project=.
+     Раньше index пытался ОТРИСОВАТЬ отчёт здесь же — но разметки отчёта
+     в index.html нет (она в report.html), поэтому renderReport() падал
+     с TypeError на первом же $('#crumbProduct'), и страница оставалась белой.
+     Отчёт живёт в report.html — туда и отправляем. */
+  (function () {
     const params = new URLSearchParams(window.location.search);
     const historyId = params.get('history');
     const projectId = params.get('project');
-
-    console.log('[LCA] URL params:', { historyId, projectId, hasUser: !!currentUser, hasSB: !!supabaseClient });
-
-    // Clean URL immediately after reading params
-    if (historyId || projectId) {
-      window.history.replaceState({}, '', window.location.pathname);
-    }
-
-    if (historyId && supabaseClient) {
-      console.log('[LCA] Fetching from Supabase:', historyId);
-      // Try user_history first, then project_calculations
-      supabaseClient.from('user_history').select('*').eq('id', historyId).single()
-        .then(({ data, error }) => {
-          if (data && data.report_data) {
-            console.log('[LCA] Found in user_history');
-            renderReport(data.report_data);
-          } else {
-            // Try project_calculations table
-            supabaseClient.from('project_calculations').select('*').eq('id', historyId).single()
-              .then(({ data: pcData, error: pcErr }) => {
-                if (pcData && pcData.report_data) {
-                  console.log('[LCA] Found in project_calculations');
-                  renderReport(pcData.report_data);
-                } else {
-                  showToast(currentLang === 'ru' ? 'Расчёт не найден' : 'Calculation not found');
-                }
-              });
-          }
-        })
-        .catch(e => {
-          console.error('[LCA] Failed:', e);
-          showToast(currentLang === 'ru' ? 'Ошибка загрузки' : 'Failed to load');
-        });
-    }
-
-    if (projectId && supabaseClient) {
-      console.log('[LCA] Fetching project from Supabase:', projectId);
-      supabaseClient.from('project_calculations').select('*').eq('project_id', projectId).order('created_at', { ascending: false })
-        .then(({ data, error }) => {
-          console.log('[LCA] Supabase project response:', { data, error });
-          if (error) {
-            console.warn('[LCA] Supabase project error:', error.code, error.message);
-            showToast(currentLang === 'ru' ? 'Проект не найден в облаке'
-              : currentLang === 'zh' ? '未在云端找到该项目'
-              : 'Project not found in cloud');
-            return;
-          }
-          if (data && data.length > 0 && data[0].report_data) {
-            renderReport(data[0].report_data);
-          } else {
-            console.warn('[LCA] Project not found or empty:', projectId);
-            showToast(currentLang === 'ru' ? 'Проект не найден или пуст'
-              : currentLang === 'zh' ? '项目未找到或为空'
-              : 'Project not found or empty');
-          }
-        })
-        .catch(e => {
-          console.error('[LCA] Failed to load project:', e);
-          showToast(currentLang === 'ru' ? 'Ошибка загрузки проекта'
-            : currentLang === 'zh' ? '项目加载失败'
-            : 'Failed to load project');
-        });
-    }
+    if (historyId) { window.location.replace('/report.html?history=' + encodeURIComponent(historyId)); return; }
+    if (projectId) { window.location.replace('/report.html?project=' + encodeURIComponent(projectId)); return; }
   })();
+
 
   var savedTheme = localStorage.getItem('lca-theme');
   var themeToggle = document.getElementById('themeToggle');

@@ -162,12 +162,6 @@ html.dark .lang-switch button.active { background: var(--ink); color: var(--bg);
             Discord
         </button>
 
-        <!-- Web3 Wallet -->
-        <button type="button" id="walletBtn" class="oauth-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3v4M8 3v4"/></svg>
-            Web3 Wallet
-        </button>
-
         <div class="divider"><span data-i18n="or">или</span></div>
 
         <form class="form-group" id="loginForm">
@@ -215,7 +209,26 @@ html.dark .lang-switch button.active { background: var(--ink); color: var(--bg);
     <script>
         const SB_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
-        const REDIRECT = window.location.origin + '/';
+        /* Куда вернуть человека после входа.
+           Раньше здесь было жёстко '/' — и любой, кто заходил залогиниться
+           со страницы расшаренного отчёта или из кабинета, оказывался
+           на главной и терял то, ради чего вообще шёл.
+
+           Берём ?next= из адреса. Принимаем ТОЛЬКО относительные пути
+           (начинается с одного '/'), иначе это open-redirect: злоумышленник
+           дал бы ссылку /login.html?next=https://зло.сайт и увёл человека
+           сразу после успешного входа. */
+        function safeNext() {
+            try {
+                const raw = new URLSearchParams(location.search).get('next');
+                if (!raw) return '/';
+                const dec = decodeURIComponent(raw);
+                if (!dec.startsWith('/') || dec.startsWith('//')) return '/';
+                return dec;
+            } catch (e) { return '/'; }
+        }
+        const NEXT = safeNext();
+        const REDIRECT = window.location.origin + NEXT;
         let sbClient = null;
         let isLoginMode = true;
 
@@ -237,9 +250,6 @@ html.dark .lang-switch button.active { background: var(--ink); color: var(--bg);
                 agreement: 'Нажимая «Войти», вы соглашаетесь с', terms: 'условиями использования',
                 wechat_label: 'WeChat (скоро)', wechat_alert: 'WeChat вход будет доступен после настройки WeChat Open Platform',
                 discord_alert: 'Discord OAuth будет доступен после настройки приложения в Discord Developer Portal',
-                wallet_install: 'Установите MetaMask или другой Web3 кошелёк для входа',
-                wallet_connect: 'Кошелёк подключён',
-                wallet_fail: 'Ошибка подключения кошелька',
                 sb_not_loaded: 'Supabase не загружен', sb_sdk_missing: 'Supabase SDK не загружен',
                 logging_in: 'Вход...', passwords_mismatch: 'Пароли не совпадают',
                 min6_chars: 'Пароль должен содержать минимум 6 символов',
@@ -266,9 +276,6 @@ html.dark .lang-switch button.active { background: var(--ink); color: var(--bg);
                 agreement: 'By signing in, you agree to the', terms: 'terms of service',
                 wechat_label: 'WeChat (coming soon)', wechat_alert: 'WeChat login will be available after WeChat Open Platform setup',
                 discord_alert: 'Discord OAuth will be available after setting up an app in Discord Developer Portal',
-                wallet_install: 'Install MetaMask or another Web3 wallet to sign in',
-                wallet_connect: 'Wallet connected',
-                wallet_fail: 'Wallet connection failed',
                 sb_not_loaded: 'Supabase not loaded', sb_sdk_missing: 'Supabase SDK not loaded',
                 logging_in: 'Signing in...', passwords_mismatch: 'Passwords do not match',
                 min6_chars: 'Password must be at least 6 characters',
@@ -295,9 +302,6 @@ html.dark .lang-switch button.active { background: var(--ink); color: var(--bg);
                 agreement: '登录即表示您同意', terms: '服务条款',
                 wechat_label: '微信（即将上线）', wechat_alert: '微信登录将在配置微信开放平台后可用',
                 discord_alert: 'Discord OAuth将在Discord Developer Portal配置后可用',
-                wallet_install: '安装MetaMask或其他Web3钱包以登录',
-                wallet_connect: '钱包已连接',
-                wallet_fail: '钱包连接失败',
                 sb_not_loaded: 'Supabase 未加载', sb_sdk_missing: 'Supabase SDK 未加载',
                 logging_in: '登录中...', passwords_mismatch: '密码不匹配',
                 min6_chars: '密码至少需要6个字符',
@@ -369,39 +373,6 @@ html.dark .lang-switch button.active { background: var(--ink); color: var(--bg);
             } catch (e) { showError('Discord: ' + e.message); }
         });
 
-        // Web3 Wallet via MetaMask
-        document.getElementById('walletBtn').addEventListener('click', async () => {
-            if (!window.ethereum) {
-                alert(loginT('wallet_install'));
-                return;
-            }
-            try {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                const address = accounts[0];
-                const message = 'Sign in to LCA-AI\nWallet: ' + address + '\nTime: ' + Date.now();
-                const signature = await window.ethereum.request({
-                    method: 'personal_sign',
-                    params: [message, address]
-                });
-                // Send to Supabase Edge Function for verification
-                const resp = await fetch(SB_URL + '/functions/v1/web3-auth', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + SB_KEY
-                    },
-                    body: JSON.stringify({ address, message, signature })
-                });
-                const data = await resp.json();
-                if (data.error) { showError('Web3: ' + data.error); return; }
-                // Save session and redirect
-                localStorage.setItem('supabase_token', data.access_token);
-                window.location.href = REDIRECT;
-            } catch (e) {
-                if (e.code === 4001) return; // User rejected
-                showError(loginT('wallet_fail') + ': ' + e.message);
-            }
-        });
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
