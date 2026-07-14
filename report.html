@@ -3699,6 +3699,8 @@ const I18N = {
     scope_full:  'Полный жизненный цикл',
     res_label:   'Углеродный след продукта (kgCO₂e):',
     res_label_bare: 'Углеродный след продукта',
+    share_save_first: 'Сначала сохраните расчёт',
+    share_link_copied: 'Публичная ссылка скопирована (30 дней)',
     unc_note:        '90% интервал · Монте-Карло',
     sens_title:      'Что двигает результат',
     sens_hint:       'на сколько сдвинется итог, если коэффициент ошибается на 10%',
@@ -3886,6 +3888,8 @@ const I18N = {
     scope_full:  'Full lifecycle',
     res_label:   'Product carbon footprint (kgCO₂e):',
     res_label_bare: 'Product carbon footprint',
+    share_save_first: 'Save the calculation first',
+    share_link_copied: 'Public link copied (30 days)',
     unc_note:        '90% interval · Monte Carlo',
     sens_title:      'What moves the result',
     sens_hint:       'how far the total shifts if the factor is off by 10%',
@@ -4063,6 +4067,8 @@ const I18N = {
     scope_full:  '全生命周期',
     res_label:   '产品碳足迹 (kgCO₂e):',
     res_label_bare: '产品碳足迹',
+    share_save_first: '请先保存计算',
+    share_link_copied: '公开链接已复制（30 天）',
     unc_note:        '90% 区间 · 蒙特卡洛',
     sens_title:      '哪些因素影响结果',
     sens_hint:       '若该因子偏差 10%，总量将随之变动多少',
@@ -7375,22 +7381,35 @@ document.addEventListener('DOMContentLoaded', async function() {
   document.getElementById('exportPdf')?.addEventListener('click', function() { showPdfPreview(); });
   document.getElementById('exportPrint')?.addEventListener('click', function() { window.print(); });
 
+  /* Публичная ссылка.
+     Раньше эта кнопка переключала user_history.is_public — колонки, которой
+     не существует (оба запроса падали молча), и копировала ссылку на
+     /report.html?history=…, закрытую RLS: посторонний её всё равно не открыл бы.
+     Теперь используем настоящую систему: токен в share_links + /share.html,
+     которую читает Edge Function share-view под service_role. */
   document.getElementById('publicShareBtn')?.addEventListener('click', async () => {
     if (!lastReport || !currentUser) return;
+    const T = I18N[currentLang] || I18N.ru;
     const historyId = lastReport._historyId;
-    if (!historyId) {
-      showToast(currentLang === 'ru' ? 'Сначала сохраните расчёт' : currentLang === 'zh' ? '请先保存计算' : 'Save the calculation first');
-      return;
-    }
-    const { data } = await supabaseClient.from('user_history').select('is_public').eq('id', historyId).single();
-    const newState = !(data?.is_public);
-    await supabaseClient.from('user_history').update({ is_public: newState }).eq('id', historyId);
-    const url = window.location.origin + '/report.html?history=' + historyId;
-    if (newState) {
+    if (!historyId) { showToast(T.share_save_first); return; }
+
+    try {
+      const token = (crypto.randomUUID && crypto.randomUUID()) ||
+                    (Date.now() + '-' + Math.random().toString(16).slice(2));
+      const { error } = await supabaseClient.from('share_links').insert({
+        token,
+        kind: 'history',
+        target_id: historyId,
+        owner_id: currentUser.id,
+        expires_at: new Date(Date.now() + 30 * 864e5).toISOString()   // 30 дней
+      });
+      if (error) throw error;
+
+      const url = window.location.origin + '/share.html?token=' + token;
       await navigator.clipboard.writeText(url);
-      showToast(currentLang === 'ru' ? 'Публичная ссылка скопирована' : currentLang === 'zh' ? '公开链接已复制' : 'Public link copied');
-    } else {
-      showToast(currentLang === 'ru' ? 'Ссылка теперь приватная' : currentLang === 'zh' ? '链接已设为私密' : 'Link is now private');
+      showToast(T.share_link_copied);
+    } catch (e) {
+      showToast(String(e.message || e));
     }
   });
 
