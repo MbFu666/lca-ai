@@ -1414,13 +1414,31 @@ header {
   max-width: 20ch;
 }
 .res-hero-num {
+  /* nowrap и огромный font-size раньше висели на ВСЁМ блоке, включая
+     вложенный текстовый .label ("Углеродный след продукта (kg CO₂e):") —
+     он наследовал 44–82px без переноса и вылезал за рамки на узких экранах. */
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.res-hero-num .label {
   font-family: var(--mono);
-  font-size: clamp(44px, 7vw, 82px);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--graphite-low);
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+.res-hero-num .value {
+  font-family: var(--mono);
+  font-size: clamp(36px, 7vw, 82px);
   font-weight: 700;
   letter-spacing: -0.04em;
-  line-height: 0.9;
+  line-height: 0.95;
   color: var(--e-ink);
-  white-space: nowrap;
+  word-break: break-word;
 }
 .res-hero-num .unit, .res-hero-num .u {
   font-size: 0.24em;
@@ -3084,6 +3102,58 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
   pointer-events: none;
 }
 
+
+/* ═══════════════════════════════════════════════════════════
+   UNCERTAINTY — интервал вместо точки.
+   Одно число создаёт ложную точность: за ним стоят коэффициенты
+   разной надёжности. Показываем распределение, а не точку.
+   ═══════════════════════════════════════════════════════════ */
+.uncertainty {
+  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--rule);
+}
+.unc-range {
+  font-family: var(--mono); font-size: 15px; font-weight: 600; color: var(--graphite);
+}
+.unc-note {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--graphite-low);
+}
+
+/* Sensitivity — что реально двигает результат */
+.sens { display: flex; flex-direction: column; }
+.sens-row {
+  display: grid; grid-template-columns: minmax(120px,1.4fr) 3fr auto;
+  align-items: center; gap: 14px; padding: 10px 0;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.sens-row:last-child { border-bottom: none; }
+.sens-name { font-size: 13px; color: var(--graphite-mid); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sens-bar { height: 8px; background: var(--paper-sunk); }
+.sens-fill { height: 100%; background: var(--e-3); }
+.sens-val { font-family: var(--mono); font-size: 12px; font-weight: 600; text-align: right; white-space: nowrap; }
+.sens-hint { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--graphite-low); margin-bottom: 16px; }
+
+/* Reduction pathways — обратная задача к цели */
+.path { border: 1px solid var(--rule); margin-top: 8px; }
+.path-row {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
+  padding: 13px 16px; border-bottom: 1px solid var(--rule-soft);
+}
+.path-row:last-child { border-bottom: none; }
+.path-lever { font-size: 14px; color: var(--graphite); flex: 1; }
+.path-lever b { font-weight: 600; }
+.path-need { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--e-ink); white-space: nowrap; }
+.path-impossible { color: var(--graphite-low); font-weight: 400; }
+.goal-input {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap;
+}
+.goal-input input {
+  width: 80px; border: 1px solid var(--rule); border-radius: 0; background: var(--paper);
+  padding: 8px 10px; font-family: var(--mono); font-size: 14px; color: var(--graphite); outline: none;
+}
+.goal-input input:focus { border-color: var(--e-3); }
+.goal-input label { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--graphite-low); }
 </style>
 </head>
 <body>
@@ -5832,52 +5902,291 @@ $('#pdfDownload')?.addEventListener('click', () => {
   exportPdf();
 });
 
+/* ═══════════════════════════════════════════════════════════════
+   PDF — формальный документ по ISO 14067 / PAS 2050.
+
+   Раньше экспорт был скриншотом текущего экрана (html2canvas всего #step2
+   + jsPDF нарезал его на страницы по высоте изображения). Из-за этого:
+   текст не выделялся и не искался, таблицы резались посередине строки
+   на границе страниц, и в PDF попадал ровно тот же UI, что и на экране,
+   без структуры, ожидаемой для отчёта по ISO 14067.
+
+   Теперь строится ОТДЕЛЬНЫЙ скрытый шаблон с формальной структурой
+   (цель и границы → результат → инвентаризация → чувствительность →
+   источники), который не виден на странице. Каждый раздел рендерится
+   в СВОЙ canvas и кладётся в PDF как единый блок — так таблица не может
+   разорваться посередине строки, только между разделами.
+
+   Почему не через нативный текст jsPDF: встроенные шрифты jsPDF (Helvetica
+   и т.д.) поддерживают только латиницу — ни кириллица, ни китайский не
+   отрисуются без встраивания шрифта размером в несколько мегабайт.
+   Скрытый DOM-шаблон использует уже загруженные шрифты страницы
+   (включая Noto Sans SC для китайского) и снимается как изображение,
+   поэтому годится сразу для RU/EN/ZH без единой лишней зависимости. */
+
+function pdfTexts() {
+  const L = {
+    ru: {
+      eyebrow: 'ОЦЕНКА ЖИЗНЕННОГО ЦИКЛА · ISO 14067 / PAS 2050',
+      s1: '1. Цель и границы', fu: 'Функциональная единица', sb: 'Границы системы',
+      method: 'Метод оценки', region: 'Регион', cycle: 'Период учёта', date: 'Дата расчёта',
+      s2: '2. Результат по стадиям', stage: 'Стадия', share: 'Доля',
+      unc: '90% интервал (Монте-Карло, 4000 прогонов)',
+      s3: '3. Инвентаризация (Life Cycle Inventory)',
+      th_stage: 'Стадия', th_proc: 'Процесс', th_amount: 'Кол-во', th_unit: 'Ед.',
+      th_factor: 'Коэффициент', th_src: 'Источник', th_co2: 'kg CO₂e',
+      s4: '4. Анализ чувствительности',
+      sens_note: 'На сколько сдвинется итог, если коэффициент процесса ошибается на 10%. Показывает, какие данные стоит перепроверять в первую очередь.',
+      s5: '5. Источники и допущения',
+      disc: 'Расчёт выполнен с помощью ИИ-модели на основе баз данных факторов эмиссии (Ecoinvent, IPCC AR6, CCDB, GREET). Интервал неопределённости получен методом Монте-Карло на основе заявленной надёжности каждого коэффициента и не заменяет верификацию третьей стороной. Документ не является official verified LCA-отчётом в терминах ISO 14040/14044 без независимого review.',
+      gen: 'Сгенерировано автоматически'
+    },
+    en: {
+      eyebrow: 'LIFE CYCLE ASSESSMENT · ISO 14067 / PAS 2050',
+      s1: '1. Goal and Scope', fu: 'Functional unit', sb: 'System boundary',
+      method: 'Assessment method', region: 'Region', cycle: 'Accounting cycle', date: 'Calculation date',
+      s2: '2. Result by Stage', stage: 'Stage', share: 'Share',
+      unc: '90% interval (Monte Carlo, 4000 runs)',
+      s3: '3. Life Cycle Inventory',
+      th_stage: 'Stage', th_proc: 'Process', th_amount: 'Amount', th_unit: 'Unit',
+      th_factor: 'Factor', th_src: 'Source', th_co2: 'kg CO₂e',
+      s4: '4. Sensitivity Analysis',
+      sens_note: 'How far the total shifts if a process factor is off by 10%. Shows which data points are worth double-checking first.',
+      s5: '5. Sources and Assumptions',
+      disc: 'This calculation was produced by an AI model using emission factor databases (Ecoinvent, IPCC AR6, CCDB, GREET). The uncertainty interval is derived via Monte Carlo simulation from the stated confidence of each factor and does not substitute third-party verification. This document is not an ISO 14040/14044 verified LCA report without independent review.',
+      gen: 'Automatically generated'
+    },
+    zh: {
+      eyebrow: '生命周期评价 · ISO 14067 / PAS 2050',
+      s1: '1. 目标与范围', fu: '功能单位', sb: '系统边界',
+      method: '评估方法', region: '地区', cycle: '核算周期', date: '计算日期',
+      s2: '2. 各阶段结果', stage: '阶段', share: '占比',
+      unc: '90% 区间（蒙特卡洛，4000 次模拟）',
+      s3: '3. 生命周期清单',
+      th_stage: '阶段', th_proc: '过程', th_amount: '数量', th_unit: '单位',
+      th_factor: '排放因子', th_src: '来源', th_co2: 'kg CO₂e',
+      s4: '4. 敏感性分析',
+      sens_note: '若某过程排放因子偏差 10%，总量将随之变动多少。用于判断哪些数据最值得优先核实。',
+      s5: '5. 数据来源与假设',
+      disc: '本计算由 AI 模型基于排放因子数据库（Ecoinvent、IPCC AR6、CCDB、GREET）生成。不确定性区间通过蒙特卡洛模拟并依据各因子的置信度得出，不能替代第三方核查。在未经独立审核的情况下，本文件不构成 ISO 14040/14044 意义上经核实的 LCA 报告。',
+      gen: '自动生成'
+    }
+  };
+  return L[currentLang] || L.ru;
+}
+
+/* Строит скрытый DOM-шаблон формального отчёта и возвращает {root, sections} —
+   root нужно будет удалить после рендера, sections — массив div для скриншота. */
+function buildPdfTemplate(d) {
+  const T = pdfTexts();
+  const stagesRaw = Array.isArray(d.stages) ? d.stages.slice() : [];
+  const stages = stagesRaw.sort((a, b) => (parseFloat(b.co2eq) || 0) - (parseFloat(a.co2eq) || 0));
+  const total = parseFloat(d.total_co2eq) || 0;
+  const shownTotal = displayTotal(total);
+  const RAMP = ['#F03B0C', '#D9481C', '#B4652A', '#8A6A4F', '#B8B4AC', '#9B978F'];
+
+  const root = document.createElement('div');
+  root.style.cssText = 'position:fixed; left:-9999px; top:0; width:794px; background:#fff; color:#161514;' +
+    'font-family:"Source Serif 4","Noto Sans SC",Georgia,serif; z-index:-1;';
+
+  const sections = [];
+  const addSection = (html) => {
+    const sec = document.createElement('div');
+    sec.style.cssText = 'padding:26px 30px; background:#fff; box-sizing:border-box; width:794px;';
+    sec.innerHTML = html;
+    root.appendChild(sec);
+    sections.push(sec);
+  };
+
+  // escape() и fmtNum() уже объявлены в этом файле (function-декларации, hoisted) —
+  // используем их напрямую. НЕ window.escape: это встроенная функция URL-кодирования,
+  // а не HTML-экранирование, подстановка привела бы к XSS в сгенерированном PDF-шаблоне.
+  const esc = escape;
+  const num = fmtNum;
+
+  // ── Заголовок + результат ──
+  const mc = monteCarlo(d);
+  addSection(`
+    <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.18em; color:#9B978F; margin-bottom:14px;">${esc(T.eyebrow)}</div>
+    <div style="font-family:Oswald,sans-serif; font-weight:600; text-transform:uppercase; font-size:26px; letter-spacing:-.01em; max-width:26ch; color:#161514;">${esc(d.product_title || '—')}</div>
+    <div style="display:flex; align-items:baseline; gap:10px; margin-top:16px;">
+      <span style="font-family:'JetBrains Mono',monospace; font-size:44px; font-weight:700; letter-spacing:-.03em; color:#B4300E;">${num(shownTotal.value)}</span>
+      <span style="font-family:'JetBrains Mono',monospace; font-size:14px; color:#6B6862;">${esc(shownTotal.unit)}</span>
+    </div>
+    ${mc ? `<div style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#6B6862; margin-top:6px;">
+      ${num(displayTotal(mc.p05).value)} — ${num(displayTotal(mc.p95).value)} ${esc(shownTotal.unit)} · ${esc(T.unc)}
+    </div>` : ''}
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:22px; padding-top:16px; border-top:1px solid #D6D2CB;">
+      ${[[T.fu, d.functional_unit], [T.method, d.method], [T.region, d.region],
+         [T.cycle, d.accounting_cycle], [T.date, (d.calc_date || new Date().toISOString().slice(0,10))]]
+        .filter(([,v]) => v)
+        .map(([k,v]) => `<div><div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:#9B978F;">${esc(k)}</div><div style="font-size:12px; margin-top:3px; color:#161514;">${esc(v)}</div></div>`)
+        .join('')}
+    </div>
+    ${d.system_boundary ? `<div style="margin-top:14px;"><div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:#9B978F;">${esc(T.sb)}</div><div style="font-size:12px; margin-top:3px;">${esc(d.system_boundary)}</div></div>` : ''}
+  `);
+
+  // ── Раздел 1: результат по стадиям ──
+  addSection(`
+    <div style="font-family:Oswald,sans-serif; font-size:15px; font-weight:600; text-transform:uppercase; letter-spacing:.02em; margin-bottom:14px; color:#161514;">${esc(T.s2)}</div>
+    <table style="width:100%; border-collapse:collapse; font-size:11px;">
+      <thead><tr style="background:#161514; color:#fff;">
+        <th style="text-align:left; padding:7px 10px; font-weight:600;">${esc(T.stage)}</th>
+        <th style="text-align:right; padding:7px 10px; font-weight:600;">${esc(T.th_co2)}</th>
+        <th style="text-align:right; padding:7px 10px; font-weight:600;">${esc(T.share)}</th>
+      </tr></thead>
+      <tbody>
+        ${stages.map((s, i) => {
+          const v = parseFloat(s.co2eq) || 0;
+          const pct = total ? (v / total * 100) : 0;
+          return `<tr style="background:${i % 2 ? '#F4F2EE' : '#fff'};">
+            <td style="padding:7px 10px; border-bottom:1px solid #E4E1DA;"><span style="display:inline-block;width:8px;height:8px;background:${RAMP[Math.min(i,RAMP.length-1)]};margin-right:8px;"></span>${esc(s.name || '—')}</td>
+            <td style="padding:7px 10px; text-align:right; border-bottom:1px solid #E4E1DA; font-family:'JetBrains Mono',monospace; font-weight:600;">${num(v)}</td>
+            <td style="padding:7px 10px; text-align:right; border-bottom:1px solid #E4E1DA; font-family:'JetBrains Mono',monospace; color:#6B6862;">${pct.toFixed(0)}%</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  `);
+
+  // ── Раздел 2: полная инвентаризация ──
+  const hasSub = stages.some(s => Array.isArray(s.sub_processes) && s.sub_processes.length);
+  if (hasSub) {
+    let rows = '';
+    stages.forEach((s, i) => {
+      (s.sub_processes || []).forEach(sp => {
+        rows += `<tr>
+          <td style="padding:6px 8px; border-bottom:1px solid #E4E1DA; font-size:10px;"><span style="display:inline-block;width:6px;height:6px;background:${RAMP[Math.min(i,RAMP.length-1)]};margin-right:6px;"></span>${esc(s.name || '—')}</td>
+          <td style="padding:6px 8px; border-bottom:1px solid #E4E1DA; font-size:10px;">${esc(sp.name || '—')}</td>
+          <td style="padding:6px 8px; border-bottom:1px solid #E4E1DA; font-size:10px; text-align:right; font-family:'JetBrains Mono',monospace;">${num(sp.amount)}</td>
+          <td style="padding:6px 8px; border-bottom:1px solid #E4E1DA; font-size:10px;">${esc(sp.unit || '')}</td>
+          <td style="padding:6px 8px; border-bottom:1px solid #E4E1DA; font-size:10px; text-align:right; font-family:'JetBrains Mono',monospace;">${num(sp.factor)}</td>
+          <td style="padding:6px 8px; border-bottom:1px solid #E4E1DA; font-size:9px; color:#6B6862;">${esc(sp.factor_source || sp.source || '—')}</td>
+          <td style="padding:6px 8px; border-bottom:1px solid #E4E1DA; font-size:10px; text-align:right; font-family:'JetBrains Mono',monospace; font-weight:600;">${num(sp.co2eq)}</td>
+        </tr>`;
+      });
+    });
+    addSection(`
+      <div style="font-family:Oswald,sans-serif; font-size:15px; font-weight:600; text-transform:uppercase; letter-spacing:.02em; margin-bottom:14px; color:#161514;">${esc(T.s3)}</div>
+      <table style="width:100%; border-collapse:collapse;">
+        <thead><tr style="background:#161514; color:#fff;">
+          <th style="text-align:left; padding:6px 8px; font-size:9px; font-weight:600;">${esc(T.th_stage)}</th>
+          <th style="text-align:left; padding:6px 8px; font-size:9px; font-weight:600;">${esc(T.th_proc)}</th>
+          <th style="text-align:right; padding:6px 8px; font-size:9px; font-weight:600;">${esc(T.th_amount)}</th>
+          <th style="text-align:left; padding:6px 8px; font-size:9px; font-weight:600;">${esc(T.th_unit)}</th>
+          <th style="text-align:right; padding:6px 8px; font-size:9px; font-weight:600;">${esc(T.th_factor)}</th>
+          <th style="text-align:left; padding:6px 8px; font-size:9px; font-weight:600;">${esc(T.th_src)}</th>
+          <th style="text-align:right; padding:6px 8px; font-size:9px; font-weight:600;">${esc(T.th_co2)}</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `);
+  }
+
+  // ── Раздел 3: чувствительность (та же формула, что и на экране) ──
+  const subs = allSubProcesses(d);
+  if (total && subs.length >= 2) {
+    const sensRows = subs.map(x => ({
+      name: x.p.name || '—',
+      elasticity: ((parseFloat(x.p.amount) || 0) * (parseFloat(x.p.factor) || 0) * 0.10) / total * 100
+    }))
+    .filter(r => r.elasticity > 0.01)
+    .sort((a, b) => b.elasticity - a.elasticity)
+    .slice(0, 8);
+
+    if (sensRows.length) {
+      const max = sensRows[0].elasticity;
+      addSection(`
+        <div style="font-family:Oswald,sans-serif; font-size:15px; font-weight:600; text-transform:uppercase; letter-spacing:.02em; margin-bottom:8px; color:#161514;">${esc(T.s4)}</div>
+        <div style="font-size:10px; color:#6B6862; margin-bottom:14px; max-width:60ch;">${esc(T.sens_note)}</div>
+        ${sensRows.map(r => `
+          <div style="display:flex; align-items:center; gap:12px; padding:6px 0; border-bottom:1px solid #E4E1DA;">
+            <div style="flex:0 0 200px; font-size:11px;">${esc(r.name)}</div>
+            <div style="flex:1; height:7px; background:#F0EEE9;"><div style="height:100%; width:${(r.elasticity/max*100).toFixed(1)}%; background:#D9481C;"></div></div>
+            <div style="flex:0 0 50px; text-align:right; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:600;">${r.elasticity.toFixed(2)}%</div>
+          </div>
+        `).join('')}
+      `);
+    }
+  }
+
+  // ── Раздел 4: источники и допущения ──
+  addSection(`
+    <div style="font-family:Oswald,sans-serif; font-size:15px; font-weight:600; text-transform:uppercase; letter-spacing:.02em; margin-bottom:12px; color:#161514;">${esc(T.s5)}</div>
+    ${d.total_description ? `<div style="font-size:12px; line-height:1.6; color:#3A3835; margin-bottom:14px;">${esc(d.total_description)}</div>` : ''}
+    <div style="font-size:10px; line-height:1.6; color:#9B978F; padding-top:12px; border-top:1px solid #D6D2CB;">${esc(T.disc)}</div>
+  `);
+
+  document.body.appendChild(root);
+  return { root, sections };
+}
+
 async function exportPdf() {
   if (!lastReport) return;
-  
-  // Load required libraries
   await Promise.all([loadLib('jspdf'), loadLib('html2canvas')]);
-  
-  // Переключаемся на шаг 2 и ждём обновления DOM
-  switchStep(2);
-  
-  setTimeout(async () => {
-    const { jsPDF } = window.jspdf;
-    const step2 = document.getElementById('step2');
-    
-    // Создаём canvas из DOM элемента шага 2
-    const canvas = await html2canvas(step2, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      logging: false
-    });
-    
-    const imgData = canvas.toDataURL('image/png');
-    const imgWidth = 190; // A4 ширина минус отступы
-    const pageHeight = 277; // A4 высота минус отступы
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    let heightLeft = imgHeight;
-    let position = 10;
-    
-    const doc = new jsPDF('p', 'mm', 'a4');
-    
-    // Добавляем первую страницу
-    doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-    
-    // Добавляем дополнительные страницы если контент не помещается
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight + 10;
-      doc.addPage();
-      doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p', 'mm', 'a4');
+  const marginX = 12, marginTop = 14, marginBottom = 16;
+  const pageW = 210, pageH = 297;
+  const usableW = pageW - marginX * 2;
+
+  const { root, sections } = buildPdfTemplate(lastReport);
+  let cy = marginTop;
+  let first = true;
+
+  try {
+    for (const sec of sections) {
+      const canvas = await html2canvas(sec, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
+      const imgW = usableW;
+      const imgH = (canvas.height * imgW) / canvas.width;
+      const imgData = canvas.toDataURL('image/png');
+
+      // Раздел целиком не влезает в остаток текущей страницы → новая страница.
+      // Так таблица внутри раздела не разрывается посередине строки —
+      // разрыв возможен только МЕЖДУ разделами.
+      if (!first && cy + imgH > pageH - marginBottom) {
+        doc.addPage();
+        cy = marginTop;
+      }
+
+      if (imgH > pageH - marginTop - marginBottom) {
+        // Редкий случай: раздел выше целой страницы (очень длинная инвентаризация) —
+        // нарезаем по высоте, как раньше, только для ЭТОГО раздела, не для всего документа.
+        let heightLeft = imgH, pos = cy;
+        doc.addImage(imgData, 'PNG', marginX, pos, imgW, imgH);
+        heightLeft -= (pageH - pos - marginBottom);
+        while (heightLeft > 0) {
+          doc.addPage();
+          pos = marginTop - (imgH - heightLeft);
+          doc.addImage(imgData, 'PNG', marginX, pos, imgW, imgH);
+          heightLeft -= (pageH - marginTop - marginBottom);
+        }
+        cy = pageH;
+      } else {
+        doc.addImage(imgData, 'PNG', marginX, cy, imgW, imgH);
+        cy += imgH + 7;
+      }
+      first = false;
     }
-    
-    // Сохраняем файл
-    const fileName = (lastReport.product_title || 'lca-report').replace(/[^\w\-\u0400-\u04FF\u4e00-\u9fff]+/g, '_') + '.pdf';
-    doc.save(fileName);
-  }, 500);
+  } finally {
+    root.remove();
+  }
+
+  // Футер номеров страниц — исключительно латиница/цифры, чтобы не упереться
+  // в отсутствие кириллицы/CJK во встроенных шрифтах jsPDF.
+  const total = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= total; i++) {
+    doc.setPage(i);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(155, 151, 143);
+    doc.text('LCA\u00B7AI', marginX, pageH - 8);
+    doc.text(i + ' / ' + total, pageW - marginX, pageH - 8, { align: 'right' });
+  }
+
+  const fileName = (lastReport.product_title || 'lca-report').replace(/[^\w\-\u0400-\u04FF\u4e00-\u9fff]+/g, '_') + '.pdf';
+  doc.save(fileName);
 }
 
 function fmtNum(n) {
@@ -7105,59 +7414,7 @@ async function downloadWord(d) {
         .legend-item { margin: 6px 0; font-size: 12px; }
         .legend-color { width: 12px; height: 12px; display: inline-block; margin-right: 8px; vertical-align: middle; }
         .footer { color: #93A0A6; font-size: 10px; margin-top: 30px; border-top: 1px solid #D6D2CB; padding-top: 10px; }
-      
-/* ═══════════════════════════════════════════════════════════
-   UNCERTAINTY — интервал вместо точки.
-   Одно число создаёт ложную точность: за ним стоят коэффициенты
-   разной надёжности. Показываем распределение, а не точку.
-   ═══════════════════════════════════════════════════════════ */
-.uncertainty {
-  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
-  margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--rule);
-}
-.unc-range {
-  font-family: var(--mono); font-size: 15px; font-weight: 600; color: var(--graphite);
-}
-.unc-note {
-  font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--graphite-low);
-}
-
-/* Sensitivity — что реально двигает результат */
-.sens { display: flex; flex-direction: column; }
-.sens-row {
-  display: grid; grid-template-columns: minmax(120px,1.4fr) 3fr auto;
-  align-items: center; gap: 14px; padding: 10px 0;
-  border-bottom: 1px solid var(--rule-soft);
-}
-.sens-row:last-child { border-bottom: none; }
-.sens-name { font-size: 13px; color: var(--graphite-mid); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sens-bar { height: 8px; background: var(--paper-sunk); }
-.sens-fill { height: 100%; background: var(--e-3); }
-.sens-val { font-family: var(--mono); font-size: 12px; font-weight: 600; text-align: right; white-space: nowrap; }
-.sens-hint { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--graphite-low); margin-bottom: 16px; }
-
-/* Reduction pathways — обратная задача к цели */
-.path { border: 1px solid var(--rule); margin-top: 8px; }
-.path-row {
-  display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
-  padding: 13px 16px; border-bottom: 1px solid var(--rule-soft);
-}
-.path-row:last-child { border-bottom: none; }
-.path-lever { font-size: 14px; color: var(--graphite); flex: 1; }
-.path-lever b { font-weight: 600; }
-.path-need { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--e-ink); white-space: nowrap; }
-.path-impossible { color: var(--graphite-low); font-weight: 400; }
-.goal-input {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap;
-}
-.goal-input input {
-  width: 80px; border: 1px solid var(--rule); border-radius: 0; background: var(--paper);
-  padding: 8px 10px; font-family: var(--mono); font-size: 14px; color: var(--graphite); outline: none;
-}
-.goal-input input:focus { border-color: var(--e-3); }
-.goal-input label { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--graphite-low); }
-</style>
+      </style>
     </head>
     <body>
       <h1>LCA Report: ${escW(d.product_title || '-')}</h1>
