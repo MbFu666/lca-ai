@@ -644,9 +644,9 @@
                         <div class="filter-field">
                             <label data-i18n="f_date">Дата</label>
                             <div class="filter-range">
-                                <input type="date" id="fDateFrom">
+                                <input type="date" id="fDateFrom" class="lang-date">
                                 <span>—</span>
-                                <input type="date" id="fDateTo">
+                                <input type="date" id="fDateTo" class="lang-date">
                             </div>
                         </div>
                         <div class="filter-field">
@@ -1306,6 +1306,8 @@
             });
             document.querySelectorAll('.lang-switch button').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
             document.getElementById('langSelect').value = lang;
+            // Update date input lang attribute for proper locale in calendar picker
+            document.querySelectorAll('.lang-date').forEach(el => el.setAttribute('lang', lang));
             renderGreeting();
             if (currentUser) {
                 renderOverview();
