@@ -51,11 +51,14 @@
             --transition: all var(--fast) var(--ease);
         }
         html.dark {
-            --paper: #131211; --paper-sunk: #0D0C0B; --paper-raised: #1B1A18;
-            --graphite: #EDEAE4; --graphite-mid: #9B978F; --graphite-low: #6B6862;
-            --rule: #2E2C29; --rule-soft: #1E332D;
-            --e-0: #B8B4AC; --e-1: #8A6A4F; --e-2: #B4652A; --e-3: #D9481C; --e-4: #F03B0C;
-            --e-ink: #F03B0C;
+            --paper:        #131211;  --paper-sunk:   #0D0C0B;
+            --paper-raised: #1B1A18;  --graphite:     #EDEAE4;  --graphite-mid: #9B978F;  --graphite-low: #6B6862;
+            --rule:         #2E2C29;  --rule-soft:    #262421;             /* On graphite the scale genuinely glows — physically truthful */
+            --e-0: #4A4741;  --e-1: #A87F5C;  --e-2: #D97B33;
+            --e-3: #F05A23;  --e-4: #FF6B2C;  --e-ink: #FF8A50;
+            --ok:   #6FBF95;
+            --err:  #E8654A;
+        
             --jade-bg: #1B1A18;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
