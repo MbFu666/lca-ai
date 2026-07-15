@@ -22,7 +22,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/jsonrepair@3.11.2/lib/umd/jsonrepair.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="lca-food-examples.js"></script>
 <script>
 // Register Service Worker
 if ('serviceWorker' in navigator) {
@@ -4642,14 +4641,7 @@ let suggestDebounceTimer = null;
 
 function suggestPool() {
   const t = I18N[currentLang] || I18N.ru;
-  const base = Array.isArray(t.suggestPool) ? t.suggestPool : [];
-  // Merge external food/beverage examples if available
-  if (typeof LCA_FOOD_EXAMPLES !== 'undefined') {
-    const lang = currentLang || 'ru';
-    const extra = LCA_FOOD_EXAMPLES[lang] || LCA_FOOD_EXAMPLES.ru || [];
-    return [...base, ...extra];
-  }
-  return base;
+  return Array.isArray(t.suggestPool) ? t.suggestPool : [];
 }
 
 /* Ранжирование: точное совпадение с начала строки — выше, чем совпадение
@@ -7371,6 +7363,24 @@ document.addEventListener('DOMContentLoaded', async function() {
     const projectId = params.get('project');
     if (historyId) { window.location.replace('/report.html?history=' + encodeURIComponent(historyId)); return; }
     if (projectId) { window.location.replace('/report.html?project=' + encodeURIComponent(projectId)); return; }
+  })();
+
+  /* «Создать вариант» из кабинета.
+     Кнопка кладёт описание исходного расчёта в lca_variant_seed и ведёт сюда
+     через ?variant=1 — но это никто не читал: поле оставалось пустым, и
+     разница с обычным новым расчётом проявлялась только после сохранения
+     (через lca_variant_parent, который подхватывается отдельно). Теперь
+     описание реально подставляется в поле, ради чего кнопка и нажималась. */
+  (function () {
+    let seed = null;
+    try {
+      seed = localStorage.getItem('lca_variant_seed');
+      localStorage.removeItem('lca_variant_seed');
+    } catch (e) {}
+    if (seed) {
+      const pi = document.getElementById('productInput');
+      if (pi) { pi.value = seed; pi.focus(); }
+    }
   })();
 
 
