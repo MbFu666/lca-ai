@@ -1920,8 +1920,8 @@
                             '<button class="btn btn-ghost btn-sm variant-btn" data-id="' + h.id + '">⎘ ' + esc(t('variant')) + '</button>' +
                             '<button class="btn btn-ghost btn-sm note-btn" data-id="' + h.id + '">✎ ' + esc(t('note')) + '</button>' +
                             '<button class="btn btn-ghost btn-sm add-to-project-btn" data-id="' + h.id + '"><span class="btn-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5a1 1 0 0 1 1-1h4.3l2 2H20a1 1 0 0 1 1 1V18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6.5z"/></svg></span>' + esc(t('to_project')) + '</button>' +
-                            '<button class="email-share-hist-btn btn-icon" data-id="' + h.id + '" title="' + esc(t('share_title')) + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15l6-6"/><path d="M8 12L5.5 14.5a3 3 0 0 0 4 4L12 16"/><path d="M16 12l2.5-2.5a3 3 0 0 0-4-4L12 8"/></svg></button>' +
-                            '<button class="btn btn-ghost btn-sm archive-hist-btn" data-id="' + h.id + '" title="' + esc(t('archive')) + '"><span class="btn-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="4.3" rx="0.8"/><path d="M4.5 8.8V18a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1V8.8"/><path d="M10 13h4"/></svg></span></button>') +
+                            '<button class="email-share-hist-btn btn-ghost btn-sm" data-id="' + h.id + '">' + esc(t('share')) + '</button>' +
+                            '<button class="btn btn-ghost btn-sm archive-hist-btn" data-id="' + h.id + '">' + esc(t('archive')) + '</button>') +
                     '</div>' +
                 '</div>';
             }).join('');
@@ -2343,7 +2343,7 @@
             h += '<button class="btn btn-ghost btn-sm toggle-calcs-btn" data-id="' + p.id + '">▸ ' + t('calculations') + '</button>';
             h += '<button class="btn btn-ghost btn-sm target-btn" data-id="' + p.id + '" data-target="' + (p.target_pct || '') + '">◎ ' + t('target_set') + '</button>';
             h += '<button class="btn btn-ghost btn-sm rename-project-btn" data-id="' + p.id + '" data-name="' + esc(p.name) + '">✏️ ' + t('rename') + '</button>';
-            h += '<button class="archive-btn btn-icon" data-id="' + p.id + '" title="' + esc(p.archived ? t('toast_restored') : t('toast_archived')) + '">' + (p.archived ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="4.3" rx="0.8"/><path d="M4.5 8.8V18a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1V8.8"/><path d="M12 11v5M9.6 13.4L12 11l2.4 2.4"/></svg>' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="4.3" rx="0.8"/><path d="M4.5 8.8V18a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1V8.8"/><path d="M10 13h4"/></svg>') + '</button>';
+            h += '<button class="archive-btn btn-ghost btn-sm" data-id="' + p.id + '">' + (p.archived ? '📤 ' + t('restore') : '📦 ' + t('archive')) + '</button>';
             h += '<button class="email-share-btn btn-icon" data-id="' + p.id + '" title="' + esc(t('share_title')) + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="3"/><path d="M3.6 19c0-3 2.4-5.5 5.4-5.5s5.4 2.5 5.4 5.5"/><path d="M16 9.3a2.6 2.6 0 1 0 0-5.2M18.4 19c0-2.3-1.5-4.3-3.4-5"/></svg></button>';
             h += '<button class="btn btn-danger btn-sm delete-project-btn" data-id="' + p.id + '">' + t('delete') + '</button>';
             h += '</div>';
