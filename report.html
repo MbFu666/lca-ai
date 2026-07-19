@@ -3232,7 +3232,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
         <span class="scope-pill" id="metaSBPill">—</span>
       </div>
       <div class="cs-view" role="group" aria-label="View">
-        <button class="active" data-view="tree" title="Граф">
+        <button class="active" data-view="tree" data-i18n-title="view_tree" title="Граф">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
             <rect x="6" y="1" width="4" height="3" rx="0.5"/>
             <rect x="1" y="11" width="4" height="3" rx="0.5"/>
@@ -3241,7 +3241,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
           </svg>
           <span data-i18n="view_tree">Граф</span>
         </button>
-        <button data-view="list" title="Список">
+        <button data-view="list" data-i18n-title="view_list" title="Список">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M2 4h12M2 8h12M2 12h12"/>
           </svg>
@@ -3535,13 +3535,13 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
       <h2>Word</h2>
       <div style="display:flex;gap:10px;align-items:center">
         <button id="wordDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius:30px;font-size:13px;font-weight:600;cursor:pointer">
-          ⬇ <span>Скачать Word</span>
+          ⬇ <span data-i18n="word_download">Скачать Word</span>
         </button>
         <button class="modal-close" data-close>×</button>
       </div>
     </div>
     <div class="modal-body" style="padding:16px 30px 30px">
-      <div style="color:var(--ink-mute);font-size:12px;margin-bottom:12px">Предпросмотр документа</div>
+      <div style="color:var(--ink-mute);font-size:12px;margin-bottom:12px" data-i18n="word_preview_doc">Предпросмотр документа</div>
       <div id="wordPreview" style="border:1px solid var(--rule);border-radius:8px;padding:20px;background:white;max-height:60vh;overflow-y:auto;font-family:Arial,sans-serif;font-size:13px;color:#0E2E27"></div>
     </div>
   </div>
@@ -3554,7 +3554,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
       <h2>PDF</h2>
       <div style="display:flex;gap:10px;align-items:center">
         <button id="pdfDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius:30px;font-size:13px;font-weight:600;cursor:pointer">
-          ⬇ <span>Скачать PDF</span>
+          ⬇ <span data-i18n="pdf_download">Скачать PDF</span>
         </button>
         <button class="modal-close" data-close>×</button>
       </div>
@@ -3753,6 +3753,9 @@ const I18N = {
     export_pdf:  'PDF',
     preview_word:'Предпросмотр Word',
     preview_pdf: 'Предпросмотр PDF',
+    word_download: 'Скачать Word',
+    pdf_download: 'Скачать PDF',
+    word_preview_doc: 'Предпросмотр документа',
     pdf_preview_note: 'Предпросмотр отчёта — то же самое, что скачается',
     pdf_generating: 'Формируем документ…',
     pdf_error: 'Не удалось сформировать документ',
@@ -3816,6 +3819,8 @@ const I18N = {
     em_method:       'Метод расчёта',
     em_method_quick: 'Quick',
     em_scope:        'Границы системы',
+    em_custom_factors: 'Пользовательские коэффициенты',
+    em_add_factor:   'Добавить коэффициент',
     scope_half:      'Half lifecycle',
     scope_half_d:    'От добычи сырья до производства, дистрибуции и хранения.',
     scope_full_t:    'Full lifecycle',
@@ -3952,6 +3957,9 @@ const I18N = {
     export_pdf:  'PDF',
     preview_word:'Word Preview',
     preview_pdf: 'PDF Preview',
+    word_download: 'Download Word',
+    pdf_download: 'Download PDF',
+    word_preview_doc: 'Document preview',
     pdf_preview_note: 'Preview of the report — exactly what will be downloaded',
     pdf_generating: 'Building the document…',
     pdf_error: 'Could not build the document',
@@ -4013,6 +4021,8 @@ const I18N = {
     em_method:       'Method',
     em_method_quick: 'Quick',
     em_scope:        'System boundary',
+    em_custom_factors: 'Custom factors',
+    em_add_factor:   'Add factor',
     scope_half:      'Half life cycle',
     scope_half_d:    'From resource extraction to product manufacturing, distribution and storage.',
     scope_full_t:    'Full lifecycle',
@@ -4141,6 +4151,9 @@ const I18N = {
     export_pdf:  'PDF',
     preview_word:'Word预览',
     preview_pdf: 'PDF预览',
+    word_download: '下载 Word',
+    pdf_download: '下载 PDF',
+    word_preview_doc: '文档预览',
     pdf_preview_note: '报告预览 — 与下载内容完全一致',
     pdf_generating: '正在生成文档…',
     pdf_error: '文档生成失败',
@@ -4202,6 +4215,8 @@ const I18N = {
     em_method:       '核算方法',
     em_method_quick: 'Quick',
     em_scope:        '系统边界',
+    em_custom_factors: '自定义系数',
+    em_add_factor:   '添加系数',
     scope_half:      '半生命周期',
     scope_half_d:    '从资源获取到产品制造、分销和储存。',
     scope_full_t:    '全生命周期',
@@ -4479,6 +4494,11 @@ function applyLanguage(lang) {
   $$('[data-i18n-placeholder]').forEach(el => {
     const k = el.dataset.i18nPlaceholder;
     if (t[k] !== undefined) el.placeholder = t[k];
+  });
+  // title атрибуты
+  $$('[data-i18n-title]').forEach(el => {
+    const k = el.dataset.i18nTitle;
+    if (t[k] !== undefined) el.title = t[k];
   });
 
   // Example chips are on index.html (home page) only
