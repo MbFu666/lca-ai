@@ -79,8 +79,9 @@
         .nav a:hover { color: var(--jade); }
         .nav a.active { color: var(--jade); font-weight: 700; }
         .nav a.active::after { content: ''; position: absolute; bottom: -16px; left: 0; right: 0; height: 2px; background: var(--jade); border-radius: 2px; }
-        .theme-toggle { background: none; border: 1px solid var(--rule); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; transition: var(--transition); padding: 0; }
-        .theme-toggle:hover { border-color: var(--jade); background: var(--jade-bg); transform: rotate(15deg); }
+        .theme-toggle { background: none; border: 1px solid var(--rule); width: 30px; height: 30px; border-radius: 0; cursor: pointer; font-size: 0; position: relative; transition: border-color var(--fast) var(--ease); display: inline-flex; align-items: center; justify-content: center; padding: 0; }
+        .theme-toggle::after { content: ''; width: 12px; height: 12px; border: 1px solid var(--graphite); background: linear-gradient(90deg, var(--graphite) 50%, transparent 50%); }
+        .theme-toggle:hover { border-color: var(--graphite); }
         .lang-switch { display: inline-flex; background: var(--bg-soft); border-radius: 30px; padding: 3px; border: 1px solid var(--rule); }
         .lang-switch button { background: none; border: none; padding: 5px 12px; border-radius: 30px; font-size: 11px; font-weight: 600; color: var(--ink-mute); cursor: pointer; transition: var(--transition); }
         .lang-switch button.active { background: white; color: var(--ink); box-shadow: var(--shadow-sm); }
@@ -573,7 +574,7 @@
                     <button data-lang="en">EN</button>
                     <button data-lang="zh">中文</button>
                 </div>
-                <button class="theme-toggle" id="themeToggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13.5A8.5 8.5 0 1 1 10.5 4a7 7 0 0 0 9.5 9.5z"/></svg></button>
+                <button class="theme-toggle" id="themeToggle"></button>
             </div>
         </div>
     </header>
@@ -1014,7 +1015,7 @@
                 delete_type_email: 'Это необратимо. Чтобы подтвердить, введите ваш email: {email}',
                 delete_mismatch: 'Email не совпадает — удаление отменено',
                 delete_partial: 'Данные удалены, но сам аккаунт остался: серверная функция delete-account не задеплоена. Пока она не установлена, полностью удалить аккаунт из браузера невозможно.',
-                share_title: 'Поделиться',
+                share: 'Поделиться', share_title: 'Поделиться',
                 share_sub: 'Получатель увидит отчёт только для чтения. Ссылку можно отозвать в любой момент.',
                 share_expires: 'Срок действия', share_email_label: 'Отправить на email (необязательно)',
                 share_email_ph: 'colleague@example.com',
@@ -1127,7 +1128,7 @@
                 delete_type_email: 'This cannot be undone. To confirm, type your email: {email}',
                 delete_mismatch: 'Email does not match — deletion cancelled',
                 delete_partial: 'Your data was deleted, but the account itself remains: the delete-account server function is not deployed. Until it is installed, the account cannot be fully removed from the browser.',
-                share_title: 'Share',
+                share: 'Share', share_title: 'Share',
                 share_sub: 'The recipient gets a read-only report. You can revoke the link at any time.',
                 share_expires: 'Expires in', share_email_label: 'Send to email (optional)',
                 share_email_ph: 'colleague@example.com',
@@ -1240,7 +1241,7 @@
                 delete_type_email: '此操作不可撤销。请输入您的邮箱以确认：{email}',
                 delete_mismatch: '邮箱不匹配 — 已取消删除',
                 delete_partial: '数据已删除，但账户本身仍然存在：服务器端 delete-account 函数尚未部署。在其安装之前，无法从浏览器彻底删除账户。',
-                share_title: '分享',
+                share: '分享', share_title: '分享',
                 share_sub: '接收方仅可只读查看报告。链接可随时撤销。',
                 share_expires: '有效期', share_email_label: '发送到邮箱（可选）',
                 share_email_ph: 'colleague@example.com',
@@ -1920,8 +1921,8 @@
                             '<button class="btn btn-ghost btn-sm variant-btn" data-id="' + h.id + '">⎘ ' + esc(t('variant')) + '</button>' +
                             '<button class="btn btn-ghost btn-sm note-btn" data-id="' + h.id + '">✎ ' + esc(t('note')) + '</button>' +
                             '<button class="btn btn-ghost btn-sm add-to-project-btn" data-id="' + h.id + '"><span class="btn-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5a1 1 0 0 1 1-1h4.3l2 2H20a1 1 0 0 1 1 1V18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6.5z"/></svg></span>' + esc(t('to_project')) + '</button>' +
-                            '<button class="email-share-hist-btn btn-ghost btn-sm" data-id="' + h.id + '">' + esc(t('share')) + '</button>' +
-                            '<button class="btn btn-ghost btn-sm archive-hist-btn" data-id="' + h.id + '">' + esc(t('archive')) + '</button>') +
+                            '<button class="email-share-hist-btn btn-ghost btn-sm" data-id="' + h.id + '">🔗 ' + esc(t('share')) + '</button>' +
+                            '<button class="btn btn-ghost btn-sm archive-hist-btn" data-id="' + h.id + '">📦 ' + esc(t('archive')) + '</button>') +
                     '</div>' +
                 '</div>';
             }).join('');
@@ -2303,7 +2304,7 @@
                     h += '<div class="calc-item">';
                     h += '<div style="cursor:pointer;flex:1" onclick="window.location.href=\'/report.html?history=' + c.id + '\'"><div class="calc-name">' + esc(product) + '</div><div class="calc-date">' + fmtDate(c.created_at) + '</div></div>';
                     h += '<div style="display:flex;align-items:center;gap:10px"><div class="calc-total">' + fmtCo2(total) + ' kgCO₂e</div>';
-                    h += '<button class="btn btn-danger btn-sm delete-projcalc-btn" data-id="' + c.id + '" title="' + t('delete') + '">✕</button></div>';
+                    h += '<button class="btn btn-danger btn-sm delete-projcalc-btn" data-id="' + c.id + '">✕ ' + t('delete') + '</button></div>';
                     h += '</div>';
                 });
                 h += '</div>';
@@ -2344,7 +2345,7 @@
             h += '<button class="btn btn-ghost btn-sm target-btn" data-id="' + p.id + '" data-target="' + (p.target_pct || '') + '">◎ ' + t('target_set') + '</button>';
             h += '<button class="btn btn-ghost btn-sm rename-project-btn" data-id="' + p.id + '" data-name="' + esc(p.name) + '">✏️ ' + t('rename') + '</button>';
             h += '<button class="archive-btn btn-ghost btn-sm" data-id="' + p.id + '">' + (p.archived ? '📤 ' + t('restore') : '📦 ' + t('archive')) + '</button>';
-            h += '<button class="email-share-btn btn-icon" data-id="' + p.id + '" title="' + esc(t('share_title')) + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="3"/><path d="M3.6 19c0-3 2.4-5.5 5.4-5.5s5.4 2.5 5.4 5.5"/><path d="M16 9.3a2.6 2.6 0 1 0 0-5.2M18.4 19c0-2.3-1.5-4.3-3.4-5"/></svg></button>';
+            h += '<button class="email-share-btn btn-ghost btn-sm" data-id="' + p.id + '">🔗 ' + t('share') + '</button>';
             h += '<button class="btn btn-danger btn-sm delete-project-btn" data-id="' + p.id + '">' + t('delete') + '</button>';
             h += '</div>';
             h += '</div>';
