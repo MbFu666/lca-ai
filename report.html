@@ -3483,7 +3483,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
       <div class="em-custom-factors" id="emCustomFactors">
         <div class="em-factor-row">
           <input type="text" class="em-factor-name" placeholder="Название процесса" data-i18n-placeholder="em_factor_name_ph">
-          <input type="number" class="em-factor-value" placeholder="Значение" step="any">
+          <input type="number" class="em-factor-value" placeholder="Значение" step="any" data-i18n-placeholder="em_factor_value_ph">
           <select class="em-factor-unit">
             <option value="kg CO2-eq/kg">kg CO₂-eq/kg</option>
             <option value="kg CO2-eq/kWh">kg CO₂-eq/kWh</option>
@@ -3821,6 +3821,7 @@ const I18N = {
     em_scope:        'Границы системы',
     em_custom_factors: 'Пользовательские коэффициенты',
     em_add_factor:   'Добавить коэффициент',
+    em_factor_name_ph: 'Название процесса', em_factor_value_ph: 'Значение',
     scope_half:      'Half lifecycle',
     scope_half_d:    'От добычи сырья до производства, дистрибуции и хранения.',
     scope_full_t:    'Full lifecycle',
@@ -4023,6 +4024,7 @@ const I18N = {
     em_scope:        'System boundary',
     em_custom_factors: 'Custom factors',
     em_add_factor:   'Add factor',
+    em_factor_name_ph: 'Process name', em_factor_value_ph: 'Value',
     scope_half:      'Half life cycle',
     scope_half_d:    'From resource extraction to product manufacturing, distribution and storage.',
     scope_full_t:    'Full lifecycle',
@@ -4217,6 +4219,7 @@ const I18N = {
     em_scope:        '系统边界',
     em_custom_factors: '自定义系数',
     em_add_factor:   '添加系数',
+    em_factor_name_ph: '过程名称', em_factor_value_ph: '数值',
     scope_half:      '半生命周期',
     scope_half_d:    '从资源获取到产品制造、分销和储存。',
     scope_full_t:    '全生命周期',
@@ -6627,8 +6630,8 @@ $('#emAddFactor').addEventListener('click', () => {
   const row = document.createElement('div');
   row.className = 'em-factor-row';
   row.innerHTML = `
-    <input type="text" class="em-factor-name" placeholder="${currentLang === 'ru' ? 'Название процесса' : currentLang === 'zh' ? '过程名称' : 'Process name'}">
-    <input type="number" class="em-factor-value" placeholder="${currentLang === 'ru' ? 'Значение' : currentLang === 'zh' ? '数值' : 'Value'}" step="any">
+    <input type="text" class="em-factor-name" placeholder="${I18N[currentLang]?.em_factor_name_ph || 'Название процесса'}" data-i18n-placeholder="em_factor_name_ph">
+    <input type="number" class="em-factor-value" placeholder="${I18N[currentLang]?.em_factor_value_ph || 'Значение'}" step="any" data-i18n-placeholder="em_factor_value_ph">
     <select class="em-factor-unit">
       <option value="kg CO2-eq/kg">kg CO₂-eq/kg</option>
       <option value="kg CO2-eq/kWh">kg CO₂-eq/kWh</option>
