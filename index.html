@@ -3886,7 +3886,7 @@ const I18N = {
     auth_required_btn:   'Войти / Регистрация',
     auth_required_close: 'Закрыть',
     /* example chips */
-    examples: [
+    xamples: [
       { l: 'Вода 0.5 л', v: '0.5 л бутилированной воды, ПЭТ бутылка, Польша' },
       { l: 'Футболка 200 г', v: '1 хлопковая футболка 200 г, Бангладеш, EU' },
       { l: 'Ноутбук 1.5 кг', v: 'Ноутбук 1.5 кг, Тайвань, LCD-экран' },
@@ -4079,7 +4079,7 @@ const I18N = {
     auth_required_msg:   'Please login or register to use this feature',
     auth_required_btn:   'Login / Register',
     auth_required_close: 'Close',
-    examples: [
+    xamples: [
       { l: 'Water 0.5 L', v: '0.5 L bottled water, PET bottle, Poland' },
       { l: 'T-shirt 200 g', v: '1 cotton t-shirt 200 g, Bangladesh, EU' },
       { l: 'Laptop 1.5 kg', v: 'Laptop 1.5 kg, Taiwan, LCD screen' },
@@ -4271,7 +4271,7 @@ const I18N = {
     auth_required_msg:   '请登录或注册以使用此功能',
     auth_required_btn:   '登录 / 注册',
     auth_required_close: '关闭',
-    examples: [
+    xamples: [
       { l: '水 0.5 升', v: '0.5 升瓶装水，PET 瓶，波兰' },
       { l: 'T恤 200克', v: '1件棉质T恤 200克，孟加拉国，欧盟' },
       { l: '笔记本电脑 1.5kg', v: '笔记本电脑 1.5kg，台湾，LCD屏幕' },
@@ -4504,9 +4504,14 @@ function renderExampleChips() {
   const host = document.getElementById('exampleChips');
   if (!host) return;
   host.innerHTML = '';
-  const t = I18N[currentLang] || I18N.ru;
-  if (!t.examples) return;
-  t.examples.forEach(function(ex) {
+  var pool = [];
+  if (typeof LCA_FOOD_EXAMPLES !== 'undefined' && Array.isArray(LCA_FOOD_EXAMPLES[currentLang])) {
+    pool = LCA_FOOD_EXAMPLES[currentLang];
+  } else {
+    var t = I18N[currentLang] || I18N.ru;
+    if (Array.isArray(t.examples)) pool = t.examples;
+  }
+  pool.forEach(function(ex) {
     var b = document.createElement('button');
     b.textContent = ex.l;
     b.addEventListener('click', function() {
