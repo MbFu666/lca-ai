@@ -3624,6 +3624,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
   </div>
 </div>
 
+<script src="lca-food-examples.js"></script>
 <script>
 /* ============================================================
    LCA·AI — расчёт LCA через DeepSeek API (через прокси-бэкенд)
@@ -3901,7 +3902,7 @@ const I18N = {
     ],
     /* Расширенный пул для автодополнения — используется только выпадающим списком
        при вводе, отдельно от статичных чипов-примеров выше. */
-    suggestPool: [
+    uggestPool: [
       { l: 'Вода бутилированная', v: '0.5 л бутилированной воды, ПЭТ бутылка' },
       { l: 'Хлопковая футболка', v: '1 хлопковая футболка 200 г' },
       { l: 'Джинсы', v: '1 пара джинсов, деним 600 г, Бангладеш' },
@@ -4131,7 +4132,7 @@ const I18N = {
       { l: 'Paper A4 1 m²', v: '1 m² A4 paper, cellulose, Finland' },
       { l: 'Sneakers', v: '1 pair sneakers, synthetic+rubber, 400 g, Vietnam' }
     ],
-    suggestPool: [
+    uggestPool: [
       { l: 'Bottled water', v: '0.5 L bottled water, PET bottle' },
       { l: 'Cotton t-shirt', v: '1 cotton t-shirt 200 g' },
       { l: 'Jeans', v: '1 pair of jeans, denim 600 g, Bangladesh' },
@@ -4360,7 +4361,7 @@ const I18N = {
       { l: 'A4纸 1平方米', v: '1平方米A4纸，纸浆，芬兰' },
       { l: '运动鞋', v: '1双运动鞋，合成材料+橡胶，400克，越南' }
     ],
-    suggestPool: [
+    uggestPool: [
       { l: '瓶装水', v: '0.5 升瓶装水，PET 瓶' },
       { l: '棉质T恤', v: '1件棉质T恤 200克' },
       { l: '牛仔裤', v: '1条牛仔裤，斜纹布 600克，孟加拉国' },
@@ -4640,6 +4641,9 @@ let suggestItems = [];
 let suggestDebounceTimer = null;
 
 function suggestPool() {
+  if (typeof LCA_FOOD_EXAMPLES !== 'undefined') {
+    return Array.isArray(LCA_FOOD_EXAMPLES[currentLang]) ? LCA_FOOD_EXAMPLES[currentLang] : (LCA_FOOD_EXAMPLES.ru || []);
+  }
   const t = I18N[currentLang] || I18N.ru;
   return Array.isArray(t.suggestPool) ? t.suggestPool : [];
 }
