@@ -20,8 +20,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/jsonrepair@3.11.2/lib/umd/jsonrepair.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/jsonrepair@3.11.2/lib/umd/jsonrepair.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // Register Service Worker
 if ('serviceWorker' in navigator) {
@@ -96,13 +96,13 @@ function updateAuthUI(isLoggedIn) {
     else { const s = document.createElement('span'); s.className='auth-avatar-text'; s.textContent = name.charAt(0).toUpperCase(); a.appendChild(s); }
     const nameEl = document.createElement('span'); nameEl.textContent = name; a.appendChild(nameEl);
     authSection.appendChild(a);
-    const logoutBtn = document.createElement('button'); logoutBtn.className='auth-logout'; logoutBtn.title='Выйти'; logoutBtn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>';
+    const logoutBtn = document.createElement('button'); logoutBtn.className='auth-logout'; logoutBtn.title='Выйти'; logoutBtn.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>';
     logoutBtn.addEventListener('click', logout);
     authSection.appendChild(logoutBtn);
   } else {
     const nextQ = '?next=' + encodeURIComponent(location.pathname + location.search);
     authSection.innerHTML = '<a href="/login.html' + nextQ + '" class="auth-btn">' +
-      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
+      '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
       '<span>Войти</span></a>';
   }
 
@@ -335,9 +335,10 @@ async function saveToProject(projectId, report) {
      Mapped to contribution, not to identity. */
   --e-0: #B8B4AC;   /* negligible */
   --e-1: #8A6A4F;
-  --e-2: #B4652A;
+  --e-2: #D4A574;
   --e-3: #D9481C;
   --e-4: #F03B0C;   /* dominant stage */
+  --e-5: #F03B0C;
   --e-ink: #7A2E10; /* emission text on paper — passes 4.5:1 */
 
   /* Semantic (still achromatic — status is weight, not hue) */
@@ -2523,7 +2524,6 @@ header {
 .em-scope-card:last-child, .scope-card:last-child { border-right: none; }
 .em-scope-card:hover, .scope-card:hover { background: var(--paper-sunk); }
 .em-scope-card.selected, .scope-card.selected { border-left: 3px solid var(--e-4); }
-}
 .em-scope-card.selected::after, .scope-card.selected::after { content: none; }
 .em-scope-card h4, .scope-card h4 {
   font-family: var(--mono);
@@ -3042,12 +3042,14 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
   outline: none;
   cursor: pointer;
 }
-.detail-slider::-webkit-slider-thumb { outline: 2px solid var(--e-4); }
+.detail-slider::-webkit-slider-thumb {
+  outline: 2px solid var(--e-4);
   cursor: pointer;
   transition: transform var(--fast) var(--ease);
 }
 .detail-slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
-.detail-slider::-moz-range-thumb { outline: 2px solid var(--e-4); }
+.detail-slider::-moz-range-thumb {
+  outline: 2px solid var(--e-4);
   cursor: pointer;
 }
 .detail-slider::-moz-range-track { background: var(--rule); height: 2px; border-radius: 0; }
@@ -3157,10 +3159,10 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
         <button data-lang="zh" class="active">中文</button>
       </div>
       <div class="header-actions">
-        <button class="theme-toggle" id="themeToggle"></button>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"></button>
         <div class="auth-section" id="authSection">
           <a href="/login.html" class="auth-btn" id="authBtn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <span data-i18n="auth_login">Войти</span>
           </a>
         </div>
@@ -3202,12 +3204,12 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
         <button id="projectsBtn" data-i18n="projects">Проекты</button>
         <button id="saveToProjectBtn" data-i18n="save_to_project">В проект</button>
         <button id="editModelBtn" data-i18n="edit_model">Edit Model</button>
-        <button id="exportExcel"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg> <span data-i18n="export_excel">Excel</span></button>
-        <button id="exportWord"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg> <span data-i18n="export_word">Word</span></button>
-        <button id="exportJson"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H7a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2 2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h1"/><path d="M16 3h1a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2 2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-1"/></svg> <span data-i18n="export_json">JSON</span></button>
-        <button id="exportPdf"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><path d="M9 13h6"/><path d="M9 17h3"/></svg> <span data-i18n="export_pdf">PDF</span></button>
-        <button id="exportPrint" class="primary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> <span data-i18n="export_print">Отчёт</span></button>
-        <button id="publicShareBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><rect x="3" y="11" width="18" height="11" rx="1"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg> <span data-i18n="public_share">Публичная ссылка</span></button>
+        <button id="exportExcel"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg> <span data-i18n="export_excel">Excel</span></button>
+        <button id="exportWord"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg> <span data-i18n="export_word">Word</span></button>
+        <button id="exportJson"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H7a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2 2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h1"/><path d="M16 3h1a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2 2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-1"/></svg> <span data-i18n="export_json">JSON</span></button>
+        <button id="exportPdf"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><path d="M9 13h6"/><path d="M9 17h3"/></svg> <span data-i18n="export_pdf">PDF</span></button>
+        <button id="exportPrint" class="primary"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> <span data-i18n="export_print">Отчёт</span></button>
+        <button id="publicShareBtn"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><rect x="3" y="11" width="18" height="11" rx="1"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg> <span data-i18n="public_share">Публичная ссылка</span></button>
       </div>
     </div>
 
@@ -3219,7 +3221,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
       </div>
       <div class="cs-view" role="group" aria-label="View">
         <button class="active" data-view="tree" data-i18n-title="view_tree" title="Граф">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
             <rect x="6" y="1" width="4" height="3" rx="0.5"/>
             <rect x="1" y="11" width="4" height="3" rx="0.5"/>
             <rect x="11" y="11" width="4" height="3" rx="0.5"/>
@@ -3228,7 +3230,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
           <span data-i18n="view_tree">Граф</span>
         </button>
         <button data-view="list" data-i18n-title="view_list" title="Список">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M2 4h12M2 8h12M2 12h12"/>
           </svg>
           <span data-i18n="view_list">Список</span>
@@ -3293,8 +3295,8 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
           <div class="res-card-head">
             <h3 data-i18n="contrib_h">Состав выбросов</h3>
             <span class="res-tabs" data-group="donut">
-              <span class="active" data-mode="stage"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <span data-i18n="tab_stage">стадия</span></span>
-              <span data-mode="type"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg> <span data-i18n="tab_type">тип</span></span>
+              <span class="active" data-mode="stage"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <span data-i18n="tab_stage">стадия</span></span>
+              <span data-mode="type"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg> <span data-i18n="tab_type">тип</span></span>
             </span>
           </div>
           <div class="composition">
@@ -3313,9 +3315,9 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
           <div class="res-card-head">
             <h3 data-i18n="rank_h">Рейтинг выбросов</h3>
             <span class="res-tabs" data-group="ranking">
-              <span class="active" data-mode="stage"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <span data-i18n="tab_stage">стадия</span></span>
-              <span data-mode="type"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg> <span data-i18n="tab_type">тип</span></span>
-              <span data-mode="source"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg> <span data-i18n="tab_source">источник</span></span>
+              <span class="active" data-mode="stage"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <span data-i18n="tab_stage">стадия</span></span>
+              <span data-mode="type"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg> <span data-i18n="tab_type">тип</span></span>
+              <span data-mode="source"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg> <span data-i18n="tab_source">источник</span></span>
             </span>
           </div>
           <div class="ranking" id="ranking"></div>
@@ -3395,7 +3397,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
   </div>
   <div class="agent-body" id="agentBody">
     <div class="agent-empty">
-      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/><path d="M10 21h4"/></svg></div>
+      <div class="icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/><path d="M10 21h4"/></svg></div>
       <span data-i18n-html="agent_empty">Расчёт ещё не запущен.<br>Сделайте первый расчёт — и я задам<br>уточняющие вопросы по модели.</span>
     </div>
   </div>
@@ -3422,7 +3424,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
     </div>
     <div class="modal-body">
       <div class="em-grid">
-        <div class="em-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M8 6h8"/><path d="M8 10h8"/><path d="M8 14h4"/></svg></div>
+        <div class="em-thumb"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M8 6h8"/><path d="M8 10h8"/><path d="M8 14h4"/></svg></div>
         <div class="em-field">
           <label data-i18n="em_name">Название продукта</label>
           <input id="emName" type="text">
@@ -3521,7 +3523,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
       <h2>Word</h2>
       <div style="display:flex;gap:10px;align-items:center">
         <button id="wordDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius: 0;font-size:13px;font-weight:600;cursor:pointer">
-          <span class="btn-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg></span> <span data-i18n="word_download">Скачать Word</span>
+          <span class="btn-ic"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg></span> <span data-i18n="word_download">Скачать Word</span>
         </button>
         <button class="modal-close" data-close>×</button>
       </div>
@@ -3540,7 +3542,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
       <h2>PDF</h2>
       <div style="display:flex;gap:10px;align-items:center">
         <button id="pdfDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius: 0;font-size:13px;font-weight:600;cursor:pointer">
-          <span class="btn-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg></span> <span data-i18n="pdf_download">Скачать PDF</span>
+          <span class="btn-ic"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg></span> <span data-i18n="pdf_download">Скачать PDF</span>
         </button>
         <button class="modal-close" data-close>×</button>
       </div>
@@ -3572,7 +3574,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
       <h2 data-i18n="history_h">История расчётов</h2>
       <div style="display:flex;gap:10px;align-items:center">
         <button id="clearHistory" style="background:var(--c-rust);color:white;border:none;padding:6px 14px;border-radius: 0;font-size:12px;font-weight:600;cursor:pointer">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg> <span data-i18n="history_clear">Очистить</span>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg> <span data-i18n="history_clear">Очистить</span>
         </button>
         <button class="modal-close" data-close>×</button>
       </div>
@@ -6407,7 +6409,7 @@ function renderChatHistory() {
     const isUser = msg.role === 'user';
     html += `
       <div class="chat-msg ${isUser ? 'chat-user' : 'chat-ai'}">
-        <div class="chat-avatar">${isUser ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:16px;height:16px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' : 'AI'}</div>
+        <div class="chat-avatar">${isUser ? '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:16px;height:16px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' : 'AI'}</div>
         <div class="chat-bubble">${escape(msg.text)}</div>
       </div>
     `;
@@ -6502,7 +6504,7 @@ async function applyAgentAnswers() {
       <div class="agent-processing-spinner"></div>
       <div class="agent-processing-text">${t.agent_recalc || 'Пересчёт с учётом ваших ответов…'}</div>
       <div class="agent-processing-details">
-        ${answered.map(q => `<div class="agent-processing-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M20 6L9 17l-5-5"/></svg> ${escape(q.text)}</div>`).join('')}
+        ${answered.map(q => `<div class="agent-processing-item"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M20 6L9 17l-5-5"/></svg> ${escape(q.text)}</div>`).join('')}
       </div>
     </div>
   `;

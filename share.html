@@ -141,9 +141,13 @@ footer a:hover { color:var(--e-ink); border-color:var(--e-3); }
   table { font-size:11px; }
 }
 @media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
+
+.skip-link { position: absolute; left: -9999px; top: 0; z-index: 9999; padding: 8px 16px; background: var(--graphite); color: var(--paper); font-family: var(--mono); font-size: 12px; text-decoration: none; }
+.skip-link:focus { left: 8px; top: 8px; }
 </style>
 </head>
 <body>
+    <a class="skip-link" href="#content">Skip to content</a>>
 <div class="frame">
   <header>
     <a class="brand" href="/"><span class="dot"></span>LCA<em>·</em>AI</a>
@@ -153,7 +157,7 @@ footer a:hover { color:var(--e-ink); border-color:var(--e-3); }
         <button data-lang="en">EN</button>
         <button data-lang="zh">中文</button>
       </div>
-      <button class="theme-btn" id="themeBtn" aria-label="theme"></button>
+      <button class="theme-btn" id="themeBtn" aria-label="Toggle dark mode"></button>
     </div>
   </header>
 

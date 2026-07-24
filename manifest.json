@@ -4,8 +4,8 @@
   "description": "Оценка углеродного следа продукта с помощью ИИ",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FFFFFF",
-  "theme_color": "#14C997",
+  "background_color": "#F2F0EC",
+  "theme_color": "#F03B0C",
   "orientation": "any",
   "icons": [
     {
@@ -24,5 +24,7 @@
     "productivity"
   ],
   "lang": "ru",
-  "dir": "ltr"
+  "dir": "ltr",
+  "scope": "/",
+  "id": "lca-ai"
 }
