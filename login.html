@@ -168,7 +168,7 @@ html.dark .lang-switch button.active { background: var(--graphite); color: var(-
 
         <div class="divider"><span data-i18n="or">или</span></div>
 
-        <form class="form-group" id="loginForm">
+        <form class="form-group" id="loginForm" novalidate>
             <label for="loginEmail" data-i18n="email_label">Email</label>
             <input type="email" id="loginEmail" data-i18n-placeholder="email_ph" placeholder="Введите email" required>
             <label for="loginPassword" data-i18n="password_label">Пароль</label>
@@ -176,7 +176,7 @@ html.dark .lang-switch button.active { background: var(--graphite); color: var(-
             <button type="submit" class="submit-btn" id="loginBtn" data-i18n="login_btn">Войти</button>
         </form>
 
-        <form class="form-group" id="registerForm" style="display:none">
+        <form class="form-group" id="registerForm" style="display:none" novalidate>
             <label for="regEmail" data-i18n="email_label">Email</label>
             <input type="email" id="regEmail" data-i18n-placeholder="email_ph" placeholder="Введите email" required>
             <label for="regPassword" data-i18n="password_label">Пароль</label>
@@ -189,7 +189,7 @@ html.dark .lang-switch button.active { background: var(--graphite); color: var(-
         <div id="otpSection" style="display:none;margin-top:16px">
             <div style="font-size:13px;color:var(--ink-soft);margin-bottom:8px" data-i18n="otp_title">Вход по коду из письма</div>
             <input type="email" id="otpEmail" data-i18n-placeholder="email_ph" placeholder="Email" style="width:100%;padding:12px;border:1px solid var(--rule);border-radius:0;margin-bottom:8px;background:var(--bg);color:var(--ink)">
-            <button id="sendOtpBtn" data-i18n="send_code" style="width:100%;padding:12px;background:var(--jade);color:#fff;border:none;border-radius:0;cursor:pointer">Отправить код</button>
+            <button id="sendOtpBtn" data-i18n="send_code" style="width:100%;padding:12px;background:var(--jade);color:#fff;border:none;border-radius:0;cursor:pointer">Отправить ссылку</button>
             <div id="otpCodeSection" style="display:none;margin-top:8px">
                 <input type="text" id="otpCode" data-i18n-placeholder="code_ph" placeholder="Код из письма" maxlength="6" style="width:100%;padding:12px;border:1px solid var(--rule);border-radius:0;margin-bottom:8px;background:var(--bg);color:var(--ink);text-align:center;font-size:20px;letter-spacing:8px">
                 <button id="verifyOtpBtn" data-i18n="verify_btn" style="width:100%;padding:12px;background:var(--jade);color:#fff;border:none;border-radius:0;cursor:pointer">Войти</button>
@@ -257,6 +257,7 @@ html.dark .lang-switch button.active { background: var(--graphite); color: var(-
                 discord_alert: 'Discord OAuth будет доступен после настройки приложения в Discord Developer Portal',
                 sb_not_loaded: 'Supabase не загружен', sb_sdk_missing: 'Supabase SDK не загружен',
                 logging_in: 'Вход...', passwords_mismatch: 'Пароли не совпадают',
+                val_required: 'Заполните это поле', val_email: 'Введите корректный email',
                 min6_chars: 'Пароль должен содержать минимум 6 символов',
                 registering: 'Регистрация...',
                 confirmation_sent: 'Письмо с подтверждением отправлено на',
@@ -284,6 +285,7 @@ html.dark .lang-switch button.active { background: var(--graphite); color: var(-
                 discord_alert: 'Discord OAuth will be available after setting up an app in Discord Developer Portal',
                 sb_not_loaded: 'Supabase not loaded', sb_sdk_missing: 'Supabase SDK not loaded',
                 logging_in: 'Signing in...', passwords_mismatch: 'Passwords do not match',
+                val_required: 'This field is required', val_email: 'Enter a valid email',
                 min6_chars: 'Password must be at least 6 characters',
                 registering: 'Registering...',
                 confirmation_sent: 'Confirmation email sent to',
@@ -311,6 +313,7 @@ html.dark .lang-switch button.active { background: var(--graphite); color: var(-
                 discord_alert: 'Discord OAuth将在Discord Developer Portal配置后可用',
                 sb_not_loaded: 'Supabase 未加载', sb_sdk_missing: 'Supabase SDK 未加载',
                 logging_in: '登录中...', passwords_mismatch: '密码不匹配',
+                val_required: '请填写此字段', val_email: '请输入有效的邮箱地址',
                 min6_chars: '密码至少需要6个字符',
                 registering: '注册中...',
                 confirmation_sent: '确认邮件已发送至',
@@ -383,6 +386,7 @@ html.dark .lang-switch button.active { background: var(--graphite); color: var(-
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!validateForm(document.getElementById('loginForm'))) return;
             if (!sbClient) { showError(loginT('sb_not_loaded')); return; }
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
@@ -398,6 +402,7 @@ html.dark .lang-switch button.active { background: var(--graphite); color: var(-
 
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!validateForm(document.getElementById('registerForm'))) return;
             if (!sbClient) { showError(loginT('sb_not_loaded')); return; }
             const email = document.getElementById('regEmail').value;
             const password = document.getElementById('regPassword').value;
@@ -474,6 +479,23 @@ html.dark .lang-switch button.active { background: var(--graphite); color: var(-
             document.getElementById('regBtn').textContent = t.reg_btn;
             document.getElementById('switchText').textContent = isLoginMode ? t.no_account : t.has_account;
             document.getElementById('switchLink').textContent = isLoginMode ? t.register : t.login_link;
+        }
+
+        function validateForm(form) {
+            const t = LOGIN_I18N[loginLang] || LOGIN_I18N.ru;
+            let valid = true;
+            form.querySelectorAll('[required]').forEach(el => {
+                el.setCustomValidity('');
+                if (!el.value.trim()) {
+                    el.setCustomValidity(t.val_required);
+                    valid = false;
+                } else if (el.type === 'email' && !el.value.includes('@')) {
+                    el.setCustomValidity(t.val_email);
+                    valid = false;
+                }
+            });
+            if (!valid) form.reportValidity();
+            return valid;
         }
 
         document.getElementById('toggleOtp').addEventListener('click', (e) => {
