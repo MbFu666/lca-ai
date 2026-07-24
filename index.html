@@ -3195,57 +3195,6 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
 
 
 
-/* ─── Scroll-Scrub ─── */
-.scrub-track { position: relative; height: 600vh; }
-.scrub-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
-.scrub-progress { position: absolute; top: 0; left: 0; right: 0; height: 3px; z-index: 20; background: rgba(128,128,128,0.15); }
-.scrub-progress span { display: block; height: 100%; background: var(--e-4, #E06020); width: 0%; transition: width 0.05s linear; }
-.scrub-bg { position: absolute; inset: 0; opacity: 0; transition: opacity 0.8s ease-out; pointer-events: none; }
-.scrub-bg-on { opacity: 1; }
-[data-sbg="0"] { background: var(--paper, #F2F0EC); }
-[data-sbg="1"] { background: var(--graphite, #1C1B19); }
-[data-sbg="2"] { background: #1a1917; }
-[data-sbg="3"] { background: var(--graphite, #1C1B19); }
-[data-sbg="4"] { background: #1a1917; }
-[data-sbg="5"] { background: var(--graphite, #1C1B19); }
-.scrub-vis-layer { position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-.scrub-vis { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transform: scale(0.96); transition: opacity 0.7s ease-out, transform 0.7s ease-out; }
-.scrub-vis-on { opacity: 1; transform: scale(1); }
-.scrub-form-mock { max-width: 460px; width: 90%; }
-.scrub-input-mock { font-family: var(--mono, monospace); font-size: 14px; padding: 16px 20px; border: 1px solid var(--rule, #D6D3CC); color: var(--graphite, #1C1B19); background: var(--paper, #F2F0EC); margin-bottom: 16px; }
-.scrub-btn-mock { display: inline-block; font-family: var(--display, sans-serif); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; background: var(--graphite, #1C1B19); color: var(--paper, #F2F0EC); padding: 12px 32px; }
-.scrub-num { font-family: var(--mono, monospace); font-size: clamp(80px, 20vw, 200px); font-weight: 600; color: var(--e-5, #F03B0C); line-height: 1; opacity: 0.9; }
-.scrub-num-final { color: var(--paper, #F2F0EC); }
-.scrub-num-unit { font-family: var(--mono, monospace); font-size: clamp(14px, 3vw, 24px); color: rgba(255,255,255,0.35); margin-top: 8px; letter-spacing: 0.08em; }
-.scrub-ribbons { width: 80%; max-width: 560px; display: flex; flex-direction: column; gap: 18px; }
-.scrub-vr { height: 12px; background: var(--c); width: 0%; transition: width 1.2s cubic-bezier(0.25,0.46,0.45,0.94); }
-.scrub-vis-on .scrub-vr { width: var(--w); }
-.scrub-bars { width: 80%; max-width: 480px; display: flex; flex-direction: column; gap: 20px; }
-.scrub-vb { display: flex; align-items: center; gap: 14px; font-family: var(--mono, monospace); font-size: 13px; color: rgba(255,255,255,0.5); }
-.scrub-vb span:first-child { width: 90px; flex-shrink: 0; text-align: right; }
-.scrub-vb span:last-child { width: 48px; font-weight: 600; color: var(--e-4, #E06020); font-size: 15px; }
-.scrub-vb-bar { flex: 1; height: 8px; background: rgba(255,255,255,0.08); overflow: hidden; }
-.scrub-vb-fill { height: 100%; background: var(--e-4, #E06020); width: 0%; transition: width 1s ease-out; }
-.scrub-vis-on .scrub-vb-fill { width: var(--pct); }
-.scrub-copy { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; pointer-events: none; }
-.scrub-copy-on { opacity: 1; transform: translateY(0); pointer-events: auto; }
-.scrub-kicker { font-family: var(--mono, monospace); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 16px; }
-[data-copy="0"] .scrub-kicker { color: var(--graphite-low, #6B6862); }
-.scrub-copy:not([data-copy="0"]) .scrub-kicker { color: var(--e-3, #D98C48); font-size: 28px; font-weight: 600; font-family: var(--mono, monospace); }
-.scrub-h1 { font-family: var(--display, sans-serif); font-size: clamp(36px, 7vw, 72px); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.05; margin-bottom: 20px; max-width: 780px; color: var(--graphite, #1C1B19); }
-.scrub-h1 em { font-style: normal; color: var(--e-4, #E06020); }
-.scrub-h2 { font-family: var(--display, sans-serif); font-size: clamp(28px, 5vw, 56px); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.1; margin-bottom: 16px; max-width: 680px; }
-[data-copy="0"] .scrub-h2 { color: var(--graphite, #1C1B19); }
-.scrub-copy:not([data-copy="0"]) .scrub-h2 { color: var(--paper, #F2F0EC); }
-.scrub-sub { font-family: var(--body, serif); font-size: clamp(14px, 2vw, 18px); max-width: 480px; line-height: 1.6; margin-bottom: 24px; }
-[data-copy="0"] .scrub-sub { color: var(--graphite-low, #6B6862); }
-.scrub-copy:not([data-copy="0"]) .scrub-sub { color: rgba(242,240,236,0.55); }
-.scrub-cta { display: inline-block; font-family: var(--display, sans-serif); font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; padding: 14px 40px; text-decoration: none; transition: background 0.2s ease; }
-[data-copy="0"] .scrub-cta { background: var(--graphite, #1C1B19); color: var(--paper, #F2F0EC); }
-[data-copy="0"] .scrub-cta:hover { background: var(--e-5, #F03B0C); }
-[data-copy="5"] .scrub-cta { background: var(--e-4, #E06020); color: var(--paper, #F2F0EC); font-size: 16px; padding: 16px 48px; }
-[data-copy="5"] .scrub-cta:hover { background: var(--e-5, #F03B0C); }
-@media (max-width: 600px) { .scrub-copy { padding: 24px; } .scrub-h1 { font-size: 32px; } .scrub-h2 { font-size: 26px; } }
 </style>
 </head>
 <body>
@@ -3281,44 +3230,6 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
       <span class="eyebrow reveal" data-i18n="eyebrow">оценка жизненного цикла · ISO 14067</span>
       <h1 class="hero-h1" data-i18n-html="h1">Где в вашем продукте <em>углерод</em>.</h1>
       <p class="hero-sub reveal" data-i18n="hero_sub">Опишите продукт — система соберёт модель жизненного цикла, разложит след по стадиям и укажет источник каждого коэффициента.</p>
-    </section>
-
-    <!-- ============== SCROLL-SCRUB DEMO ============== -->
-    <section class="scrub-track" id="scrubWrap">
-      <div class="scrub-stage">
-        <div class="scrub-progress"><span id="scrubFill"></span></div>
-        <div class="scrub-bg scrub-bg-on" data-sbg="0"></div>
-        <div class="scrub-bg" data-sbg="1"></div>
-        <div class="scrub-bg" data-sbg="2"></div>
-        <div class="scrub-bg" data-sbg="3"></div>
-        <div class="scrub-bg" data-sbg="4"></div>
-        <div class="scrub-bg" data-sbg="5"></div>
-        <div class="scrub-vis-layer">
-          <div class="scrub-vis scrub-vis-on" data-vis="0">
-            <div class="scrub-form-mock"><div class="scrub-input-mock">1 кг ржаного хлеба, Польша, крафт-упаковка</div><div class="scrub-btn-mock">Рассчитать</div></div>
-          </div>
-          <div class="scrub-vis" data-vis="1"><div class="scrub-num">0.99</div><div class="scrub-num-unit">kg CO₂e</div></div>
-          <div class="scrub-vis" data-vis="2">
-            <div class="scrub-ribbons"><div class="scrub-vr" style="--w:70%;--c:#B8B4AC"></div><div class="scrub-vr" style="--w:84%;--c:#D4A574"></div><div class="scrub-vr" style="--w:24%;--c:#D98C48"></div><div class="scrub-vr" style="--w:12%;--c:#E06020"></div><div class="scrub-vr" style="--w:8%;--c:#F03B0C"></div></div>
-          </div>
-          <div class="scrub-vis" data-vis="3"><canvas id="scrubDonut" width="240" height="240"></canvas></div>
-          <div class="scrub-vis" data-vis="4">
-            <div class="scrub-bars"><div class="scrub-vb"><span>Упаковка</span><div class="scrub-vb-bar"><div class="scrub-vb-fill" style="--pct:15%"></div></div><span>−15%</span></div><div class="scrub-vb"><span>Логистика</span><div class="scrub-vb-bar"><div class="scrub-vb-fill" style="--pct:22%"></div></div><span>−22%</span></div><div class="scrub-vb"><span>Энергия</span><div class="scrub-vb-bar"><div class="scrub-vb-fill" style="--pct:40%"></div></div><span>−40%</span></div></div>
-          </div>
-          <div class="scrub-vis" data-vis="5"><div class="scrub-num scrub-num-final">0.99</div><div class="scrub-num-unit">kg CO₂e</div></div>
-        </div>
-        <article class="scrub-copy scrub-copy-on" data-copy="0">
-          <p class="scrub-kicker" data-i18n="scrub_kicker">life cycle assessment · ISO 14067</p>
-          <h1 class="scrub-h1" data-i18n-html="scrub_h1">Where the carbon <em>actually is</em></h1>
-          <p class="scrub-sub" data-i18n="scrub_sub">Describe a product — the system builds a life cycle model, splits the footprint by stage.</p>
-          <a class="scrub-cta" href="#composerDropZone" data-i18n="scrub_cta">Try it now</a>
-        </article>
-        <article class="scrub-copy" data-copy="1"><p class="scrub-kicker">01</p><h2 class="scrub-h2" data-i18n="scrub_h2_1">The result is instant.</h2><p class="scrub-sub" data-i18n="scrub_sub_1">1 kg rye bread · kraft packaging · Poland</p></article>
-        <article class="scrub-copy" data-copy="2"><p class="scrub-kicker">02</p><h2 class="scrub-h2" data-i18n="scrub_h2_2">See where it flows.</h2><p class="scrub-sub" data-i18n="scrub_sub_2">Five lifecycle stages. Band width equals CO₂ contribution.</p></article>
-        <article class="scrub-copy" data-copy="3"><p class="scrub-kicker">03</p><h2 class="scrub-h2" data-i18n="scrub_h2_3">Find the hotspots.</h2><p class="scrub-sub" data-i18n="scrub_sub_3">Donut chart breaks down emissions by stage.</p></article>
-        <article class="scrub-copy" data-copy="4"><p class="scrub-kicker">04</p><h2 class="scrub-h2" data-i18n="scrub_h2_4">Cut the footprint.</h2><p class="scrub-sub" data-i18n="scrub_sub_4">AI recommendations with concrete reduction targets.</p></article>
-        <article class="scrub-copy" data-copy="5"><p class="scrub-kicker">05</p><h2 class="scrub-h2" data-i18n="scrub_h2_5">Every pixel means carbon.</h2><a class="scrub-cta" href="#composerDropZone" data-i18n="scrub_cta">Try it now</a></article>
-      </div>
     </section>
 
     <!-- ============== LIVE FLOW — the signature visual ============== -->
@@ -7619,74 +7530,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   
   // Example chips are rendered by renderExampleChips() via applyLanguage()
   
-  // ─── Scroll-Scrub ───
-  (function() {
-    var wrap = document.getElementById('scrubWrap');
-    if (!wrap) return;
-    var copies = wrap.querySelectorAll('.scrub-copy');
-    var bgs = wrap.querySelectorAll('.scrub-bg');
-    var vis = wrap.querySelectorAll('.scrub-vis');
-    var fill = document.getElementById('scrubFill');
-    var total = copies.length;
-    var donutDone = false;
-    function onScroll() {
-      var r = wrap.getBoundingClientRect();
-      var sh = wrap.offsetHeight - window.innerHeight;
-      var sc = Math.max(0, -r.top);
-      var p = Math.max(0, Math.min(1, sc / sh));
-      var idx = Math.min(total - 1, Math.floor(p * total));
-      if (fill) fill.style.width = (p * 100) + '%';
-      bgs.forEach(function(b, i) { b.classList.toggle('scrub-bg-on', i === idx); });
-      vis.forEach(function(v, i) { v.classList.toggle('scrub-vis-on', i === idx); });
-      copies.forEach(function(c, i) { c.classList.toggle('scrub-copy-on', i === idx); });
-      if (idx === 3 && !donutDone) { donutDone = true; drawDonut(); }
-    }
-    function drawDonut() {
-      var cv = document.getElementById('scrubDonut');
-      if (!cv) return;
-      var ctx = cv.getContext('2d');
-      var cx = 120, cy = 120, r = 90, lw = 24;
-      var data = [35, 42, 12, 6, 4];
-      var colors = ['#B8B4AC','#D4A574','#D98C48','#E06020','#F03B0C'];
-      var tot = data.reduce(function(a,b){return a+b;}, 0);
-      var prog = 0;
-      function anim() {
-        prog += 0.02;
-        if (prog > 1) prog = 1;
-        ctx.clearRect(0, 0, 240, 240);
-        var cur = -Math.PI / 2;
-        var tgt = -Math.PI / 2 + Math.PI * 2 * prog;
-        data.forEach(function(v, i) {
-          var a = (v / tot) * Math.PI * 2;
-          var end = Math.min(cur + a, tgt);
-          if (end > cur) {
-            ctx.beginPath();
-            ctx.arc(cx, cy, r, cur, end);
-            ctx.lineWidth = lw;
-            ctx.strokeStyle = colors[i];
-            ctx.stroke();
-          }
-          cur += a;
-        });
-        if (prog > 0.5) {
-          var al = Math.min(1, (prog - 0.5) * 4);
-          ctx.fillStyle = 'rgba(242,240,236,' + al + ')';
-          ctx.font = '600 28px "JetBrains Mono", monospace';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText('0.99', cx, cy - 8);
-          ctx.font = '12px "JetBrains Mono", monospace';
-          ctx.fillStyle = 'rgba(242,240,236,' + (al * 0.5) + ')';
-          ctx.fillText('kg CO\u2082e', cx, cy + 16);
-        }
-        if (prog < 1) requestAnimationFrame(anim);
-      }
-      requestAnimationFrame(anim);
-    }
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-  })();
-
+    
   console.log('[LCA] Init complete');
 });
 </script>
