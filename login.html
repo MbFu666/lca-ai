@@ -365,7 +365,7 @@ html.dark .lang-switch button.active { background: var(--graphite); color: var(-
         });
 
         document.getElementById('wechatBtn').addEventListener('click', () => {
-            alert(loginT('wechat_alert'));
+            showError(loginT('wechat_alert'));
         });
 
         // Discord OAuth via Supabase

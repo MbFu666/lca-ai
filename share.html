@@ -271,6 +271,11 @@ let editing=null, draft=null;
 const $ = id => document.getElementById(id);
 const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
   .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+function showToast(msg) {
+  let t = document.getElementById('toast');
+  if (!t) { t = document.createElement('div'); t.id = 'toast'; t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--graphite);color:var(--paper);padding:12px 24px;font-size:13px;z-index:9999;opacity:0;transition:opacity .3s'; document.body.appendChild(t); }
+  t.textContent = msg; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 3000);
+}
 const fmt = v => { const n=parseFloat(v)||0;
   return n>=1000?n.toFixed(0):n>=10?n.toFixed(1):n.toFixed(2); };
 const fmtDate = d => { try {
@@ -399,7 +404,7 @@ async function fork() {
   } catch (e) {
     btn.disabled = false;
     btn.textContent = kind==='project' ? t.fork_project : t.fork;
-    alert(t.err_save + ': ' + (e.message||e));
+    showToast(t.err_save + ': ' + (e.message||e));
   }
 }
 
@@ -469,7 +474,7 @@ async function saveEdit() {
     btn.disabled = false;
   } catch (e) {
     btn.disabled = false; btn.textContent = T().save;
-    alert(e.message || e);
+    showToast(e.message || e);
   }
 }
 

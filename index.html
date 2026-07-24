@@ -6504,6 +6504,18 @@ function showToast(msg) {
   setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
+function confirmAction(msg) {
+  return new Promise(resolve => {
+    const mask = document.createElement('div');
+    mask.className = 'modal-mask show';
+    mask.innerHTML = '<div class="modal" style="max-width:360px"><div class="modal-body"><p style="font-size:15px;line-height:1.5;margin:0">' + msg + '</p></div><div class="modal-foot"><button id="confirmNo">Cancel</button><button class="primary" id="confirmYes">OK</button></div></div>';
+    document.body.appendChild(mask);
+    mask.querySelector('#confirmYes').onclick = () => { mask.remove(); resolve(true); };
+    mask.querySelector('#confirmNo').onclick = () => { mask.remove(); resolve(false); };
+    mask.addEventListener('click', e => { if (e.target === mask) { mask.remove(); resolve(false); } });
+  });
+}
+
 // Обновить счётчик на кнопке
 function updateCompareBadge() {
   const btn = $('#compareBtn');
@@ -6621,10 +6633,9 @@ function renderHistory() {
   });
 }
 
-$('#clearHistory')?.addEventListener('click', () => {
-  if (confirm(currentLang === 'ru' ? 'Очистить историю?' 
-    : currentLang === 'zh' ? '确定清除历史？'
-    : 'Clear history?')) {
+$('#clearHistory')?.addEventListener('click', async () => {
+  const msg = currentLang === 'ru' ? 'Очистить историю?' : currentLang === 'zh' ? '确定清除历史？' : 'Clear history?';
+  if (await confirmAction(msg)) {
     clearHistory();
     renderHistory();
   }
@@ -6849,9 +6860,10 @@ function renderProjects() {
   
   // Delete project
   list.querySelectorAll('.project-delete-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', async (e) => {
       e.stopPropagation();
-      if (confirm(currentLang === 'ru' ? 'Удалить проект?' : currentLang === 'zh' ? '删除项目？' : 'Delete project?')) {
+      const msg = currentLang === 'ru' ? 'Удалить проект?' : currentLang === 'zh' ? '删除项目？' : 'Delete project?';
+      if (await confirmAction(msg)) {
         deleteProject(btn.dataset.id);
         renderProjects();
       }
@@ -7221,7 +7233,7 @@ function downloadJson(d) {
 async function downloadExcel(d) {
   await loadLib('xlsx');
   if (typeof XLSX === 'undefined') {
-    alert('SheetJS не загружен. Проверьте соединение с CDN.');
+    showToast('SheetJS не загружен. Проверьте соединение с CDN.');
     return;
   }
   const rows = excelRows(d);
