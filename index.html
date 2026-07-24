@@ -3189,9 +3189,6 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
   top: 0;
   height: 100vh;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 .scrub-phase {
   position: absolute;
@@ -3203,7 +3200,6 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
   transform: translateY(40px);
   transition: opacity 0.8s ease-out, transform 0.8s ease-out;
   pointer-events: none;
-  padding: 40px;
 }
 .scrub-phase.scrub-active {
   opacity: 1;
@@ -3211,8 +3207,51 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
   pointer-events: auto;
 }
 
+/* Background image */
+.scrub-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.15;
+  transition: opacity 1s ease-out;
+}
+.scrub-active .scrub-bg { opacity: 0.2; }
+
+/* Content overlay */
+.scrub-content {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+  width: 100%;
+  padding: 40px;
+  text-align: center;
+}
+
 /* Phase 0: Form */
-.scrub-form { text-align: center; max-width: 600px; width: 100%; }
+.scrub-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--graphite-low);
+  margin-bottom: 16px;
+}
+.scrub-h2 {
+  font-family: var(--display);
+  font-size: clamp(28px, 5vw, 48px);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 32px;
+  line-height: 1.1;
+}
+.scrub-h2 em { font-style: normal; color: var(--e-4); }
+.scrub-form { max-width: 500px; margin: 0 auto 24px; }
+.scrub-input-wrap {
+  position: relative;
+  margin-bottom: 16px;
+}
 .scrub-input {
   font-family: var(--mono);
   font-size: 15px;
@@ -3221,8 +3260,21 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
   color: var(--graphite);
   background: var(--paper);
   text-align: left;
-  margin-bottom: 16px;
   width: 100%;
+}
+.scrub-cursor {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 20px;
+  background: var(--e-4);
+  animation: scrubBlink 1s infinite;
+}
+@keyframes scrubBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 .scrub-btn {
   display: inline-block;
@@ -3233,8 +3285,20 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
   letter-spacing: 0.06em;
   background: var(--graphite);
   color: var(--paper);
-  padding: 12px 32px;
+  padding: 14px 36px;
   cursor: default;
+}
+.scrub-hint {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--graphite-low);
+  animation: scrubPulse 2s infinite;
+}
+@keyframes scrubPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
 }
 
 /* Phase 1: Result */
@@ -3245,47 +3309,61 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--graphite-low);
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 .scrub-result-num {
   font-family: var(--mono);
-  font-size: clamp(48px, 12vw, 96px);
+  font-size: clamp(56px, 14vw, 120px);
   font-weight: 600;
   color: var(--e-5);
   line-height: 1;
+  margin-bottom: 12px;
 }
 .scrub-unit {
-  font-size: 0.35em;
+  font-size: 0.3em;
   color: var(--graphite-low);
   font-weight: 400;
 }
-.scrub-result-sub {
-  font-size: 13px;
+.scrub-result-product {
+  font-size: 14px;
   color: var(--graphite-low);
-  margin-top: 12px;
+  margin-bottom: 24px;
+}
+.scrub-emission-bar {
+  width: 300px;
+  max-width: 80%;
+  height: 4px;
+  background: var(--rule);
+  margin: 0 auto;
+  overflow: hidden;
+}
+.scrub-emission-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--e-1), var(--e-5));
+  width: 0%;
+  transition: width 1.5s ease-out;
 }
 
 /* Phase 2: Flow ribbons */
-.scrub-flow { max-width: 700px; width: 100%; }
+.scrub-flow { max-width: 600px; width: 100%; margin: 0 auto; }
 .scrub-flow-title {
   font-family: var(--display);
   font-size: 18px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  margin-bottom: 32px;
-  text-align: center;
+  margin-bottom: 40px;
 }
 .scrub-ribbon {
-  height: 8px;
+  height: 10px;
   background: var(--e-3);
-  margin-bottom: 16px;
+  margin-bottom: 24px;
   position: relative;
   width: 0%;
   transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .scrub-ribbon::after {
-  content: attr(data-label);
+  content: attr(data-label-scrub);
   position: absolute;
   left: 0;
   top: -22px;
@@ -3295,13 +3373,13 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
   color: var(--graphite-low);
   white-space: nowrap;
 }
-.scrub-ribbon .scrub-ribbon-val {
-  position: absolute;
-  right: 0;
-  top: -22px;
+.scrub-flow-hint {
   font-family: var(--mono);
-  font-size: 11px;
-  color: var(--graphite);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--graphite-low);
+  margin-top: 16px;
 }
 
 /* Phase 3: Analysis */
@@ -3311,14 +3389,24 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
   align-items: center;
   max-width: 700px;
   width: 100%;
+  margin: 0 auto;
+  text-align: left;
 }
 .scrub-donut-wrap { flex-shrink: 0; }
 .scrub-bars { flex: 1; }
+.scrub-bar-title {
+  font-family: var(--display);
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 20px;
+}
 .scrub-bar-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 .scrub-bar-label {
   font-family: var(--mono);
@@ -3351,23 +3439,24 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
 }
 
 /* Phase 4: Recommendations */
-.scrub-recs { max-width: 600px; width: 100%; text-align: center; }
+.scrub-recs { max-width: 550px; width: 100%; margin: 0 auto; text-align: left; }
 .scrub-rec-title {
   font-family: var(--display);
   font-size: 18px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
+  text-align: center;
 }
 .scrub-rec-card {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 16px;
   padding: 20px;
   border: 1px solid var(--rule);
   margin-bottom: 12px;
-  text-align: left;
+  background: var(--paper);
   opacity: 0;
   transform: translateX(-30px);
   transition: opacity 0.6s ease-out, transform 0.6s ease-out;
@@ -3376,24 +3465,34 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
   opacity: 1;
   transform: translateX(0);
 }
-.scrub-rec-icon {
-  width: 32px;
-  height: 32px;
+.scrub-rec-num {
+  font-family: var(--mono);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--e-4);
+  width: 40px;
   flex-shrink: 0;
 }
-.scrub-rec-icon svg {
-  width: 100%;
-  height: 100%;
-  stroke: var(--e-4);
-}
-.scrub-rec-text {
+.scrub-rec-body { flex: 1; }
+.scrub-rec-body b {
+  display: block;
   font-size: 14px;
-  line-height: 1.5;
-  color: var(--graphite-low);
-}
-.scrub-rec-text b {
-  color: var(--graphite);
   font-weight: 600;
+  color: var(--graphite);
+  margin-bottom: 4px;
+}
+.scrub-rec-body p {
+  font-size: 13px;
+  color: var(--graphite-low);
+  line-height: 1.4;
+  margin: 0;
+}
+.scrub-rec-pct {
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--e-4);
+  flex-shrink: 0;
 }
 
 /* Phase 5: Final */
@@ -3404,20 +3503,34 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--graphite-low);
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 .scrub-final-num {
   font-family: var(--mono);
-  font-size: clamp(64px, 16vw, 120px);
+  font-size: clamp(72px, 18vw, 140px);
   font-weight: 600;
   color: var(--e-5);
   line-height: 1;
+  margin-bottom: 8px;
 }
 .scrub-final-unit {
   font-family: var(--mono);
   font-size: 16px;
   color: var(--graphite-low);
-  margin-bottom: 32px;
+  margin-bottom: 24px;
+}
+.scrub-final-bar {
+  width: 200px;
+  height: 4px;
+  background: var(--rule);
+  margin: 0 auto 32px;
+  overflow: hidden;
+}
+.scrub-final-fill {
+  height: 100%;
+  background: var(--e-5);
+  width: 0%;
+  transition: width 2s ease-out;
 }
 .scrub-cta {
   display: inline-block;
@@ -3428,7 +3541,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
   letter-spacing: 0.06em;
   background: var(--e-4);
   color: var(--paper);
-  padding: 14px 36px;
+  padding: 14px 40px;
   text-decoration: none;
   transition: background 0.2s ease;
 }
@@ -3437,6 +3550,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
 @media (max-width: 600px) {
   .scrub-analysis { flex-direction: column; gap: 24px; }
   .scrub-bar-label { width: 80px; }
+  .scrub-content { padding: 20px; }
 }
 
 </style>
@@ -3479,79 +3593,119 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
     <!-- ============== SCROLL-SCRUB DEMO ============== -->
     <section class="scrub-wrap" id="scrubWrap">
       <div class="scrub-sticky">
-        <!-- Phase 0: Input form -->
+        <!-- Phase 0: Input form with background -->
         <div class="scrub-phase scrub-active" data-phase="0">
-          <div class="scrub-form">
-            <div class="scrub-input" id="scrubInput">1 кг ржаного хлеба, Польша, крафт-упаковка</div>
-            <div class="scrub-btn">Рассчитать</div>
+          <div class="scrub-bg" style="background-image:url('https://d8j0ntlcm91z4.cloudfront.net/user_3GvutktLRsJ3a6DH1pfJ3iPUVVH/hf_20260724_062510_fe4a6bec-e000-485d-b8a7-618893a31153.png')"></div>
+          <div class="scrub-content">
+            <div class="scrub-eyebrow" data-i18n="scrub_eyebrow">оценка жизненного цикла · ISO 14067</div>
+            <h2 class="scrub-h2" data-i18n-html="scrub_h2">Где в вашем продукте <em>углерод</em></h2>
+            <div class="scrub-form">
+              <div class="scrub-input-wrap">
+                <div class="scrub-input" id="scrubInput" data-i18n="scrub_input">1 кг ржаного хлеба, Польша, крафт-упаковка</div>
+                <div class="scrub-cursor"></div>
+              </div>
+              <div class="scrub-btn" data-i18n="scrub_btn">Рассчитать</div>
+            </div>
+            <div class="scrub-hint" data-i18n="scrub_hint">Прокрутите вниз, чтобы увидеть результат</div>
           </div>
         </div>
 
         <!-- Phase 1: Result number -->
         <div class="scrub-phase" data-phase="1">
-          <div class="scrub-result">
-            <div class="scrub-result-label">Углеродный след</div>
-            <div class="scrub-result-num"><span id="scrubCountUp">0.00</span> <span class="scrub-unit">kg CO₂e</span></div>
-            <div class="scrub-result-sub">1 кг ржаного хлеба · крафт-упаковка</div>
+          <div class="scrub-bg" style="background-image:url('https://d8j0ntlcm91z4.cloudfront.net/user_3GvutktLRsJ3a6DH1pfJ3iPUVVH/hf_20260724_062906_4f4fa6b1-288f-4174-961e-990ec85ccbe9.png')"></div>
+          <div class="scrub-content">
+            <div class="scrub-result">
+              <div class="scrub-result-label" data-i18n="scrub_result_label">Углеродный след</div>
+              <div class="scrub-result-num"><span id="scrubCountUp">0.00</span> <span class="scrub-unit">kg CO₂e</span></div>
+              <div class="scrub-result-product">1 кг ржаного хлеба · крафт-упаковка</div>
+              <div class="scrub-emission-bar"><div class="scrub-emission-fill"></div></div>
+            </div>
           </div>
         </div>
 
         <!-- Phase 2: Flow diagram -->
         <div class="scrub-phase" data-phase="2">
-          <div class="scrub-flow">
-            <div class="scrub-flow-title">Разбивка по стадиям</div>
-            <div class="scrub-ribbons" id="scrubRibbons">
-              <div class="scrub-ribbon" data-width="35" data-label="Добыча сырья" data-val="0.35"></div>
-              <div class="scrub-ribbon" data-width="42" data-label="Производство" data-val="0.42"></div>
-              <div class="scrub-ribbon" data-width="12" data-label="Дистрибуция" data-val="0.12"></div>
-              <div class="scrub-ribbon" data-width="6" data-label="Использование" data-val="0.06"></div>
-              <div class="scrub-ribbon" data-width="4" data-label="Конец ЖЦ" data-val="0.04"></div>
+          <div class="scrub-bg" style="background-image:url('https://d8j0ntlcm91z4.cloudfront.net/user_3GvutktLRsJ3a6DH1pfJ3iPUVVH/hf_20260724_062938_339b2159-24be-4c1c-accd-3370eae3a88f.png')"></div>
+          <div class="scrub-content">
+            <div class="scrub-flow">
+              <div class="scrub-flow-title" data-i18n="scrub_flow_title">Разбивка по стадиям</div>
+              <div class="scrub-ribbons" id="scrubRibbons">
+                <div class="scrub-ribbon" data-width="35" data-label-scrub="Добыча сырья" data-val="0.35"></div>
+                <div class="scrub-ribbon" data-width="42" data-label-scrub="Производство" data-val="0.42"></div>
+                <div class="scrub-ribbon" data-width="12" data-label-scrub="Дистрибуция" data-val="0.12"></div>
+                <div class="scrub-ribbon" data-width="6" data-label-scrub="Использование" data-val="0.06"></div>
+                <div class="scrub-ribbon" data-width="4" data-label-scrub="Конец ЖЦ" data-val="0.04"></div>
+              </div>
+              <div class="scrub-flow-hint" data-i18n="scrub_flow_hint">Ширина ленты = вклад стадии в CO₂</div>
             </div>
           </div>
         </div>
 
         <!-- Phase 3: Donut + bars -->
         <div class="scrub-phase" data-phase="3">
-          <div class="scrub-analysis">
-            <div class="scrub-donut-wrap">
-              <canvas id="scrubDonut" width="200" height="200"></canvas>
-            </div>
-            <div class="scrub-bars">
-              <div class="scrub-bar-row"><span class="scrub-bar-label">Добыча сырья</span><div class="scrub-bar"><div class="scrub-bar-fill" data-pct="35"></div></div><span class="scrub-bar-val">0.35</span></div>
-              <div class="scrub-bar-row"><span class="scrub-bar-label">Производство</span><div class="scrub-bar"><div class="scrub-bar-fill" data-pct="42"></div></div><span class="scrub-bar-val">0.42</span></div>
-              <div class="scrub-bar-row"><span class="scrub-bar-label">Дистрибуция</span><div class="scrub-bar"><div class="scrub-bar-fill" data-pct="12"></div></div><span class="scrub-bar-val">0.12</span></div>
-              <div class="scrub-bar-row"><span class="scrub-bar-label">Использование</span><div class="scrub-bar"><div class="scrub-bar-fill" data-pct="6"></div></div><span class="scrub-bar-val">0.06</span></div>
-              <div class="scrub-bar-row"><span class="scrub-bar-label">Конец ЖЦ</span><div class="scrub-bar"><div class="scrub-bar-fill" data-pct="4"></div></div><span class="scrub-bar-val">0.04</span></div>
+          <div class="scrub-bg" style="background-image:url('https://d8j0ntlcm91z4.cloudfront.net/user_3GvutktLRsJ3a6DH1pfJ3iPUVVH/hf_20260724_063027_b8eb6721-ffde-4811-bbb9-7fe681ccd8e3.png')"></div>
+          <div class="scrub-content">
+            <div class="scrub-analysis">
+              <div class="scrub-donut-wrap">
+                <canvas id="scrubDonut" width="220" height="220"></canvas>
+              </div>
+              <div class="scrub-bars">
+                <div class="scrub-bar-title" data-i18n="scrub_bar_title">Горячие точки</div>
+                <div class="scrub-bar-row"><span class="scrub-bar-label">Добыча сырья</span><div class="scrub-bar"><div class="scrub-bar-fill" data-pct="35"></div></div><span class="scrub-bar-val">0.35</span></div>
+                <div class="scrub-bar-row"><span class="scrub-bar-label">Производство</span><div class="scrub-bar"><div class="scrub-bar-fill" data-pct="42"></div></div><span class="scrub-bar-val">0.42</span></div>
+                <div class="scrub-bar-row"><span class="scrub-bar-label">Дистрибуция</span><div class="scrub-bar"><div class="scrub-bar-fill" data-pct="12"></div></div><span class="scrub-bar-val">0.12</span></div>
+                <div class="scrub-bar-row"><span class="scrub-bar-label">Использование</span><div class="scrub-bar"><div class="scrub-bar-fill" data-pct="6"></div></div><span class="scrub-bar-val">0.06</span></div>
+                <div class="scrub-bar-row"><span class="scrub-bar-label">Конец ЖЦ</span><div class="scrub-bar"><div class="scrub-bar-fill" data-pct="4"></div></div><span class="scrub-bar-val">0.04</span></div>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Phase 4: Recommendations -->
         <div class="scrub-phase" data-phase="4">
-          <div class="scrub-recs">
-            <div class="scrub-rec-title">Рекомендации по снижению</div>
-            <div class="scrub-rec-card" data-delay="0">
-              <div class="scrub-rec-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 9h18"/><path d="M9 3v18"/></svg></div>
-              <div class="scrub-rec-text"><b>Сократите упаковку</b><br>Переход на более лёгкую упаковку снизит след на 15%</div>
-            </div>
-            <div class="scrub-rec-card" data-delay="1">
-              <div class="scrub-rec-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
-              <div class="scrub-rec-text"><b>Оптимизируйте логистику</b><br>Ближайший поставщик сократит транспортный след на 22%</div>
-            </div>
-            <div class="scrub-rec-card" data-delay="2">
-              <div class="scrub-rec-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
-              <div class="scrub-rec-text"><b>Выбирайте возобновляемую энергию</b><br>Зелёная энергия на производстве — до 40% экономии</div>
+          <div class="scrub-bg" style="background-image:url('https://d8j0ntlcm91z4.cloudfront.net/user_3GvutktLRsJ3a6DH1pfJ3iPUVVH/hf_20260724_063000_9eeefaba-5dc4-47a2-b1db-9dff68d59da4.png')"></div>
+          <div class="scrub-content">
+            <div class="scrub-recs">
+              <div class="scrub-rec-title" data-i18n="scrub_rec_title">Рекомендации по снижению</div>
+              <div class="scrub-rec-card" data-delay="0">
+                <div class="scrub-rec-num">01</div>
+                <div class="scrub-rec-body">
+                  <b data-i18n="scrub_rec1_title">Сократите упаковку</b>
+                  <p data-i18n="scrub_rec1_desc">Переход на более лёгкую упаковку снизит след на 15%</p>
+                </div>
+                <div class="scrub-rec-pct">−15%</div>
+              </div>
+              <div class="scrub-rec-card" data-delay="1">
+                <div class="scrub-rec-num">02</div>
+                <div class="scrub-rec-body">
+                  <b data-i18n="scrub_rec2_title">Оптимизируйте логистику</b>
+                  <p data-i18n="scrub_rec2_desc">Ближайший поставщик сократит транспортный след на 22%</p>
+                </div>
+                <div class="scrub-rec-pct">−22%</div>
+              </div>
+              <div class="scrub-rec-card" data-delay="2">
+                <div class="scrub-rec-num">03</div>
+                <div class="scrub-rec-body">
+                  <b data-i18n="scrub_rec3_title">Возобновляемая энергия</b>
+                  <p data-i18n="scrub_rec3_desc">Зелёная энергия на производстве — до 40% экономии</p>
+                </div>
+                <div class="scrub-rec-pct">−40%</div>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Phase 5: Final CTA -->
         <div class="scrub-phase" data-phase="5">
-          <div class="scrub-final">
-            <div class="scrub-final-label">Итоговый углеродный след</div>
-            <div class="scrub-final-num"><span id="scrubFinalCount">0.00</span></div>
-            <div class="scrub-final-unit">kg CO₂e</div>
-            <a href="#composerDropZone" class="scrub-cta">Попробовать сейчас</a>
+          <div class="scrub-bg" style="background-image:url('https://d8j0ntlcm91z4.cloudfront.net/user_3GvutktLRsJ3a6DH1pfJ3iPUVVH/hf_20260724_063118_0f7a6880-b27c-4476-9e71-962c1d7a3dc3.png')"></div>
+          <div class="scrub-content">
+            <div class="scrub-final">
+              <div class="scrub-final-label" data-i18n="scrub_final_label">Итоговый углеродный след</div>
+              <div class="scrub-final-num"><span id="scrubFinalCount">0.00</span></div>
+              <div class="scrub-final-unit">kg CO₂e</div>
+              <div class="scrub-final-bar"><div class="scrub-final-fill"></div></div>
+              <a href="#composerDropZone" class="scrub-cta" data-i18n="scrub_cta">Попробовать сейчас</a>
+            </div>
           </div>
         </div>
       </div>
@@ -4036,6 +4190,25 @@ const I18N = {
     feat_full_d:  'Excel, Word, PDF. Таблица инвентаризации выгружается целиком, без потерь.',
     preview_label:'Пример результата',
     hero_flow_label:'пример · 1 кг ржаного хлеба · крафт-упаковка',
+    /* scroll-scrub */
+    scrub_eyebrow: 'оценка жизненного цикла · ISO 14067',
+    scrub_h2:      'Где в вашем продукте <em>углерод</em>',
+    scrub_input:   '1 кг ржаного хлеба, Польша, крафт-упаковка',
+    scrub_btn:     'Рассчитать',
+    scrub_hint:    'Прокрутите вниз, чтобы увидеть результат',
+    scrub_result_label: 'Углеродный след',
+    scrub_flow_title: 'Разбивка по стадиям',
+    scrub_flow_hint:  'Ширина ленты = вклад стадии в CO₂',
+    scrub_bar_title:  'Горячие точки',
+    scrub_rec_title:  'Рекомендации по снижению',
+    scrub_rec1_title: 'Сократите упаковку',
+    scrub_rec1_desc:  'Переход на более лёгкую упаковку снизит след на 15%',
+    scrub_rec2_title: 'Оптимизируйте логистику',
+    scrub_rec2_desc:  'Ближайший поставщик сократит транспортный след на 22%',
+    scrub_rec3_title: 'Возобновляемая энергия',
+    scrub_rec3_desc:  'Зелёная энергия на производстве — до 40% экономии',
+    scrub_final_label:'Итоговый углеродный след',
+    scrub_cta:     'Попробовать сейчас',
     flow_hint:    'наведите на ленту — толщина равна вкладу стадии',
     upload_excel: 'Импорт Excel',
     drop_excel:   'Отпустите — Excel будет разобран как таблица инвентаризации',
@@ -4281,7 +4454,26 @@ const I18N = {
     feat_full_d:  'Excel, Word, PDF. The inventory table exports whole, nothing dropped.',
     preview_label:'Example result',
     hero_flow_label:'example · 1 kg rye bread · kraft packaging',
-    flow_hint:    'hover a ribbon — its width is the stage\'s share',
+    /* scroll-scrub */
+    scrub_eyebrow: 'life cycle assessment · ISO 14067',
+    scrub_h2:      'Where the carbon <em>actually is</em>',
+    scrub_input:   '1 kg rye bread, Poland, kraft packaging',
+    scrub_btn:     'Calculate',
+    scrub_hint:    'Scroll down to see the result',
+    scrub_result_label: 'Carbon footprint',
+    scrub_flow_title: 'Breakdown by stage',
+    scrub_flow_hint:  'Band width = stage contribution to CO\u2082',
+    scrub_bar_title:  'Hotspots',
+    scrub_rec_title:  'Reduction recommendations',
+    scrub_rec1_title: 'Reduce packaging',
+    scrub_rec1_desc:  'Switching to lighter packaging cuts the footprint by 15%',
+    scrub_rec2_title: 'Optimize logistics',
+    scrub_rec2_desc:  'A closer supplier reduces transport emissions by 22%',
+    scrub_rec3_title: 'Renewable energy',
+    scrub_rec3_desc:  'Green energy in manufacturing \u2014 up to 40% savings',
+    scrub_final_label:'Total carbon footprint',
+    scrub_cta:     'Try it now',
+    flow_hint:    'hover a ribbon \u2014 its width is the stage\'s share',
     upload_excel: 'Import Excel',
     drop_excel:   'Drop it — the Excel will be read as an inventory table',
     em_custom_factors: 'Custom factors',
@@ -4510,6 +4702,25 @@ const I18N = {
     feat_full_d:  'Excel、Word、PDF。清单表格完整导出，不丢失数据。',
     preview_label:'结果示例',
     hero_flow_label:'示例 · 1 千克黑麦面包 · 牛皮纸包装',
+    /* scroll-scrub */
+    scrub_eyebrow: '生命周期评估 · ISO 14067',
+    scrub_h2:      '碳排放<em>究竟在哪里</em>',
+    scrub_input:   '1 千克黑麦面包，波兰，牛皮纸包装',
+    scrub_btn:     '计算',
+    scrub_hint:    '向下滚动查看结果',
+    scrub_result_label: '碳足迹',
+    scrub_flow_title: '各阶段分解',
+    scrub_flow_hint:  '色带宽度 = 该阶段对 CO₂ 的贡献',
+    scrub_bar_title:  '排放热点',
+    scrub_rec_title:  '减排建议',
+    scrub_rec1_title: '减少包装',
+    scrub_rec1_desc:  '改用更轻的包装可降低 15% 的碳足迹',
+    scrub_rec2_title: '优化物流',
+    scrub_rec2_desc:  '就近供应商可减少 22% 的运输排放',
+    scrub_rec3_title: '可再生能源',
+    scrub_rec3_desc:  '生产环节使用绿色能源 — 最多节省 40%',
+    scrub_final_label:'总碳足迹',
+    scrub_cta:     '立即体验',
     flow_hint:    '悬停色带 — 宽度即该阶段的占比',
     upload_excel: '导入 Excel',
     drop_excel:   '松开鼠标 — Excel 将作为清单表格解析',
@@ -7828,13 +8039,15 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
       });
 
-      // Phase 1: count-up
+      // Phase 1: count-up + emission bar
       if (phaseIdx === 1) {
         var countEl = document.getElementById('scrubCountUp');
         if (countEl && !countEl.dataset.done) {
           countEl.dataset.done = '1';
           animateNum(countEl, 0, 0.99, 1500);
         }
+        var eFill = wrap.querySelector('.scrub-emission-fill');
+        if (eFill) setTimeout(function() { eFill.style.width = '78%'; }, 500);
       }
 
       // Phase 2: ribbons
@@ -7867,13 +8080,15 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
       }
 
-      // Phase 5: final count-up
+      // Phase 5: final count-up + bar
       if (phaseIdx === 5) {
         var finalEl = document.getElementById('scrubFinalCount');
         if (finalEl && !finalEl.dataset.done) {
           finalEl.dataset.done = '1';
           animateNum(finalEl, 0, 0.99, 2000);
         }
+        var fFill = wrap.querySelector('.scrub-final-fill');
+        if (fFill) setTimeout(function() { fFill.style.width = '100%'; }, 500);
       }
     }
 
