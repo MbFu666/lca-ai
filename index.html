@@ -3441,27 +3441,179 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
 
 /* ─── Scroll-Scrub (ZING-style) ─── */
 .scrub-track { position: relative; height: 600vh; }
-.scrub-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; background: var(--graphite); }
-.scrub-film { position: absolute; inset: 0; z-index: 0; }
-.scrub-film-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.2s ease-out; will-change: opacity; }
-.scrub-film-img.scrub-film-active { opacity: 1; }
-.scrub-film-grade { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(28,27,25,0.2) 0%, rgba(28,27,25,0.7) 100%); z-index: 1; }
-.scrub-progress { position: absolute; top: 0; left: 0; right: 0; height: 3px; z-index: 10; background: rgba(255,255,255,0.1); }
+.scrub-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+
+/* Background phases */
+.scrub-bg { position: absolute; inset: 0; opacity: 0; transition: opacity 1s ease-out; }
+.scrub-bg.scrub-bg-active { opacity: 1; }
+
+/* Progress bar */
+.scrub-progress { position: absolute; top: 0; left: 0; right: 0; height: 3px; z-index: 20; background: rgba(128,128,128,0.2); }
 .scrub-progress span { display: block; height: 100%; background: var(--e-4); width: 0%; transition: width 0.1s linear; }
-.scrub-copy { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; pointer-events: none; }
+
+/* Visual elements layer */
+.scrub-visuals { position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.scrub-vis { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; transform: scale(0.95); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+.scrub-vis.scrub-vis-active { opacity: 1; transform: scale(1); }
+
+/* Mock form (phase 0) */
+.scrub-mock-form { max-width: 480px; width: 90%; }
+.scrub-mock-input {
+  font-family: var(--mono);
+  font-size: 14px;
+  padding: 16px 20px;
+  border: 1px solid var(--rule);
+  color: var(--graphite);
+  background: var(--paper);
+  margin-bottom: 16px;
+}
+.scrub-mock-btn {
+  display: inline-block;
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--graphite);
+  color: var(--paper);
+  padding: 12px 32px;
+}
+
+/* Big number (phase 1, 5) */
+.scrub-vis-num {
+  font-family: var(--mono);
+  font-size: clamp(80px, 20vw, 200px);
+  font-weight: 600;
+  color: var(--e-5);
+  line-height: 1;
+  opacity: 0.9;
+}
+.scrub-vis-num-final { color: var(--paper); }
+.scrub-vis-unit {
+  font-family: var(--mono);
+  font-size: clamp(14px, 3vw, 24px);
+  color: rgba(255,255,255,0.4);
+  margin-top: 8px;
+  letter-spacing: 0.08em;
+}
+
+/* Ribbons (phase 2) */
+.scrub-vis-ribbons { width: 80%; max-width: 600px; display: flex; flex-direction: column; gap: 16px; }
+.scrub-vr {
+  height: 12px;
+  background: var(--c);
+  width: 0%;
+  transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.scrub-vis-active .scrub-vr { width: var(--w); }
+
+/* Donut (phase 3) */
+#scrubDonut { display: block; }
+
+/* Bars (phase 4) */
+.scrub-vis-bars { width: 80%; max-width: 500px; display: flex; flex-direction: column; gap: 20px; }
+.scrub-vb {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+}
+.scrub-vb span:first-child { width: 100px; flex-shrink: 0; text-align: right; }
+.scrub-vb span:last-child { width: 50px; font-weight: 600; color: var(--e-4); font-size: 16px; }
+.scrub-vb div { flex: 1; height: 8px; background: rgba(255,255,255,0.1); position: relative; overflow: hidden; }
+.scrub-vb-fill {
+  height: 100%;
+  background: var(--e-4);
+  width: 0%;
+  transition: width 1s ease-out;
+}
+.scrub-vis-active .scrub-vb-fill { width: var(--pct); }
+
+/* Text copy overlays */
+.scrub-copy {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  pointer-events: none;
+}
 .scrub-copy-active { opacity: 1; transform: translateY(0); pointer-events: auto; }
-.scrub-kicker { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--e-3); margin-bottom: 16px; }
-.scrub-h1 { font-family: var(--display); font-size: clamp(36px, 7vw, 72px); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; color: var(--paper); line-height: 1.05; margin-bottom: 20px; max-width: 800px; }
-.scrub-h1 em { font-style: normal; color: var(--e-4); }
-.scrub-h2 { font-family: var(--display); font-size: clamp(28px, 5vw, 56px); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; color: var(--paper); line-height: 1.1; margin-bottom: 16px; max-width: 700px; }
-.scrub-sub { font-family: var(--body); font-size: clamp(14px, 2vw, 18px); color: rgba(242,240,236,0.7); max-width: 500px; line-height: 1.6; margin-bottom: 24px; }
-.scrub-big-num { font-family: var(--mono); font-size: clamp(64px, 14vw, 140px); font-weight: 600; color: var(--e-5); line-height: 1; margin-bottom: 8px; }
-.scrub-big-unit { font-size: 0.25em; color: rgba(242,240,236,0.5); font-weight: 400; margin-left: 8px; }
-.scrub-big-final { margin: 24px 0 32px; }
-.scrub-cta { display: inline-block; font-family: var(--display); font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; background: var(--e-4); color: var(--paper); padding: 14px 40px; text-decoration: none; transition: background 0.2s ease; }
-.scrub-cta:hover { background: var(--e-5); }
-.scrub-cta-big { font-size: 16px; padding: 16px 48px; }
-@media (max-width: 600px) { .scrub-copy { padding: 24px; } .scrub-h1 { font-size: 32px; } .scrub-h2 { font-size: 26px; } }
+.scrub-kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.scrub-copy[data-copy="0"] .scrub-kicker { color: var(--graphite-low); }
+.scrub-copy:not([data-copy="0"]) .scrub-kicker { color: var(--e-3); font-size: 32px; font-weight: 600; }
+.scrub-h1 {
+  font-family: var(--display);
+  font-size: clamp(36px, 7vw, 72px);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1.05;
+  margin-bottom: 20px;
+  max-width: 800px;
+}
+[data-copy="0"] .scrub-h1 { color: var(--graphite); }
+[data-copy="0"] .scrub-h1 em { font-style: normal; color: var(--e-4); }
+.scrub-h2 {
+  font-family: var(--display);
+  font-size: clamp(28px, 5vw, 56px);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  margin-bottom: 16px;
+  max-width: 700px;
+}
+[data-copy="0"] .scrub-h2 { color: var(--graphite); }
+.scrub-copy:not([data-copy="0"]) .scrub-h2 { color: var(--paper); }
+.scrub-sub {
+  font-family: var(--body);
+  font-size: clamp(14px, 2vw, 18px);
+  max-width: 500px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+[data-copy="0"] .scrub-sub { color: var(--graphite-low); }
+.scrub-copy:not([data-copy="0"]) .scrub-sub { color: rgba(242,240,236,0.6); }
+
+/* CTA */
+.scrub-cta {
+  display: inline-block;
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 14px 40px;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+[data-copy="0"] .scrub-cta { background: var(--graphite); color: var(--paper); }
+[data-copy="0"] .scrub-cta:hover { background: var(--e-5); }
+.scrub-cta-big { background: var(--e-4); color: var(--paper); font-size: 16px; padding: 16px 48px; }
+.scrub-cta-big:hover { background: var(--e-5); }
+
+@media (max-width: 600px) {
+  .scrub-copy { padding: 24px; }
+  .scrub-h1 { font-size: 32px; }
+  .scrub-h2 { font-size: 26px; }
+  .scrub-mock-form { max-width: 90%; }
+}
 
 </style>
 </head>
@@ -3585,15 +3737,59 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
     <section class="scrub-track" id="scrubWrap" aria-label="LCA product story">
       <div class="scrub-stage">
         <div class="scrub-progress" aria-hidden="true"><span id="scrubProgressFill"></span></div>
-        <div class="scrub-film" aria-hidden="true">
-          <img src="https://d8j0ntlcm91z4.cloudfront.net/user_3GvutktLRsJ3a6DH1pfJ3iPUVVH/hf_20260724_072803_608ce928-4ab1-4ef8-b0dd-9916f26d0191.png" alt="" class="scrub-film-img scrub-film-active" data-bg="0">
-          <img src="https://d8j0ntlcm91z4.cloudfront.net/user_3GvutktLRsJ3a6DH1pfJ3iPUVVH/hf_20260724_072835_cd5d0ddb-a1f0-4735-86c8-6bfaad6ff3ae.png" alt="" class="scrub-film-img" data-bg="1">
-          <img src="https://d8j0ntlcm91z4.cloudfront.net/user_3GvutktLRsJ3a6DH1pfJ3iPUVVH/hf_20260724_072905_8bd4e9c1-4f36-4f85-b908-7ae477558122.png" alt="" class="scrub-film-img" data-bg="2">
-          <img src="https://d8j0ntlcm91z4.cloudfront.net/user_3GvutktLRsJ3a6DH1pfJ3iPUVVH/hf_20260724_072941_25ccfe73-1c55-47c6-9f76-28a9459754cd.png" alt="" class="scrub-film-img" data-bg="3">
-          <img src="https://d8j0ntlcm91z4.cloudfront.net/user_3GvutktLRsJ3a6DH1pfJ3iPUVVH/hf_20260724_073018_e93aa373-7d49-4d25-8340-3edccea393d5.png" alt="" class="scrub-film-img" data-bg="4">
-          <img src="https://d8j0ntlcm91z4.cloudfront.net/user_3GvutktLRsJ3a6DH1pfJ3iPUVVH/hf_20260724_073113_4f99ff45-a124-4a2f-adba-48ee2d3e7bba.png" alt="" class="scrub-film-img" data-bg="5">
-          <div class="scrub-film-grade"></div>
+
+        <!-- CSS backgrounds per phase -->
+        <div class="scrub-bg scrub-bg-active" data-sbg="0" style="background:var(--paper)"></div>
+        <div class="scrub-bg" data-sbg="1" style="background:var(--graphite)"></div>
+        <div class="scrub-bg" data-sbg="2" style="background:#1a1917"></div>
+        <div class="scrub-bg" data-sbg="3" style="background:var(--graphite)"></div>
+        <div class="scrub-bg" data-sbg="4" style="background:#1a1917"></div>
+        <div class="scrub-bg" data-sbg="5" style="background:var(--graphite)"></div>
+
+        <!-- Visual elements layer -->
+        <div class="scrub-visuals" aria-hidden="true">
+          <!-- Phase 0: Form mockup -->
+          <div class="scrub-vis scrub-vis-active" data-vis="0">
+            <div class="scrub-mock-form">
+              <div class="scrub-mock-input">1 кг ржаного хлеба, Польша, крафт-упаковка</div>
+              <div class="scrub-mock-btn">Рассчитать</div>
+            </div>
+          </div>
+          <!-- Phase 1: Number -->
+          <div class="scrub-vis" data-vis="1">
+            <div class="scrub-vis-num">0.99</div>
+            <div class="scrub-vis-unit">kg CO₂e</div>
+          </div>
+          <!-- Phase 2: Animated ribbons -->
+          <div class="scrub-vis" data-vis="2">
+            <div class="scrub-vis-ribbons">
+              <div class="scrub-vr" style="--w:70%;--c:var(--e-1)"></div>
+              <div class="scrub-vr" style="--w:84%;--c:var(--e-2)"></div>
+              <div class="scrub-vr" style="--w:24%;--c:var(--e-3)"></div>
+              <div class="scrub-vr" style="--w:12%;--c:var(--e-4)"></div>
+              <div class="scrub-vr" style="--w:8%;--c:var(--e-5)"></div>
+            </div>
+          </div>
+          <!-- Phase 3: Donut canvas -->
+          <div class="scrub-vis" data-vis="3">
+            <canvas id="scrubDonut" width="240" height="240"></canvas>
+          </div>
+          <!-- Phase 4: Recommendation bars -->
+          <div class="scrub-vis" data-vis="4">
+            <div class="scrub-vis-bars">
+              <div class="scrub-vb"><span>Упаковка</span><div class="scrub-vb-fill" style="--pct:15%"></div><span>−15%</span></div>
+              <div class="scrub-vb"><span>Логистика</span><div class="scrub-vb-fill" style="--pct:22%"></div><span>−22%</span></div>
+              <div class="scrub-vb"><span>Энергия</span><div class="scrub-vb-fill" style="--pct:40%"></div><span>−40%</span></div>
+            </div>
+          </div>
+          <!-- Phase 5: Final -->
+          <div class="scrub-vis" data-vis="5">
+            <div class="scrub-vis-num scrub-vis-num-final">0.99</div>
+            <div class="scrub-vis-unit">kg CO₂e</div>
+          </div>
         </div>
+
+        <!-- Text copy overlays -->
         <article class="scrub-copy scrub-copy-active" data-copy="0">
           <p class="scrub-kicker" data-i18n="scrub_eyebrow">life cycle assessment · ISO 14067</p>
           <h1 class="scrub-h1" data-i18n-html="scrub_h1">Where the carbon <em>actually is</em></h1>
@@ -3601,25 +3797,28 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
           <a class="scrub-cta" href="#composerDropZone" data-i18n="scrub_cta">Try it now</a>
         </article>
         <article class="scrub-copy" data-copy="1">
+          <p class="scrub-kicker">01</p>
           <h2 class="scrub-h2" data-i18n="scrub_r1_h2">The result is instant.</h2>
-          <div class="scrub-big-num"><span id="scrubCountUp">0.00</span><span class="scrub-big-unit">kg CO₂e</span></div>
           <p class="scrub-sub" data-i18n="scrub_r1_sub">1 kg rye bread · kraft packaging · Poland</p>
         </article>
         <article class="scrub-copy" data-copy="2">
+          <p class="scrub-kicker">02</p>
           <h2 class="scrub-h2" data-i18n="scrub_r2_h2">See where it flows.</h2>
-          <p class="scrub-sub" data-i18n="scrub_r2_sub">Five lifecycle stages. Band width equals CO₂ contribution. The dominant stage is obvious at a glance.</p>
+          <p class="scrub-sub" data-i18n="scrub_r2_sub">Five lifecycle stages. Band width equals CO₂ contribution.</p>
         </article>
         <article class="scrub-copy" data-copy="3">
+          <p class="scrub-kicker">03</p>
           <h2 class="scrub-h2" data-i18n="scrub_r3_h2">Find the hotspots.</h2>
-          <p class="scrub-sub" data-i18n="scrub_r3_sub">Donut chart breaks down emissions. Bar ranking shows exactly where to focus reduction efforts.</p>
+          <p class="scrub-sub" data-i18n="scrub_r3_sub">Donut chart breaks down emissions by stage.</p>
         </article>
         <article class="scrub-copy" data-copy="4">
+          <p class="scrub-kicker">04</p>
           <h2 class="scrub-h2" data-i18n="scrub_r4_h2">Cut the footprint.</h2>
-          <p class="scrub-sub" data-i18n="scrub_r4_sub">AI-generated recommendations with estimated savings. Packaging, logistics, energy — each with a concrete reduction target.</p>
+          <p class="scrub-sub" data-i18n="scrub_r4_sub">AI recommendations with concrete reduction targets.</p>
         </article>
         <article class="scrub-copy" data-copy="5">
+          <p class="scrub-kicker">05</p>
           <h2 class="scrub-h2" data-i18n="scrub_r5_h2">Every pixel means carbon.</h2>
-          <div class="scrub-big-num scrub-big-final"><span id="scrubFinalCount">0.00</span><span class="scrub-big-unit">kg CO₂e</span></div>
           <a class="scrub-cta scrub-cta-big" href="#composerDropZone" data-i18n="scrub_cta">Try it now</a>
         </article>
       </div>
@@ -7910,14 +8109,15 @@ document.addEventListener('DOMContentLoaded', async function() {
   
   // Example chips are rendered by renderExampleChips() via applyLanguage()
   
-  // ─── Scroll-Scrub (ZING-style) ───
-  (function() {
+    (function() {
     var wrap = document.getElementById('scrubWrap');
     if (!wrap) return;
     var copies = wrap.querySelectorAll('.scrub-copy');
-    var bgImgs = wrap.querySelectorAll('.scrub-film-img');
+    var bgs = wrap.querySelectorAll('.scrub-bg');
+    var vis = wrap.querySelectorAll('.scrub-vis');
     var progressFill = document.getElementById('scrubProgressFill');
     var totalPhases = copies.length;
+    var donutDrawn = false;
     function onScroll() {
       var rect = wrap.getBoundingClientRect();
       var scrollH = wrap.offsetHeight - window.innerHeight;
@@ -7925,33 +8125,55 @@ document.addEventListener('DOMContentLoaded', async function() {
       var pct = Math.max(0, Math.min(1, scrolled / scrollH));
       var phaseIdx = Math.min(totalPhases - 1, Math.floor(pct * totalPhases));
       if (progressFill) progressFill.style.width = (pct * 100) + '%';
-      bgImgs.forEach(function(img, i) {
-        if (i === phaseIdx) img.classList.add('scrub-film-active');
-        else img.classList.remove('scrub-film-active');
-      });
-      copies.forEach(function(c, i) {
-        if (i === phaseIdx) c.classList.add('scrub-copy-active');
-        else c.classList.remove('scrub-copy-active');
-      });
-      if (phaseIdx === 1) {
-        var el = document.getElementById('scrubCountUp');
-        if (el && !el.dataset.done) { el.dataset.done = '1'; animNum(el, 0, 0.99, 1500); }
-      }
-      if (phaseIdx === 5) {
-        var el2 = document.getElementById('scrubFinalCount');
-        if (el2 && !el2.dataset.done) { el2.dataset.done = '1'; animNum(el2, 0, 0.99, 2000); }
-      }
+      bgs.forEach(function(b, i) { b.classList.toggle('scrub-bg-active', i === phaseIdx); });
+      vis.forEach(function(v, i) { v.classList.toggle('scrub-vis-active', i === phaseIdx); });
+      copies.forEach(function(c, i) { c.classList.toggle('scrub-copy-active', i === phaseIdx); });
+      if (phaseIdx === 3 && !donutDrawn) { donutDrawn = true; drawDonut(); }
     }
-    function animNum(el, from, to, dur) {
-      var s = performance.now();
-      function tick(n) { var t = Math.min(1,(n-s)/dur); el.textContent = (from+(to-from)*(1-Math.pow(1-t,3))).toFixed(2); if (t<1) requestAnimationFrame(tick); }
-      requestAnimationFrame(tick);
+    function drawDonut() {
+      var canvas = document.getElementById('scrubDonut');
+      if (!canvas) return;
+      var ctx = canvas.getContext('2d');
+      var cx = 120, cy = 120, r = 90, lw = 24;
+      var data = [35, 42, 12, 6, 4];
+      var colors = ['#B8B4AC','#D4A574','#D98C48','#E06020','#F03B0C'];
+      var total = data.reduce(function(a,b){return a+b;}, 0);
+      var progress = 0;
+      function animate() {
+        progress += 0.02;
+        if (progress > 1) progress = 1;
+        ctx.clearRect(0, 0, 240, 240);
+        var currentAngle = -Math.PI / 2;
+        var targetAngle = -Math.PI / 2 + (Math.PI * 2 * progress);
+        data.forEach(function(val, i) {
+          var angle = (val / total) * Math.PI * 2;
+          var endAngle = Math.min(currentAngle + angle, targetAngle);
+          if (endAngle > currentAngle) {
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, currentAngle, endAngle);
+            ctx.lineWidth = lw;
+            ctx.strokeStyle = colors[i];
+            ctx.stroke();
+          }
+          currentAngle += angle;
+        });
+        if (progress > 0.5) {
+          ctx.fillStyle = 'rgba(242,240,236,' + Math.min(1, (progress - 0.5) * 4) + ')';
+          ctx.font = '600 28px "JetBrains Mono", monospace';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('0.99', cx, cy - 8);
+          ctx.font = '12px "JetBrains Mono", monospace';
+          ctx.fillStyle = 'rgba(242,240,236,' + Math.min(0.5, (progress - 0.5) * 2) + ')';
+          ctx.fillText('kg CO₂e', cx, cy + 16);
+        }
+        if (progress < 1) requestAnimationFrame(animate);
+      }
+      requestAnimationFrame(animate);
     }
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
-  })();
-
-  console.log('[LCA] Init complete');
+  })console.log('[LCA] Init complete');
 
   // ─── Scroll-Scrub Demo ───
   (function() {
