@@ -3238,7 +3238,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
       </div>
       <div class="hero-flow" id="flowWrap">
         <canvas id="flowCanvas"
-                aria-label="Диаграмма потока: разбивка углеродного следа по стадиям жизненного цикла"></canvas>
+                aria-label="Диаграмма потока: разбивка углеродного следа по стадиям жизненного цикла">Canvas diagram showing carbon emission flow by lifecycle stage</canvas>
       </div>
       <div class="flow-hint" data-i18n="flow_hint">наведите на ленту — толщина равна вкладу стадии</div>
     </section>
@@ -3247,8 +3247,8 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
     <section class="composer" id="composerDropZone">
       <div class="composer-inner">
         <div class="modes">
-          <button data-mode="full" class="active"><em>—</em> <span data-i18n="mode_full">Полный цикл</span></button>
-          <button data-mode="factor"><em>—</em> <span data-i18n="mode_factor">Приоритет факторов</span></button>
+          <button data-mode="full" class="active" role="tab" aria-selected="true"><em>—</em> <span data-i18n="mode_full">Полный цикл</span></button>
+          <button data-mode="factor" role="tab" aria-selected="false"><em>—</em> <span data-i18n="mode_factor">Приоритет факторов</span></button>
         </div>
 
         <label class="input-label" for="productInput" data-i18n="input_label">Описание продукта</label>
@@ -3902,7 +3902,7 @@ const I18N = {
     ],
     /* Расширенный пул для автодополнения — используется только выпадающим списком
        при вводе, отдельно от статичных чипов-примеров выше. */
-    uggestPool: [
+    suggestPool: [
       { l: 'Вода бутилированная', v: '0.5 л бутилированной воды, ПЭТ бутылка' },
       { l: 'Хлопковая футболка', v: '1 хлопковая футболка 200 г' },
       { l: 'Джинсы', v: '1 пара джинсов, деним 600 г, Бангладеш' },
@@ -4132,7 +4132,7 @@ const I18N = {
       { l: 'Paper A4 1 m²', v: '1 m² A4 paper, cellulose, Finland' },
       { l: 'Sneakers', v: '1 pair sneakers, synthetic+rubber, 400 g, Vietnam' }
     ],
-    uggestPool: [
+    suggestPool: [
       { l: 'Bottled water', v: '0.5 L bottled water, PET bottle' },
       { l: 'Cotton t-shirt', v: '1 cotton t-shirt 200 g' },
       { l: 'Jeans', v: '1 pair of jeans, denim 600 g, Bangladesh' },
@@ -4361,7 +4361,7 @@ const I18N = {
       { l: 'A4纸 1平方米', v: '1平方米A4纸，纸浆，芬兰' },
       { l: '运动鞋', v: '1双运动鞋，合成材料+橡胶，400克，越南' }
     ],
-    uggestPool: [
+    suggestPool: [
       { l: '瓶装水', v: '0.5 升瓶装水，PET 瓶' },
       { l: '棉质T恤', v: '1件棉质T恤 200克' },
       { l: '牛仔裤', v: '1条牛仔裤，斜纹布 600克，孟加拉国' },
@@ -4640,12 +4640,12 @@ let suggestActiveIndex = -1;
 let suggestItems = [];
 let suggestDebounceTimer = null;
 
-function suggestPool() {
+function ssuggestPool() {
   if (typeof LCA_FOOD_EXAMPLES !== 'undefined') {
     return Array.isArray(LCA_FOOD_EXAMPLES[currentLang]) ? LCA_FOOD_EXAMPLES[currentLang] : (LCA_FOOD_EXAMPLES.ru || []);
   }
   const t = I18N[currentLang] || I18N.ru;
-  return Array.isArray(t.suggestPool) ? t.suggestPool : [];
+  return Array.isArray(t.ssuggestPool) ? t.ssuggestPool : [];
 }
 
 /* Ранжирование: точное совпадение с начала строки — выше, чем совпадение
@@ -4656,7 +4656,7 @@ function rankSuggestions(query) {
   if (q.length < 2) return [];
 
   const scored = [];
-  suggestPool().forEach(item => {
+  ssuggestPool().forEach(item => {
     const l = item.l.toLowerCase();
     const v = item.v.toLowerCase();
     let score = -1;
