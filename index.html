@@ -137,8 +137,8 @@ function requireAuth(action) {
       <h3 style="margin-bottom:12px" data-i18n="auth_required_title">Требуется авторизация</h3>
       <p style="margin-bottom:24px;color:var(--ink-soft)" data-i18n="auth_required_msg">Войдите или зарегистрируйтесь, чтобы использовать эту функцию</p>
       <div style="display:flex;gap:12px;justify-content:center">
-        <a href="/login.html" class="primary" style="padding:10px 24px;border-radius:8px;background:var(--jade);color:white;text-decoration:none" data-i18n="auth_required_btn">Войти / Регистрация</a>
-        <button onclick="closeModal('modalAuthRequired')" style="padding:10px 24px;border-radius:8px;border:1px solid var(--rule);background:var(--bg);cursor:pointer" data-i18n="auth_required_close">Закрыть</button>
+        <a href="/login.html" class="primary" style="padding:10px 24px;border-radius: 0;background:var(--jade);color:white;text-decoration:none" data-i18n="auth_required_btn">Войти / Регистрация</a>
+        <button onclick="closeModal('modalAuthRequired')" style="padding:10px 24px;border-radius: 0;border:1px solid var(--rule);background:var(--bg);cursor:pointer" data-i18n="auth_required_close">Закрыть</button>
       </div>
     </div>`;
     document.body.appendChild(modal);
@@ -348,9 +348,9 @@ async function saveToProject(projectId, report) {
   --e-ink: #7A2E10; /* emission text on paper — passes 4.5:1 */
 
   /* Semantic (still achromatic — status is weight, not hue) */
-  --ok:   #2F6B4F;
+  --ok: var(--e-2);
   --warn: #8A6A4F;
-  --err:  #A32E12;
+  --err: var(--e-5);
 
   /* Type */
   --display: 'Oswald', 'Noto Sans SC', system-ui, sans-serif;
@@ -407,8 +407,8 @@ html.dark {
   --e-4: #FF6B2C;
   --e-ink: #FF8A50;
 
-  --ok:   #6FBF95;
-  --err:  #E8654A;
+  --ok: var(--e-2);
+  --err: var(--e-5);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -851,12 +851,12 @@ header {
   margin-top: 2px;
   background: var(--paper-raised);
   border: 1px solid var(--rule);
-  box-shadow: 0 8px 24px rgba(0,0,0,.08);
+  box-shadow: none;
   z-index: 40;
   max-height: 260px;
   overflow-y: auto;
 }
-html.dark .suggest-box { box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+html.dark .suggest-box { box-shadow: none; }
 .suggest-box.show { display: block; }
 .suggest-item {
   display: flex;
@@ -2613,9 +2613,7 @@ html.dark .suggest-box { box-shadow: 0 8px 24px rgba(0,0,0,.35); }
 }
 .em-scope-card:last-child, .scope-card:last-child { border-right: none; }
 .em-scope-card:hover, .scope-card:hover { background: var(--paper-sunk); }
-.em-scope-card.selected, .scope-card.selected {
-  background: var(--paper-sunk);
-  box-shadow: inset 3px 0 0 var(--e-4);
+.em-scope-card.selected, .scope-card.selected { border-left: 3px solid var(--e-4); }
 }
 .em-scope-card.selected::after, .scope-card.selected::after { content: none; }
 .em-scope-card h4, .scope-card h4 {
@@ -3135,24 +3133,12 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
   outline: none;
   cursor: pointer;
 }
-.detail-slider::-webkit-slider-thumb {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  background: var(--e-4);
-  border: 2px solid var(--paper-raised);
-  box-shadow: 0 0 0 1px var(--e-4);
+.detail-slider::-webkit-slider-thumb { outline: 2px solid var(--e-4); }
   cursor: pointer;
   transition: transform var(--fast) var(--ease);
 }
 .detail-slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
-.detail-slider::-moz-range-thumb {
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  background: var(--e-4);
-  border: 2px solid var(--paper-raised);
-  box-shadow: 0 0 0 1px var(--e-4);
+.detail-slider::-moz-range-thumb { outline: 2px solid var(--e-4); }
   cursor: pointer;
 }
 .detail-slider::-moz-range-track { background: var(--rule); height: 2px; border-radius: 0; }
@@ -3210,7 +3196,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
         <button data-lang="zh" class="active">中文</button>
       </div>
       <div class="header-actions">
-        <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">🌙</button>
+        <button class="theme-toggle" id="themeToggle"></button>
         <div class="auth-section" id="authSection">
           <a href="/login.html" class="auth-btn" id="authBtn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -3434,7 +3420,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
   </div>
 </aside>
 
-<button class="agent-fab" id="agentFab" title="AI Agent">✦</button>
+<button class="agent-fab" id="agentFab" title="AI Agent"></button>
 
 <!-- ═════════ EDIT MODEL modal ═════════ -->
 <div class="modal-mask" id="modalEdit">
@@ -3445,7 +3431,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
     </div>
     <div class="modal-body">
       <div class="em-grid">
-        <div class="em-thumb">🍶</div>
+        <div class="em-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M8 6h8"/><path d="M8 10h8"/><path d="M8 14h4"/></svg></div>
         <div class="em-field">
           <label data-i18n="em_name">Название продукта</label>
           <input id="emName" type="text">
@@ -3519,7 +3505,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
     <div class="modal-head">
       <h2 data-i18n="xls_h">Детальные данные</h2>
       <div style="display:flex;gap:10px;align-items:center">
-        <button id="xlsDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius:30px;font-size:13px;font-weight:600;cursor:pointer">
+        <button id="xlsDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius: 0;font-size:13px;font-weight:600;cursor:pointer">
           ⬇ <span data-i18n="xls_download">Скачать Excel</span>
         </button>
         <button class="modal-close" data-close>×</button>
@@ -3543,7 +3529,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
     <div class="modal-head">
       <h2>Word</h2>
       <div style="display:flex;gap:10px;align-items:center">
-        <button id="wordDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius:30px;font-size:13px;font-weight:600;cursor:pointer">
+        <button id="wordDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius: 0;font-size:13px;font-weight:600;cursor:pointer">
           ⬇ <span>Скачать Word</span>
         </button>
         <button class="modal-close" data-close>×</button>
@@ -3551,7 +3537,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
     </div>
     <div class="modal-body" style="padding:16px 30px 30px">
       <div style="color:var(--ink-mute);font-size:12px;margin-bottom:12px">Предпросмотр документа</div>
-      <div id="wordPreview" style="border:1px solid var(--rule);border-radius:8px;padding:20px;background:white;max-height:60vh;overflow-y:auto;font-family:Arial,sans-serif;font-size:13px;color:#0E2E27"></div>
+      <div id="wordPreview" style="border:1px solid var(--rule);border-radius: 0;padding:20px;background:white;max-height:60vh;overflow-y:auto;font-family:Arial,sans-serif;font-size:13px;color:#0E2E27"></div>
     </div>
   </div>
 </div>
@@ -3562,7 +3548,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
     <div class="modal-head">
       <h2>PDF</h2>
       <div style="display:flex;gap:10px;align-items:center">
-        <button id="pdfDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius:30px;font-size:13px;font-weight:600;cursor:pointer">
+        <button id="pdfDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius: 0;font-size:13px;font-weight:600;cursor:pointer">
           ⬇ <span>Скачать PDF</span>
         </button>
         <button class="modal-close" data-close>×</button>
@@ -3570,7 +3556,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
     </div>
     <div class="modal-body" style="padding:16px 30px 30px">
       <div style="color:var(--ink-mute);font-size:12px;margin-bottom:12px">Предпросмотр отчёта</div>
-      <div id="pdfPreview" style="border:1px solid var(--rule);border-radius:8px;overflow:hidden;max-height:70vh"></div>
+      <div id="pdfPreview" style="border:1px solid var(--rule);border-radius: 0;overflow:hidden;max-height:70vh"></div>
     </div>
   </div>
 </div>
@@ -3594,8 +3580,8 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
     <div class="modal-head">
       <h2 data-i18n="history_h">История расчётов</h2>
       <div style="display:flex;gap:10px;align-items:center">
-        <button id="clearHistory" style="background:var(--c-rust);color:white;border:none;padding:6px 14px;border-radius:30px;font-size:12px;font-weight:600;cursor:pointer">
-          ✕ <span data-i18n="history_clear">Очистить</span>
+        <button id="clearHistory" style="background:var(--c-rust);color:white;border:none;padding:6px 14px;border-radius: 0;font-size:12px;font-weight:600;cursor:pointer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg> <span data-i18n="history_clear">Очистить</span>
         </button>
         <button class="modal-close" data-close>×</button>
       </div>
@@ -3612,7 +3598,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
     <div class="modal-head">
       <h2 data-i18n="projects_h">Проекты</h2>
       <div style="display:flex;gap:10px;align-items:center">
-        <button id="newProjectBtn" style="background:var(--jade);color:white;border:none;padding:6px 14px;border-radius:30px;font-size:12px;font-weight:600;cursor:pointer">
+        <button id="newProjectBtn" style="background:var(--jade);color:white;border:none;padding:6px 14px;border-radius: 0;font-size:12px;font-weight:600;cursor:pointer">
           + <span data-i18n="new_project">Новый</span>
         </button>
         <button class="modal-close" data-close>×</button>
@@ -3806,7 +3792,7 @@ const I18N = {
     agent_details:   'Детализация модели',
     agent_empty:     'Расчёт ещё не запущен.<br>Сделайте первый расчёт — и я задам<br>уточняющие вопросы по модели.',
     agent_cta_hint:  'Я могу задать уточняющие вопросы<br>о вашей модели, чтобы повысить точность.',
-    agent_cta_btn:   '✦ Сгенерировать вопросы',
+    agent_cta_btn:   'Сгенерировать вопросы',
     agent_msg_ph:    'Дополнить описание…',
     agent_loading:   'AI готовит уточняющие вопросы…',
     agent_recalc:    'Пересчёт с учётом ваших ответов…',
@@ -4046,7 +4032,7 @@ const I18N = {
     agent_details:   'Model refinement',
     agent_empty:     'No calculation yet.<br>Run a first calculation —<br>then I will ask clarifying questions.',
     agent_cta_hint:  'I can ask clarifying questions<br>about your model to improve accuracy.',
-    agent_cta_btn:   '✦ Generate questions',
+    agent_cta_btn:   'Generate questions',
     agent_msg_ph:    'Add a note…',
     agent_loading:   'AI is preparing clarifying questions…',
     agent_recalc:    'Recalculating with your answers…',
@@ -4275,7 +4261,7 @@ const I18N = {
     agent_details:   '模型细化',
     agent_empty:     '尚未进行计算。<br>请先完成一次计算,<br>我会就模型提出补充问题。',
     agent_cta_hint:  '我可以就您的模型提出补充问题,<br>以提高准确度。',
-    agent_cta_btn:   '✦ 生成问题',
+    agent_cta_btn:   '生成问题',
     agent_msg_ph:    '补充说明…',
     agent_loading:   'AI 正在准备补充问题…',
     agent_recalc:    '正在根据您的回答重新计算…',
@@ -6267,7 +6253,7 @@ function renderChatHistory() {
     const isUser = msg.role === 'user';
     html += `
       <div class="chat-msg ${isUser ? 'chat-user' : 'chat-ai'}">
-        <div class="chat-avatar">${isUser ? '👤' : 'AI'}</div>
+        <div class="chat-avatar">${isUser ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:16px;height:16px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' : 'AI'}</div>
         <div class="chat-bubble">${escape(msg.text)}</div>
       </div>
     `;
@@ -6362,7 +6348,7 @@ async function applyAgentAnswers() {
       <div class="agent-processing-spinner"></div>
       <div class="agent-processing-text">${t.agent_recalc || 'Пересчёт с учётом ваших ответов…'}</div>
       <div class="agent-processing-details">
-        ${answered.map(q => `<div class="agent-processing-item">✓ ${escape(q.text)}</div>`).join('')}
+        ${answered.map(q => `<div class="agent-processing-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M20 6L9 17l-5-5"/></svg> ${escape(q.text)}</div>`).join('')}
       </div>
     </div>
   `;
@@ -6622,7 +6608,7 @@ function renderHistory() {
 }
 
 $('#clearHistory')?.addEventListener('click', () => {
-  if (confirm(currentLang === 'ru' ? 'Очистить историю?' 
+  if (confirmModal && confirmModal(currentLang === 'ru' ? 'Очистить историю?' 
     : currentLang === 'zh' ? '确定清除历史？'
     : 'Clear history?')) {
     clearHistory();
@@ -6851,7 +6837,7 @@ function renderProjects() {
   list.querySelectorAll('.project-delete-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (confirm(currentLang === 'ru' ? 'Удалить проект?' : currentLang === 'zh' ? '删除项目？' : 'Delete project?')) {
+      if (confirmModal && confirmModal(currentLang === 'ru' ? 'Удалить проект?' : currentLang === 'zh' ? '删除项目？' : 'Delete project?')) {
         deleteProject(btn.dataset.id);
         renderProjects();
       }
@@ -6908,7 +6894,7 @@ function showNewProjectModal() {
         </div>
         <div class="modal-body" style="padding:24px 30px">
           <label style="font-size:13px;color:var(--ink-soft);font-weight:600;display:block;margin-bottom:8px">${currentLang === 'ru' ? 'Название проекта' : currentLang === 'zh' ? '项目名称' : 'Project name'}</label>
-          <input type="text" id="newProjectNameInput" placeholder="${currentLang === 'ru' ? 'Например: Анализ упаковки' : currentLang === 'zh' ? '例如：包装分析' : 'e.g. Packaging analysis'}" style="width:100%;padding:12px 16px;border:1px solid var(--rule);border-radius:10px;font-family:inherit;font-size:15px;outline:none;transition:border-color 0.15s">
+          <input type="text" id="newProjectNameInput" placeholder="${currentLang === 'ru' ? 'Например: Анализ упаковки' : currentLang === 'zh' ? '例如：包装分析' : 'e.g. Packaging analysis'}" style="width:100%;padding:12px 16px;border:1px solid var(--rule);border-radius: 0;font-family:inherit;font-size:15px;outline:none;transition:border-color 0.15s">
           <div id="newProjectError" style="color:var(--c-rust);font-size:12px;margin-top:6px;display:none"></div>
         </div>
         <div class="modal-foot">
@@ -7046,7 +7032,7 @@ function showNewProjectModalForSave() {
         </div>
         <div class="modal-body" style="padding:24px 30px">
           <label style="font-size:13px;color:var(--ink-soft);font-weight:600;display:block;margin-bottom:8px">${currentLang === 'ru' ? 'Название проекта' : currentLang === 'zh' ? '项目名称' : 'Project name'}</label>
-          <input type="text" id="newProjectSaveInput" placeholder="${currentLang === 'ru' ? 'Например: Анализ упаковки' : currentLang === 'zh' ? '例如：包装分析' : 'e.g. Packaging analysis'}" style="width:100%;padding:12px 16px;border:1px solid var(--rule);border-radius:10px;font-family:inherit;font-size:15px;outline:none;transition:border-color 0.15s">
+          <input type="text" id="newProjectSaveInput" placeholder="${currentLang === 'ru' ? 'Например: Анализ упаковки' : currentLang === 'zh' ? '例如：包装分析' : 'e.g. Packaging analysis'}" style="width:100%;padding:12px 16px;border:1px solid var(--rule);border-radius: 0;font-family:inherit;font-size:15px;outline:none;transition:border-color 0.15s">
           <div id="newProjectSaveError" style="color:var(--c-rust);font-size:12px;margin-top:6px;display:none"></div>
         </div>
         <div class="modal-foot">
@@ -7221,7 +7207,7 @@ function downloadJson(d) {
 async function downloadExcel(d) {
   await loadLib('xlsx');
   if (typeof XLSX === 'undefined') {
-    alert('SheetJS не загружен. Проверьте соединение с CDN.');
+    showToast('SheetJS не загружен. Проверьте соединение с CDN.');
     return;
   }
   const rows = excelRows(d);
@@ -7399,11 +7385,11 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
   if (themeToggle) {
     var isDark = document.documentElement.classList.contains('dark');
-    themeToggle.textContent = isDark ? String.fromCodePoint(0x2600, 0xFE0F) : String.fromCodePoint(0x1F319);
+    // theme icon handled by CSS ::after
     themeToggle.addEventListener('click', function() {
       document.documentElement.classList.toggle('dark');
       var isDark = document.documentElement.classList.contains('dark');
-      themeToggle.textContent = isDark ? String.fromCodePoint(0x2600, 0xFE0F) : String.fromCodePoint(0x1F319);
+      // theme icon handled by CSS ::after
       localStorage.setItem('lca-theme', isDark ? 'dark' : 'light');
     });
   }
