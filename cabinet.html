@@ -8,7 +8,7 @@
       var t = localStorage.getItem('lca-theme');
       if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');
-        document.documentElement.style.background = '#0C1A16';
+        document.documentElement.style.background = '#131211';
       }
     })();
     </script>
@@ -36,7 +36,7 @@
             --graphite: #1C1B19; --graphite-mid: #6B6862; --graphite-low: #9B978F;
             --rule: #D6D2CB;
             --e-3: #D9481C; --e-4: #F03B0C; --e-ink: #7A2E10;
-            --ok: var(--e-2); --warn: #8A6A4F; --err: #A32E12;
+            --ok: var(--e-2); --warn: #8A6A4F; --err: var(--e-5);
 
             /* Legacy-алиасы: старые имена продолжают резолвиться в новые токены,
                чтобы не переписывать сотни var(--jade)/var(--ink) по всему файлу
@@ -59,7 +59,7 @@
             --graphite: #EDEAE4; --graphite-mid: #9B978F; --graphite-low: #6B6862;
             --rule: #2E2C29;
             --e-3: #F05A23; --e-4: #FF6B2C; --e-ink: #FF8A50;
-            --ok: #6FBF95; --warn: #A87F5C; --err: #E8654A;
+            --ok: var(--e-2); --warn: #A87F5C; --err: var(--e-5);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: var(--sans); background: var(--bg); color: var(--ink); min-height: 100vh; }
@@ -133,7 +133,7 @@
         .menu a .menu-icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
         .menu a:hover { background: var(--bg-soft); color: var(--ink); transform: translateX(2px); }
         .menu a.active { background: var(--jade-bg); color: var(--jade-deep); font-weight: 700; }
-        .menu a.active::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 20px; background: var(--jade); border-radius: 0 3px 3px 0; }
+        .menu a.active::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 20px; background: var(--jade); border-radius: 0; }
         .menu a[data-tab="logout"] { color: var(--c-rust); margin-top: 4px; border-top: 1px solid var(--rule); padding-top: 13px; border-radius: 0 0 var(--radius-xs) var(--radius-xs); }
         .menu a[data-tab="logout"]:hover { background: rgba(0,0,0,0.04); }
 
@@ -324,7 +324,7 @@
 
         /* ── Settings Tabs ── */
         .settings-tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--rule); padding-bottom: 8px; flex-wrap: wrap; }
-        .settings-tab { background: none; border: none; padding: 8px 16px; font-size: 13px; color: var(--ink-mute); cursor: pointer; border-radius: 0 8px 0 0; font-family: inherit; transition: var(--transition); }
+        .settings-tab { background: none; border: none; padding: 8px 16px; font-size: 13px; color: var(--ink-mute); cursor: pointer; border-radius: 0; font-family: inherit; transition: var(--transition); }
         .settings-tab:hover { color: var(--ink); background: var(--bg-soft); }
         .settings-tab.active { color: var(--jade); font-weight: 600; border-bottom: 2px solid var(--jade); }
         .settings-pane { display: none; }
@@ -2553,7 +2553,7 @@
             if (/[0-9]/.test(pw)) score++;
             if (/[^A-Za-z0-9]/.test(pw)) score++;
             const pct = Math.min(100, (score / 5) * 100);
-            const colors = ['#A32E12', '#8A6A4F', '#8A6A4F', '#D9481C', '#F03B0C'];
+            const colors = ['var(--e-5)', '#8A6A4F', '#8A6A4F', '#D9481C', '#F03B0C'];
             bar.style.width = pct + '%';
             bar.style.background = colors[Math.max(0, score - 1)] || 'var(--rule)';
         });
