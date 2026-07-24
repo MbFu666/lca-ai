@@ -137,8 +137,8 @@ function requireAuth(action) {
       <h3 style="margin-bottom:12px" data-i18n="auth_required_title">Требуется авторизация</h3>
       <p style="margin-bottom:24px;color:var(--ink-soft)" data-i18n="auth_required_msg">Войдите или зарегистрируйтесь, чтобы использовать эту функцию</p>
       <div style="display:flex;gap:12px;justify-content:center">
-        <a href="/login.html" class="primary" style="padding:10px 24px;border-radius: 0;background:var(--jade);color:white;text-decoration:none" data-i18n="auth_required_btn">Войти / Регистрация</a>
-        <button onclick="closeModal('modalAuthRequired')" style="padding:10px 24px;border-radius: 0;border:1px solid var(--rule);background:var(--bg);cursor:pointer" data-i18n="auth_required_close">Закрыть</button>
+        <a href="/login.html" class="primary" style="padding:10px 24px;border-radius:8px;background:var(--jade);color:white;text-decoration:none" data-i18n="auth_required_btn">Войти / Регистрация</a>
+        <button onclick="closeModal('modalAuthRequired')" style="padding:10px 24px;border-radius:8px;border:1px solid var(--rule);background:var(--bg);cursor:pointer" data-i18n="auth_required_close">Закрыть</button>
       </div>
     </div>`;
     document.body.appendChild(modal);
@@ -348,9 +348,9 @@ async function saveToProject(projectId, report) {
   --e-ink: #7A2E10; /* emission text on paper — passes 4.5:1 */
 
   /* Semantic (still achromatic — status is weight, not hue) */
-  --ok: var(--e-2);
+  --ok:   #2F6B4F;
   --warn: #8A6A4F;
-  --err: var(--e-5);
+  --err:  #A32E12;
 
   /* Type */
   --display: 'Oswald', 'Noto Sans SC', system-ui, sans-serif;
@@ -407,8 +407,8 @@ html.dark {
   --e-4: #FF6B2C;
   --e-ink: #FF8A50;
 
-  --ok: var(--e-2);
-  --err: var(--e-5);
+  --ok:   #6FBF95;
+  --err:  #E8654A;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -851,12 +851,12 @@ header {
   margin-top: 2px;
   background: var(--paper-raised);
   border: 1px solid var(--rule);
-  box-shadow: none;
+  box-shadow: 0 8px 24px rgba(0,0,0,.08);
   z-index: 40;
   max-height: 260px;
   overflow-y: auto;
 }
-html.dark .suggest-box { box-shadow: none; }
+html.dark .suggest-box { box-shadow: 0 8px 24px rgba(0,0,0,.35); }
 .suggest-box.show { display: block; }
 .suggest-item {
   display: flex;
@@ -2613,7 +2613,9 @@ html.dark .suggest-box { box-shadow: none; }
 }
 .em-scope-card:last-child, .scope-card:last-child { border-right: none; }
 .em-scope-card:hover, .scope-card:hover { background: var(--paper-sunk); }
-.em-scope-card.selected, .scope-card.selected { border-left: 3px solid var(--e-4); }
+.em-scope-card.selected, .scope-card.selected {
+  background: var(--paper-sunk);
+  box-shadow: inset 3px 0 0 var(--e-4);
 }
 .em-scope-card.selected::after, .scope-card.selected::after { content: none; }
 .em-scope-card h4, .scope-card h4 {
@@ -2816,7 +2818,7 @@ html.dark .suggest-box { box-shadow: none; }
 }
 .history-item:hover, .project-calc-item:hover, .select-project-item:hover {
   background: var(--paper-sunk);
-  border-left: 3px solid var(--e-4);
+  box-shadow: inset 3px 0 0 var(--e-4);
 }
 .history-info, .select-project-name { flex: 1; min-width: 0; }
 .history-product, .project-calc-name, .select-project-name {
@@ -3133,12 +3135,24 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
   outline: none;
   cursor: pointer;
 }
-.detail-slider::-webkit-slider-thumb { outline: 2px solid var(--e-4); }
+.detail-slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--e-4);
+  border: 2px solid var(--paper-raised);
+  box-shadow: 0 0 0 1px var(--e-4);
   cursor: pointer;
   transition: transform var(--fast) var(--ease);
 }
 .detail-slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
-.detail-slider::-moz-range-thumb { outline: 2px solid var(--e-4); }
+.detail-slider::-moz-range-thumb {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--e-4);
+  border: 2px solid var(--paper-raised);
+  box-shadow: 0 0 0 1px var(--e-4);
   cursor: pointer;
 }
 .detail-slider::-moz-range-track { background: var(--rule); height: 2px; border-radius: 0; }
@@ -3179,442 +3193,6 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
   pointer-events: none;
 }
 
-/* ─── Scroll-Scrub Demo ─── */
-.scrub-wrap {
-  position: relative;
-  height: 600vh;
-}
-.scrub-sticky {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.scrub-phase {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-  pointer-events: none;
-  padding: 40px;
-}
-.scrub-phase.scrub-active {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-/* Phase 0: Form */
-.scrub-form { text-align: center; max-width: 600px; width: 100%; }
-.scrub-input {
-  font-family: var(--mono);
-  font-size: 15px;
-  padding: 16px 20px;
-  border: 1px solid var(--rule);
-  color: var(--graphite);
-  background: var(--paper);
-  text-align: left;
-  margin-bottom: 16px;
-  width: 100%;
-}
-.scrub-btn {
-  display: inline-block;
-  font-family: var(--display);
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  background: var(--graphite);
-  color: var(--paper);
-  padding: 12px 32px;
-  cursor: default;
-}
-
-/* Phase 1: Result */
-.scrub-result { text-align: center; }
-.scrub-result-label {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--graphite-low);
-  margin-bottom: 12px;
-}
-.scrub-result-num {
-  font-family: var(--mono);
-  font-size: clamp(48px, 12vw, 96px);
-  font-weight: 600;
-  color: var(--e-5);
-  line-height: 1;
-}
-.scrub-unit {
-  font-size: 0.35em;
-  color: var(--graphite-low);
-  font-weight: 400;
-}
-.scrub-result-sub {
-  font-size: 13px;
-  color: var(--graphite-low);
-  margin-top: 12px;
-}
-
-/* Phase 2: Flow ribbons */
-.scrub-flow { max-width: 700px; width: 100%; }
-.scrub-flow-title {
-  font-family: var(--display);
-  font-size: 18px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 32px;
-  text-align: center;
-}
-.scrub-ribbon {
-  height: 8px;
-  background: var(--e-3);
-  margin-bottom: 16px;
-  position: relative;
-  width: 0%;
-  transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-.scrub-ribbon::after {
-  content: attr(data-label);
-  position: absolute;
-  left: 0;
-  top: -22px;
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  color: var(--graphite-low);
-  white-space: nowrap;
-}
-.scrub-ribbon .scrub-ribbon-val {
-  position: absolute;
-  right: 0;
-  top: -22px;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--graphite);
-}
-
-/* Phase 3: Analysis */
-.scrub-analysis {
-  display: flex;
-  gap: 48px;
-  align-items: center;
-  max-width: 700px;
-  width: 100%;
-}
-.scrub-donut-wrap { flex-shrink: 0; }
-.scrub-bars { flex: 1; }
-.scrub-bar-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.scrub-bar-label {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  color: var(--graphite-low);
-  width: 100px;
-  flex-shrink: 0;
-}
-.scrub-bar {
-  flex: 1;
-  height: 6px;
-  background: var(--rule);
-  position: relative;
-  overflow: hidden;
-}
-.scrub-bar-fill {
-  height: 100%;
-  background: var(--e-4);
-  width: 0%;
-  transition: width 1s ease-out;
-}
-.scrub-bar-val {
-  font-family: var(--mono);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--graphite);
-  width: 36px;
-  text-align: right;
-}
-
-/* Phase 4: Recommendations */
-.scrub-recs { max-width: 600px; width: 100%; text-align: center; }
-.scrub-rec-title {
-  font-family: var(--display);
-  font-size: 18px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 32px;
-}
-.scrub-rec-card {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 20px;
-  border: 1px solid var(--rule);
-  margin-bottom: 12px;
-  text-align: left;
-  opacity: 0;
-  transform: translateX(-30px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-}
-.scrub-rec-card.scrub-card-visible {
-  opacity: 1;
-  transform: translateX(0);
-}
-.scrub-rec-icon {
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-}
-.scrub-rec-icon svg {
-  width: 100%;
-  height: 100%;
-  stroke: var(--e-4);
-}
-.scrub-rec-text {
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--graphite-low);
-}
-.scrub-rec-text b {
-  color: var(--graphite);
-  font-weight: 600;
-}
-
-/* Phase 5: Final */
-.scrub-final { text-align: center; }
-.scrub-final-label {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--graphite-low);
-  margin-bottom: 12px;
-}
-.scrub-final-num {
-  font-family: var(--mono);
-  font-size: clamp(64px, 16vw, 120px);
-  font-weight: 600;
-  color: var(--e-5);
-  line-height: 1;
-}
-.scrub-final-unit {
-  font-family: var(--mono);
-  font-size: 16px;
-  color: var(--graphite-low);
-  margin-bottom: 32px;
-}
-.scrub-cta {
-  display: inline-block;
-  font-family: var(--display);
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  background: var(--e-4);
-  color: var(--paper);
-  padding: 14px 36px;
-  text-decoration: none;
-  transition: background 0.2s ease;
-}
-.scrub-cta:hover { background: var(--e-5); }
-
-@media (max-width: 600px) {
-  .scrub-analysis { flex-direction: column; gap: 24px; }
-  .scrub-bar-label { width: 80px; }
-}
-
-/* ─── Scroll-Scrub (ZING-style) ─── */
-.scrub-track { position: relative; height: 600vh; }
-.scrub-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
-
-/* Background phases */
-.scrub-bg { position: absolute; inset: 0; opacity: 0; transition: opacity 1s ease-out; }
-.scrub-bg.scrub-bg-active { opacity: 1; }
-
-/* Progress bar */
-.scrub-progress { position: absolute; top: 0; left: 0; right: 0; height: 3px; z-index: 20; background: rgba(128,128,128,0.2); }
-.scrub-progress span { display: block; height: 100%; background: var(--e-4); width: 0%; transition: width 0.1s linear; }
-
-/* Visual elements layer */
-.scrub-visuals { position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-.scrub-vis { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; transform: scale(0.95); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
-.scrub-vis.scrub-vis-active { opacity: 1; transform: scale(1); }
-
-/* Mock form (phase 0) */
-.scrub-mock-form { max-width: 480px; width: 90%; }
-.scrub-mock-input {
-  font-family: var(--mono);
-  font-size: 14px;
-  padding: 16px 20px;
-  border: 1px solid var(--rule);
-  color: var(--graphite);
-  background: var(--paper);
-  margin-bottom: 16px;
-}
-.scrub-mock-btn {
-  display: inline-block;
-  font-family: var(--display);
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  background: var(--graphite);
-  color: var(--paper);
-  padding: 12px 32px;
-}
-
-/* Big number (phase 1, 5) */
-.scrub-vis-num {
-  font-family: var(--mono);
-  font-size: clamp(80px, 20vw, 200px);
-  font-weight: 600;
-  color: var(--e-5);
-  line-height: 1;
-  opacity: 0.9;
-}
-.scrub-vis-num-final { color: var(--paper); }
-.scrub-vis-unit {
-  font-family: var(--mono);
-  font-size: clamp(14px, 3vw, 24px);
-  color: rgba(255,255,255,0.4);
-  margin-top: 8px;
-  letter-spacing: 0.08em;
-}
-
-/* Ribbons (phase 2) */
-.scrub-vis-ribbons { width: 80%; max-width: 600px; display: flex; flex-direction: column; gap: 16px; }
-.scrub-vr {
-  height: 12px;
-  background: var(--c);
-  width: 0%;
-  transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-.scrub-vis-active .scrub-vr { width: var(--w); }
-
-/* Donut (phase 3) */
-#scrubDonut { display: block; }
-
-/* Bars (phase 4) */
-.scrub-vis-bars { width: 80%; max-width: 500px; display: flex; flex-direction: column; gap: 20px; }
-.scrub-vb {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-family: var(--mono);
-  font-size: 13px;
-  color: rgba(255,255,255,0.6);
-}
-.scrub-vb span:first-child { width: 100px; flex-shrink: 0; text-align: right; }
-.scrub-vb span:last-child { width: 50px; font-weight: 600; color: var(--e-4); font-size: 16px; }
-.scrub-vb div { flex: 1; height: 8px; background: rgba(255,255,255,0.1); position: relative; overflow: hidden; }
-.scrub-vb-fill {
-  height: 100%;
-  background: var(--e-4);
-  width: 0%;
-  transition: width 1s ease-out;
-}
-.scrub-vis-active .scrub-vb-fill { width: var(--pct); }
-
-/* Text copy overlays */
-.scrub-copy {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-  text-align: center;
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-  pointer-events: none;
-}
-.scrub-copy-active { opacity: 1; transform: translateY(0); pointer-events: auto; }
-.scrub-kicker {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  margin-bottom: 16px;
-}
-.scrub-copy[data-copy="0"] .scrub-kicker { color: var(--graphite-low); }
-.scrub-copy:not([data-copy="0"]) .scrub-kicker { color: var(--e-3); font-size: 32px; font-weight: 600; }
-.scrub-h1 {
-  font-family: var(--display);
-  font-size: clamp(36px, 7vw, 72px);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  line-height: 1.05;
-  margin-bottom: 20px;
-  max-width: 800px;
-}
-[data-copy="0"] .scrub-h1 { color: var(--graphite); }
-[data-copy="0"] .scrub-h1 em { font-style: normal; color: var(--e-4); }
-.scrub-h2 {
-  font-family: var(--display);
-  font-size: clamp(28px, 5vw, 56px);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  line-height: 1.1;
-  margin-bottom: 16px;
-  max-width: 700px;
-}
-[data-copy="0"] .scrub-h2 { color: var(--graphite); }
-.scrub-copy:not([data-copy="0"]) .scrub-h2 { color: var(--paper); }
-.scrub-sub {
-  font-family: var(--body);
-  font-size: clamp(14px, 2vw, 18px);
-  max-width: 500px;
-  line-height: 1.6;
-  margin-bottom: 24px;
-}
-[data-copy="0"] .scrub-sub { color: var(--graphite-low); }
-.scrub-copy:not([data-copy="0"]) .scrub-sub { color: rgba(242,240,236,0.6); }
-
-/* CTA */
-.scrub-cta {
-  display: inline-block;
-  font-family: var(--display);
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 14px 40px;
-  text-decoration: none;
-  transition: background 0.2s ease;
-}
-[data-copy="0"] .scrub-cta { background: var(--graphite); color: var(--paper); }
-[data-copy="0"] .scrub-cta:hover { background: var(--e-5); }
-.scrub-cta-big { background: var(--e-4); color: var(--paper); font-size: 16px; padding: 16px 48px; }
-.scrub-cta-big:hover { background: var(--e-5); }
-
-@media (max-width: 600px) {
-  .scrub-copy { padding: 24px; }
-  .scrub-h1 { font-size: 32px; }
-  .scrub-h2 { font-size: 26px; }
-  .scrub-mock-form { max-width: 90%; }
-}
-
 </style>
 </head>
 <body>
@@ -3632,7 +3210,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
         <button data-lang="zh" class="active">中文</button>
       </div>
       <div class="header-actions">
-        <button class="theme-toggle" id="themeToggle"></button>
+        <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">🌙</button>
         <div class="auth-section" id="authSection">
           <a href="/login.html" class="auth-btn" id="authBtn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -3650,178 +3228,6 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
       <span class="eyebrow reveal" data-i18n="eyebrow">оценка жизненного цикла · ISO 14067</span>
       <h1 class="hero-h1" data-i18n-html="h1">Где в вашем продукте <em>углерод</em>.</h1>
       <p class="hero-sub reveal" data-i18n="hero_sub">Опишите продукт — система соберёт модель жизненного цикла, разложит след по стадиям и укажет источник каждого коэффициента.</p>
-    </section>
-
-    <!-- ============== SCROLL-SCRUB DEMO ============== -->
-    <section class="scrub-wrap" id="scrubWrap">
-      <div class="scrub-sticky">
-        <!-- Phase 0: Input form -->
-        <div class="scrub-phase scrub-active" data-phase="0">
-          <div class="scrub-form">
-            <div class="scrub-input" id="scrubInput">1 кг ржаного хлеба, Польша, крафт-упаковка</div>
-            <div class="scrub-btn">Рассчитать</div>
-          </div>
-        </div>
-
-        <!-- Phase 1: Result number -->
-        <div class="scrub-phase" data-phase="1">
-          <div class="scrub-result">
-            <div class="scrub-result-label">Углеродный след</div>
-            <div class="scrub-result-num"><span id="scrubCountUp">0.00</span> <span class="scrub-unit">kg CO₂e</span></div>
-            <div class="scrub-result-sub">1 кг ржаного хлеба · крафт-упаковка</div>
-          </div>
-        </div>
-
-        <!-- Phase 2: Flow diagram -->
-        <div class="scrub-phase" data-phase="2">
-          <div class="scrub-flow">
-            <div class="scrub-flow-title">Разбивка по стадиям</div>
-            <div class="scrub-ribbons" id="scrubRibbons">
-              <div class="scrub-ribbon" data-width="35" data-label="Добыча сырья" data-val="0.35"></div>
-              <div class="scrub-ribbon" data-width="42" data-label="Производство" data-val="0.42"></div>
-              <div class="scrub-ribbon" data-width="12" data-label="Дистрибуция" data-val="0.12"></div>
-              <div class="scrub-ribbon" data-width="6" data-label="Использование" data-val="0.06"></div>
-              <div class="scrub-ribbon" data-width="4" data-label="Конец ЖЦ" data-val="0.04"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Phase 3: Donut + bars -->
-        <div class="scrub-phase" data-phase="3">
-          <div class="scrub-analysis">
-            <div class="scrub-donut-wrap">
-              <canvas id="scrubDonut" width="200" height="200"></canvas>
-            </div>
-            <div class="scrub-bars">
-              <div class="scrub-bar-row"><span class="scrub-bar-label">Добыча сырья</span><div class="scrub-bar"><div class="scrub-bar-fill" data-pct="35"></div></div><span class="scrub-bar-val">0.35</span></div>
-              <div class="scrub-bar-row"><span class="scrub-bar-label">Производство</span><div class="scrub-bar"><div class="scrub-bar-fill" data-pct="42"></div></div><span class="scrub-bar-val">0.42</span></div>
-              <div class="scrub-bar-row"><span class="scrub-bar-label">Дистрибуция</span><div class="scrub-bar"><div class="scrub-bar-fill" data-pct="12"></div></div><span class="scrub-bar-val">0.12</span></div>
-              <div class="scrub-bar-row"><span class="scrub-bar-label">Использование</span><div class="scrub-bar"><div class="scrub-bar-fill" data-pct="6"></div></div><span class="scrub-bar-val">0.06</span></div>
-              <div class="scrub-bar-row"><span class="scrub-bar-label">Конец ЖЦ</span><div class="scrub-bar"><div class="scrub-bar-fill" data-pct="4"></div></div><span class="scrub-bar-val">0.04</span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Phase 4: Recommendations -->
-        <div class="scrub-phase" data-phase="4">
-          <div class="scrub-recs">
-            <div class="scrub-rec-title">Рекомендации по снижению</div>
-            <div class="scrub-rec-card" data-delay="0">
-              <div class="scrub-rec-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 9h18"/><path d="M9 3v18"/></svg></div>
-              <div class="scrub-rec-text"><b>Сократите упаковку</b><br>Переход на более лёгкую упаковку снизит след на 15%</div>
-            </div>
-            <div class="scrub-rec-card" data-delay="1">
-              <div class="scrub-rec-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
-              <div class="scrub-rec-text"><b>Оптимизируйте логистику</b><br>Ближайший поставщик сократит транспортный след на 22%</div>
-            </div>
-            <div class="scrub-rec-card" data-delay="2">
-              <div class="scrub-rec-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
-              <div class="scrub-rec-text"><b>Выбирайте возобновляемую энергию</b><br>Зелёная энергия на производстве — до 40% экономии</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Phase 5: Final CTA -->
-        <div class="scrub-phase" data-phase="5">
-          <div class="scrub-final">
-            <div class="scrub-final-label">Итоговый углеродный след</div>
-            <div class="scrub-final-num"><span id="scrubFinalCount">0.00</span></div>
-            <div class="scrub-final-unit">kg CO₂e</div>
-            <a href="#composerDropZone" class="scrub-cta">Попробовать сейчас</a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============== SCROLL-SCRUB DEMO (ZING-style) ============== -->
-    <section class="scrub-track" id="scrubWrap" aria-label="LCA product story">
-      <div class="scrub-stage">
-        <div class="scrub-progress" aria-hidden="true"><span id="scrubProgressFill"></span></div>
-
-        <!-- CSS backgrounds per phase -->
-        <div class="scrub-bg scrub-bg-active" data-sbg="0" style="background:var(--paper)"></div>
-        <div class="scrub-bg" data-sbg="1" style="background:var(--graphite)"></div>
-        <div class="scrub-bg" data-sbg="2" style="background:#1a1917"></div>
-        <div class="scrub-bg" data-sbg="3" style="background:var(--graphite)"></div>
-        <div class="scrub-bg" data-sbg="4" style="background:#1a1917"></div>
-        <div class="scrub-bg" data-sbg="5" style="background:var(--graphite)"></div>
-
-        <!-- Visual elements layer -->
-        <div class="scrub-visuals" aria-hidden="true">
-          <!-- Phase 0: Form mockup -->
-          <div class="scrub-vis scrub-vis-active" data-vis="0">
-            <div class="scrub-mock-form">
-              <div class="scrub-mock-input">1 кг ржаного хлеба, Польша, крафт-упаковка</div>
-              <div class="scrub-mock-btn">Рассчитать</div>
-            </div>
-          </div>
-          <!-- Phase 1: Number -->
-          <div class="scrub-vis" data-vis="1">
-            <div class="scrub-vis-num">0.99</div>
-            <div class="scrub-vis-unit">kg CO₂e</div>
-          </div>
-          <!-- Phase 2: Animated ribbons -->
-          <div class="scrub-vis" data-vis="2">
-            <div class="scrub-vis-ribbons">
-              <div class="scrub-vr" style="--w:70%;--c:var(--e-1)"></div>
-              <div class="scrub-vr" style="--w:84%;--c:var(--e-2)"></div>
-              <div class="scrub-vr" style="--w:24%;--c:var(--e-3)"></div>
-              <div class="scrub-vr" style="--w:12%;--c:var(--e-4)"></div>
-              <div class="scrub-vr" style="--w:8%;--c:var(--e-5)"></div>
-            </div>
-          </div>
-          <!-- Phase 3: Donut canvas -->
-          <div class="scrub-vis" data-vis="3">
-            <canvas id="scrubDonut" width="240" height="240"></canvas>
-          </div>
-          <!-- Phase 4: Recommendation bars -->
-          <div class="scrub-vis" data-vis="4">
-            <div class="scrub-vis-bars">
-              <div class="scrub-vb"><span>Упаковка</span><div class="scrub-vb-fill" style="--pct:15%"></div><span>−15%</span></div>
-              <div class="scrub-vb"><span>Логистика</span><div class="scrub-vb-fill" style="--pct:22%"></div><span>−22%</span></div>
-              <div class="scrub-vb"><span>Энергия</span><div class="scrub-vb-fill" style="--pct:40%"></div><span>−40%</span></div>
-            </div>
-          </div>
-          <!-- Phase 5: Final -->
-          <div class="scrub-vis" data-vis="5">
-            <div class="scrub-vis-num scrub-vis-num-final">0.99</div>
-            <div class="scrub-vis-unit">kg CO₂e</div>
-          </div>
-        </div>
-
-        <!-- Text copy overlays -->
-        <article class="scrub-copy scrub-copy-active" data-copy="0">
-          <p class="scrub-kicker" data-i18n="scrub_eyebrow">life cycle assessment · ISO 14067</p>
-          <h1 class="scrub-h1" data-i18n-html="scrub_h1">Where the carbon <em>actually is</em></h1>
-          <p class="scrub-sub" data-i18n="scrub_sub">Describe a product — the system builds a life cycle model, splits the footprint by stage.</p>
-          <a class="scrub-cta" href="#composerDropZone" data-i18n="scrub_cta">Try it now</a>
-        </article>
-        <article class="scrub-copy" data-copy="1">
-          <p class="scrub-kicker">01</p>
-          <h2 class="scrub-h2" data-i18n="scrub_r1_h2">The result is instant.</h2>
-          <p class="scrub-sub" data-i18n="scrub_r1_sub">1 kg rye bread · kraft packaging · Poland</p>
-        </article>
-        <article class="scrub-copy" data-copy="2">
-          <p class="scrub-kicker">02</p>
-          <h2 class="scrub-h2" data-i18n="scrub_r2_h2">See where it flows.</h2>
-          <p class="scrub-sub" data-i18n="scrub_r2_sub">Five lifecycle stages. Band width equals CO₂ contribution.</p>
-        </article>
-        <article class="scrub-copy" data-copy="3">
-          <p class="scrub-kicker">03</p>
-          <h2 class="scrub-h2" data-i18n="scrub_r3_h2">Find the hotspots.</h2>
-          <p class="scrub-sub" data-i18n="scrub_r3_sub">Donut chart breaks down emissions by stage.</p>
-        </article>
-        <article class="scrub-copy" data-copy="4">
-          <p class="scrub-kicker">04</p>
-          <h2 class="scrub-h2" data-i18n="scrub_r4_h2">Cut the footprint.</h2>
-          <p class="scrub-sub" data-i18n="scrub_r4_sub">AI recommendations with concrete reduction targets.</p>
-        </article>
-        <article class="scrub-copy" data-copy="5">
-          <p class="scrub-kicker">05</p>
-          <h2 class="scrub-h2" data-i18n="scrub_r5_h2">Every pixel means carbon.</h2>
-          <a class="scrub-cta scrub-cta-big" href="#composerDropZone" data-i18n="scrub_cta">Try it now</a>
-        </article>
-      </div>
     </section>
 
     <!-- ============== LIVE FLOW — the signature visual ============== -->
@@ -4028,7 +3434,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
   </div>
 </aside>
 
-<button class="agent-fab" id="agentFab" title="AI Agent"></button>
+<button class="agent-fab" id="agentFab" title="AI Agent">✦</button>
 
 <!-- ═════════ EDIT MODEL modal ═════════ -->
 <div class="modal-mask" id="modalEdit">
@@ -4039,7 +3445,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
     </div>
     <div class="modal-body">
       <div class="em-grid">
-        <div class="em-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M8 6h8"/><path d="M8 10h8"/><path d="M8 14h4"/></svg></div>
+        <div class="em-thumb">🍶</div>
         <div class="em-field">
           <label data-i18n="em_name">Название продукта</label>
           <input id="emName" type="text">
@@ -4113,7 +3519,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
     <div class="modal-head">
       <h2 data-i18n="xls_h">Детальные данные</h2>
       <div style="display:flex;gap:10px;align-items:center">
-        <button id="xlsDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius: 0;font-size:13px;font-weight:600;cursor:pointer">
+        <button id="xlsDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius:30px;font-size:13px;font-weight:600;cursor:pointer">
           ⬇ <span data-i18n="xls_download">Скачать Excel</span>
         </button>
         <button class="modal-close" data-close>×</button>
@@ -4137,7 +3543,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
     <div class="modal-head">
       <h2>Word</h2>
       <div style="display:flex;gap:10px;align-items:center">
-        <button id="wordDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius: 0;font-size:13px;font-weight:600;cursor:pointer">
+        <button id="wordDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius:30px;font-size:13px;font-weight:600;cursor:pointer">
           ⬇ <span>Скачать Word</span>
         </button>
         <button class="modal-close" data-close>×</button>
@@ -4145,7 +3551,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
     </div>
     <div class="modal-body" style="padding:16px 30px 30px">
       <div style="color:var(--ink-mute);font-size:12px;margin-bottom:12px">Предпросмотр документа</div>
-      <div id="wordPreview" style="border:1px solid var(--rule);border-radius: 0;padding:20px;background:white;max-height:60vh;overflow-y:auto;font-family:Arial,sans-serif;font-size:13px;color:#0E2E27"></div>
+      <div id="wordPreview" style="border:1px solid var(--rule);border-radius:8px;padding:20px;background:white;max-height:60vh;overflow-y:auto;font-family:Arial,sans-serif;font-size:13px;color:#0E2E27"></div>
     </div>
   </div>
 </div>
@@ -4156,7 +3562,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
     <div class="modal-head">
       <h2>PDF</h2>
       <div style="display:flex;gap:10px;align-items:center">
-        <button id="pdfDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius: 0;font-size:13px;font-weight:600;cursor:pointer">
+        <button id="pdfDownload" style="background:var(--jade);color:white;border:none;padding:8px 18px;border-radius:30px;font-size:13px;font-weight:600;cursor:pointer">
           ⬇ <span>Скачать PDF</span>
         </button>
         <button class="modal-close" data-close>×</button>
@@ -4164,7 +3570,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
     </div>
     <div class="modal-body" style="padding:16px 30px 30px">
       <div style="color:var(--ink-mute);font-size:12px;margin-bottom:12px">Предпросмотр отчёта</div>
-      <div id="pdfPreview" style="border:1px solid var(--rule);border-radius: 0;overflow:hidden;max-height:70vh"></div>
+      <div id="pdfPreview" style="border:1px solid var(--rule);border-radius:8px;overflow:hidden;max-height:70vh"></div>
     </div>
   </div>
 </div>
@@ -4188,8 +3594,8 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
     <div class="modal-head">
       <h2 data-i18n="history_h">История расчётов</h2>
       <div style="display:flex;gap:10px;align-items:center">
-        <button id="clearHistory" style="background:var(--c-rust);color:white;border:none;padding:6px 14px;border-radius: 0;font-size:12px;font-weight:600;cursor:pointer">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg> <span data-i18n="history_clear">Очистить</span>
+        <button id="clearHistory" style="background:var(--c-rust);color:white;border:none;padding:6px 14px;border-radius:30px;font-size:12px;font-weight:600;cursor:pointer">
+          ✕ <span data-i18n="history_clear">Очистить</span>
         </button>
         <button class="modal-close" data-close>×</button>
       </div>
@@ -4206,7 +3612,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
     <div class="modal-head">
       <h2 data-i18n="projects_h">Проекты</h2>
       <div style="display:flex;gap:10px;align-items:center">
-        <button id="newProjectBtn" style="background:var(--jade);color:white;border:none;padding:6px 14px;border-radius: 0;font-size:12px;font-weight:600;cursor:pointer">
+        <button id="newProjectBtn" style="background:var(--jade);color:white;border:none;padding:6px 14px;border-radius:30px;font-size:12px;font-weight:600;cursor:pointer">
           + <span data-i18n="new_project">Новый</span>
         </button>
         <button class="modal-close" data-close>×</button>
@@ -4304,19 +3710,6 @@ const I18N = {
     preview_label:'Пример результата',
     hero_flow_label:'пример · 1 кг ржаного хлеба · крафт-упаковка',
     flow_hint:    'наведите на ленту — толщина равна вкладу стадии',
-    scrub_eyebrow:'оценка жизненного цикла · ISO 14067',
-    scrub_h1:     'Где в вашем продукте <em>углерод</em>',
-    scrub_sub:    'Опишите продукт — система соберёт модель жизненного цикла, разложит след по стадиям.',
-    scrub_cta:    'Попробовать сейчас',
-    scrub_r1_h2:  'Результат мгновенно',
-    scrub_r1_sub: '1 кг ржаного хлеба · крафт-упаковка · Польша',
-    scrub_r2_h2:  'Видно, куда уходит углерод',
-    scrub_r2_sub: 'Пять стадий. Ширина ленты равна вкладу в CO₂. Доминирующая стадия видна сразу.',
-    scrub_r3_h2:  'Найдите горячие точки',
-    scrub_r3_sub: 'Кольцевая диаграмма разбивает выбросы. Рейтинг показывает, куда направить усилия.',
-    scrub_r4_h2:  'Сократите след',
-    scrub_r4_sub: 'Рекомендации ИИ с оценкой экономии. Упаковка, логистика, энергия — каждая с конкретной целью.',
-    scrub_r5_h2:  'Каждый пиксель означает углерод',
     upload_excel: 'Импорт Excel',
     drop_excel:   'Отпустите — Excel будет разобран как таблица инвентаризации',
     em_custom_factors: 'Свои коэффициенты',
@@ -4413,14 +3806,14 @@ const I18N = {
     agent_details:   'Детализация модели',
     agent_empty:     'Расчёт ещё не запущен.<br>Сделайте первый расчёт — и я задам<br>уточняющие вопросы по модели.',
     agent_cta_hint:  'Я могу задать уточняющие вопросы<br>о вашей модели, чтобы повысить точность.',
-    agent_cta_btn:   'Сгенерировать вопросы',
+    agent_cta_btn:   '✦ Сгенерировать вопросы',
     agent_msg_ph:    'Дополнить описание…',
     agent_loading:   'AI готовит уточняющие вопросы…',
     agent_recalc:    'Пересчёт с учётом ваших ответов…',
     chat_mode:       'Чат',
     step2_loading:   'Анализирую модель…',
     step2_cta_text:  'На этом шаге AI подготовит описание, ключевые допущения, ограничения и рекомендации по снижению. Это отдельный короткий запрос.',
-    step2_cta_btn:   'Сгенерировать анализ',
+    step2_cta_btn:   '▸ Сгенерировать анализ',
     /* edit model modal */
     edit_model:      'Edit Model',
     edit_model_h:    'Параметры расчёта',
@@ -4562,19 +3955,6 @@ const I18N = {
     preview_label:'Example result',
     hero_flow_label:'example · 1 kg rye bread · kraft packaging',
     flow_hint:    'hover a ribbon — its width is the stage\'s share',
-    scrub_eyebrow:'life cycle assessment · ISO 14067',
-    scrub_h1:     'Where the carbon <em>actually is</em>',
-    scrub_sub:    'Describe a product — the system builds a life cycle model, splits the footprint by stage.',
-    scrub_cta:    'Try it now',
-    scrub_r1_h2:  'The result is instant.',
-    scrub_r1_sub: '1 kg rye bread · kraft packaging · Poland',
-    scrub_r2_h2:  'See where it flows.',
-    scrub_r2_sub: 'Five lifecycle stages. Band width equals CO₂ contribution. The dominant stage is obvious at a glance.',
-    scrub_r3_h2:  'Find the hotspots.',
-    scrub_r3_sub: 'Donut chart breaks down emissions. Bar ranking shows exactly where to focus reduction efforts.',
-    scrub_r4_h2:  'Cut the footprint.',
-    scrub_r4_sub: 'AI-generated recommendations with estimated savings. Packaging, logistics, energy — each with a concrete target.',
-    scrub_r5_h2:  'Every pixel means carbon.',
     upload_excel: 'Import Excel',
     drop_excel:   'Drop it — the Excel will be read as an inventory table',
     em_custom_factors: 'Custom factors',
@@ -4666,14 +4046,14 @@ const I18N = {
     agent_details:   'Model refinement',
     agent_empty:     'No calculation yet.<br>Run a first calculation —<br>then I will ask clarifying questions.',
     agent_cta_hint:  'I can ask clarifying questions<br>about your model to improve accuracy.',
-    agent_cta_btn:   'Generate questions',
+    agent_cta_btn:   '✦ Generate questions',
     agent_msg_ph:    'Add a note…',
     agent_loading:   'AI is preparing clarifying questions…',
     agent_recalc:    'Recalculating with your answers…',
     chat_mode:       'Chat',
     step2_loading:   'Analysing the model…',
     step2_cta_text:  'On this step the AI will prepare the description, key assumptions, limitations and reduction recommendations. It is a separate short request.',
-    step2_cta_btn:   'Generate analysis',
+    step2_cta_btn:   '▸ Generate analysis',
     edit_model:      'Edit Model',
     edit_model_h:    'Accounting details',
     em_name:         'Product name',
@@ -4804,19 +4184,6 @@ const I18N = {
     preview_label:'结果示例',
     hero_flow_label:'示例 · 1 千克黑麦面包 · 牛皮纸包装',
     flow_hint:    '悬停色带 — 宽度即该阶段的占比',
-    scrub_eyebrow:'生命周期评估 · ISO 14067',
-    scrub_h1:     '碳排放<em>究竟在哪里</em>',
-    scrub_sub:    '描述产品 — 系统构建生命周期模型，按阶段拆解碳足迹。',
-    scrub_cta:    '立即体验',
-    scrub_r1_h2:  '结果即刻呈现',
-    scrub_r1_sub: '1 千克黑麦面包 · 牛皮纸包装 · 波兰',
-    scrub_r2_h2:  '看清碳的流向',
-    scrub_r2_sub: '五个生命周期阶段。色带宽度等于对 CO₂ 的贡献。主导阶段一目了然。',
-    scrub_r3_h2:  '找到排放热点',
-    scrub_r3_sub: '环形图分解排放。排名条形图精确显示减排方向。',
-    scrub_r4_h2:  '削减碳足迹',
-    scrub_r4_sub: 'AI 生成的减排建议与预估节省。包装、物流、能源 — 每项都有具体目标。',
-    scrub_r5_h2:  '每个像素都意味着碳排放',
     upload_excel: '导入 Excel',
     drop_excel:   '松开鼠标 — Excel 将作为清单表格解析',
     em_custom_factors: '自定义因子',
@@ -4908,14 +4275,14 @@ const I18N = {
     agent_details:   '模型细化',
     agent_empty:     '尚未进行计算。<br>请先完成一次计算,<br>我会就模型提出补充问题。',
     agent_cta_hint:  '我可以就您的模型提出补充问题,<br>以提高准确度。',
-    agent_cta_btn:   '生成问题',
+    agent_cta_btn:   '✦ 生成问题',
     agent_msg_ph:    '补充说明…',
     agent_loading:   'AI 正在准备补充问题…',
     agent_recalc:    '正在根据您的回答重新计算…',
     chat_mode:       '聊天',
     step2_loading:   '正在分析模型…',
     step2_cta_text:  '本步骤将由 AI 生成描述、关键假设、局限性以及减排建议。这是一次独立的短请求。',
-    step2_cta_btn:   '生成分析',
+    step2_cta_btn:   '▸ 生成分析',
     edit_model:      '编辑模型',
     edit_model_h:    '核算详情',
     em_name:         '产品名称',
@@ -6900,7 +6267,7 @@ function renderChatHistory() {
     const isUser = msg.role === 'user';
     html += `
       <div class="chat-msg ${isUser ? 'chat-user' : 'chat-ai'}">
-        <div class="chat-avatar">${isUser ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:16px;height:16px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' : 'AI'}</div>
+        <div class="chat-avatar">${isUser ? '👤' : 'AI'}</div>
         <div class="chat-bubble">${escape(msg.text)}</div>
       </div>
     `;
@@ -6995,7 +6362,7 @@ async function applyAgentAnswers() {
       <div class="agent-processing-spinner"></div>
       <div class="agent-processing-text">${t.agent_recalc || 'Пересчёт с учётом ваших ответов…'}</div>
       <div class="agent-processing-details">
-        ${answered.map(q => `<div class="agent-processing-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M20 6L9 17l-5-5"/></svg> ${escape(q.text)}</div>`).join('')}
+        ${answered.map(q => `<div class="agent-processing-item">✓ ${escape(q.text)}</div>`).join('')}
       </div>
     </div>
   `;
@@ -7255,7 +6622,7 @@ function renderHistory() {
 }
 
 $('#clearHistory')?.addEventListener('click', () => {
-  if (confirmModal && confirmModal(currentLang === 'ru' ? 'Очистить историю?' 
+  if (confirm(currentLang === 'ru' ? 'Очистить историю?' 
     : currentLang === 'zh' ? '确定清除历史？'
     : 'Clear history?')) {
     clearHistory();
@@ -7484,7 +6851,7 @@ function renderProjects() {
   list.querySelectorAll('.project-delete-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (confirmModal && confirmModal(currentLang === 'ru' ? 'Удалить проект?' : currentLang === 'zh' ? '删除项目？' : 'Delete project?')) {
+      if (confirm(currentLang === 'ru' ? 'Удалить проект?' : currentLang === 'zh' ? '删除项目？' : 'Delete project?')) {
         deleteProject(btn.dataset.id);
         renderProjects();
       }
@@ -7541,7 +6908,7 @@ function showNewProjectModal() {
         </div>
         <div class="modal-body" style="padding:24px 30px">
           <label style="font-size:13px;color:var(--ink-soft);font-weight:600;display:block;margin-bottom:8px">${currentLang === 'ru' ? 'Название проекта' : currentLang === 'zh' ? '项目名称' : 'Project name'}</label>
-          <input type="text" id="newProjectNameInput" placeholder="${currentLang === 'ru' ? 'Например: Анализ упаковки' : currentLang === 'zh' ? '例如：包装分析' : 'e.g. Packaging analysis'}" style="width:100%;padding:12px 16px;border:1px solid var(--rule);border-radius: 0;font-family:inherit;font-size:15px;outline:none;transition:border-color 0.15s">
+          <input type="text" id="newProjectNameInput" placeholder="${currentLang === 'ru' ? 'Например: Анализ упаковки' : currentLang === 'zh' ? '例如：包装分析' : 'e.g. Packaging analysis'}" style="width:100%;padding:12px 16px;border:1px solid var(--rule);border-radius:10px;font-family:inherit;font-size:15px;outline:none;transition:border-color 0.15s">
           <div id="newProjectError" style="color:var(--c-rust);font-size:12px;margin-top:6px;display:none"></div>
         </div>
         <div class="modal-foot">
@@ -7679,7 +7046,7 @@ function showNewProjectModalForSave() {
         </div>
         <div class="modal-body" style="padding:24px 30px">
           <label style="font-size:13px;color:var(--ink-soft);font-weight:600;display:block;margin-bottom:8px">${currentLang === 'ru' ? 'Название проекта' : currentLang === 'zh' ? '项目名称' : 'Project name'}</label>
-          <input type="text" id="newProjectSaveInput" placeholder="${currentLang === 'ru' ? 'Например: Анализ упаковки' : currentLang === 'zh' ? '例如：包装分析' : 'e.g. Packaging analysis'}" style="width:100%;padding:12px 16px;border:1px solid var(--rule);border-radius: 0;font-family:inherit;font-size:15px;outline:none;transition:border-color 0.15s">
+          <input type="text" id="newProjectSaveInput" placeholder="${currentLang === 'ru' ? 'Например: Анализ упаковки' : currentLang === 'zh' ? '例如：包装分析' : 'e.g. Packaging analysis'}" style="width:100%;padding:12px 16px;border:1px solid var(--rule);border-radius:10px;font-family:inherit;font-size:15px;outline:none;transition:border-color 0.15s">
           <div id="newProjectSaveError" style="color:var(--c-rust);font-size:12px;margin-top:6px;display:none"></div>
         </div>
         <div class="modal-foot">
@@ -7854,7 +7221,7 @@ function downloadJson(d) {
 async function downloadExcel(d) {
   await loadLib('xlsx');
   if (typeof XLSX === 'undefined') {
-    showToast('SheetJS не загружен. Проверьте соединение с CDN.');
+    alert('SheetJS не загружен. Проверьте соединение с CDN.');
     return;
   }
   const rows = excelRows(d);
@@ -8032,11 +7399,11 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
   if (themeToggle) {
     var isDark = document.documentElement.classList.contains('dark');
-    // theme icon handled by CSS ::after
+    themeToggle.textContent = isDark ? String.fromCodePoint(0x2600, 0xFE0F) : String.fromCodePoint(0x1F319);
     themeToggle.addEventListener('click', function() {
       document.documentElement.classList.toggle('dark');
       var isDark = document.documentElement.classList.contains('dark');
-      // theme icon handled by CSS ::after
+      themeToggle.textContent = isDark ? String.fromCodePoint(0x2600, 0xFE0F) : String.fromCodePoint(0x1F319);
       localStorage.setItem('lca-theme', isDark ? 'dark' : 'light');
     });
   }
@@ -8109,190 +7476,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   
   // Example chips are rendered by renderExampleChips() via applyLanguage()
   
-    (function() {
-    var wrap = document.getElementById('scrubWrap');
-    if (!wrap) return;
-    var copies = wrap.querySelectorAll('.scrub-copy');
-    var bgs = wrap.querySelectorAll('.scrub-bg');
-    var vis = wrap.querySelectorAll('.scrub-vis');
-    var progressFill = document.getElementById('scrubProgressFill');
-    var totalPhases = copies.length;
-    var donutDrawn = false;
-    function onScroll() {
-      var rect = wrap.getBoundingClientRect();
-      var scrollH = wrap.offsetHeight - window.innerHeight;
-      var scrolled = Math.max(0, -rect.top);
-      var pct = Math.max(0, Math.min(1, scrolled / scrollH));
-      var phaseIdx = Math.min(totalPhases - 1, Math.floor(pct * totalPhases));
-      if (progressFill) progressFill.style.width = (pct * 100) + '%';
-      bgs.forEach(function(b, i) { b.classList.toggle('scrub-bg-active', i === phaseIdx); });
-      vis.forEach(function(v, i) { v.classList.toggle('scrub-vis-active', i === phaseIdx); });
-      copies.forEach(function(c, i) { c.classList.toggle('scrub-copy-active', i === phaseIdx); });
-      if (phaseIdx === 3 && !donutDrawn) { donutDrawn = true; drawDonut(); }
-    }
-    function drawDonut() {
-      var canvas = document.getElementById('scrubDonut');
-      if (!canvas) return;
-      var ctx = canvas.getContext('2d');
-      var cx = 120, cy = 120, r = 90, lw = 24;
-      var data = [35, 42, 12, 6, 4];
-      var colors = ['#B8B4AC','#D4A574','#D98C48','#E06020','#F03B0C'];
-      var total = data.reduce(function(a,b){return a+b;}, 0);
-      var progress = 0;
-      function animate() {
-        progress += 0.02;
-        if (progress > 1) progress = 1;
-        ctx.clearRect(0, 0, 240, 240);
-        var currentAngle = -Math.PI / 2;
-        var targetAngle = -Math.PI / 2 + (Math.PI * 2 * progress);
-        data.forEach(function(val, i) {
-          var angle = (val / total) * Math.PI * 2;
-          var endAngle = Math.min(currentAngle + angle, targetAngle);
-          if (endAngle > currentAngle) {
-            ctx.beginPath();
-            ctx.arc(cx, cy, r, currentAngle, endAngle);
-            ctx.lineWidth = lw;
-            ctx.strokeStyle = colors[i];
-            ctx.stroke();
-          }
-          currentAngle += angle;
-        });
-        if (progress > 0.5) {
-          ctx.fillStyle = 'rgba(242,240,236,' + Math.min(1, (progress - 0.5) * 4) + ')';
-          ctx.font = '600 28px "JetBrains Mono", monospace';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText('0.99', cx, cy - 8);
-          ctx.font = '12px "JetBrains Mono", monospace';
-          ctx.fillStyle = 'rgba(242,240,236,' + Math.min(0.5, (progress - 0.5) * 2) + ')';
-          ctx.fillText('kg CO₂e', cx, cy + 16);
-        }
-        if (progress < 1) requestAnimationFrame(animate);
-      }
-      requestAnimationFrame(animate);
-    }
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-  })console.log('[LCA] Init complete');
-
-  // ─── Scroll-Scrub Demo ───
-  (function() {
-    var wrap = document.getElementById('scrubWrap');
-    if (!wrap) return;
-    var phases = wrap.querySelectorAll('.scrub-phase');
-    var totalPhases = phases.length;
-    var stageColors = ['#B8B4AC','#D4A574','#D98C48','#E06020','#F03B0C'];
-
-    function onScroll() {
-      var rect = wrap.getBoundingClientRect();
-      var scrollH = wrap.offsetHeight - window.innerHeight;
-      var scrolled = -rect.top;
-      var pct = Math.max(0, Math.min(1, scrolled / scrollH));
-      var phaseIdx = Math.min(totalPhases - 1, Math.floor(pct * totalPhases));
-
-      phases.forEach(function(p, i) {
-        if (i === phaseIdx) {
-          p.classList.add('scrub-active');
-        } else {
-          p.classList.remove('scrub-active');
-        }
-      });
-
-      // Phase 1: count-up
-      if (phaseIdx === 1) {
-        var countEl = document.getElementById('scrubCountUp');
-        if (countEl && !countEl.dataset.done) {
-          countEl.dataset.done = '1';
-          animateNum(countEl, 0, 0.99, 1500);
-        }
-      }
-
-      // Phase 2: ribbons
-      if (phaseIdx === 2) {
-        var ribbons = wrap.querySelectorAll('.scrub-ribbon');
-        ribbons.forEach(function(r, i) {
-          setTimeout(function() {
-            r.style.width = r.dataset.width + '%';
-            r.style.background = stageColors[i] || stageColors[4];
-          }, i * 200);
-        });
-      }
-
-      // Phase 3: bars + donut
-      if (phaseIdx === 3) {
-        wrap.querySelectorAll('.scrub-bar-fill').forEach(function(f) {
-          if (!f.dataset.done) {
-            f.dataset.done = '1';
-            f.style.width = f.dataset.pct + '%';
-          }
-        });
-        drawDonut();
-      }
-
-      // Phase 4: recommendation cards
-      if (phaseIdx === 4) {
-        wrap.querySelectorAll('.scrub-rec-card').forEach(function(c) {
-          var delay = parseInt(c.dataset.delay || '0') * 300;
-          setTimeout(function() { c.classList.add('scrub-card-visible'); }, delay);
-        });
-      }
-
-      // Phase 5: final count-up
-      if (phaseIdx === 5) {
-        var finalEl = document.getElementById('scrubFinalCount');
-        if (finalEl && !finalEl.dataset.done) {
-          finalEl.dataset.done = '1';
-          animateNum(finalEl, 0, 0.99, 2000);
-        }
-      }
-    }
-
-    function animateNum(el, from, to, dur) {
-      var start = performance.now();
-      function tick(now) {
-        var t = Math.min(1, (now - start) / dur);
-        var eased = 1 - Math.pow(1 - t, 3);
-        el.textContent = (from + (to - from) * eased).toFixed(2);
-        if (t < 1) requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-    }
-
-    function drawDonut() {
-      var canvas = document.getElementById('scrubDonut');
-      if (!canvas || canvas.dataset.done) return;
-      canvas.dataset.done = '1';
-      var ctx = canvas.getContext('2d');
-      var cx = 100, cy = 100, r = 80, lw = 20;
-      var data = [35, 42, 12, 6, 4];
-      var colors = stageColors;
-      var total = data.reduce(function(a,b){return a+b;}, 0);
-      var startAngle = -Math.PI / 2;
-
-      data.forEach(function(val, i) {
-        var angle = (val / total) * Math.PI * 2;
-        ctx.beginPath();
-        ctx.arc(cx, cy, r, startAngle, startAngle + angle);
-        ctx.lineWidth = lw;
-        ctx.strokeStyle = colors[i];
-        ctx.stroke();
-        startAngle += angle;
-      });
-
-      // Center text
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--graphite').trim();
-      ctx.font = '600 20px "JetBrains Mono", monospace';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('0.99', cx, cy - 6);
-      ctx.font = '11px "JetBrains Mono", monospace';
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--graphite-low').trim();
-      ctx.fillText('kg CO₂e', cx, cy + 14);
-    }
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-  })();
+  console.log('[LCA] Init complete');
 });
 </script>
 
