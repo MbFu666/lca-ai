@@ -2934,17 +2934,22 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
   body::before, header, .hero, .composer, .examples, footer,
   .cs-actions, .cs-view, .lang, .detail-float, .res-tabs,
   .agent, .agent-fab, .modal-mask, .modal-overlay, .toast,
-  .features, .how-it-works, .final-cta, .trust-strip, .social-proof {
+  .features, .how-it-works, .final-cta, .trust-strip, .social-proof,
+  .theme-toggle, .auth-section, .skip-link, .scrub-track {
     display: none !important;
   }
-  body { background: #FFF; color: #000; }
+  body { background: #FFF; color: #000; font-size: 11pt; }
   .frame { max-width: 100%; padding: 0; }
   .output, .page-results { display: block !important; }
   .cs-panel { display: block !important; page-break-before: always; }
   .cs-panel:first-of-type { page-break-before: auto; }
   .res-row { grid-template-columns: 1fr; }
   .res-card, .ai-section, .flow-table-wrap, .res-hero, .note { break-inside: avoid; }
-  a { color: #000; }
+  a { color: #000; text-decoration: underline; }
+  .res-hero-num .value { font-size: 48pt; color: #000; }
+  .donut, .ranking { break-inside: avoid; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #CCC; padding: 6px 8px; font-size: 10pt; }
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -5509,7 +5514,7 @@ function sliderRecalc(input, stageI, subI) {
   if (amountInput) amountInput.value = newAmount;
   // Update resValue (в выбранных единицах)
   const shownTotal = displayTotal(d.total_co2eq);
-  $('#resValue').textContent = fmtNum(shownTotal.value);
+  countUp($('#resValue'), shownTotal.value, 1200);
   const uEl = document.getElementById('resUnit');
   if (uEl) uEl.textContent = shownTotal.unit;
   // Аналитика зависит от значений — пересчитываем вместе с ними
@@ -6273,6 +6278,20 @@ function fmtNum(n) {
   if (Math.abs(num) >= 10)  return num.toFixed(1);
   if (Math.abs(num) >= 1)   return num.toFixed(2);
   return num.toFixed(3);
+}
+
+function countUp(el, target, duration) {
+  if (!el || isNaN(target)) { el.textContent = fmtNum(target); return; }
+  const start = performance.now();
+  const decimals = fmtNum(target).includes('.') ? fmtNum(target).split('.')[1].length : 0;
+  function tick(now) {
+    const t = Math.min(1, (now - start) / (duration || 1200));
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = (target * eased).toFixed(decimals);
+    if (t < 1) requestAnimationFrame(tick);
+    else el.textContent = fmtNum(target);
+  }
+  requestAnimationFrame(tick);
 }
 
 function escape(s) {
