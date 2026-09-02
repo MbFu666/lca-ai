@@ -85,7 +85,7 @@ Deno.serve(async (req: Request) => {
   const safe = {
     model: ALLOWED_MODELS.includes(body.model) ? body.model : "deepseek-v4-flash",
     messages: Array.isArray(body.messages) ? body.messages : [],
-    max_tokens: Math.min(parseInt(body.max_tokens) || 5000, 4000),
+    max_tokens: Math.min(parseInt(body.max_tokens) || 8000, 16000),
     temperature: typeof body.temperature === "number" ? body.temperature : 0.2,
     stream: false,
   };

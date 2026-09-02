@@ -1108,6 +1108,7 @@
                 pw_mismatch: 'Пароли не совпадают', pw_min6: 'Минимум 6 символов',
                 pw_wrong_old: 'Неверный текущий пароль', pw_old_required: 'Введите текущий пароль',
                 status_done: 'Готово', status_pending: 'В процессе',
+                src_engine: 'Расчёт из приложения',
                 tab_profile: 'Профиль', tab_security: 'Безопасность', tab_calc: 'Расчёты', tab_interface: 'Интерфейс', tab_data: 'Данные',
                 calc_settings: 'Параметры расчётов', unit_label: 'Единицы CO₂', precision_label: 'Точность AI', region_label: 'Регион по умолчанию',
                 precision_fast: 'Быстрая (меньше деталей)', precision_deep: 'Глубокая (полный LCA)',
@@ -1221,6 +1222,7 @@
                 pw_mismatch: 'Passwords do not match', pw_min6: 'Minimum 6 characters',
                 pw_wrong_old: 'Wrong current password', pw_old_required: 'Enter current password',
                 status_done: 'Done', status_pending: 'In progress',
+                src_engine: 'App calculation',
                 tab_profile: 'Profile', tab_security: 'Security', tab_calc: 'Calculations', tab_interface: 'Interface', tab_data: 'Data',
                 calc_settings: 'Calculation settings', unit_label: 'CO₂ units', precision_label: 'AI precision', region_label: 'Default region',
                 precision_fast: 'Fast (less detail)', precision_deep: 'Deep (full LCA)',
@@ -1334,6 +1336,7 @@
                 pw_mismatch: '密码不匹配', pw_min6: '至少6个字符',
                 pw_wrong_old: '当前密码错误', pw_old_required: '请输入当前密码',
                 status_done: '已完成', status_pending: '进行中',
+                src_engine: '应用计算',
                 tab_profile: '个人资料', tab_security: '安全', tab_calc: '计算', tab_interface: '界面', tab_data: '数据',
                 calc_settings: '计算参数', unit_label: 'CO₂ 单位', precision_label: 'AI 精度', region_label: '默认区域',
                 precision_fast: '快速（较少细节）', precision_deep: '深度（完整 LCA）',
@@ -1912,6 +1915,9 @@
                     '</div>' +
                     '<div class="card-meta">' +
                         '<span>' + esc(h.functional_unit || '—') + '</span>' +
+                        (h.report_data && h.report_data.source === 'engine'
+                            ? '<span style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--rule);color:var(--ink-soft);padding:2px 6px">' + esc(t('src_engine')) + '</span>'
+                            : '') +
                         '<span class="card-co2">' + fmtCo2(h.total_co2eq) + ' kgCO₂e</span>' +
                     '</div>' +
                     versionBadge(h) +

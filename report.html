@@ -3622,7 +3622,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
    и временно вшить ключ в заголовок ниже (но НИ В КОЕМ СЛУЧАЕ
    не выкладывайте такой файл в открытый доступ).
    ============================================================ */
-const API_URL = "https://pbisngkepszwzzjivxus.supabase.co/functions/v1/lca-proxy";  // Supabase Edge Function
+const DEEPSEEK_PROXY = "https://pbisngkepszwzzjivxus.supabase.co/functions/v1/lca-proxy"; // Supabase Edge Function
 const MODEL   = "deepseek-v4-flash";      // мультимодальная, дешёвая. Для сильнее: "deepseek-v4-pro"
 
 const STAGE_COLORS = ["#F03B0C", "#D9481C", "#B4652A", "#8A6A4F", "#B8B4AC", "#9B978F"];
@@ -4643,8 +4643,8 @@ async function apiCall(messages, opts = {}) {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${token}`
   };
-  
-  const res = await fetch(API_URL, {
+
+  const res = await fetch(DEEPSEEK_PROXY, {
     method: 'POST',
     headers: headers,
     body: JSON.stringify(body)
