@@ -74,7 +74,7 @@
         .topbar .sub { font-size: 13px; color: var(--ink-mute); margin-top: 6px; font-family: var(--mono); }
         .topbar .sub b { color: var(--ink-soft); font-weight: 600; }
         .top-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        select.vsel, select.settings-input {
+        select.settings-input {
             font-family: var(--mono); font-size: 13px; padding: 7px 10px;
             background: var(--bg-card); color: var(--ink); border: 1px solid var(--rule); cursor: pointer;
         }
@@ -225,7 +225,6 @@
                     <div class="sub" id="projMeta"></div>
                 </div>
                 <div class="top-actions">
-                    <select class="vsel" id="versionSel" title="version"></select>
                     <a class="btn" href="/project.html" data-i18n="back_list">← К списку</a>
                 </div>
             </div>
@@ -326,7 +325,6 @@
     "g_params": "Параметры",
     "g_currency": "Валюты",
     "g_social": "Соц. индикаторы",
-    "meta_version": "версия",
     "meta_entities": "сущностей",
     "meta_size": "размер",
     "meta_db": "исходная база",
@@ -432,7 +430,6 @@
     "copy": "Копировать",
     "toast_link_copied": "Ссылка скопирована!",
     "err_email": "Введите корректный email",
-    "snap_versions": "версий",
     "snap_open": "Открыть облачный проект",
     "archive_empty": "Архив пуст",
     "back_list": "← К списку",
@@ -472,7 +469,6 @@
     "g_params": "Parameters",
     "g_currency": "Currencies",
     "g_social": "Social indicators",
-    "meta_version": "version",
     "meta_entities": "entities",
     "meta_size": "size",
     "meta_db": "source database",
@@ -578,7 +574,6 @@
     "copy": "Copy",
     "toast_link_copied": "Link copied!",
     "err_email": "Enter a valid email",
-    "snap_versions": "versions",
     "snap_open": "Open cloud project",
     "archive_empty": "Archive is empty",
     "back_list": "← Back to list",
@@ -618,7 +613,6 @@
     "g_params": "参数",
     "g_currency": "货币",
     "g_social": "社会指标",
-    "meta_version": "版本",
     "meta_entities": "实体",
     "meta_size": "大小",
     "meta_db": "源数据库",
@@ -724,7 +718,6 @@
     "copy": "复制",
     "toast_link_copied": "链接已复制！",
     "err_email": "请输入有效的邮箱",
-    "snap_versions": "个版本",
     "snap_open": "打开云项目",
     "archive_empty": "归档为空",
     "back_list": "← 返回列表",
@@ -814,7 +807,7 @@
     const state = {
         mode: 'list',
         projectId: null, project: null,
-        snapshots: [], version: null, savedAt: null, stats: null,
+        savedAt: null, stats: null,
         entities: {}, index: new Map(),
         sel: null, openGroups: new Set(['Process']),
         factorLimit: new Map(),
@@ -884,7 +877,7 @@
         if (state.projectId) {
             state.mode = 'detail';
             document.getElementById('detailView').style.display = 'block';
-            await initDetail(params.get('v'));
+            await initDetail();
         } else {
             state.mode = 'list';
             document.getElementById('listView').style.display = 'block';
@@ -908,12 +901,11 @@
                 if (!c.project_id) continue;
                 (state.calcsByProject[c.project_id] = state.calcsByProject[c.project_id] || []).push(c);
             }
-            const { data: snaps } = await db.from('project_snapshots').select('project_id, version, stats').eq('user_id', currentUser.id).order('version', { ascending: false });
+            const { data: snaps } = await db.from('project_snapshots').select('project_id, stats, created_at').eq('user_id', currentUser.id).order('version', { ascending: false });
             state.snapByProject = {};
             for (const s of (snaps || [])) {
-                const m = state.snapByProject[s.project_id] || (state.snapByProject[s.project_id] = { count: 0, latest: 0, total: 0 });
-                m.count++;
-                if (s.version > m.latest) { m.latest = s.version; m.total = (s.stats && s.stats.total) || 0; }
+                if (state.snapByProject[s.project_id]) continue;
+                state.snapByProject[s.project_id] = { total: (s.stats && s.stats.total) || 0, saved_at: s.created_at };
             }
             renderList();
         } catch (e) {
@@ -959,8 +951,8 @@
             let h = '<div class="pcard">';
             h += '<div class="pcard-head"><div class="pcard-title">' + esc(p.name) +
                  (p.archived ? '<span class="badge">' + esc(t('archived_badge')) + '</span>' : '') + '</div>';
-            if (snap && snap.count > 0) {
-                h += '<a class="badge cloud" href="/project.html?id=' + p.id + '" title="' + esc(t('snap_open')) + '">☁ v' + snap.latest + ' · ' + snap.count + ' ' + esc(t('snap_versions')) + (snap.total ? ' · ' + snap.total + ' ent.' : '') + '</a>';
+            if (snap) {
+                h += '<a class="badge cloud" href="/project.html?id=' + p.id + '" title="' + esc(t('snap_open')) + '">☁ ' + (snap.total ? snap.total + ' ent. · ' : '') + fmtDate(snap.saved_at) + '</a>';
             }
             h += '<span class="badge">' + calcs.length + ' ' + esc(t('calcs_count')) + '</span>';
             h += '<span class="pcard-date">' + fmtDate(p.created_at) + '</span></div>';
@@ -979,7 +971,7 @@
             }
             h += targetBlockHtml(p);
             h += '<div class="card-actions">';
-            if (snap && snap.count > 0) h += '<a class="btn btn-primary btn-sm" href="/project.html?id=' + p.id + '">' + esc(t('open_snapshot')) + '</a>';
+            if (snap) h += '<a class="btn btn-primary btn-sm" href="/project.html?id=' + p.id + '">' + esc(t('open_snapshot')) + '</a>';
             h += '<button class="btn btn-sm target-btn" data-id="' + p.id + '" data-target="' + (p.target_pct || '') + '">' + esc(t('target_set')) + '</button>';
             h += '<button class="btn btn-sm rename-project-btn" data-id="' + p.id + '" data-name="' + esc(p.name) + '">' + esc(t('rename')) + '</button>';
             h += '<button class="btn btn-sm archive-btn" data-id="' + p.id + '">' + esc(p.archived ? t('restore') : t('archive')) + '</button>';
@@ -1155,28 +1147,16 @@
     /* ══════════════════════════════════════════════════
        DETAIL MODE
        ══════════════════════════════════════════════════ */
-    async function initDetail(vParam) {
+    async function initDetail() {
         try {
             const { data: proj, error: pErr } = await db.from('user_projects').select('*').eq('id', state.projectId).single();
             if (pErr || !proj) throw new Error(t('err_not_found'));
             state.project = proj;
-            const { data: snaps, error: sErr } = await db.from('project_snapshots')
-                .select('id, version, created_at, stats, note')
-                .eq('project_id', state.projectId).order('version', { ascending: false });
-            if (sErr) throw sErr;
-            state.snapshots = snaps || [];
             renderMeta();
             renderActions();
             await loadCalcs();
             renderTarget();
-            if (!state.snapshots.length) {
-                document.getElementById('detail').innerHTML = '<div class="empty">' + esc(t('empty_tree')) + '</div>';
-                return;
-            }
-            const want = parseInt(vParam, 10);
-            const chosen = state.snapshots.find(s => s.version === want) || state.snapshots[0];
-            fillVersionSel(chosen.version);
-            await loadSnapshot(chosen.version);
+            await loadSnapshot();
         } catch (e) {
             console.error(e);
             document.getElementById('projName').textContent = t('err_not_found');
@@ -1244,21 +1224,19 @@
         box.innerHTML = targetBlockHtml(p) ? '<div class="card" style="margin-top:18px">' + targetBlockHtml(p) + '</div>' : '';
     }
 
-    function fillVersionSel(current) {
-        const sel = document.getElementById('versionSel');
-        sel.innerHTML = state.snapshots.map(s =>
-            '<option value="' + s.version + '"' + (s.version === current ? ' selected' : '') + '>v' + s.version + ' · ' + fmtDate(s.created_at) + '</option>'
-        ).join('');
-        sel.onchange = () => loadSnapshot(parseInt(sel.value, 10));
-    }
-
-    async function loadSnapshot(version) {
-        state.version = version;
+    async function loadSnapshot() {
         document.getElementById('detail').innerHTML = '<div class="empty">' + esc(t('loading')) + '</div>';
         const { data, error } = await db.from('project_snapshots')
             .select('entities, stats, created_at, note')
-            .eq('project_id', state.projectId).eq('version', version).single();
+            .eq('project_id', state.projectId).order('version', { ascending: false }).limit(1).maybeSingle();
         if (error) { showToast(t('err_load') + error.message); return; }
+        if (!data) {
+            state.entities = {};
+            state.index = new Map();
+            renderTree();
+            document.getElementById('detail').innerHTML = '<div class="empty">' + esc(t('empty_tree')) + '</div>';
+            return;
+        }
         state.entities = data.entities || {};
         state.stats = data.stats || null;
         state.savedAt = data.created_at;
@@ -1278,7 +1256,7 @@
         const firstAny = firstProc || Object.values(state.entities).find(a => Array.isArray(a) && a.length)?.[0];
         if (firstAny) selectEntity(firstAny['@type'] || typeOf(firstAny), firstAny['@id']);
         else document.getElementById('detail').innerHTML = '<div class="empty">' + esc(t('empty_tree')) + '</div>';
-        history.replaceState(null, '', '?id=' + state.projectId + '&v=' + version);
+        history.replaceState(null, '', '?id=' + state.projectId);
     }
 
     function typeOf(e) {
@@ -1292,7 +1270,6 @@
         document.getElementById('projName').textContent = state.project ? state.project.name : '…';
         const s = state.stats || {};
         const parts = [];
-        if (state.version) parts.push(t('meta_version') + ': <b>v' + state.version + '</b>');
         if (s.total) parts.push(t('meta_entities') + ': <b>' + s.total + '</b>');
         if (s.sizeMb) parts.push(t('meta_size') + ': <b>' + s.sizeMb + ' MB</b>');
         if (s.db) parts.push(t('meta_db') + ': <b>' + esc(s.db) + '</b>');

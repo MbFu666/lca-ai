@@ -346,13 +346,6 @@
         #avatarFileInput { display: none; }
 
         /* ── Project Cards ── */
-        .project-calcs { border-top: 1px solid var(--rule); padding-top: 14px; margin-top: 14px; }
-        .calc-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border: 1px solid var(--rule); border-radius: var(--radius-sm); margin-bottom: 10px; transition: var(--transition); background: var(--bg); }
-        .calc-item:hover { border-color: var(--jade); background: var(--jade-bg); }
-        .calc-item:last-child { margin-bottom: 0; }
-        .calc-name { font-size: 14px; font-weight: 600; }
-        .calc-date { font-size: 12px; color: var(--ink-mute); margin-top: 2px; }
-        .calc-total { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--jade); white-space: nowrap; }
 
         /* ── Password Strength ── */
         .pw-strength { height: 3px; border-radius: 0; background: var(--rule); margin-top: -6px; margin-bottom: 12px; overflow: hidden; }
@@ -494,15 +487,6 @@
         .cmp-warn { padding: 10px 12px; border-left: 3px solid var(--c-rust); background: var(--bg-soft); font-size: 13px; color: var(--ink-soft); margin-bottom: 16px; }
 
         /* Цель проекта */
-        .target { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--rule); }
-        .target-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
-        .target-label { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); }
-        .target-stat { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--c-rust); }
-        .target-stat.reached { color: var(--e-2); }
-        .target-bar { height: 6px; background: var(--bg-soft); overflow: hidden; }
-        .target-fill { height: 100%; background: var(--jade); transition: width .5s cubic-bezier(.22,1,.36,1); }
-        .target-fill.reached { background: var(--e-2); }
-        .target-foot { font-family: var(--mono); font-size: 10px; color: var(--ink-mute); margin-top: 6px; }
 
         /* Расширенная статистика */
         .xstat-sub { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 10px; }
@@ -1050,16 +1034,14 @@
                 cmp_warn_fu: 'У расчётов разные функциональные единицы. Сравнение абсолютных значений некорректно — смотрите на структуру стадий, а не на итоговое число.',
                 batch_delete_text: 'Удалить {n} расчётов безвозвратно?',
                 batch_deleted: 'Удалено: {n}', batch_archived: 'В архив: {n}', batch_to_project: 'Добавлено в проект: {n}',
-                target: 'Цель', target_set: 'Цель', target_base: 'база',
-                target_title: 'Цель по снижению', target_text: 'На сколько процентов снизить след относительно первого расчёта в проекте? Пусто — убрать цель.',
                 title: 'LCA·AI — Личный кабинет',
                 nav_home: 'Главная', nav_cabinet: 'Кабинет',
                 loading: 'Загрузка...', stat_calcs: 'Расчётов', stat_projects: 'Проектов',
                 menu_overview: 'Обзор', menu_history: 'История', menu_projects: 'Проекты', menu_settings: 'Настройки', menu_logout: 'Выйти',
-                overview_title: 'Обзор', history_title: 'История расчётов', projects_title: 'Проекты', settings_title: 'Настройки',
+                overview_title: 'Обзор', history_title: 'История расчётов', settings_title: 'Настройки',
                 greeting_morning: 'Доброе утро', greeting_day: 'Добрый день', greeting_evening: 'Добрый вечер', greeting_night: 'Доброй ночи',
                 greeting_sub: 'Вот сводка вашей активности',
-                new_calc: '+ Новый расчёт', new_project: '+ Новый проект',
+                new_calc: '+ Новый расчёт',
                 kpi_calcs: 'Всего расчётов', kpi_total: 'Суммарный след', kpi_avg: 'Средний на расчёт', kpi_projects: 'Проектов',
                 chart_title: 'Активность за 30 дней', chart_sub: 'Количество расчётов по дням',
                 recent_title: 'Недавние расчёты', recent_sub: 'Последние 5 записей', no_recent: 'Пока нет расчётов',
@@ -1077,21 +1059,17 @@
                 change_pw_title: 'Изменить пароль', old_pw_ph: 'Текущий пароль', new_pw_ph: 'Новый пароль', confirm_pw_ph: 'Подтвердите пароль',
                 change_pw_btn: 'Изменить пароль',
                 view: 'Посмотреть', delete: 'Удалить', calculations: 'Расчёты', to_project: 'В проект', rename: 'Переименовать',
-                no_history: 'Нет расчётов', do_calc: 'Сделать расчёт', no_projects: 'Нет проектов', create: 'Создать',
-                unnamed: 'Без названия', calcs_count: 'расчётов',
-                confirm_delete_calc: 'Удалить расчёт?', confirm_delete_calc_text: 'Это действие нельзя отменить.',
-                confirm_delete_project: 'Удалить проект?', confirm_delete_project_text: 'Все расчёты внутри проекта тоже будут удалены.',
-                confirm_delete_calc_from_proj: 'Удалить расчёт из проекта?', confirm_delete_account: 'Удалить аккаунт и все данные?',
+                no_history: 'Нет расчётов', do_calc: 'Сделать расчёт', create: 'Создать',
+                unnamed: 'Без названия',
+                confirm_delete_calc: 'Удалить расчёт?', confirm_delete_calc_text: 'Это действие нельзя отменить.', confirm_delete_account: 'Удалить аккаунт и все данные?',
                 confirm_delete_account_text: 'Все расчёты, проекты и профиль будут удалены безвозвратно.',
-                project_name_prompt: 'Название проекта', rename_prompt: 'Новое название проекта',
                 pick_project_title: 'Добавить в проект', pick_project_empty: 'Проектов пока нет — создайте первый на вкладке «Проекты»',
                 cancel: 'Отмена', ok: 'ОК',
-                toast_deleted: 'Удалено', toast_calc_deleted: 'Расчёт удалён', toast_project_created: 'Проект создан',
-                toast_project_renamed: 'Проект переименован', toast_added_to_project: 'Добавлено в проект',
+                toast_deleted: 'Удалено', toast_added_to_project: 'Добавлено в проект',
                 toast_profile_saved: 'Профиль обновлён', toast_pw_changed: 'Пароль изменён', toast_lang_saved: 'Язык сохранён',
                 toast_link_copied: 'Ссылка скопирована!', toast_avatar_saved: 'Аватар обновлён',
                 toast_avatar_too_big: 'Файл слишком большой (макс. 500 КБ)', toast_csv_done: 'CSV выгружен',
-                toast_archived: 'Проект архивирован', toast_restored: 'Проект восстановлен', archive_title: 'Архив',
+                toast_archived: 'Проект архивирован', toast_restored: 'Проект восстановлен',
                 err_sb_not_loaded: 'Ошибка: Supabase не загружен', err_auth: 'Ошибка авторизации: ',
                 err_load_history: 'Ошибка загрузки истории: ', err_load_projects: 'Ошибка загрузки проектов: ',
                 err_load_stats: 'Ошибка загрузки статистики', err_delete: 'Ошибка удаления: ',
@@ -1164,16 +1142,14 @@
                 cmp_warn_fu: 'These calculations use different functional units. Comparing absolute values is not valid — read the stage structure, not the bottom-line number.',
                 batch_delete_text: 'Delete {n} calculations permanently?',
                 batch_deleted: 'Deleted: {n}', batch_archived: 'Archived: {n}', batch_to_project: 'Added to project: {n}',
-                target: 'Target', target_set: 'Target', target_base: 'base',
-                target_title: 'Reduction target', target_text: 'By what percentage should the footprint drop against the first calculation in this project? Leave empty to remove the target.',
                 title: 'LCA·AI — Dashboard',
                 nav_home: 'Home', nav_cabinet: 'Dashboard',
                 loading: 'Loading...', stat_calcs: 'Calcs', stat_projects: 'Projects',
                 menu_overview: 'Overview', menu_history: 'History', menu_projects: 'Projects', menu_settings: 'Settings', menu_logout: 'Sign out',
-                overview_title: 'Overview', history_title: 'Calculation history', projects_title: 'Projects', settings_title: 'Settings',
+                overview_title: 'Overview', history_title: 'Calculation history', settings_title: 'Settings',
                 greeting_morning: 'Good morning', greeting_day: 'Good afternoon', greeting_evening: 'Good evening', greeting_night: 'Good night',
                 greeting_sub: 'Here is your activity summary',
-                new_calc: '+ New calculation', new_project: '+ New project',
+                new_calc: '+ New calculation',
                 kpi_calcs: 'Total calculations', kpi_total: 'Total footprint', kpi_avg: 'Average per calc', kpi_projects: 'Projects',
                 chart_title: '30-day activity', chart_sub: 'Calculations per day',
                 recent_title: 'Recent calculations', recent_sub: 'Last 5 records', no_recent: 'No calculations yet',
@@ -1191,21 +1167,17 @@
                 change_pw_title: 'Change password', old_pw_ph: 'Current password', new_pw_ph: 'New password', confirm_pw_ph: 'Confirm password',
                 change_pw_btn: 'Change password',
                 view: 'View', delete: 'Delete', calculations: 'Calculations', to_project: 'To project', rename: 'Rename',
-                no_history: 'No calculations yet', do_calc: 'Make a calculation', no_projects: 'No projects yet', create: 'Create',
-                unnamed: 'Untitled', calcs_count: 'calculations',
-                confirm_delete_calc: 'Delete calculation?', confirm_delete_calc_text: 'This action cannot be undone.',
-                confirm_delete_project: 'Delete project?', confirm_delete_project_text: 'All calculations inside will be deleted too.',
-                confirm_delete_calc_from_proj: 'Remove calculation from project?', confirm_delete_account: 'Delete account and all data?',
+                no_history: 'No calculations yet', do_calc: 'Make a calculation', create: 'Create',
+                unnamed: 'Untitled',
+                confirm_delete_calc: 'Delete calculation?', confirm_delete_calc_text: 'This action cannot be undone.', confirm_delete_account: 'Delete account and all data?',
                 confirm_delete_account_text: 'All calculations, projects and profile will be permanently deleted.',
-                project_name_prompt: 'Project name', rename_prompt: 'New project name',
                 pick_project_title: 'Add to project', pick_project_empty: 'No projects yet — create one in the Projects tab',
                 cancel: 'Cancel', ok: 'OK',
-                toast_deleted: 'Deleted', toast_calc_deleted: 'Calculation deleted', toast_project_created: 'Project created',
-                toast_project_renamed: 'Project renamed', toast_added_to_project: 'Added to project',
+                toast_deleted: 'Deleted', toast_added_to_project: 'Added to project',
                 toast_profile_saved: 'Profile updated', toast_pw_changed: 'Password changed', toast_lang_saved: 'Language saved',
                 toast_link_copied: 'Link copied!', toast_avatar_saved: 'Avatar updated',
                 toast_avatar_too_big: 'File too large (max 500 KB)', toast_csv_done: 'CSV exported',
-                toast_archived: 'Project archived', toast_restored: 'Project restored', archive_title: 'Archive',
+                toast_archived: 'Project archived', toast_restored: 'Project restored',
                 err_sb_not_loaded: 'Error: Supabase not loaded', err_auth: 'Auth error: ',
                 err_load_history: 'Error loading history: ', err_load_projects: 'Error loading projects: ',
                 err_load_stats: 'Error loading stats', err_delete: 'Delete error: ',
@@ -1278,16 +1250,14 @@
                 cmp_warn_fu: '这些计算使用了不同的功能单位，直接比较绝对数值并不可靠 — 请关注阶段构成，而非最终数字。',
                 batch_delete_text: '永久删除 {n} 条计算记录？',
                 batch_deleted: '已删除 {n} 条', batch_archived: '已归档 {n} 条', batch_to_project: '已添加到项目 {n} 条',
-                target: '目标', target_set: '目标', target_base: '基准',
-                target_title: '减排目标', target_text: '相对项目中第一次计算，碳足迹需下降多少百分比？留空则取消目标。',
                 title: 'LCA·AI — 个人中心',
                 nav_home: '首页', nav_cabinet: '个人中心',
                 loading: '加载中...', stat_calcs: '计算', stat_projects: '项目',
                 menu_overview: '概览', menu_history: '历史', menu_projects: '项目', menu_settings: '设置', menu_logout: '退出',
-                overview_title: '概览', history_title: '计算历史', projects_title: '项目', settings_title: '设置',
+                overview_title: '概览', history_title: '计算历史', settings_title: '设置',
                 greeting_morning: '早上好', greeting_day: '下午好', greeting_evening: '晚上好', greeting_night: '夜深了',
                 greeting_sub: '这是您的活动摘要',
-                new_calc: '+ 新建计算', new_project: '+ 新建项目',
+                new_calc: '+ 新建计算',
                 kpi_calcs: '计算总数', kpi_total: '总碳足迹', kpi_avg: '平均每次', kpi_projects: '项目',
                 chart_title: '近30天活动', chart_sub: '每日计算数量',
                 recent_title: '最近计算', recent_sub: '最近5条记录', no_recent: '暂无计算记录',
@@ -1305,21 +1275,17 @@
                 change_pw_title: '修改密码', old_pw_ph: '当前密码', new_pw_ph: '新密码', confirm_pw_ph: '确认密码',
                 change_pw_btn: '修改密码',
                 view: '查看', delete: '删除', calculations: '计算', to_project: '加入项目', rename: '重命名',
-                no_history: '暂无计算记录', do_calc: '开始计算', no_projects: '暂无项目', create: '创建',
-                unnamed: '未命名', calcs_count: '次计算',
-                confirm_delete_calc: '确定删除此计算？', confirm_delete_calc_text: '此操作无法撤销。',
-                confirm_delete_project: '确定删除此项目？', confirm_delete_project_text: '项目内的所有计算也将被删除。',
-                confirm_delete_calc_from_proj: '确定从项目中删除此计算？', confirm_delete_account: '确定删除账户及所有数据？',
+                no_history: '暂无计算记录', do_calc: '开始计算', create: '创建',
+                unnamed: '未命名',
+                confirm_delete_calc: '确定删除此计算？', confirm_delete_calc_text: '此操作无法撤销。', confirm_delete_account: '确定删除账户及所有数据？',
                 confirm_delete_account_text: '所有计算、项目和个人资料将被永久删除。',
-                project_name_prompt: '项目名称', rename_prompt: '新项目名称',
                 pick_project_title: '加入项目', pick_project_empty: '暂无项目 — 请先在"项目"页创建',
                 cancel: '取消', ok: '确定',
-                toast_deleted: '已删除', toast_calc_deleted: '计算已删除', toast_project_created: '项目已创建',
-                toast_project_renamed: '项目已重命名', toast_added_to_project: '已加入项目',
+                toast_deleted: '已删除', toast_added_to_project: '已加入项目',
                 toast_profile_saved: '资料已更新', toast_pw_changed: '密码已修改', toast_lang_saved: '语言已保存',
                 toast_link_copied: '链接已复制！', toast_avatar_saved: '头像已更新',
                 toast_avatar_too_big: '文件太大（最大 500 KB）', toast_csv_done: 'CSV 已导出',
-                toast_archived: '项目已归档', toast_restored: '项目已恢复', archive_title: '归档',
+                toast_archived: '项目已归档', toast_restored: '项目已恢复',
                 err_sb_not_loaded: '错误：Supabase 未加载', err_auth: '认证错误：',
                 err_load_history: '加载历史出错：', err_load_projects: '加载项目出错：',
                 err_load_stats: '加载统计数据出错', err_delete: '删除出错：',
