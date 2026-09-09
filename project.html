@@ -185,6 +185,14 @@
             opacity: 0; pointer-events: none; transition: var(--transition); z-index: 500; font-family: var(--mono);
         }
         #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        @media print {
+            header, .pv-side, #expBar, #projActions, #toast, .modal-mask, .card-actions { display: none !important; }
+            .pv-layout { grid-template-columns: 1fr !important; gap: 0 !important; }
+            body { background: #fff; }
+            .card { border-color: #bbb; break-inside: avoid; }
+            .container { max-width: none; }
+        }
     </style>
 </head>
 <body>
@@ -224,7 +232,12 @@
                     <h1 id="projName">…</h1>
                     <div class="sub" id="projMeta"></div>
                 </div>
-                <div class="top-actions">
+                <div class="top-actions" id="expBar">
+                    <button class="btn" id="expExcel" title="Excel">⬇ Excel</button>
+                    <button class="btn" id="expWord" title="Word">⬇ Word</button>
+                    <button class="btn" id="expJson" title="JSON">⬇ JSON</button>
+                    <button class="btn" id="expPdf" title="PDF">⬇ PDF</button>
+                    <button class="btn" id="expPrint" title="Print">🖨</button>
                     <a class="btn" href="/project.html" data-i18n="back_list">← К списку</a>
                 </div>
             </div>
@@ -441,7 +454,13 @@
     "exp_365": "1 год",
     "err_create": "Ошибка создания: ",
     "err_delete": "Ошибка удаления: ",
-    "err_generic": "Ошибка: "
+    "err_generic": "Ошибка: ",
+    "exp_done": "Экспорт готов",
+    "err_lib": "Библиотека не загружена с CDN",
+    "pdf_generating": "Генерация PDF…",
+    "exp_process": "Процесс",
+    "exp_inventory": "Инвентаризационный анализ",
+    "exp_lcia": "Оценка воздействия"
   },
   "en": {
     "title": "LCA·AI — Projects",
@@ -585,7 +604,13 @@
     "exp_365": "1 year",
     "err_create": "Create error: ",
     "err_delete": "Delete error: ",
-    "err_generic": "Error: "
+    "err_generic": "Error: ",
+    "exp_done": "Export ready",
+    "err_lib": "Library failed to load from CDN",
+    "pdf_generating": "Generating PDF…",
+    "exp_process": "Process",
+    "exp_inventory": "Inventory",
+    "exp_lcia": "Impact assessment"
   },
   "zh": {
     "title": "LCA·AI — 项目",
@@ -729,7 +754,13 @@
     "exp_365": "1 年",
     "err_create": "创建出错：",
     "err_delete": "删除出错：",
-    "err_generic": "错误："
+    "err_generic": "错误：",
+    "exp_done": "导出完成",
+    "err_lib": "库未能从 CDN 加载",
+    "pdf_generating": "正在生成 PDF…",
+    "exp_process": "过程",
+    "exp_inventory": "清单",
+    "exp_lcia": "影响评价"
   }
 };
     let pvLang = 'ru';
@@ -1561,6 +1592,176 @@
             default: return renderGeneric(e, type);
         }
     }
+
+    /* ══════════════════════════════════════════════════
+       Exports (Excel / Word / JSON / PDF / Print) — тот же набор, что в report.html
+       ══════════════════════════════════════════════════ */
+    const lazyLibs = {
+        xlsx: { url: 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js', loaded: false },
+        jspdf: { url: 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', loaded: false },
+        html2canvas: { url: 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', loaded: false },
+    };
+    async function loadLib(name) {
+        if (lazyLibs[name].loaded) return true;
+        return new Promise((resolve) => {
+            const s = document.createElement('script');
+            s.src = lazyLibs[name].url;
+            s.onload = () => { lazyLibs[name].loaded = true; resolve(true); };
+            s.onerror = () => resolve(false);
+            document.head.appendChild(s);
+        });
+    }
+    const safeName = (s) => String(s || 'lca-project').replace(/[^\w\-Ѐ-ӿ一-鿿]+/g, '_').slice(0, 50);
+
+    function metaRows() {
+        const s = state.stats || {};
+        const rows = [
+            ['Project', state.project ? state.project.name : ''],
+            ['Saved', state.savedAt ? new Date(state.savedAt).toLocaleString() : ''],
+            ['Source DB', s.db || ''],
+            ['Entities', s.total || 0],
+        ];
+        for (const [k, v] of Object.entries(s.types || {})) rows.push([k, v]);
+        return rows;
+    }
+    function inventoryRows() {
+        const rows = [[t('exp_process'), t('c_io'), t('c_flow'), t('c_amount'), t('c_unit'), t('c_provider'), t('c_dq')]];
+        for (const p of (state.entities.Process || [])) {
+            for (const x of (p.exchanges || [])) {
+                const isIn = x.input === true || x.isInput === true;
+                rows.push([
+                    p.name || '', isIn ? t('in') : t('out'), refName(x.flow) || '',
+                    x.amountFormula || fmtNum(x.amount), refName(x.unit) || '',
+                    refName(x.defaultProvider) || '', x.dqEntry || '',
+                ]);
+            }
+        }
+        return rows;
+    }
+    function lciaRows() {
+        const rows = [[t('k_category'), t('c_flow'), t('c_factor'), t('c_unit')]];
+        for (const c of (state.entities.ImpactCategory || [])) {
+            for (const f of (c.impactFactors || [])) {
+                rows.push([c.name || '', refName(f.flow) || '', fmtNum(f.value), refName(f.unit) || c.refUnit || '']);
+            }
+        }
+        return rows;
+    }
+
+    async function downloadExcel() {
+        await loadLib('xlsx');
+        if (typeof XLSX === 'undefined') { showToast(t('err_lib')); return; }
+        const wb = XLSX.utils.book_new();
+        const meta = XLSX.utils.aoa_to_sheet(metaRows());
+        meta['!cols'] = [{ wch: 24 }, { wch: 44 }];
+        XLSX.utils.book_append_sheet(wb, meta, 'Meta');
+        const inv = XLSX.utils.aoa_to_sheet(inventoryRows());
+        inv['!cols'] = [{ wch: 44 }, { wch: 8 }, { wch: 40 }, { wch: 14 }, { wch: 10 }, { wch: 32 }, { wch: 22 }];
+        XLSX.utils.book_append_sheet(wb, inv, 'Inventory');
+        const lcia = XLSX.utils.aoa_to_sheet(lciaRows());
+        lcia['!cols'] = [{ wch: 34 }, { wch: 44 }, { wch: 16 }, { wch: 12 }];
+        XLSX.utils.book_append_sheet(wb, lcia, 'LCIA');
+        XLSX.writeFile(wb, safeName(state.project && state.project.name) + '.xlsx');
+        showToast(t('exp_done'));
+    }
+
+    async function downloadWord() {
+        const escW = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const s = state.stats || {};
+        let body = '<h1>LCA Project: ' + escW(state.project && state.project.name) + '</h1>';
+        body += '<div class="meta"><p><strong>' + escW(t('meta_saved')) + ':</strong> ' + escW(state.savedAt ? new Date(state.savedAt).toLocaleString() : '') + '</p>' +
+                '<p><strong>' + escW(t('meta_db')) + ':</strong> ' + escW(s.db || '') + '</p>' +
+                '<p><strong>' + escW(t('meta_entities')) + ':</strong> ' + escW(s.total || 0) + '</p></div>';
+        body += '<h2>' + escW(t('exp_inventory')) + '</h2>';
+        for (const p of (state.entities.Process || [])) {
+            body += '<h3>' + escW(p.name) + '</h3><table><tr><th>' + escW(t('c_io')) + '</th><th>' + escW(t('c_flow')) + '</th><th>' + escW(t('c_amount')) + '</th><th>' + escW(t('c_unit')) + '</th><th>' + escW(t('c_provider')) + '</th></tr>';
+            for (const x of (p.exchanges || [])) {
+                const isIn = x.input === true || x.isInput === true;
+                body += '<tr><td>' + escW(isIn ? t('in') : t('out')) + '</td><td>' + escW(refName(x.flow)) + '</td><td class="value">' + escW(x.amountFormula || fmtNum(x.amount)) + '</td><td>' + escW(refName(x.unit)) + '</td><td>' + escW(refName(x.defaultProvider) || '-') + '</td></tr>';
+            }
+            body += '</table>';
+        }
+        body += '<h2>' + escW(t('exp_lcia')) + '</h2>';
+        for (const c of (state.entities.ImpactCategory || [])) {
+            const fs = c.impactFactors || [];
+            body += '<h3>' + escW(c.name) + ' (' + fs.length + ')</h3><table><tr><th>' + escW(t('c_flow')) + '</th><th>' + escW(t('c_factor')) + '</th><th>' + escW(t('c_unit')) + '</th></tr>';
+            for (const f of fs.slice(0, 100)) {
+                body += '<tr><td>' + escW(refName(f.flow)) + '</td><td class="value">' + escW(fmtNum(f.value)) + '</td><td>' + escW(refName(f.unit) || c.refUnit || '') + '</td></tr>';
+            }
+            if (fs.length > 100) body += '<tr><td colspan="3">… ' + (fs.length - 100) + ' more</td></tr>';
+            body += '</table>';
+        }
+        body += '<div class="footer">Generated by LCA·AI on ' + new Date().toLocaleDateString() + '</div>';
+        const html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;color:#1C1B19}h1{font-size:24px}h2{border-bottom:1px solid #D6D2CB;padding-bottom:8px;font-size:18px}h3{font-size:14px;margin-top:18px}table{border-collapse:collapse;width:100%;margin:12px 0}th,td{border:1px solid #D6D2CB;padding:6px 10px;text-align:left;font-size:12px}th{background:#F4F2EE;text-transform:uppercase;font-size:10px}.value{font-family:"Courier New",monospace;text-align:right}.meta{color:#6B6862;font-size:13px}.footer{color:#9B978F;font-size:10px;margin-top:24px;border-top:1px solid #D6D2CB;padding-top:8px}</style></head><body>' + body + '</body></html>';
+        const blob = new Blob(['' + html], { type: 'application/msword' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = safeName(state.project && state.project.name) + '.doc';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        showToast(t('exp_done'));
+    }
+
+    function downloadJson() {
+        const payload = {
+            project: state.project ? state.project.name : null,
+            saved_at: state.savedAt || null,
+            stats: state.stats || null,
+            entities: state.entities,
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = safeName(state.project && state.project.name) + '.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast(t('exp_done'));
+    }
+
+    async function downloadPdf() {
+        showToast(t('pdf_generating'));
+        const ok1 = await loadLib('jspdf');
+        const ok2 = await loadLib('html2canvas');
+        if (!ok1 || !ok2 || !window.jspdf || !window.html2canvas) { showToast(t('err_lib')); return; }
+        const side = document.querySelector('.pv-side');
+        const bar = document.getElementById('expBar');
+        const acts = document.getElementById('projActions');
+        side.style.display = 'none'; bar.style.display = 'none'; acts.style.display = 'none';
+        try {
+            const el = document.getElementById('detailView');
+            const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: getComputedStyle(document.body).backgroundColor });
+            const jsPDF = window.jspdf.jsPDF;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgW = 210, pageH = 297;
+            const imgH = canvas.height * imgW / canvas.width;
+            const img = canvas.toDataURL('image/png');
+            let heightLeft = imgH, position = 0;
+            pdf.addImage(img, 'PNG', 0, position, imgW, imgH);
+            heightLeft -= pageH;
+            while (heightLeft > 0) {
+                position = heightLeft - imgH;
+                pdf.addPage();
+                pdf.addImage(img, 'PNG', 0, position, imgW, imgH);
+                heightLeft -= pageH;
+            }
+            pdf.save(safeName(state.project && state.project.name) + '.pdf');
+            showToast(t('exp_done'));
+        } catch (e) {
+            showToast(String(e.message || e));
+        } finally {
+            side.style.display = ''; bar.style.display = ''; acts.style.display = '';
+        }
+    }
+
+    document.getElementById('expExcel').addEventListener('click', downloadExcel);
+    document.getElementById('expWord').addEventListener('click', downloadWord);
+    document.getElementById('expJson').addEventListener('click', downloadJson);
+    document.getElementById('expPdf').addEventListener('click', downloadPdf);
+    document.getElementById('expPrint').addEventListener('click', () => window.print());
 
     /* ── lang init ── */
     (function () {
