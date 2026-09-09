@@ -21,8 +21,15 @@ function isRateLimited(userId: string): boolean {
 }
 
 Deno.serve(async (req: Request) => {
+  const ALLOWED_ORIGINS = [
+    "https://lca-ai.ru",
+    "https://www.lca-ai.ru",
+    "http://127.0.0.1:8123",
+    "http://localhost:8123",
+  ];
+  const origin = req.headers.get("Origin") ?? "";
   const corsHeaders: Record<string, string> = {
-    "Access-Control-Allow-Origin": "https://lca-ai.ru",
+    "Access-Control-Allow-Origin": ALLOWED_ORIGINS.includes(origin) ? origin : "https://lca-ai.ru",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization, apikey",
   };

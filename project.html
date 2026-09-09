@@ -15,7 +15,15 @@
     <title>LCA·AI — Проекты</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/vendor/supabase.min.js"></script>
+    <script>
+        if (!window.supabase) {
+            var s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+            document.head.appendChild(s);
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
         if (!window.supabase) {
             var s = document.createElement('script');
@@ -460,7 +468,20 @@
     "pdf_generating": "Генерация PDF…",
     "exp_process": "Процесс",
     "exp_inventory": "Инвентаризационный анализ",
-    "exp_lcia": "Оценка воздействия"
+    "exp_lcia": "Оценка воздействия",
+    "exp_generating": "Генерация Excel…",
+    "exp_files": "файлов",
+    "err_jszip": "JSZip не загружен",
+    "ai_generating": "ИИ-агент составляет отчёт…",
+    "ai_error": "Ошибка ИИ-отчёта: ",
+    "rep_exec": "Резюме",
+    "rep_goal": "Цель и границы исследования",
+    "rep_method": "Методология",
+    "rep_lci": "Инвентаризационный анализ жизненного цикла",
+    "rep_lcia": "Оценка воздействия на жизненном цикле",
+    "rep_interp": "Интерпретация",
+    "rep_limits": "Допущения и ограничения",
+    "rep_reco": "Рекомендации"
   },
   "en": {
     "title": "LCA·AI — Projects",
@@ -610,7 +631,20 @@
     "pdf_generating": "Generating PDF…",
     "exp_process": "Process",
     "exp_inventory": "Inventory",
-    "exp_lcia": "Impact assessment"
+    "exp_lcia": "Impact assessment",
+    "exp_generating": "Generating Excel…",
+    "exp_files": "files",
+    "err_jszip": "JSZip not loaded",
+    "ai_generating": "AI agent is writing the report…",
+    "ai_error": "AI report error: ",
+    "rep_exec": "Executive summary",
+    "rep_goal": "Goal and scope definition",
+    "rep_method": "Methodology",
+    "rep_lci": "Life cycle inventory analysis",
+    "rep_lcia": "Life cycle impact assessment",
+    "rep_interp": "Interpretation",
+    "rep_limits": "Assumptions and limitations",
+    "rep_reco": "Recommendations"
   },
   "zh": {
     "title": "LCA·AI — 项目",
@@ -760,7 +794,20 @@
     "pdf_generating": "正在生成 PDF…",
     "exp_process": "过程",
     "exp_inventory": "清单",
-    "exp_lcia": "影响评价"
+    "exp_lcia": "影响评价",
+    "exp_generating": "正在生成 Excel…",
+    "exp_files": "个文件",
+    "err_jszip": "JSZip 未加载",
+    "ai_generating": "AI 代理正在撰写报告…",
+    "ai_error": "AI 报告错误：",
+    "rep_exec": "摘要",
+    "rep_goal": "目标与范围定义",
+    "rep_method": "方法学",
+    "rep_lci": "生命周期清单分析",
+    "rep_lcia": "生命周期影响评价",
+    "rep_interp": "解释",
+    "rep_limits": "假设与局限",
+    "rep_reco": "建议"
   }
 };
     let pvLang = 'ru';
@@ -1613,96 +1660,133 @@
     }
     const safeName = (s) => String(s || 'lca-project').replace(/[^\w\-Ѐ-ӿ一-鿿]+/g, '_').slice(0, 50);
 
-    function metaRows() {
-        const s = state.stats || {};
-        const rows = [
-            ['Project', state.project ? state.project.name : ''],
-            ['Saved', state.savedAt ? new Date(state.savedAt).toLocaleString() : ''],
-            ['Source DB', s.db || ''],
-            ['Entities', s.total || 0],
+    /* ── openLCA-style: one workbook per entity, packed into a zip ── */
+    const EX_HEADERS = () => ['Flow', 'Category', 'Flow type', 'Unit', 'Amount', 'Formula', 'Uncertainty', 'Provider', 'DQ'];
+    function metaPairs(e) {
+        return [
+            ['Name', e.name || ''],
+            ['Category', catPath(e.category) || ''],
+            ['Location', refName(e.location) || ''],
+            ['Type', e.processType || e.flowType || e.flowPropertyType || e['@type'] || ''],
+            ['CAS', e.cas || ''],
+            ['Version', e.version || ''],
+            ['Last change', e.lastChange ? String(e.lastChange).slice(0, 10) : ''],
+            ['Reference unit', e.refUnit || ''],
+            ['Reference flow', refName(e.refFlow) || ''],
+            ['Reference quantity', e.refQuantity != null ? e.refQuantity : ''],
+            ['Unit', refName(e.unit) || ''],
+            ['Description', e.description || ''],
+            ['ID', e['@id'] || ''],
         ];
-        for (const [k, v] of Object.entries(s.types || {})) rows.push([k, v]);
-        return rows;
     }
-    function inventoryRows() {
-        const rows = [[t('exp_process'), t('c_io'), t('c_flow'), t('c_amount'), t('c_unit'), t('c_provider'), t('c_dq')]];
-        for (const p of (state.entities.Process || [])) {
-            for (const x of (p.exchanges || [])) {
-                const isIn = x.input === true || x.isInput === true;
-                rows.push([
-                    p.name || '', isIn ? t('in') : t('out'), refName(x.flow) || '',
-                    x.amountFormula || fmtNum(x.amount), refName(x.unit) || '',
-                    refName(x.defaultProvider) || '', x.dqEntry || '',
-                ]);
-            }
-        }
-        return rows;
+    function exRows(list) {
+        return list.map(x => {
+            const fl = x.flow || {};
+            return [
+                refName(x.flow) || '', String(fl.category || ''), String(fl.flowType || ''), refName(x.unit) || '',
+                typeof x.amount === 'number' ? x.amount : (x.amount || ''), x.amountFormula || '',
+                x.uncertainty ? JSON.stringify(x.uncertainty) : '', refName(x.defaultProvider) || '', x.dqEntry || '',
+            ];
+        });
     }
-    function lciaRows() {
-        const rows = [[t('k_category'), t('c_flow'), t('c_factor'), t('c_unit')]];
-        for (const c of (state.entities.ImpactCategory || [])) {
-            for (const f of (c.impactFactors || [])) {
-                rows.push([c.name || '', refName(f.flow) || '', fmtNum(f.value), refName(f.unit) || c.refUnit || '']);
+    function entityWorkbook(type, e) {
+        const wb = XLSX.utils.book_new();
+        const add = (rows, name, cols) => {
+            const ws = XLSX.utils.aoa_to_sheet(rows);
+            if (cols) ws['!cols'] = cols;
+            XLSX.utils.book_append_sheet(wb, ws, name.slice(0, 31));
+        };
+        const W = [{ wch: 20 }, { wch: 60 }];
+        const XC = [{ wch: 40 }, { wch: 24 }, { wch: 16 }, { wch: 10 }, { wch: 14 }, { wch: 14 }, { wch: 22 }, { wch: 32 }, { wch: 20 }];
+        switch (type) {
+            case 'Process': {
+                add(metaPairs(e), 'Process', W);
+                const ex = e.exchanges || [];
+                add([EX_HEADERS(), ...exRows(ex.filter(x => x.input === true || x.isInput === true))], 'Inputs', XC);
+                add([EX_HEADERS(), ...exRows(ex.filter(x => !(x.input === true || x.isInput === true)))], 'Outputs', XC);
+                break;
             }
+            case 'Flow': {
+                add(metaPairs(e), 'Flow', W);
+                add([['Flow property', 'Reference', 'Conversion factor'],
+                    ...(e.flowProperties || []).map(fp => [refName(fp.flowProperty) || '', fp.isRefFlowProperty ? 'yes' : '', fp.conversionFactor != null ? fp.conversionFactor : ''])],
+                    'Flow properties', [{ wch: 32 }, { wch: 10 }, { wch: 18 }]);
+                break;
+            }
+            case 'ImpactCategory': {
+                add(metaPairs(e), 'Impact category', W);
+                add([['Flow', 'Category', 'Flow type', 'Unit', 'Value', 'Formula'],
+                    ...(e.impactFactors || []).map(f => [refName(f.flow) || '', String((f.flow && f.flow.category) || ''), String((f.flow && f.flow.flowType) || ''), refName(f.unit) || e.refUnit || '', f.value != null ? f.value : '', f.formula || ''])],
+                    'Factors', [{ wch: 40 }, { wch: 24 }, { wch: 16 }, { wch: 12 }, { wch: 16 }, { wch: 16 }]);
+                break;
+            }
+            case 'ImpactMethod': {
+                add(metaPairs(e), 'Impact method', W);
+                add([['Impact category'], ...(e.impactCategories || []).map(c => [refName(c) || ''])], 'Categories', [{ wch: 48 }]);
+                break;
+            }
+            case 'UnitGroup': {
+                add(metaPairs(e), 'Unit group', W);
+                add([['Unit', 'Conversion factor', 'Reference unit'],
+                    ...(e.units || []).map(u => [u.name || '', u.conversionFactor != null ? u.conversionFactor : '', u.isRefUnit ? 'yes' : ''])],
+                    'Units', [{ wch: 20 }, { wch: 18 }, { wch: 14 }]);
+                break;
+            }
+            case 'ProductSystem': {
+                add(metaPairs(e), 'Product system', W);
+                add([['Process', 'Category', 'Location', 'Type'],
+                    ...(e.processes || []).map(p => [refName(p) || '', String(p.category || ''), String(p.location || ''), String(p.processType || '')])],
+                    'Processes', [{ wch: 44 }, { wch: 24 }, { wch: 10 }, { wch: 16 }]);
+                add([['Provider', 'Process', 'Amount', 'Unit'],
+                    ...(e.processLinks || []).map(l => [refName(l.provider) || '', refName(l.process) || '', l.amount != null ? l.amount : '', refName(l.unit) || ''])],
+                    'Process links', [{ wch: 40 }, { wch: 40 }, { wch: 14 }, { wch: 10 }]);
+                break;
+            }
+            case 'DQSystem': {
+                add(metaPairs(e), 'DQ system', W);
+                const rows = [['Indicator', 'Indicator #', 'Score #', 'Label']];
+                for (const ind of (e.indicators || [])) {
+                    for (const s of (ind.scores || [])) rows.push([ind.name || '', ind.position != null ? ind.position : '', s.position != null ? s.position : '', s.label || '']);
+                }
+                add(rows, 'Indicators', [{ wch: 32 }, { wch: 10 }, { wch: 8 }, { wch: 48 }]);
+                break;
+            }
+            default:
+                add(metaPairs(e), type.slice(0, 31), W);
         }
-        return rows;
+        return wb;
     }
 
     async function downloadExcel() {
         await loadLib('xlsx');
         if (typeof XLSX === 'undefined') { showToast(t('err_lib')); return; }
-        const wb = XLSX.utils.book_new();
-        const meta = XLSX.utils.aoa_to_sheet(metaRows());
-        meta['!cols'] = [{ wch: 24 }, { wch: 44 }];
-        XLSX.utils.book_append_sheet(wb, meta, 'Meta');
-        const inv = XLSX.utils.aoa_to_sheet(inventoryRows());
-        inv['!cols'] = [{ wch: 44 }, { wch: 8 }, { wch: 40 }, { wch: 14 }, { wch: 10 }, { wch: 32 }, { wch: 22 }];
-        XLSX.utils.book_append_sheet(wb, inv, 'Inventory');
-        const lcia = XLSX.utils.aoa_to_sheet(lciaRows());
-        lcia['!cols'] = [{ wch: 34 }, { wch: 44 }, { wch: 16 }, { wch: 12 }];
-        XLSX.utils.book_append_sheet(wb, lcia, 'LCIA');
-        XLSX.writeFile(wb, safeName(state.project && state.project.name) + '.xlsx');
-        showToast(t('exp_done'));
-    }
-
-    async function downloadWord() {
-        const escW = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        const s = state.stats || {};
-        let body = '<h1>LCA Project: ' + escW(state.project && state.project.name) + '</h1>';
-        body += '<div class="meta"><p><strong>' + escW(t('meta_saved')) + ':</strong> ' + escW(state.savedAt ? new Date(state.savedAt).toLocaleString() : '') + '</p>' +
-                '<p><strong>' + escW(t('meta_db')) + ':</strong> ' + escW(s.db || '') + '</p>' +
-                '<p><strong>' + escW(t('meta_entities')) + ':</strong> ' + escW(s.total || 0) + '</p></div>';
-        body += '<h2>' + escW(t('exp_inventory')) + '</h2>';
-        for (const p of (state.entities.Process || [])) {
-            body += '<h3>' + escW(p.name) + '</h3><table><tr><th>' + escW(t('c_io')) + '</th><th>' + escW(t('c_flow')) + '</th><th>' + escW(t('c_amount')) + '</th><th>' + escW(t('c_unit')) + '</th><th>' + escW(t('c_provider')) + '</th></tr>';
-            for (const x of (p.exchanges || [])) {
-                const isIn = x.input === true || x.isInput === true;
-                body += '<tr><td>' + escW(isIn ? t('in') : t('out')) + '</td><td>' + escW(refName(x.flow)) + '</td><td class="value">' + escW(x.amountFormula || fmtNum(x.amount)) + '</td><td>' + escW(refName(x.unit)) + '</td><td>' + escW(refName(x.defaultProvider) || '-') + '</td></tr>';
+        if (typeof JSZip === 'undefined') { showToast(t('err_jszip')); return; }
+        showToast(t('exp_generating'));
+        await new Promise(r => setTimeout(r, 50));
+        try {
+            const zip = new JSZip();
+            let n = 0;
+            for (const [type, arr] of Object.entries(state.entities)) {
+                if (!Array.isArray(arr)) continue;
+                for (const e of arr) {
+                    const wb = entityWorkbook(type, e);
+                    zip.file(type + '/' + safeName(e.name || e['@id']) + '.xlsx', XLSX.write(wb, { type: 'array', bookType: 'xlsx' }));
+                    n++;
+                }
             }
-            body += '</table>';
+            const blob = await zip.generateAsync({ type: 'blob' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = safeName(state.project && state.project.name) + '_excel.zip';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            showToast(t('exp_done') + ': ' + n + ' ' + t('exp_files'));
+        } catch (e) {
+            showToast(String(e.message || e));
         }
-        body += '<h2>' + escW(t('exp_lcia')) + '</h2>';
-        for (const c of (state.entities.ImpactCategory || [])) {
-            const fs = c.impactFactors || [];
-            body += '<h3>' + escW(c.name) + ' (' + fs.length + ')</h3><table><tr><th>' + escW(t('c_flow')) + '</th><th>' + escW(t('c_factor')) + '</th><th>' + escW(t('c_unit')) + '</th></tr>';
-            for (const f of fs.slice(0, 100)) {
-                body += '<tr><td>' + escW(refName(f.flow)) + '</td><td class="value">' + escW(fmtNum(f.value)) + '</td><td>' + escW(refName(f.unit) || c.refUnit || '') + '</td></tr>';
-            }
-            if (fs.length > 100) body += '<tr><td colspan="3">… ' + (fs.length - 100) + ' more</td></tr>';
-            body += '</table>';
-        }
-        body += '<div class="footer">Generated by LCA·AI on ' + new Date().toLocaleDateString() + '</div>';
-        const html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;color:#1C1B19}h1{font-size:24px}h2{border-bottom:1px solid #D6D2CB;padding-bottom:8px;font-size:18px}h3{font-size:14px;margin-top:18px}table{border-collapse:collapse;width:100%;margin:12px 0}th,td{border:1px solid #D6D2CB;padding:6px 10px;text-align:left;font-size:12px}th{background:#F4F2EE;text-transform:uppercase;font-size:10px}.value{font-family:"Courier New",monospace;text-align:right}.meta{color:#6B6862;font-size:13px}.footer{color:#9B978F;font-size:10px;margin-top:24px;border-top:1px solid #D6D2CB;padding-top:8px}</style></head><body>' + body + '</body></html>';
-        const blob = new Blob(['' + html], { type: 'application/msword' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = safeName(state.project && state.project.name) + '.doc';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-        showToast(t('exp_done'));
     }
 
     function downloadJson() {
@@ -1717,43 +1801,217 @@
         const a = document.createElement('a');
         a.href = url;
         a.download = safeName(state.project && state.project.name) + '.json';
+        document.body.appendChild(a);
         a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        showToast(t('exp_done'));
+    }
+
+    /* ══════════════════════════════════════════════════
+       AI report agent (ISO 14040/14044 narrative) for Word & PDF
+       ══════════════════════════════════════════════════ */
+    const AI_SYSTEM = [
+        'You are a senior life cycle assessment (LCA) consultant and technical writer with 15+ years of experience preparing ISO 14040/14044-compliant studies and EPD-style technical reports.',
+        'You receive a JSON description of an LCA project: processes with their technosphere and elementary exchanges, impact categories with characterization factors, product systems, data quality systems and database statistics.',
+        'Write a professional, publication-quality LCA report narrative based STRICTLY on the provided data. Never invent flows, processes, impact values or numbers that are not present in the input. You may derive simple figures (counts, shares of provided amounts, totals) and must label them as derived from the inventory.',
+        'Follow the ISO 14040/14044 report structure: goal and scope definition, life cycle inventory analysis (LCI), life cycle impact assessment (LCIA), interpretation.',
+        'Identify hotspots: processes and exchanges that dominate material and energy flows; comment on geographic coverage implied by process locations; comment on data quality (presence or absence of DQ systems and pedigree scores).',
+        'If information required by ISO is missing (e.g. no calculated impact results, no declared functional unit), state this explicitly in assumptions_limitations instead of fabricating it.',
+        'Respond ONLY with a JSON object having exactly these string keys: "title", "executive_summary", "goal_and_scope", "methodology", "inventory_analysis", "impact_assessment", "interpretation", "assumptions_limitations", "recommendations".',
+        'Each value is 1-3 paragraphs of dense technical prose. No markdown headers inside values. Bullet lines starting with "- " are allowed only inside "recommendations" and "assumptions_limitations".',
+        'Write the entire report in the language given by the "lang" field of the user message (ru, en or zh), using professional LCA terminology of that language.',
+    ].join(' ');
+
+    function aiPayload() {
+        const procs = (state.entities.Process || []).slice(0, 60).map(p => {
+            const ex = p.exchanges || [];
+            const top = list => list.slice(0, 6).map(x => ({
+                flow: refName(x.flow) || '', amount: x.amountFormula || x.amount, unit: refName(x.unit) || '',
+                provider: refName(x.defaultProvider) || null, dq: x.dqEntry || null,
+            }));
+            return {
+                name: p.name || '', location: refName(p.location) || null, category: catPath(p.category),
+                reference_flow: refName(p.refFlow) || null, unit: refName(p.unit) || null, ref_quantity: p.refQuantity ?? null,
+                inputs: top(ex.filter(x => x.input === true || x.isInput === true)),
+                outputs: top(ex.filter(x => !(x.input === true || x.isInput === true))),
+            };
+        });
+        return {
+            lang: pvLang,
+            project: state.project ? state.project.name : null,
+            saved_at: state.savedAt || null,
+            source_db: (state.stats || {}).db || null,
+            stats: state.stats || null,
+            processes: procs,
+            impact_categories: (state.entities.ImpactCategory || []).map(c => ({
+                name: c.name || '', ref_unit: c.refUnit || null,
+                n_factors: (c.impactFactors || []).length,
+                top_flows: (c.impactFactors || []).slice(0, 5).map(f => refName(f.flow) || ''),
+            })),
+            impact_methods: (state.entities.ImpactMethod || []).map(m => ({ name: m.name || '', n_categories: (m.impactCategories || []).length })),
+            product_systems: (state.entities.ProductSystem || []).map(p => ({ name: p.name || '', n_processes: (p.processes || []).length })),
+            dq_systems: (state.entities.DQSystem || []).map(d => ({ name: d.name || '', n_indicators: (d.indicators || []).length })),
+        };
+    }
+
+    async function callAIReport() {
+        if (state.aiReport) return state.aiReport;
+        const { data: { session } } = await db.auth.getSession();
+        if (!session) throw new Error('LOGIN_REQUIRED');
+        const res = await fetch(SB_URL + '/functions/v1/lca-proxy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token },
+            body: JSON.stringify({
+                model: 'deepseek-chat',
+                max_tokens: 8000,
+                temperature: 0.3,
+                response_format: { type: 'json_object' },
+                messages: [
+                    { role: 'system', content: AI_SYSTEM },
+                    { role: 'user', content: JSON.stringify(aiPayload()) },
+                ],
+            }),
+        });
+        if (!res.ok) throw new Error('AI HTTP ' + res.status);
+        const out = await res.json();
+        const text = out && out.choices && out.choices[0] && out.choices[0].message && out.choices[0].message.content;
+        if (!text) throw new Error('EMPTY_RESPONSE');
+        const rep = JSON.parse(text);
+        state.aiReport = rep;
+        return rep;
+    }
+
+    const REPORT_CSS = [
+        'body{font-family:Arial,Helvetica,sans-serif;color:#1C1B19;margin:0;padding:32px;font-size:13px;line-height:1.55}',
+        'h1{font-size:24px;margin:0 0 4px}',
+        'h2{font-size:16px;border-bottom:1px solid #D6D2CB;padding-bottom:6px;margin:26px 0 10px}',
+        'h3{font-size:13px;margin:16px 0 6px}',
+        'p{margin:8px 0}',
+        'ul{margin:8px 0;padding-left:20px}',
+        'table{border-collapse:collapse;width:100%;margin:10px 0;font-size:11px}',
+        'th,td{border:1px solid #C9C5BE;padding:5px 8px;text-align:left;vertical-align:top}',
+        'th{background:#F0EEE9;text-transform:uppercase;font-size:9.5px;letter-spacing:.04em}',
+        '.value{font-family:"Courier New",monospace;text-align:right}',
+        '.meta{color:#6B6862;font-size:12px;margin:6px 0 18px}',
+        '.meta strong{color:#1C1B19}',
+        '.footer{color:#9B978F;font-size:10px;margin-top:28px;border-top:1px solid #D6D2CB;padding-top:8px}',
+    ].join('');
+
+    function prose(v) {
+        if (!v) return '';
+        const lines = String(v).split(/\n/);
+        let html = '', ul = false;
+        const closeUl = () => { if (ul) { html += '</ul>'; ul = false; } };
+        for (const ln of lines) {
+            const s = ln.trim();
+            if (!s) { closeUl(); continue; }
+            if (s.startsWith('- ') || s.startsWith('• ')) {
+                if (!ul) { html += '<ul>'; ul = true; }
+                html += '<li>' + esc(s.replace(/^[-•]\s*/, '')) + '</li>';
+            } else { closeUl(); html += '<p>' + esc(s) + '</p>'; }
+        }
+        closeUl();
+        return html;
+    }
+
+    function reportBody(rep) {
+        const s = state.stats || {};
+        let h = '<h1>' + esc((rep && rep.title) || (state.project && state.project.name) || 'LCA Report') + '</h1>';
+        h += '<div class="meta"><p><strong>' + esc(t('meta_saved')) + ':</strong> ' + esc(state.savedAt ? new Date(state.savedAt).toLocaleString() : '') +
+             ' · <strong>' + esc(t('meta_db')) + ':</strong> ' + esc(s.db || '') +
+             ' · <strong>' + esc(t('meta_entities')) + ':</strong> ' + esc(s.total || 0) + '</p></div>';
+        const secs = [
+            ['executive_summary', t('rep_exec')],
+            ['goal_and_scope', t('rep_goal')],
+            ['methodology', t('rep_method')],
+            ['inventory_analysis', t('rep_lci')],
+            ['impact_assessment', t('rep_lcia')],
+            ['interpretation', t('rep_interp')],
+            ['assumptions_limitations', t('rep_limits')],
+            ['recommendations', t('rep_reco')],
+        ];
+        for (const [k, label] of secs) {
+            if (rep && rep[k]) h += '<h2>' + esc(label) + '</h2>' + prose(rep[k]);
+        }
+        h += '<h2>' + esc(t('exp_inventory')) + '</h2>';
+        for (const p of (state.entities.Process || [])) {
+            const ex = p.exchanges || [];
+            if (!ex.length) continue;
+            h += '<h3>' + esc(p.name) + '</h3><table><tr><th>' + esc(t('c_io')) + '</th><th>' + esc(t('c_flow')) + '</th><th>' + esc(t('c_amount')) + '</th><th>' + esc(t('c_unit')) + '</th><th>' + esc(t('c_provider')) + '</th><th>' + esc(t('c_dq')) + '</th></tr>';
+            for (const x of ex) {
+                const isIn = x.input === true || x.isInput === true;
+                h += '<tr><td>' + esc(isIn ? t('in') : t('out')) + '</td><td>' + esc(refName(x.flow)) + '</td><td class="value">' + esc(x.amountFormula || fmtNum(x.amount)) + '</td><td>' + esc(refName(x.unit)) + '</td><td>' + esc(refName(x.defaultProvider) || '-') + '</td><td>' + esc(x.dqEntry || '') + '</td></tr>';
+            }
+            h += '</table>';
+        }
+        h += '<h2>' + esc(t('exp_lcia')) + '</h2>';
+        for (const c of (state.entities.ImpactCategory || [])) {
+            const fs = c.impactFactors || [];
+            h += '<h3>' + esc(c.name) + (c.refUnit ? ' [' + esc(c.refUnit) + ']' : '') + ' — ' + fs.length + '</h3>';
+            if (!fs.length) continue;
+            h += '<table><tr><th>' + esc(t('c_flow')) + '</th><th>' + esc(t('c_factor')) + '</th><th>' + esc(t('c_unit')) + '</th></tr>';
+            for (const f of fs.slice(0, 60)) {
+                h += '<tr><td>' + esc(refName(f.flow)) + '</td><td class="value">' + esc(fmtNum(f.value)) + '</td><td>' + esc(refName(f.unit) || c.refUnit || '') + '</td></tr>';
+            }
+            if (fs.length > 60) h += '<tr><td colspan="3">… ' + (fs.length - 60) + '</td></tr>';
+            h += '</table>';
+        }
+        h += '<div class="footer">LCA·AI Studio — ' + esc(new Date().toLocaleDateString()) + '</div>';
+        return h;
+    }
+    const reportDoc = rep => '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><style>' + REPORT_CSS + '</style></head><body>' + reportBody(rep) + '</body></html>';
+
+    async function downloadWord() {
+        showToast(t('ai_generating'));
+        let rep = null;
+        try { rep = await callAIReport(); } catch (e) { showToast(t('ai_error') + String(e.message || e)); return; }
+        const blob = new Blob(['' + reportDoc(rep)], { type: 'application/msword' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = safeName(state.project && state.project.name) + '_report.doc';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
         URL.revokeObjectURL(url);
         showToast(t('exp_done'));
     }
 
     async function downloadPdf() {
-        showToast(t('pdf_generating'));
+        showToast(t('ai_generating'));
+        let rep = null;
+        try { rep = await callAIReport(); } catch (e) { showToast(t('ai_error') + String(e.message || e)); return; }
         const ok1 = await loadLib('jspdf');
         const ok2 = await loadLib('html2canvas');
         if (!ok1 || !ok2 || !window.jspdf || !window.html2canvas) { showToast(t('err_lib')); return; }
-        const side = document.querySelector('.pv-side');
-        const bar = document.getElementById('expBar');
-        const acts = document.getElementById('projActions');
-        side.style.display = 'none'; bar.style.display = 'none'; acts.style.display = 'none';
+        showToast(t('pdf_generating'));
+        const holder = document.createElement('div');
+        holder.style.cssText = 'position:fixed;left:-10000px;top:0;width:920px;background:#ffffff;z-index:-1';
+        holder.innerHTML = '<style>' + REPORT_CSS + '</style>' + reportBody(rep);
+        document.body.appendChild(holder);
         try {
-            const el = document.getElementById('detailView');
-            const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: getComputedStyle(document.body).backgroundColor });
+            const canvas = await html2canvas(holder, { scale: 1.5, backgroundColor: '#ffffff', useCORS: true });
             const jsPDF = window.jspdf.jsPDF;
             const pdf = new jsPDF('p', 'mm', 'a4');
             const imgW = 210, pageH = 297;
             const imgH = canvas.height * imgW / canvas.width;
-            const img = canvas.toDataURL('image/png');
+            const img = canvas.toDataURL('image/jpeg', 0.78);
             let heightLeft = imgH, position = 0;
-            pdf.addImage(img, 'PNG', 0, position, imgW, imgH);
+            pdf.addImage(img, 'JPEG', 0, position, imgW, imgH);
             heightLeft -= pageH;
             while (heightLeft > 0) {
                 position = heightLeft - imgH;
                 pdf.addPage();
-                pdf.addImage(img, 'PNG', 0, position, imgW, imgH);
+                pdf.addImage(img, 'JPEG', 0, position, imgW, imgH);
                 heightLeft -= pageH;
             }
-            pdf.save(safeName(state.project && state.project.name) + '.pdf');
+            pdf.save(safeName(state.project && state.project.name) + '_report.pdf');
             showToast(t('exp_done'));
         } catch (e) {
             showToast(String(e.message || e));
         } finally {
-            side.style.display = ''; bar.style.display = ''; acts.style.display = '';
+            holder.remove();
         }
     }
 
@@ -1777,7 +2035,11 @@
         document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
     })();
 
-    init();
+    (function waitSDK(tries) {
+        if (window.supabase && window.supabase.createClient) { init(); return; }
+        if (tries > 150) { showToast(t('err_sb')); return; }
+        setTimeout(() => waitSDK(tries + 1), 200);
+    })(0);
 </script>
 </body>
 </html>
