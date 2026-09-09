@@ -1109,6 +1109,7 @@
                 pw_wrong_old: 'Неверный текущий пароль', pw_old_required: 'Введите текущий пароль',
                 status_done: 'Готово', status_pending: 'В процессе',
                 src_engine: 'Расчёт из приложения',
+                snap_versions: 'версий', snap_open: 'Открыть облачный проект',
                 tab_profile: 'Профиль', tab_security: 'Безопасность', tab_calc: 'Расчёты', tab_interface: 'Интерфейс', tab_data: 'Данные',
                 calc_settings: 'Параметры расчётов', unit_label: 'Единицы CO₂', precision_label: 'Точность AI', region_label: 'Регион по умолчанию',
                 precision_fast: 'Быстрая (меньше деталей)', precision_deep: 'Глубокая (полный LCA)',
@@ -1223,6 +1224,7 @@
                 pw_wrong_old: 'Wrong current password', pw_old_required: 'Enter current password',
                 status_done: 'Done', status_pending: 'In progress',
                 src_engine: 'App calculation',
+                snap_versions: 'versions', snap_open: 'Open cloud project',
                 tab_profile: 'Profile', tab_security: 'Security', tab_calc: 'Calculations', tab_interface: 'Interface', tab_data: 'Data',
                 calc_settings: 'Calculation settings', unit_label: 'CO₂ units', precision_label: 'AI precision', region_label: 'Default region',
                 precision_fast: 'Fast (less detail)', precision_deep: 'Deep (full LCA)',
@@ -1337,6 +1339,7 @@
                 pw_wrong_old: '当前密码错误', pw_old_required: '请输入当前密码',
                 status_done: '已完成', status_pending: '进行中',
                 src_engine: '应用计算',
+                snap_versions: '个版本', snap_open: '打开云项目',
                 tab_profile: '个人资料', tab_security: '安全', tab_calc: '计算', tab_interface: '界面', tab_data: '数据',
                 calc_settings: '计算参数', unit_label: 'CO₂ 单位', precision_label: 'AI 精度', region_label: '默认区域',
                 precision_fast: '快速（较少细节）', precision_deep: '深度（完整 LCA）',
@@ -1382,6 +1385,7 @@
 
         /* ── Local state ── */
         let historyCache = [];      // все строки user_history (загружаются один раз, фильтруются локально)
+        let snapByProject = {};     // project_id -> { count, latest, total } облачных снимков
         let historyShown = 10;      // пагинация «показать ещё»
         const PAGE = 10;
 
@@ -2306,6 +2310,10 @@
             let h = '<div class="card" id="proj-' + p.id + '">';
             h += '<div class="card-header">';
             h += '<div style="flex:1"><div class="card-title">' + esc(p.name) + '</div></div>';
+            const snap = snapByProject[p.id];
+            if (snap && snap.count > 0) {
+                h += '<a class="badge badge-blue" style="text-decoration:none;cursor:pointer" href="/project.html?id=' + p.id + '" title="' + esc(t('snap_open')) + '">☁ v' + snap.latest + ' · ' + snap.count + ' ' + esc(t('snap_versions')) + (snap.total ? ' · ' + snap.total + ' ent.' : '') + '</a>';
+            }
             h += '<div style="display:flex;align-items:center;gap:8px"><span class="badge badge-blue">' + calcCount + ' ' + t('calcs_count') + '</span><div class="card-date">' + fmtDate(p.created_at) + '</div></div>';
             h += '</div>';
             if (calcs && calcs.length > 0) {
@@ -2369,6 +2377,15 @@
             try {
                 const { data: projects, error: pErr } = await db.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
                 if (pErr) throw pErr;
+                try {
+                    const { data: snaps } = await db.from('project_snapshots').select('project_id, version, stats').eq('user_id', currentUser.id).order('version', { ascending: false });
+                    snapByProject = {};
+                    for (const s of (snaps || [])) {
+                        const m = snapByProject[s.project_id] || (snapByProject[s.project_id] = { count: 0, latest: 0, total: 0 });
+                        m.count++;
+                        if (s.version > m.latest) { m.latest = s.version; m.total = (s.stats && s.stats.total) || 0; }
+                    }
+                } catch (e) { console.warn('snapshots load:', e); }
                 const list = document.getElementById('projectsList');
                 if (!projects || projects.length === 0) {
                     list.innerHTML = '<div class="empty"><div class="empty-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5a1 1 0 0 1 1-1h4.3l2 2H20a1 1 0 0 1 1 1V18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6.5z"/></svg></div><div class="empty-text">' + t('no_projects') + '</div><button class="btn btn-primary" id="emptyCreateBtn">' + t('create') + '</button></div>';

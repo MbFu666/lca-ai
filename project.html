@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+    (function(){
+      var t = localStorage.getItem('lca-theme');
+      if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.style.background = '#131211';
+      }
+    })();
+    </script>
+    <title>LCA·AI — Проект</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        if (!window.supabase) {
+            var s = document.createElement('script');
+            s.src = 'https://unpkg.com/@supabase/supabase-js@2';
+            document.head.appendChild(s);
+        }
+    </script>
+    <style>
+        :root {
+            --paper: #F2F0EC; --paper-sunk: #E9E6E0; --paper-raised: #F8F7F4;
+            --graphite: #1C1B19; --graphite-mid: #6B6862; --graphite-low: #9B978F;
+            --rule: #D6D2CB;
+            --e-2: #D4A574; --e-3: #D9481C; --e-4: #F03B0C; --e-5: #F03B0C; --e-ink: #7A2E10;
+            --bg: var(--paper); --bg-soft: var(--paper-sunk); --bg-card: var(--paper-raised);
+            --ink: var(--graphite); --ink-soft: var(--graphite-mid); --ink-mute: var(--graphite-low);
+            --jade: var(--e-3);
+            --sans: 'Source Serif 4', 'Noto Sans SC', Georgia, serif; --mono: 'JetBrains Mono', monospace;
+            --display: 'Oswald', 'Noto Sans SC', system-ui, sans-serif;
+            --transition: all .14s cubic-bezier(.22,1,.36,1);
+        }
+        html.dark {
+            --paper: #131211; --paper-sunk: #0D0C0B; --paper-raised: #1B1A18;
+            --graphite: #EDEAE4; --graphite-mid: #9B978F; --graphite-low: #6B6862;
+            --rule: #2E2C29;
+            --e-3: #F05A23; --e-4: #FF6B2C; --e-ink: #FF8A50;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--sans); background: var(--bg); color: var(--ink); min-height: 100vh; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+
+        header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 0; border-bottom: 1px solid var(--rule);
+            background: color-mix(in srgb, var(--bg) 85%, transparent); position: sticky; top: 0; z-index: 100;
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        }
+        .brand { display: inline-flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; color: var(--ink); text-decoration: none; font-family: var(--display); }
+        .brand em { font-style: normal; color: var(--jade); font-weight: 800; }
+        .brand .dot { width: 8px; height: 8px; background: var(--jade); display: inline-block; }
+        .nav { display: flex; gap: 20px; align-items: center; }
+        .nav a { color: var(--graphite-low); text-decoration: none; font-size: 12px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; padding: 4px 0; font-family: var(--mono); }
+        .nav a:hover { color: var(--graphite); }
+        .nav a.active { color: var(--graphite); font-weight: 600; }
+        .theme-toggle { background: none; border: 1px solid var(--rule); width: 30px; height: 30px; cursor: pointer; font-size: 0; display: inline-flex; align-items: center; justify-content: center; }
+        .theme-toggle::after { content: ''; width: 12px; height: 12px; border: 1px solid var(--graphite); background: linear-gradient(90deg, var(--graphite) 50%, transparent 50%); }
+        .lang { display: inline-flex; border: 1px solid var(--rule); overflow: hidden; }
+        .lang button { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; padding: 5px 10px; border: none; background: transparent; color: var(--graphite-low); cursor: pointer; border-right: 1px solid var(--rule); }
+        .lang button:last-child { border-right: none; }
+        .lang button.active { background: var(--graphite); color: var(--paper); }
+
+        .topbar {
+            display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+            padding: 28px 0 18px; border-bottom: 1px solid var(--rule);
+        }
+        .topbar h1 { font-family: var(--display); font-size: 26px; font-weight: 600; letter-spacing: 0.01em; }
+        .topbar .sub { font-size: 13px; color: var(--ink-mute); margin-top: 6px; font-family: var(--mono); }
+        .topbar .sub b { color: var(--ink-soft); font-weight: 600; }
+        .top-actions { display: flex; align-items: center; gap: 10px; }
+        select.vsel {
+            font-family: var(--mono); font-size: 13px; padding: 7px 10px;
+            background: var(--bg-card); color: var(--ink); border: 1px solid var(--rule); cursor: pointer;
+        }
+        .btn-ghost {
+            font-family: var(--mono); font-size: 12px; padding: 7px 12px; cursor: pointer;
+            background: transparent; color: var(--ink-soft); border: 1px solid var(--rule); text-decoration: none;
+        }
+        .btn-ghost:hover { border-color: var(--graphite); color: var(--graphite); }
+
+        .pv-layout { display: grid; grid-template-columns: 300px 1fr; gap: 28px; padding: 24px 0 60px; }
+        @media (max-width: 900px) { .pv-layout { grid-template-columns: 1fr; } .pv-side { position: static !important; max-height: none !important; } }
+
+        .pv-side { position: sticky; top: 76px; align-self: start; max-height: calc(100vh - 100px); overflow-y: auto; }
+        .pv-search {
+            width: 100%; font-family: var(--mono); font-size: 12px; padding: 8px 10px;
+            background: var(--bg-card); border: 1px solid var(--rule); color: var(--ink); margin-bottom: 12px;
+        }
+        .pv-search:focus { outline: none; border-color: var(--graphite-mid); }
+        .grp { border-bottom: 1px solid var(--rule); }
+        .grp-head {
+            display: flex; justify-content: space-between; align-items: center; width: 100%;
+            padding: 9px 4px; background: none; border: none; cursor: pointer;
+            font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+            color: var(--ink-soft); text-align: left;
+        }
+        .grp-head:hover { color: var(--graphite); }
+        .grp-head .cnt { color: var(--ink-mute); }
+        .grp-head .arr { transition: transform .12s ease; display: inline-block; }
+        .grp.open .grp-head .arr { transform: rotate(90deg); }
+        .grp-body { display: none; padding: 0 0 8px; }
+        .grp.open .grp-body { display: block; }
+        .ent {
+            display: block; width: 100%; text-align: left; background: none; border: none; cursor: pointer;
+            padding: 5px 8px 5px 18px; font-size: 13px; color: var(--ink-soft);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: var(--sans);
+        }
+        .ent:hover { background: var(--bg-soft); color: var(--graphite); }
+        .ent.sel { background: var(--graphite); color: var(--paper); }
+
+        .pv-main { min-width: 0; }
+        .card { background: var(--bg-card); border: 1px solid var(--rule); padding: 24px; margin-bottom: 18px; }
+        .card h2 { font-family: var(--display); font-size: 20px; font-weight: 600; margin-bottom: 4px; word-break: break-word; }
+        .card .path { font-family: var(--mono); font-size: 11px; color: var(--ink-mute); margin-bottom: 16px; word-break: break-all; }
+        .badge { display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border: 1px solid var(--rule); color: var(--ink-soft); margin-left: 8px; vertical-align: middle; }
+        .badge.hot { border-color: var(--jade); color: var(--jade); }
+        table.kv { width: 100%; border-collapse: collapse; font-size: 13px; }
+        table.kv td { padding: 6px 8px; border-top: 1px solid var(--rule); vertical-align: top; }
+        table.kv td.k { width: 220px; color: var(--ink-mute); font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+        table.ex { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+        table.ex th {
+            text-align: left; font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
+            color: var(--ink-mute); padding: 6px 8px; border-bottom: 1px solid var(--rule); font-weight: 500;
+        }
+        table.ex td { padding: 6px 8px; border-top: 1px solid var(--rule); vertical-align: top; }
+        table.ex td.num { font-family: var(--mono); font-size: 12px; text-align: right; white-space: nowrap; }
+        td.io-in { color: var(--ink-mute); }
+        td.io-out { color: var(--jade); font-weight: 600; }
+        a.ref { color: var(--ink); text-decoration: none; border-bottom: 1px dotted var(--graphite-low); cursor: pointer; }
+        a.ref:hover { color: var(--jade); border-bottom-color: var(--jade); }
+        .sect { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); margin: 18px 0 6px; }
+        .desc { font-size: 14px; line-height: 1.6; color: var(--ink-soft); white-space: pre-wrap; margin-top: 8px; }
+        .empty { padding: 60px 20px; text-align: center; color: var(--ink-mute); font-size: 14px; }
+        .more-btn { margin-top: 8px; font-family: var(--mono); font-size: 11px; background: none; border: 1px solid var(--rule); color: var(--ink-soft); padding: 5px 10px; cursor: pointer; }
+        .more-btn:hover { border-color: var(--graphite); color: var(--graphite); }
+        #toast {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: var(--graphite); color: var(--paper); font-size: 13px; padding: 10px 18px;
+            opacity: 0; pointer-events: none; transition: var(--transition); z-index: 300; font-family: var(--mono);
+        }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container" style="display:flex;justify-content:space-between;align-items:center;width:100%">
+            <a href="/" class="brand"><span class="dot"></span>LCA<em>·</em>AI</a>
+            <div class="nav">
+                <a href="/" data-i18n="nav_home">Главная</a>
+                <a href="/cabinet.html" data-i18n="nav_cabinet">Кабинет</a>
+                <div class="lang" role="group" aria-label="Language">
+                    <button data-lang="ru" class="active">RU</button>
+                    <button data-lang="en">EN</button>
+                    <button data-lang="zh">中文</button>
+                </div>
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"></button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="topbar">
+            <div>
+                <h1 id="projName">…</h1>
+                <div class="sub" id="projMeta"></div>
+            </div>
+            <div class="top-actions">
+                <select class="vsel" id="versionSel" title="version"></select>
+                <a class="btn-ghost" href="/cabinet.html" data-i18n="back">← В кабинет</a>
+            </div>
+        </div>
+
+        <div class="pv-layout">
+            <aside class="pv-side">
+                <input class="pv-search" id="searchInput" type="search" placeholder="Поиск…" data-i18n-placeholder="search_ph">
+                <div id="tree"></div>
+            </aside>
+            <main class="pv-main" id="detail">
+                <div class="empty">…</div>
+            </main>
+        </div>
+    </div>
+    <div id="toast"></div>
+
+<script>
+    const SB_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
+
+    /* ── i18n ── */
+    const PV_I18N = {
+        ru: {
+            title: 'LCA·AI — Проект', nav_home: 'Главная', nav_cabinet: 'Кабинет', back: '← В кабинет',
+            search_ph: 'Поиск по названию…',
+            loading: 'Загрузка…', err_no_id: 'Не указан id проекта', err_not_found: 'Проект не найден или недоступен',
+            err_load: 'Ошибка загрузки: ', err_sb: 'Supabase не загружен',
+            g_processes: 'Процессы', g_flows: 'Потоки', g_systems: 'Системы продукта', g_methods: 'Методы оценки',
+            g_categories: 'Категории воздействия', g_results: 'Результаты', g_units: 'Единицы измерения',
+            g_flowprops: 'Свойства потоков', g_locations: 'Локации', g_actors: 'Акторы', g_sources: 'Источники',
+            g_dq: 'Качество данных', g_params: 'Параметры', g_currency: 'Валюты', g_social: 'Соц. индикаторы',
+            meta_version: 'версия', meta_entities: 'сущностей', meta_size: 'размер', meta_db: 'исходная база', meta_saved: 'сохранено',
+            k_category: 'Категория', k_location: 'Локация', k_type: 'Тип', k_version: 'Версия', k_changed: 'Изменён',
+            k_description: 'Описание', k_cas: 'CAS', k_refunit: 'Ед. измерения', k_ref_flow: 'Ref-поток',
+            k_unitgroup: 'Группа единиц', k_value: 'Значение', k_code: 'Код', k_url: 'URL', k_organisation: 'Организация',
+            s_inputs: 'Входы', s_outputs: 'Выходы', s_exchanges: 'Обмены', s_flowprops: 'Свойства потока',
+            s_factors: 'Коэффициенты воздействия', s_categories: 'Категории метода', s_units: 'Единицы',
+            s_indicators: 'Индикаторы DQ', s_processes: 'Процессы системы', s_setup: 'Параметры расчёта',
+            s_results: 'Результаты', s_links: 'Связи процессов', s_other: 'Данные',
+            c_flow: 'Поток', c_amount: 'Кол-во', c_unit: 'Ед.', c_provider: 'Провайдер', c_io: 'В/Вых', c_dq: 'DQ',
+            c_factor: 'Фактор', c_prop: 'Свойство', c_conv: 'Конверсия', c_ref: 'ref', c_position: '№', c_label: 'Метка',
+            c_target: 'Целевое кол-во', c_refprocess: 'Ref-процесс',
+            more: 'показать ещё ({n})', none: '—', in: 'вход', out: 'выход',
+            empty_tree: 'В снимке нет данных', no_selection: 'Выберите элемент слева',
+        },
+        en: {
+            title: 'LCA·AI — Project', nav_home: 'Home', nav_cabinet: 'Cabinet', back: '← Cabinet',
+            search_ph: 'Search by name…',
+            loading: 'Loading…', err_no_id: 'Project id missing', err_not_found: 'Project not found or not accessible',
+            err_load: 'Load error: ', err_sb: 'Supabase not loaded',
+            g_processes: 'Processes', g_flows: 'Flows', g_systems: 'Product systems', g_methods: 'Impact methods',
+            g_categories: 'Impact categories', g_results: 'Results', g_units: 'Unit groups',
+            g_flowprops: 'Flow properties', g_locations: 'Locations', g_actors: 'Actors', g_sources: 'Sources',
+            g_dq: 'Data quality', g_params: 'Parameters', g_currency: 'Currencies', g_social: 'Social indicators',
+            meta_version: 'version', meta_entities: 'entities', meta_size: 'size', meta_db: 'source database', meta_saved: 'saved',
+            k_category: 'Category', k_location: 'Location', k_type: 'Type', k_version: 'Version', k_changed: 'Last change',
+            k_description: 'Description', k_cas: 'CAS', k_refunit: 'Reference unit', k_ref_flow: 'Reference flow',
+            k_unitgroup: 'Unit group', k_value: 'Value', k_code: 'Code', k_url: 'URL', k_organisation: 'Organisation',
+            s_inputs: 'Inputs', s_outputs: 'Outputs', s_exchanges: 'Exchanges', s_flowprops: 'Flow properties',
+            s_factors: 'Impact factors', s_categories: 'Method categories', s_units: 'Units',
+            s_indicators: 'DQ indicators', s_processes: 'System processes', s_setup: 'Calculation setup',
+            s_results: 'Results', s_links: 'Process links', s_other: 'Data',
+            c_flow: 'Flow', c_amount: 'Amount', c_unit: 'Unit', c_provider: 'Provider', c_io: 'In/Out', c_dq: 'DQ',
+            c_factor: 'Factor', c_prop: 'Property', c_conv: 'Conversion', c_ref: 'ref', c_position: '#', c_label: 'Label',
+            c_target: 'Target amount', c_refprocess: 'Reference process',
+            more: 'show more ({n})', none: '—', in: 'in', out: 'out',
+            empty_tree: 'Snapshot is empty', no_selection: 'Select an item on the left',
+        },
+        zh: {
+            title: 'LCA·AI — 项目', nav_home: '首页', nav_cabinet: '个人中心', back: '← 返回',
+            search_ph: '按名称搜索…',
+            loading: '加载中…', err_no_id: '缺少项目 ID', err_not_found: '项目未找到或无权访问',
+            err_load: '加载错误：', err_sb: 'Supabase 未加载',
+            g_processes: '过程', g_flows: '流', g_systems: '产品系统', g_methods: '评价方法',
+            g_categories: '影响类别', g_results: '结果', g_units: '单位组',
+            g_flowprops: '流属性', g_locations: '地区', g_actors: '参与者', g_sources: '来源',
+            g_dq: '数据质量', g_params: '参数', g_currency: '货币', g_social: '社会指标',
+            meta_version: '版本', meta_entities: '实体', meta_size: '大小', meta_db: '源数据库', meta_saved: '保存于',
+            k_category: '类别', k_location: '地区', k_type: '类型', k_version: '版本', k_changed: '修改时间',
+            k_description: '描述', k_cas: 'CAS', k_refunit: '参考单位', k_ref_flow: '参考流',
+            k_unitgroup: '单位组', k_value: '值', k_code: '代码', k_url: 'URL', k_organisation: '组织',
+            s_inputs: '输入', s_outputs: '输出', s_exchanges: '交换', s_flowprops: '流属性',
+            s_factors: '影响因子', s_categories: '方法类别', s_units: '单位',
+            s_indicators: 'DQ 指标', s_processes: '系统过程', s_setup: '计算设置',
+            s_results: '结果', s_links: '过程链接', s_other: '数据',
+            c_flow: '流', c_amount: '数量', c_unit: '单位', c_provider: '提供者', c_io: '入/出', c_dq: 'DQ',
+            c_factor: '因子', c_prop: '属性', c_conv: '换算', c_ref: 'ref', c_position: '#', c_label: '标签',
+            c_target: '目标数量', c_refprocess: '参考过程',
+            more: '显示更多 ({n})', none: '—', in: '入', out: '出',
+            empty_tree: '快照为空', no_selection: '请在左侧选择条目',
+        },
+    };
+    let pvLang = 'ru';
+    function t(k) { return (PV_I18N[pvLang] && PV_I18N[pvLang][k]) || PV_I18N.ru[k] || k; }
+    function applyLang(lang) {
+        pvLang = lang;
+        document.title = t('title');
+        document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+        document.querySelectorAll('.lang button').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+        renderTree();
+        if (state.sel) selectEntity(state.sel.type, state.sel.id, true);
+        renderMeta();
+    }
+
+    /* ── theme ── */
+    function syncThemeUI() {
+        const dt = document.getElementById('themeToggle');
+        if (document.documentElement.classList.contains('dark')) dt.classList.add('active'); else dt.classList.remove('active');
+    }
+    document.getElementById('themeToggle').addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        localStorage.setItem('lca-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        syncThemeUI();
+    });
+    syncThemeUI();
+
+    /* ── helpers ── */
+    function esc(s) { const d = document.createElement('div'); d.textContent = (s === null || s === undefined) ? '' : String(s); return d.innerHTML; }
+    function showToast(msg) {
+        const el = document.getElementById('toast');
+        el.textContent = msg; el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 3000);
+    }
+    function fmtDate(iso) {
+        return new Date(iso).toLocaleDateString(pvLang === 'zh' ? 'zh-CN' : pvLang, { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+    function fmtNum(v) {
+        const n = parseFloat(v);
+        if (isNaN(n)) return String(v ?? '');
+        if (n !== 0 && (Math.abs(n) < 0.001 || Math.abs(n) >= 100000)) return n.toExponential(3);
+        return String(Math.round(n * 100000) / 100000);
+    }
+    const refId = r => r && typeof r === 'object' ? (r['@id'] || r.id || null) : null;
+    const refName = r => (r && typeof r === 'object' && (r.name || r['@id'])) || (typeof r === 'string' ? r : null);
+    const catPath = c => {
+        const n = refName(c);
+        if (!n) return null;
+        return String(n);
+    };
+
+    /* ── state ── */
+    const GROUPS = [
+        { key: 'Process', i18n: 'g_processes' },
+        { key: 'Flow', i18n: 'g_flows' },
+        { key: 'ProductSystem', i18n: 'g_systems' },
+        { key: 'ImpactMethod', i18n: 'g_methods' },
+        { key: 'ImpactCategory', i18n: 'g_categories' },
+        { key: 'Result', i18n: 'g_results' },
+        { key: 'UnitGroup', i18n: 'g_units' },
+        { key: 'FlowProperty', i18n: 'g_flowprops' },
+        { key: 'Location', i18n: 'g_locations' },
+        { key: 'Actor', i18n: 'g_actors' },
+        { key: 'Source', i18n: 'g_sources' },
+        { key: 'DQSystem', i18n: 'g_dq' },
+        { key: 'Parameter', i18n: 'g_params' },
+        { key: 'Currency', i18n: 'g_currency' },
+        { key: 'SocialIndicator', i18n: 'g_social' },
+    ];
+    const state = {
+        projectId: null, project: null,
+        snapshots: [], version: null,
+        entities: {}, index: new Map(), stats: null,
+        sel: null, openGroups: new Set(['Process']),
+        factorLimit: new Map(),
+    };
+
+    /* ── data loading ── */
+    let db = null;
+    async function init() {
+        if (!(window.supabase && window.supabase.createClient)) { showToast(t('err_sb')); return; }
+        db = window.supabase.createClient(SB_URL, SB_KEY);
+        const { data: { session } } = await db.auth.getSession();
+        if (!session) { window.location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search); return; }
+        const params = new URLSearchParams(location.search);
+        state.projectId = params.get('id');
+        if (!state.projectId) { document.getElementById('projName').textContent = t('err_no_id'); return; }
+        const vParam = params.get('v');
+        try {
+            const { data: proj, error: pErr } = await db.from('user_projects').select('*').eq('id', state.projectId).single();
+            if (pErr || !proj) throw new Error(t('err_not_found'));
+            state.project = proj;
+            const { data: snaps, error: sErr } = await db.from('project_snapshots')
+                .select('id, version, created_at, stats, note')
+                .eq('project_id', state.projectId).order('version', { ascending: false });
+            if (sErr) throw sErr;
+            state.snapshots = snaps || [];
+            if (!state.snapshots.length) throw new Error(t('err_not_found'));
+            const want = parseInt(vParam, 10);
+            const chosen = state.snapshots.find(s => s.version === want) || state.snapshots[0];
+            fillVersionSel(chosen.version);
+            await loadSnapshot(chosen.version);
+        } catch (e) {
+            console.error(e);
+            document.getElementById('projName').textContent = t('err_not_found');
+            document.getElementById('projMeta').textContent = String(e.message || e);
+        }
+    }
+
+    function fillVersionSel(current) {
+        const sel = document.getElementById('versionSel');
+        sel.innerHTML = state.snapshots.map(s =>
+            '<option value="' + s.version + '"' + (s.version === current ? ' selected' : '') + '>v' + s.version + ' · ' + fmtDate(s.created_at) + '</option>'
+        ).join('');
+        sel.onchange = () => loadSnapshot(parseInt(sel.value, 10));
+    }
+
+    async function loadSnapshot(version) {
+        state.version = version;
+        document.getElementById('detail').innerHTML = '<div class="empty">' + esc(t('loading')) + '</div>';
+        const { data, error } = await db.from('project_snapshots')
+            .select('entities, stats, created_at, note')
+            .eq('project_id', state.projectId).eq('version', version).single();
+        if (error) { showToast(t('err_load') + error.message); return; }
+        state.entities = data.entities || {};
+        state.stats = data.stats || null;
+        state.savedAt = data.created_at;
+        state.index = new Map();
+        for (const [type, arr] of Object.entries(state.entities)) {
+            if (!Array.isArray(arr)) continue;
+            for (const e of arr) {
+                const id = e && e['@id'];
+                if (id) state.index.set(id, { type, entity: e });
+            }
+        }
+        state.sel = null;
+        state.factorLimit = new Map();
+        renderMeta();
+        renderTree();
+        const firstProc = (state.entities.Process || [])[0];
+        const firstAny = firstProc || Object.values(state.entities).find(a => Array.isArray(a) && a.length)?.[0];
+        if (firstAny) selectEntity(firstAny['@type'] || typeOf(firstAny), firstAny['@id']);
+        else document.getElementById('detail').innerHTML = '<div class="empty">' + esc(t('empty_tree')) + '</div>';
+        history.replaceState(null, '', '?id=' + state.projectId + '&v=' + version);
+    }
+
+    function typeOf(e) {
+        for (const [type, arr] of Object.entries(state.entities)) {
+            if (Array.isArray(arr) && arr.includes(e)) return type;
+        }
+        return null;
+    }
+
+    function renderMeta() {
+        document.getElementById('projName').textContent = state.project ? state.project.name : '…';
+        const s = state.stats || {};
+        const parts = [];
+        if (state.version) parts.push(t('meta_version') + ': <b>v' + state.version + '</b>');
+        if (s.total) parts.push(t('meta_entities') + ': <b>' + s.total + '</b>');
+        if (s.sizeMb) parts.push(t('meta_size') + ': <b>' + s.sizeMb + ' MB</b>');
+        if (s.db) parts.push(t('meta_db') + ': <b>' + esc(s.db) + '</b>');
+        if (state.savedAt) parts.push(t('meta_saved') + ': <b>' + fmtDate(state.savedAt) + '</b>');
+        document.getElementById('projMeta').innerHTML = parts.join(' · ');
+    }
+
+    /* ── tree ── */
+    function renderTree() {
+        const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+        const box = document.getElementById('tree');
+        let html = '';
+        for (const g of GROUPS) {
+            let arr = state.entities[g.key] || [];
+            if (q) arr = arr.filter(e => String(e.name || '').toLowerCase().includes(q));
+            if (!arr.length) continue;
+            const open = q ? true : state.openGroups.has(g.key);
+            html += '<div class="grp' + (open ? ' open' : '') + '" data-grp="' + g.key + '">';
+            html += '<button class="grp-head" data-toggle="' + g.key + '"><span><span class="arr">▸</span> ' + esc(t(g.i18n)) + '</span><span class="cnt">' + arr.length + '</span></button>';
+            html += '<div class="grp-body">';
+            for (const e of arr) {
+                const selCls = state.sel && state.sel.id === e['@id'] ? ' sel' : '';
+                html += '<button class="ent' + selCls + '" data-type="' + g.key + '" data-id="' + esc(e['@id']) + '" title="' + esc(e.name) + '">' + esc(e.name || e['@id']) + '</button>';
+            }
+            html += '</div></div>';
+        }
+        if (!html) html = '<div class="empty">' + esc(q ? t('no_selection') : t('empty_tree')) + '</div>';
+        box.innerHTML = html;
+    }
+    document.getElementById('tree').addEventListener('click', e => {
+        const tog = e.target.closest('[data-toggle]');
+        if (tog) {
+            const k = tog.dataset.toggle;
+            if (state.openGroups.has(k)) state.openGroups.delete(k); else state.openGroups.add(k);
+            renderTree();
+            return;
+        }
+        const ent = e.target.closest('.ent');
+        if (ent) selectEntity(ent.dataset.type, ent.dataset.id);
+    });
+    document.getElementById('searchInput').addEventListener('input', renderTree);
+
+    /* ── detail rendering ── */
+    function selectEntity(type, id, silent) {
+        const hit = state.index.get(id);
+        const e = hit ? hit.entity : null;
+        if (!e) return;
+        state.sel = { type: hit.type || type, id };
+        if (!silent) {
+            state.openGroups.add(state.sel.type);
+            renderTree();
+        } else {
+            document.querySelectorAll('.ent').forEach(b => b.classList.toggle('sel', b.dataset.id === id));
+        }
+        const box = document.getElementById('detail');
+        box.innerHTML = renderEntity(e, state.sel.type);
+        box.querySelectorAll('a.ref[data-goto]').forEach(a => {
+            a.addEventListener('click', ev => { ev.preventDefault(); selectEntity(null, a.dataset.goto); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+        });
+        box.querySelectorAll('button.more-btn').forEach(b => {
+            b.addEventListener('click', () => {
+                const k = b.dataset.key;
+                state.factorLimit.set(k, (state.factorLimit.get(k) || 100) + 200);
+                selectEntity(state.sel.type, state.sel.id, true);
+            });
+        });
+    }
+
+    function refLink(ref) {
+        const id = refId(ref);
+        const name = refName(ref) || id || t('none');
+        if (id && state.index.has(id)) return '<a class="ref" href="#" data-goto="' + esc(id) + '">' + esc(name) + '</a>';
+        return esc(name);
+    }
+    function kvRow(k, v) {
+        if (v === null || v === undefined || v === '') return '';
+        return '<tr><td class="k">' + esc(k) + '</td><td>' + v + '</td></tr>';
+    }
+    function metaBlock(e) {
+        let r = '';
+        r += kvRow(t('k_category'), esc(catPath(e.category) || ''));
+        r += kvRow(t('k_location'), refName(e.location) ? esc(refName(e.location)) : '');
+        r += kvRow(t('k_type'), e.processType || e.flowType || e.flowPropertyType || '');
+        r += kvRow(t('k_version'), e.version ? esc(e.version) : '');
+        r += kvRow(t('k_changed'), e.lastChange ? esc(String(e.lastChange).slice(0, 10)) : '');
+        r += kvRow(t('k_cas'), e.cas ? esc(e.cas) : '');
+        r += kvRow(t('k_refunit'), e.refUnit ? esc(e.refUnit) : '');
+        r += kvRow(t('k_value'), (e.value !== undefined && typeof e.value !== 'object') ? esc(fmtNum(e.value)) : '');
+        r += kvRow(t('k_code'), e.code ? esc(e.code) : '');
+        r += kvRow(t('k_url'), e.url ? '<a class="ref" style="border:none;text-decoration:underline" href="' + esc(e.url) + '" target="_blank" rel="noopener">' + esc(e.url) + '</a>' : '');
+        r += kvRow(t('k_organisation'), e.organisation ? esc(e.organisation) : '');
+        r += kvRow(t('k_unitgroup'), e.unitGroup ? refLink(e.unitGroup) : '');
+        return r ? '<table class="kv">' + r + '</table>' : '';
+    }
+    function descBlock(e) {
+        return e.description ? '<div class="desc">' + esc(e.description) + '</div>' : '';
+    }
+    function head(e, type) {
+        return '<div class="card"><h2>' + esc(e.name || e['@id']) +
+            '<span class="badge hot">' + esc(type) + '</span></h2>' +
+            '<div class="path">' + esc(e['@id'] || '') + '</div>' + metaBlock(e) + descBlock(e) + '</div>';
+    }
+
+    function exRow(x) {
+        const isIn = x.input === true || x.isInput === true;
+        const amt = x.amountFormula ? esc(x.amountFormula) : fmtNum(x.amount);
+        return '<tr>' +
+            '<td class="' + (isIn ? 'io-in' : 'io-out') + '">' + esc(isIn ? t('in') : t('out')) + '</td>' +
+            '<td>' + refLink(x.flow) + '</td>' +
+            '<td class="num">' + amt + '</td>' +
+            '<td>' + esc(refName(x.unit) || '') + '</td>' +
+            '<td>' + (refId(x.defaultProvider) ? refLink(x.defaultProvider) : '<span style="color:var(--ink-mute)">' + esc(t('none')) + '</span>') + '</td>' +
+            '<td class="num">' + (x.dqEntry ? esc(x.dqEntry) : '') + '</td>' +
+            '</tr>';
+    }
+    function exTable(rows) {
+        return '<table class="ex"><thead><tr>' +
+            '<th>' + esc(t('c_io')) + '</th><th>' + esc(t('c_flow')) + '</th><th style="text-align:right">' + esc(t('c_amount')) + '</th>' +
+            '<th>' + esc(t('c_unit')) + '</th><th>' + esc(t('c_provider')) + '</th><th>' + esc(t('c_dq')) + '</th>' +
+            '</tr></thead><tbody>' + rows.map(exRow).join('') + '</tbody></table>';
+    }
+
+    function renderProcess(e) {
+        let h = head(e, 'Process');
+        const ex = Array.isArray(e.exchanges) ? e.exchanges : [];
+        const ins = ex.filter(x => x.input === true || x.isInput === true);
+        const outs = ex.filter(x => !(x.input === true || x.isInput === true));
+        h += '<div class="card">';
+        if (e.refFlow) h += '<div class="sect">' + esc(t('k_ref_flow')) + '</div><div>' + refLink(e.refFlow) + (e.unit ? ' · ' + esc(refName(e.unit)) : '') + (e.refQuantity ? ' · ' + fmtNum(e.refQuantity) : '') + '</div>';
+        h += '<div class="sect">' + esc(t('s_outputs')) + ' (' + outs.length + ')</div>';
+        h += outs.length ? exTable(outs) : '<div style="color:var(--ink-mute);font-size:13px">' + esc(t('none')) + '</div>';
+        h += '<div class="sect">' + esc(t('s_inputs')) + ' (' + ins.length + ')</div>';
+        h += ins.length ? exTable(ins) : '<div style="color:var(--ink-mute);font-size:13px">' + esc(t('none')) + '</div>';
+        h += '</div>';
+        return h;
+    }
+
+    function renderFlow(e) {
+        let h = head(e, 'Flow');
+        const fps = Array.isArray(e.flowProperties) ? e.flowProperties : [];
+        if (fps.length) {
+            h += '<div class="card"><div class="sect" style="margin-top:0">' + esc(t('s_flowprops')) + '</div>';
+            h += '<table class="ex"><thead><tr><th>' + esc(t('c_prop')) + '</th><th style="text-align:right">' + esc(t('c_conv')) + '</th><th>' + esc(t('c_ref')) + '</th></tr></thead><tbody>';
+            for (const fp of fps) {
+                h += '<tr><td>' + refLink(fp.flowProperty) + '</td><td class="num">' + fmtNum(fp.conversionFactor) + '</td><td>' + (fp.isRefFlowProperty ? '★' : '') + '</td></tr>';
+            }
+            h += '</tbody></table></div>';
+        }
+        return h;
+    }
+
+    function renderImpactCategory(e) {
+        let h = head(e, 'ImpactCategory');
+        const fs = Array.isArray(e.impactFactors) ? e.impactFactors : [];
+        const limit = state.factorLimit.get(e['@id']) || 100;
+        h += '<div class="card"><div class="sect" style="margin-top:0">' + esc(t('s_factors')) + ' (' + fs.length + ')</div>';
+        if (fs.length) {
+            h += '<table class="ex"><thead><tr><th>' + esc(t('c_flow')) + '</th><th style="text-align:right">' + esc(t('c_factor')) + '</th><th>' + esc(t('c_unit')) + '</th></tr></thead><tbody>';
+            for (const f of fs.slice(0, limit)) {
+                h += '<tr><td>' + refLink(f.flow) + '</td><td class="num">' + fmtNum(f.value) + '</td><td>' + esc(refName(f.unit) || e.refUnit || '') + '</td></tr>';
+            }
+            h += '</tbody></table>';
+            if (fs.length > limit) h += '<button class="more-btn" data-key="' + esc(e['@id']) + '">' + esc(t('more').replace('{n}', fs.length - limit)) + '</button>';
+        } else h += '<div style="color:var(--ink-mute);font-size:13px">' + esc(t('none')) + '</div>';
+        h += '</div>';
+        return h;
+    }
+
+    function renderImpactMethod(e) {
+        let h = head(e, 'ImpactMethod');
+        const cats = Array.isArray(e.impactCategories) ? e.impactCategories : [];
+        h += '<div class="card"><div class="sect" style="margin-top:0">' + esc(t('s_categories')) + ' (' + cats.length + ')</div>';
+        h += cats.length ? '<table class="ex"><tbody>' + cats.map(c => '<tr><td>' + refLink(c) + '</td></tr>').join('') + '</tbody></table>'
+            : '<div style="color:var(--ink-mute);font-size:13px">' + esc(t('none')) + '</div>';
+        h += '</div>';
+        return h;
+    }
+
+    function renderUnitGroup(e) {
+        let h = head(e, 'UnitGroup');
+        const us = Array.isArray(e.units) ? e.units : [];
+        h += '<div class="card"><div class="sect" style="margin-top:0">' + esc(t('s_units')) + ' (' + us.length + ')</div>';
+        if (us.length) {
+            h += '<table class="ex"><thead><tr><th>Name</th><th style="text-align:right">' + esc(t('c_conv')) + '</th><th>' + esc(t('c_ref')) + '</th></tr></thead><tbody>';
+            for (const u of us) h += '<tr><td>' + esc(u.name) + '</td><td class="num">' + fmtNum(u.conversionFactor) + '</td><td>' + (u.isRefUnit ? '★' : '') + '</td></tr>';
+            h += '</tbody></table>';
+        } else h += '<div style="color:var(--ink-mute);font-size:13px">' + esc(t('none')) + '</div>';
+        h += '</div>';
+        return h;
+    }
+
+    function renderProductSystem(e) {
+        let h = head(e, 'ProductSystem');
+        h += '<div class="card">';
+        let r = '';
+        r += kvRow(t('c_refprocess'), e.refProcess ? refLink(e.refProcess) : '');
+        r += kvRow(t('c_target'), (e.targetAmount !== undefined ? fmtNum(e.targetAmount) : '') + (e.targetUnit ? ' ' + esc(refName(e.targetUnit)) : ''));
+        if (r) h += '<table class="kv">' + r + '</table>';
+        const procs = Array.isArray(e.processes) ? e.processes : [];
+        h += '<div class="sect">' + esc(t('s_processes')) + ' (' + procs.length + ')</div>';
+        h += procs.length ? '<table class="ex"><tbody>' + procs.map(p => '<tr><td>' + refLink(p) + '</td><td style="color:var(--ink-mute);font-size:12px">' + esc(p.location || '') + '</td></tr>').join('') + '</tbody></table>'
+            : '<div style="color:var(--ink-mute);font-size:13px">' + esc(t('none')) + '</div>';
+        const links = Array.isArray(e.processLinks) ? e.processLinks : [];
+        if (links.length) h += '<div class="sect">' + esc(t('s_links')) + ': ' + links.length + '</div>';
+        h += '</div>';
+        return h;
+    }
+
+    function renderDQSystem(e) {
+        let h = head(e, 'DQSystem');
+        const inds = Array.isArray(e.indicators) ? e.indicators : [];
+        h += '<div class="card"><div class="sect" style="margin-top:0">' + esc(t('s_indicators')) + ' (' + inds.length + ')</div>';
+        for (const ind of inds) {
+            h += '<div style="margin:12px 0 4px;font-size:13px;font-weight:600">' + esc(ind.name) + ' <span style="color:var(--ink-mute);font-family:var(--mono);font-size:11px">#' + esc(ind.position) + '</span></div>';
+            const sc = Array.isArray(ind.scores) ? ind.scores : [];
+            if (sc.length) {
+                h += '<table class="ex"><thead><tr><th>' + esc(t('c_position')) + '</th><th>' + esc(t('c_label')) + '</th></tr></thead><tbody>';
+                for (const s of sc) h += '<tr><td class="num">' + esc(s.position) + '</td><td>' + esc(s.label) + '</td></tr>';
+                h += '</tbody></table>';
+            }
+        }
+        if (!inds.length) h += '<div style="color:var(--ink-mute);font-size:13px">' + esc(t('none')) + '</div>';
+        h += '</div>';
+        return h;
+    }
+
+    function renderResult(e) {
+        let h = head(e, 'Result');
+        const setup = e.calculationSetup || {};
+        h += '<div class="card"><div class="sect" style="margin-top:0">' + esc(t('s_setup')) + '</div><table class="kv">';
+        h += kvRow('Product system', setup.productSystem ? refLink(setup.productSystem) : '');
+        h += kvRow('Impact method', setup.impactMethod ? refLink(setup.impactMethod) : '');
+        h += kvRow('Amount', setup.amount !== undefined ? fmtNum(setup.amount) : '');
+        h += kvRow('Allocation', setup.allocation || '');
+        h += '</table>';
+        const ir = e.impactResults || e.impacts || [];
+        if (Array.isArray(ir) && ir.length) {
+            h += '<div class="sect">' + esc(t('s_results')) + ' (' + ir.length + ')</div>';
+            h += '<table class="ex"><thead><tr><th>Category</th><th style="text-align:right">Value</th></tr></thead><tbody>';
+            for (const r0 of ir.slice(0, 100)) {
+                const cat = r0.impactCategory || r0.category || {};
+                h += '<tr><td>' + refLink(cat) + '</td><td class="num">' + fmtNum(r0.amount !== undefined ? r0.amount : r0.value) + '</td></tr>';
+            }
+            h += '</tbody></table>';
+        }
+        h += '</div>';
+        return h;
+    }
+
+    function renderGeneric(e, type) {
+        let h = head(e, type);
+        const skip = new Set(['@type', '@id', 'name', 'description', 'category', 'location', 'processType', 'flowType', 'flowPropertyType', 'version', 'lastChange', 'cas', 'refUnit', 'value', 'code', 'url', 'organisation', 'unitGroup']);
+        let rows = '';
+        let extra = '';
+        for (const [k, v] of Object.entries(e)) {
+            if (skip.has(k) || v === null || v === undefined) continue;
+            if (typeof v === 'object' && !Array.isArray(v) && (refId(v) || v.name)) { rows += kvRow(k, refLink(v)); continue; }
+            if (Array.isArray(v)) {
+                if (v.length && v.every(x => x && typeof x === 'object' && (refId(x) || x.name))) {
+                    extra += '<div class="sect">' + esc(k) + ' (' + v.length + ')</div><table class="ex"><tbody>' +
+                        v.slice(0, 50).map(x => '<tr><td>' + (refId(x) ? refLink(x) : esc(x.name)) + '</td></tr>').join('') +
+                        '</tbody></table>';
+                } else if (v.length && typeof v[0] !== 'object') {
+                    rows += kvRow(k, esc(v.join(', ')));
+                } else {
+                    rows += kvRow(k, '[' + v.length + ']');
+                }
+                continue;
+            }
+            if (typeof v === 'object') { rows += kvRow(k, esc(JSON.stringify(v).slice(0, 200))); continue; }
+            rows += kvRow(k, esc(String(v)));
+        }
+        if (rows) h += '<div class="card"><div class="sect" style="margin-top:0">' + esc(t('s_other')) + '</div><table class="kv">' + rows + '</table>' + extra + '</div>';
+        else if (extra) h += '<div class="card">' + extra + '</div>';
+        return h;
+    }
+
+    function renderEntity(e, type) {
+        switch (type) {
+            case 'Process': return renderProcess(e);
+            case 'Flow': return renderFlow(e);
+            case 'ImpactCategory': return renderImpactCategory(e);
+            case 'ImpactMethod': return renderImpactMethod(e);
+            case 'UnitGroup': return renderUnitGroup(e);
+            case 'ProductSystem': return renderProductSystem(e);
+            case 'DQSystem': return renderDQSystem(e);
+            case 'Result': return renderResult(e);
+            default: return renderGeneric(e, type);
+        }
+    }
+
+    /* ── lang init ── */
+    (function () {
+        const saved = localStorage.getItem('lca-lang');
+        const bl = (navigator.language || '').toLowerCase();
+        pvLang = saved || (bl.indexOf('zh') === 0 ? 'zh' : bl.indexOf('en') === 0 ? 'en' : 'ru');
+        document.querySelectorAll('.lang button').forEach(b => {
+            b.classList.toggle('active', b.dataset.lang === pvLang);
+            b.addEventListener('click', () => { localStorage.setItem('lca-lang', b.dataset.lang); applyLang(b.dataset.lang); });
+        });
+        document.title = t('title');
+        document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+    })();
+
+    init();
+</script>
+</body>
+</html>
