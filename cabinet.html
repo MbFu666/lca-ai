@@ -608,7 +608,7 @@
                 <ul class="menu">
                     <li><a href="#" class="active" data-tab="overview"><span class="menu-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11L12 4l8 7"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/></svg></span> <span data-i18n="menu_overview">Обзор</span></a></li>
                     <li><a href="#" data-tab="history"><span class="menu-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.3"/><path d="M12 7.5V12l3 2"/></svg></span> <span data-i18n="menu_history">История</span></a></li>
-                    <li><a href="#" data-tab="projects"><span class="menu-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5a1 1 0 0 1 1-1h4.3l2 2H20a1 1 0 0 1 1 1V18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6.5z"/></svg></span> <span data-i18n="menu_projects">Проекты</span></a></li>
+                    <li><a href="/project.html"><span class="menu-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5a1 1 0 0 1 1-1h4.3l2 2H20a1 1 0 0 1 1 1V18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6.5z"/></svg></span> <span data-i18n="menu_projects">Проекты</span></a></li>
                     <li><a href="#" data-tab="settings"><span class="menu-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 4v2.2M12 17.8V20M4 12h2.2M17.8 12H20M6.3 6.3l1.5 1.5M16.2 16.2l1.5 1.5M17.7 6.3l-1.5 1.5M7.8 16.2l-1.5 1.5"/></svg></span> <span data-i18n="menu_settings">Настройки</span></a></li>
                     <li><a href="#" data-tab="logout"><span class="menu-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4"/><path d="M14 8l4 4-4 4M18 12H9"/></svg></span> <span data-i18n="menu_logout">Выйти</span></a></li>
                 </ul>
@@ -722,15 +722,6 @@
                         <button class="btn btn-sm" id="batchDelete" style="color:var(--c-rust)" data-i18n="delete">Удалить</button>
                         <button class="btn btn-sm" id="batchDeselect" data-i18n="cancel">Отменить</button>
                     </div>
-                </div>
-
-                <!-- ══ PROJECTS ══ -->
-                <div class="tab-content" id="tab-projects" style="display:none">
-                    <div class="section-head">
-                        <h2 class="section-title" data-i18n="projects_title">Проекты</h2>
-                        <button class="btn btn-primary" id="newProjectBtn" data-i18n="new_project">+ Новый проект</button>
-                    </div>
-                    <div id="projectsList"></div>
                 </div>
 
                 <!-- ══ SETTINGS ══ -->
@@ -1109,7 +1100,6 @@
                 pw_wrong_old: 'Неверный текущий пароль', pw_old_required: 'Введите текущий пароль',
                 status_done: 'Готово', status_pending: 'В процессе',
                 src_engine: 'Расчёт из приложения',
-                snap_versions: 'версий', snap_open: 'Открыть облачный проект',
                 tab_profile: 'Профиль', tab_security: 'Безопасность', tab_calc: 'Расчёты', tab_interface: 'Интерфейс', tab_data: 'Данные',
                 calc_settings: 'Параметры расчётов', unit_label: 'Единицы CO₂', precision_label: 'Точность AI', region_label: 'Регион по умолчанию',
                 precision_fast: 'Быстрая (меньше деталей)', precision_deep: 'Глубокая (полный LCA)',
@@ -1224,7 +1214,6 @@
                 pw_wrong_old: 'Wrong current password', pw_old_required: 'Enter current password',
                 status_done: 'Done', status_pending: 'In progress',
                 src_engine: 'App calculation',
-                snap_versions: 'versions', snap_open: 'Open cloud project',
                 tab_profile: 'Profile', tab_security: 'Security', tab_calc: 'Calculations', tab_interface: 'Interface', tab_data: 'Data',
                 calc_settings: 'Calculation settings', unit_label: 'CO₂ units', precision_label: 'AI precision', region_label: 'Default region',
                 precision_fast: 'Fast (less detail)', precision_deep: 'Deep (full LCA)',
@@ -1339,7 +1328,6 @@
                 pw_wrong_old: '当前密码错误', pw_old_required: '请输入当前密码',
                 status_done: '已完成', status_pending: '进行中',
                 src_engine: '应用计算',
-                snap_versions: '个版本', snap_open: '打开云项目',
                 tab_profile: '个人资料', tab_security: '安全', tab_calc: '计算', tab_interface: '界面', tab_data: '数据',
                 calc_settings: '计算参数', unit_label: 'CO₂ 单位', precision_label: 'AI 精度', region_label: '默认区域',
                 precision_fast: '快速（较少细节）', precision_deep: '深度（完整 LCA）',
@@ -1368,7 +1356,6 @@
             if (currentUser) {
                 renderOverview();
                 renderHistory();
-                loadProjects();
                 loadStats();
             }
         }
@@ -1385,7 +1372,6 @@
 
         /* ── Local state ── */
         let historyCache = [];      // все строки user_history (загружаются один раз, фильтруются локально)
-        let snapByProject = {};     // project_id -> { count, latest, total } облачных снимков
         let historyShown = 10;      // пагинация «показать ещё»
         const PAGE = 10;
 
@@ -1630,7 +1616,6 @@
         async function loadTab(tab) {
             if (tab === 'overview') { await loadHistoryData(); renderOverview(); renderExtendedStats(); }
             if (tab === 'history') { await loadHistoryData(); historyShown = PAGE; renderHistory(); }
-            if (tab === 'projects') await loadProjects();
             if (tab === 'settings') { fillProfileFields(); }
         }
 
@@ -2304,179 +2289,6 @@
         /* ══════════════════════════════════════════════════
            PROJECTS: create / rename / delete / expand
            ══════════════════════════════════════════════════ */
-        async function renderProjectCard(p) {
-            const { data: calcs } = await db.from('project_calculations').select('*').eq('project_id', p.id).order('created_at', { ascending: false });
-            const calcCount = (calcs || []).length;
-            let h = '<div class="card" id="proj-' + p.id + '">';
-            h += '<div class="card-header">';
-            h += '<div style="flex:1"><div class="card-title">' + esc(p.name) + '</div></div>';
-            const snap = snapByProject[p.id];
-            if (snap && snap.count > 0) {
-                h += '<a class="badge badge-blue" style="text-decoration:none;cursor:pointer" href="/project.html?id=' + p.id + '" title="' + esc(t('snap_open')) + '">☁ v' + snap.latest + ' · ' + snap.count + ' ' + esc(t('snap_versions')) + (snap.total ? ' · ' + snap.total + ' ent.' : '') + '</a>';
-            }
-            h += '<div style="display:flex;align-items:center;gap:8px"><span class="badge badge-blue">' + calcCount + ' ' + t('calcs_count') + '</span><div class="card-date">' + fmtDate(p.created_at) + '</div></div>';
-            h += '</div>';
-            if (calcs && calcs.length > 0) {
-                h += '<div class="project-calcs" style="display:none">';
-                calcs.forEach(c => {
-                    const product = (c.report_data && c.report_data.product_title) || t('unnamed');
-                    const total = (c.report_data && c.report_data.total_co2eq) || 0;
-                    h += '<div class="calc-item">';
-                    h += '<div style="cursor:pointer;flex:1" onclick="window.location.href=\'/report.html?history=' + c.id + '\'"><div class="calc-name">' + esc(product) + '</div><div class="calc-date">' + fmtDate(c.created_at) + '</div></div>';
-                    h += '<div style="display:flex;align-items:center;gap:10px"><div class="calc-total">' + fmtCo2(total) + ' kgCO₂e</div>';
-                    h += '<button class="btn btn-danger btn-sm delete-projcalc-btn" data-id="' + c.id + '" title="' + t('delete') + '"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button></div>';
-                    h += '</div>';
-                });
-                h += '</div>';
-            }
-            /* ── Цель по снижению: превращает проект из папки в инструмент ──
-               База = первый (самый старый) расчёт в проекте, текущее = последний.
-               Прогресс считается от фактически достигнутого снижения. */
-            const tgt = parseFloat(p.target_pct);
-            if (!isNaN(tgt) && tgt > 0 && calcs && calcs.length) {
-                const ordered = calcs.slice().sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-                const val = c => parseFloat(c.report_data && c.report_data.total_co2eq) || 0;
-                const baseline = parseFloat(p.baseline_co2) || val(ordered[0]);
-                const current  = val(ordered[ordered.length - 1]);
-                if (baseline > 0) {
-                    const goal    = baseline * (1 - tgt / 100);
-                    const cut     = (baseline - current) / baseline * 100;   // достигнутое снижение, %
-                    const pct     = Math.max(0, Math.min(100, cut / tgt * 100));
-                    const reached = current <= goal;
-                    h += '<div class="target">';
-                    h += '<div class="target-head">';
-                    h += '<span class="target-label">' + esc(t('target')) + ' −' + tgt + '%' +
-                         (p.target_date ? ' · ' + fmtDate(p.target_date) : '') + '</span>';
-                    h += '<span class="target-stat' + (reached ? ' reached' : '') + '">' +
-                         (cut >= 0 ? '−' : '+') + Math.abs(cut).toFixed(0) + '%</span>';
-                    h += '</div>';
-                    h += '<div class="target-bar"><div class="target-fill' + (reached ? ' reached' : '') +
-                         '" style="width:' + pct.toFixed(1) + '%"></div></div>';
-                    h += '<div class="target-foot">' +
-                         fmtCo2(current) + ' → ' + fmtCo2(goal) + ' kgCO₂e · ' +
-                         esc(t('target_base')) + ' ' + fmtCo2(baseline) +
-                         '</div>';
-                    h += '</div>';
-                }
-            }
-
-            h += '<div class="card-actions">';
-            h += '<button class="btn btn-ghost btn-sm toggle-calcs-btn" data-id="' + p.id + '"><span class="btn-ic"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M9 6l6 6-6 6"/></svg></span> ' + t('calculations') + '</button>';
-            h += '<button class="btn btn-ghost btn-sm target-btn" data-id="' + p.id + '" data-target="' + (p.target_pct || '') + '"><span class="btn-ic"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg></span> ' + t('target_set') + '</button>';
-            h += '<button class="btn btn-ghost btn-sm rename-project-btn" data-id="' + p.id + '" data-name="' + esc(p.name) + '"><span class="btn-ic"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7.5 19l-4 1 1-4Z"/></svg></span> ' + t('rename') + '</button>';
-            h += '<button class="archive-btn btn btn-ghost btn-sm" data-id="' + p.id + '"><span class="btn-ic"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="4.3" rx="0.8"/><path d="M4.5 8.8V18a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1V8.8"/><path d="M10 13h4"/></svg></span> ' + (p.archived ? t('restore') : t('archive')) + '</button>';
-            h += '<button class="email-share-btn btn btn-ghost btn-sm" data-id="' + p.id + '"><span class="btn-ic"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15l6-6"/><path d="M8 12L5.5 14.5a3 3 0 0 0 4 4L12 16"/><path d="M16 12l2.5-2.5a3 3 0 0 0-4-4L12 8"/></svg></span> ' + t('share') + '</button>';
-            h += '<button class="btn btn-danger btn-sm delete-project-btn" data-id="' + p.id + '">' + t('delete') + '</button>';
-            h += '</div>';
-            h += '</div>';
-            return h;
-        }
-
-        async function loadProjects() {
-            if (!currentUser || !db) return;
-            try {
-                const { data: projects, error: pErr } = await db.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-                if (pErr) throw pErr;
-                try {
-                    const { data: snaps } = await db.from('project_snapshots').select('project_id, version, stats').eq('user_id', currentUser.id).order('version', { ascending: false });
-                    snapByProject = {};
-                    for (const s of (snaps || [])) {
-                        const m = snapByProject[s.project_id] || (snapByProject[s.project_id] = { count: 0, latest: 0, total: 0 });
-                        m.count++;
-                        if (s.version > m.latest) { m.latest = s.version; m.total = (s.stats && s.stats.total) || 0; }
-                    }
-                } catch (e) { console.warn('snapshots load:', e); }
-                const list = document.getElementById('projectsList');
-                if (!projects || projects.length === 0) {
-                    list.innerHTML = '<div class="empty"><div class="empty-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5a1 1 0 0 1 1-1h4.3l2 2H20a1 1 0 0 1 1 1V18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6.5z"/></svg></div><div class="empty-text">' + t('no_projects') + '</div><button class="btn btn-primary" id="emptyCreateBtn">' + t('create') + '</button></div>';
-                    const b = document.getElementById('emptyCreateBtn');
-                    if (b) b.addEventListener('click', createProject);
-                    return;
-                }
-                const activeProjects = projects.filter(p => !p.archived);
-                const archivedProjects = projects.filter(p => p.archived);
-                let html = '';
-                if (activeProjects.length === 0) {
-                    html += '<div class="empty"><div class="empty-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5a1 1 0 0 1 1-1h4.3l2 2H20a1 1 0 0 1 1 1V18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6.5z"/></svg></div><div class="empty-text">' + t('no_projects') + '</div><button class="btn btn-primary" id="emptyCreateBtn">' + t('create') + '</button></div>';
-                }
-                for (const p of activeProjects) {
-                    html += await renderProjectCard(p);
-                }
-                if (archivedProjects.length > 0) {
-                    html += '<div style="margin-top:24px"><details><summary style="cursor:pointer;font-size:14px;font-weight:600;color:var(--ink-mute);padding:8px 0">' + t('archive_title') + ' (' + archivedProjects.length + ')</summary>';
-                    for (const p of archivedProjects) {
-                        html += await renderProjectCard(p);
-                    }
-                    html += '</details></div>';
-                }
-                list.innerHTML = html;
-                const emptyBtn = document.getElementById('emptyCreateBtn');
-                if (emptyBtn) emptyBtn.addEventListener('click', createProject);
-            } catch (e) {
-                console.error('loadProjects error:', e);
-                showToast(t('err_load_projects') + (e.message || e));
-            }
-        }
-
-        document.getElementById('newProjectBtn').addEventListener('click', createProject);
-
-        async function createProject() {
-            const name = await promptModal(t('project_name_prompt'));
-            if (!name) return;
-            try {
-                const { error } = await db.from('user_projects').insert({ user_id: currentUser.id, name });
-                if (error) throw error;
-                logAudit('create', 'project', null, { name });
-                loadProjects(); loadStats();
-                showToast(t('toast_project_created'));
-            } catch (e) { showToast(t('err_create') + (e.message || e)); }
-        }
-
-        async function renameProject(id, oldName) {
-            const name = await promptModal(t('rename_prompt'), oldName);
-            if (!name || name === oldName) return;
-            try {
-                const { error } = await db.from('user_projects').update({ name }).eq('id', id);
-                if (error) throw error;
-                loadProjects();
-                showToast(t('toast_project_renamed'));
-            } catch (e) { showToast(t('err_generic') + (e.message || e)); }
-        }
-
-        async function deleteProject(id) {
-            const ok = await confirmModal(t('confirm_delete_project'), t('confirm_delete_project_text'));
-            if (!ok) return;
-            try {
-                const { error: e1 } = await db.from('project_calculations').delete().eq('project_id', id);
-                const { error: e2 } = await db.from('user_projects').delete().eq('id', id);
-                if (e1 || e2) throw (e1 || e2);
-                logAudit('delete', 'project', id);
-                loadProjects(); loadStats();
-                showToast(t('toast_deleted'));
-            } catch (e) { showToast(t('err_delete') + (e.message || e)); }
-        }
-
-        async function deleteCalcFromProject(calcId) {
-            const ok = await confirmModal(t('confirm_delete_calc_from_proj'), t('confirm_delete_calc_text'));
-            if (!ok) return;
-            try {
-                const { error } = await db.from('project_calculations').delete().eq('id', calcId);
-                if (error) throw error;
-                loadProjects(); loadStats();
-                showToast(t('toast_calc_deleted'));
-            } catch (e) { showToast(t('err_delete') + (e.message || e)); }
-        }
-
-        async function archiveProject(id) {
-            try {
-                const { data: proj } = await db.from('user_projects').select('archived').eq('id', id).single();
-                const newVal = !(proj?.archived);
-                await db.from('user_projects').update({ archived: newVal }).eq('id', id);
-                showToast(newVal ? t('toast_archived') : t('toast_restored'));
-                loadProjects();
-            } catch (e) { showToast(t('err_generic') + (e.message || e)); }
-        }
-
         /* ══════════════════════════════════════════════════
            Account deletion / password / avatar / profile
            ══════════════════════════════════════════════════ */
@@ -2799,23 +2611,6 @@
             if (delHistory) { deleteHistory(delHistory.dataset.id); return; }
             const addBtn = e.target.closest('.add-to-project-btn');
             if (addBtn) { addToProject(addBtn.dataset.id); return; }
-            const toggleBtn = e.target.closest('.toggle-calcs-btn');
-            if (toggleBtn) {
-                const el = document.getElementById('proj-' + toggleBtn.dataset.id);
-                if (el) {
-                    const calcs = el.querySelector('.project-calcs');
-                    if (calcs) calcs.style.display = calcs.style.display === 'none' ? 'block' : 'none';
-                }
-                return;
-            }
-            const renameBtn = e.target.closest('.rename-project-btn');
-            if (renameBtn) { renameProject(renameBtn.dataset.id, renameBtn.dataset.name); return; }
-            const delProject = e.target.closest('.delete-project-btn');
-            if (delProject) { deleteProject(delProject.dataset.id); return; }
-            const delProjCalc = e.target.closest('.delete-projcalc-btn');
-            if (delProjCalc) { e.stopPropagation(); deleteCalcFromProject(delProjCalc.dataset.id); return; }
-            const archiveBtn = e.target.closest('.archive-btn');
-            if (archiveBtn) { archiveProject(archiveBtn.dataset.id); return; }
 
             /* ── история: вариант / заметка / теги / архив ── */
             const variantBtn = e.target.closest('.variant-btn');
@@ -2836,36 +2631,11 @@
             const tagX = e.target.closest('.tag-x');
             if (tagX) { removeTag(tagX.dataset.id, tagX.dataset.tag); return; }
 
-            const targetBtn = e.target.closest('.target-btn');
-            if (targetBtn) { setTarget(targetBtn.dataset.id, targetBtn.dataset.target); return; }
-
             const vbCmp = e.target.closest('.vb-cmp');
             if (vbCmp) { compareSelected([vbCmp.dataset.parent, vbCmp.dataset.id]); return; }
         });
 
         /* ── Цель по снижению для проекта ── */
-        async function setTarget(id, cur) {
-            const val = await openModal({
-                title: t('target_title'),
-                text: t('target_text'),
-                input: true,
-                inputValue: cur || '',
-                okLabel: t('save')
-            });
-            if (val === null || val === undefined || typeof val !== 'string') return;
-            const num = parseFloat(String(val).replace(',', '.'));
-            const payload = (!val.trim() || isNaN(num) || num <= 0)
-                ? { target_pct: null }
-                : { target_pct: Math.min(100, num) };
-            try {
-                const { error } = await db.from('user_projects')
-                    .update(payload).eq('id', id).eq('user_id', currentUser.id);
-                if (error) throw error;
-                showToast(t('saved'));
-                loadProjects();
-            } catch (e) { showToast(String(e.message || e)); }
-        }
-
         document.getElementById('compareClose')?.addEventListener('click',
             () => document.getElementById('compareMask').classList.remove('show'));
         document.getElementById('compareMask')?.addEventListener('click', e => {

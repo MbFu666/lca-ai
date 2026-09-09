@@ -12,7 +12,7 @@
       }
     })();
     </script>
-    <title>LCA·AI — Проект</title>
+    <title>LCA·AI — Проекты</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -73,16 +73,18 @@
         .topbar h1 { font-family: var(--display); font-size: 26px; font-weight: 600; letter-spacing: 0.01em; }
         .topbar .sub { font-size: 13px; color: var(--ink-mute); margin-top: 6px; font-family: var(--mono); }
         .topbar .sub b { color: var(--ink-soft); font-weight: 600; }
-        .top-actions { display: flex; align-items: center; gap: 10px; }
-        select.vsel {
+        .top-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        select.vsel, select.settings-input {
             font-family: var(--mono); font-size: 13px; padding: 7px 10px;
             background: var(--bg-card); color: var(--ink); border: 1px solid var(--rule); cursor: pointer;
         }
-        .btn-ghost {
-            font-family: var(--mono); font-size: 12px; padding: 7px 12px; cursor: pointer;
-            background: transparent; color: var(--ink-soft); border: 1px solid var(--rule); text-decoration: none;
-        }
-        .btn-ghost:hover { border-color: var(--graphite); color: var(--graphite); }
+        .btn { font-family: var(--mono); font-size: 12px; padding: 7px 12px; cursor: pointer; border: 1px solid var(--rule); background: transparent; color: var(--ink-soft); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+        .btn:hover { border-color: var(--graphite); color: var(--graphite); }
+        .btn-primary { background: var(--graphite); color: var(--paper); border-color: var(--graphite); }
+        .btn-primary:hover { color: var(--paper); opacity: .85; }
+        .btn-danger { color: var(--e-4); border-color: var(--e-4); }
+        .btn-danger:hover { color: var(--e-4); background: color-mix(in srgb, var(--e-4) 8%, transparent); }
+        .btn-sm { font-size: 11px; padding: 5px 9px; }
 
         .pv-layout { display: grid; grid-template-columns: 300px 1fr; gap: 28px; padding: 24px 0 60px; }
         @media (max-width: 900px) { .pv-layout { grid-template-columns: 1fr; } .pv-side { position: static !important; max-height: none !important; } }
@@ -118,8 +120,9 @@
         .card { background: var(--bg-card); border: 1px solid var(--rule); padding: 24px; margin-bottom: 18px; }
         .card h2 { font-family: var(--display); font-size: 20px; font-weight: 600; margin-bottom: 4px; word-break: break-word; }
         .card .path { font-family: var(--mono); font-size: 11px; color: var(--ink-mute); margin-bottom: 16px; word-break: break-all; }
-        .badge { display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border: 1px solid var(--rule); color: var(--ink-soft); margin-left: 8px; vertical-align: middle; }
+        .badge { display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border: 1px solid var(--rule); color: var(--ink-soft); margin-left: 8px; vertical-align: middle; text-decoration: none; }
         .badge.hot { border-color: var(--jade); color: var(--jade); }
+        .badge.cloud { border-color: var(--graphite-mid); color: var(--graphite-mid); cursor: pointer; }
         table.kv { width: 100%; border-collapse: collapse; font-size: 13px; }
         table.kv td { padding: 6px 8px; border-top: 1px solid var(--rule); vertical-align: top; }
         table.kv td.k { width: 220px; color: var(--ink-mute); font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
@@ -139,10 +142,47 @@
         .empty { padding: 60px 20px; text-align: center; color: var(--ink-mute); font-size: 14px; }
         .more-btn { margin-top: 8px; font-family: var(--mono); font-size: 11px; background: none; border: 1px solid var(--rule); color: var(--ink-soft); padding: 5px 10px; cursor: pointer; }
         .more-btn:hover { border-color: var(--graphite); color: var(--graphite); }
+
+        /* ── project list / cards ── */
+        .plist { padding: 24px 0 60px; display: flex; flex-direction: column; gap: 16px; }
+        .pcard { background: var(--bg-card); border: 1px solid var(--rule); padding: 20px 24px; }
+        .pcard-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .pcard-title { font-family: var(--display); font-size: 18px; font-weight: 600; flex: 1; min-width: 200px; word-break: break-word; }
+        .pcard-date { font-family: var(--mono); font-size: 11px; color: var(--ink-mute); }
+        .calc-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-top: 1px solid var(--rule); font-size: 13px; }
+        .calc-item:first-child { border-top: none; }
+        .calc-name { color: var(--ink); }
+        .calc-name:hover { color: var(--jade); }
+        .calc-date { font-family: var(--mono); font-size: 11px; color: var(--ink-mute); }
+        .calc-total { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
+        .card-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--rule); }
+        .target { margin-top: 14px; }
+        .target-head { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--ink-soft); margin-bottom: 6px; }
+        .target-stat { color: var(--jade); font-weight: 700; }
+        .target-stat.reached { color: var(--e-2); }
+        .target-bar { height: 6px; background: var(--bg-soft); border: 1px solid var(--rule); }
+        .target-fill { height: 100%; background: var(--jade); }
+        .target-fill.reached { background: var(--e-2); }
+        .target-foot { font-family: var(--mono); font-size: 11px; color: var(--ink-mute); margin-top: 6px; }
+
+        /* ── modals ── */
+        .modal-mask { position: fixed; inset: 0; background: color-mix(in srgb, var(--graphite) 45%, transparent); display: none; align-items: center; justify-content: center; z-index: 400; padding: 20px; }
+        .modal-mask.show, .modal-mask[style*="flex"] { display: flex; }
+        .modal { background: var(--bg-card); border: 1px solid var(--rule); padding: 28px; width: 100%; max-width: 460px; }
+        .modal h3 { font-family: var(--display); font-size: 18px; font-weight: 600; margin-bottom: 10px; }
+        .modal p { font-size: 13px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 12px; }
+        .modal input, .modal select { width: 100%; font-family: var(--mono); font-size: 13px; padding: 9px 10px; background: var(--bg); border: 1px solid var(--rule); color: var(--ink); margin-bottom: 10px; }
+        .modal input:focus, .modal select:focus { outline: none; border-color: var(--graphite-mid); }
+        .modal label { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-mute); margin: 10px 0 4px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+        .share-role-note { font-size: 12px; color: var(--ink-mute); line-height: 1.4; margin: -4px 0 8px; }
+        .share-link-row { display: flex; gap: 8px; }
+        .share-link-row input { flex: 1; margin-bottom: 0; }
+
         #toast {
             position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
             background: var(--graphite); color: var(--paper); font-size: 13px; padding: 10px 18px;
-            opacity: 0; pointer-events: none; transition: var(--transition); z-index: 300; font-family: var(--mono);
+            opacity: 0; pointer-events: none; transition: var(--transition); z-index: 500; font-family: var(--mono);
         }
         #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     </style>
@@ -154,6 +194,7 @@
             <div class="nav">
                 <a href="/" data-i18n="nav_home">Главная</a>
                 <a href="/cabinet.html" data-i18n="nav_cabinet">Кабинет</a>
+                <a href="/project.html" class="active" data-i18n="projects_title">Проекты</a>
                 <div class="lang" role="group" aria-label="Language">
                     <button data-lang="ru" class="active">RU</button>
                     <button data-lang="en">EN</button>
@@ -165,27 +206,92 @@
     </header>
 
     <div class="container">
-        <div class="topbar">
-            <div>
-                <h1 id="projName">…</h1>
-                <div class="sub" id="projMeta"></div>
+        <!-- ══ LIST MODE ══ -->
+        <div id="listView" style="display:none">
+            <div class="topbar">
+                <div><h1 data-i18n="projects_title">Проекты</h1></div>
+                <div class="top-actions">
+                    <button class="btn btn-primary" id="newProjectBtn">+ <span data-i18n="create">Создать</span></button>
+                </div>
             </div>
-            <div class="top-actions">
-                <select class="vsel" id="versionSel" title="version"></select>
-                <a class="btn-ghost" href="/cabinet.html" data-i18n="back">← В кабинет</a>
-            </div>
+            <div class="plist" id="projList"></div>
         </div>
 
-        <div class="pv-layout">
-            <aside class="pv-side">
-                <input class="pv-search" id="searchInput" type="search" placeholder="Поиск…" data-i18n-placeholder="search_ph">
-                <div id="tree"></div>
-            </aside>
-            <main class="pv-main" id="detail">
-                <div class="empty">…</div>
-            </main>
+        <!-- ══ DETAIL MODE ══ -->
+        <div id="detailView" style="display:none">
+            <div class="topbar">
+                <div>
+                    <h1 id="projName">…</h1>
+                    <div class="sub" id="projMeta"></div>
+                </div>
+                <div class="top-actions">
+                    <select class="vsel" id="versionSel" title="version"></select>
+                    <a class="btn" href="/project.html" data-i18n="back_list">← К списку</a>
+                </div>
+            </div>
+            <div class="card-actions" style="border-top:none;padding-top:14px" id="projActions"></div>
+            <div id="targetBlock"></div>
+            <div class="card" id="calcsCard" style="display:none;margin-top:18px">
+                <div class="sect" style="margin-top:0" data-i18n="calculations">Расчёты</div>
+                <div id="calcsList"></div>
+            </div>
+            <div class="pv-layout">
+                <aside class="pv-side">
+                    <input class="pv-search" id="searchInput" type="search" placeholder="Поиск…" data-i18n-placeholder="search_ph">
+                    <div id="tree"></div>
+                </aside>
+                <main class="pv-main" id="detail">
+                    <div class="empty">…</div>
+                </main>
+            </div>
         </div>
     </div>
+
+    <!-- ══ Universal modal ══ -->
+    <div class="modal-mask" id="modalMask">
+        <div class="modal">
+            <h3 id="modalTitle"></h3>
+            <p id="modalText" style="display:none"></p>
+            <input id="modalInput" style="display:none">
+            <div class="modal-actions">
+                <button class="btn" id="modalCancel" data-i18n="cancel">Отменить</button>
+                <button class="btn btn-primary" id="modalOk">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ Share modal ══ -->
+    <div class="modal-mask" id="modalShare" style="display:none">
+        <div class="modal">
+            <h3 data-i18n="share_title">Поделиться</h3>
+            <p data-i18n="share_sub">Получатель увидит отчёт только для чтения. Ссылку можно отозвать в любой момент.</p>
+            <label data-i18n="share_role_label">Права получателя</label>
+            <select id="shareRole">
+                <option value="view" data-i18n="share_role_view">Только чтение</option>
+                <option value="edit" data-i18n="share_role_edit">Чтение и редактирование</option>
+            </select>
+            <div class="share-role-note" id="shareRoleNote" data-i18n="share_role_note_view">Получатель сможет только смотреть отчёт.</div>
+            <label data-i18n="share_expires">Срок действия</label>
+            <select id="shareExpires">
+                <option value="7" data-i18n="exp_7">7 дней</option>
+                <option value="30" selected data-i18n="exp_30">30 дней</option>
+                <option value="90" data-i18n="exp_90">90 дней</option>
+                <option value="365" data-i18n="exp_365">1 год</option>
+            </select>
+            <label data-i18n="share_email_label">Отправить на email (необязательно)</label>
+            <input type="email" id="shareEmail" data-i18n-placeholder="share_email_ph" placeholder="colleague@example.com">
+            <div class="share-link-row" id="shareLinkRow" style="display:none">
+                <input type="text" id="shareLinkInput" readonly>
+                <button class="btn" id="shareCopyBtn" data-i18n="copy">Копировать</button>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" id="shareCancelBtn" data-i18n="cancel">Отменить</button>
+                <button class="btn" id="shareLinkBtn" data-i18n="share_get_link">Создать ссылку</button>
+                <button class="btn btn-primary" id="shareConfirmBtn" data-i18n="share_send">Отправить</button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast"></div>
 
 <script>
@@ -194,76 +300,445 @@
 
     /* ── i18n ── */
     const PV_I18N = {
-        ru: {
-            title: 'LCA·AI — Проект', nav_home: 'Главная', nav_cabinet: 'Кабинет', back: '← В кабинет',
-            search_ph: 'Поиск по названию…',
-            loading: 'Загрузка…', err_no_id: 'Не указан id проекта', err_not_found: 'Проект не найден или недоступен',
-            err_load: 'Ошибка загрузки: ', err_sb: 'Supabase не загружен',
-            g_processes: 'Процессы', g_flows: 'Потоки', g_systems: 'Системы продукта', g_methods: 'Методы оценки',
-            g_categories: 'Категории воздействия', g_results: 'Результаты', g_units: 'Единицы измерения',
-            g_flowprops: 'Свойства потоков', g_locations: 'Локации', g_actors: 'Акторы', g_sources: 'Источники',
-            g_dq: 'Качество данных', g_params: 'Параметры', g_currency: 'Валюты', g_social: 'Соц. индикаторы',
-            meta_version: 'версия', meta_entities: 'сущностей', meta_size: 'размер', meta_db: 'исходная база', meta_saved: 'сохранено',
-            k_category: 'Категория', k_location: 'Локация', k_type: 'Тип', k_version: 'Версия', k_changed: 'Изменён',
-            k_description: 'Описание', k_cas: 'CAS', k_refunit: 'Ед. измерения', k_ref_flow: 'Ref-поток',
-            k_unitgroup: 'Группа единиц', k_value: 'Значение', k_code: 'Код', k_url: 'URL', k_organisation: 'Организация',
-            s_inputs: 'Входы', s_outputs: 'Выходы', s_exchanges: 'Обмены', s_flowprops: 'Свойства потока',
-            s_factors: 'Коэффициенты воздействия', s_categories: 'Категории метода', s_units: 'Единицы',
-            s_indicators: 'Индикаторы DQ', s_processes: 'Процессы системы', s_setup: 'Параметры расчёта',
-            s_results: 'Результаты', s_links: 'Связи процессов', s_other: 'Данные',
-            c_flow: 'Поток', c_amount: 'Кол-во', c_unit: 'Ед.', c_provider: 'Провайдер', c_io: 'В/Вых', c_dq: 'DQ',
-            c_factor: 'Фактор', c_prop: 'Свойство', c_conv: 'Конверсия', c_ref: 'ref', c_position: '№', c_label: 'Метка',
-            c_target: 'Целевое кол-во', c_refprocess: 'Ref-процесс',
-            more: 'показать ещё ({n})', none: '—', in: 'вход', out: 'выход',
-            empty_tree: 'В снимке нет данных', no_selection: 'Выберите элемент слева',
-        },
-        en: {
-            title: 'LCA·AI — Project', nav_home: 'Home', nav_cabinet: 'Cabinet', back: '← Cabinet',
-            search_ph: 'Search by name…',
-            loading: 'Loading…', err_no_id: 'Project id missing', err_not_found: 'Project not found or not accessible',
-            err_load: 'Load error: ', err_sb: 'Supabase not loaded',
-            g_processes: 'Processes', g_flows: 'Flows', g_systems: 'Product systems', g_methods: 'Impact methods',
-            g_categories: 'Impact categories', g_results: 'Results', g_units: 'Unit groups',
-            g_flowprops: 'Flow properties', g_locations: 'Locations', g_actors: 'Actors', g_sources: 'Sources',
-            g_dq: 'Data quality', g_params: 'Parameters', g_currency: 'Currencies', g_social: 'Social indicators',
-            meta_version: 'version', meta_entities: 'entities', meta_size: 'size', meta_db: 'source database', meta_saved: 'saved',
-            k_category: 'Category', k_location: 'Location', k_type: 'Type', k_version: 'Version', k_changed: 'Last change',
-            k_description: 'Description', k_cas: 'CAS', k_refunit: 'Reference unit', k_ref_flow: 'Reference flow',
-            k_unitgroup: 'Unit group', k_value: 'Value', k_code: 'Code', k_url: 'URL', k_organisation: 'Organisation',
-            s_inputs: 'Inputs', s_outputs: 'Outputs', s_exchanges: 'Exchanges', s_flowprops: 'Flow properties',
-            s_factors: 'Impact factors', s_categories: 'Method categories', s_units: 'Units',
-            s_indicators: 'DQ indicators', s_processes: 'System processes', s_setup: 'Calculation setup',
-            s_results: 'Results', s_links: 'Process links', s_other: 'Data',
-            c_flow: 'Flow', c_amount: 'Amount', c_unit: 'Unit', c_provider: 'Provider', c_io: 'In/Out', c_dq: 'DQ',
-            c_factor: 'Factor', c_prop: 'Property', c_conv: 'Conversion', c_ref: 'ref', c_position: '#', c_label: 'Label',
-            c_target: 'Target amount', c_refprocess: 'Reference process',
-            more: 'show more ({n})', none: '—', in: 'in', out: 'out',
-            empty_tree: 'Snapshot is empty', no_selection: 'Select an item on the left',
-        },
-        zh: {
-            title: 'LCA·AI — 项目', nav_home: '首页', nav_cabinet: '个人中心', back: '← 返回',
-            search_ph: '按名称搜索…',
-            loading: '加载中…', err_no_id: '缺少项目 ID', err_not_found: '项目未找到或无权访问',
-            err_load: '加载错误：', err_sb: 'Supabase 未加载',
-            g_processes: '过程', g_flows: '流', g_systems: '产品系统', g_methods: '评价方法',
-            g_categories: '影响类别', g_results: '结果', g_units: '单位组',
-            g_flowprops: '流属性', g_locations: '地区', g_actors: '参与者', g_sources: '来源',
-            g_dq: '数据质量', g_params: '参数', g_currency: '货币', g_social: '社会指标',
-            meta_version: '版本', meta_entities: '实体', meta_size: '大小', meta_db: '源数据库', meta_saved: '保存于',
-            k_category: '类别', k_location: '地区', k_type: '类型', k_version: '版本', k_changed: '修改时间',
-            k_description: '描述', k_cas: 'CAS', k_refunit: '参考单位', k_ref_flow: '参考流',
-            k_unitgroup: '单位组', k_value: '值', k_code: '代码', k_url: 'URL', k_organisation: '组织',
-            s_inputs: '输入', s_outputs: '输出', s_exchanges: '交换', s_flowprops: '流属性',
-            s_factors: '影响因子', s_categories: '方法类别', s_units: '单位',
-            s_indicators: 'DQ 指标', s_processes: '系统过程', s_setup: '计算设置',
-            s_results: '结果', s_links: '过程链接', s_other: '数据',
-            c_flow: '流', c_amount: '数量', c_unit: '单位', c_provider: '提供者', c_io: '入/出', c_dq: 'DQ',
-            c_factor: '因子', c_prop: '属性', c_conv: '换算', c_ref: 'ref', c_position: '#', c_label: '标签',
-            c_target: '目标数量', c_refprocess: '参考过程',
-            more: '显示更多 ({n})', none: '—', in: '入', out: '出',
-            empty_tree: '快照为空', no_selection: '请在左侧选择条目',
-        },
-    };
+  "ru": {
+    "title": "LCA·AI — Проекты",
+    "nav_home": "Главная",
+    "nav_cabinet": "Кабинет",
+    "back": "← В кабинет",
+    "search_ph": "Поиск по названию…",
+    "loading": "Загрузка…",
+    "err_no_id": "Не указан id проекта",
+    "err_not_found": "Проект не найден или недоступен",
+    "err_load": "Ошибка загрузки: ",
+    "err_sb": "Supabase не загружен",
+    "g_processes": "Процессы",
+    "g_flows": "Потоки",
+    "g_systems": "Системы продукта",
+    "g_methods": "Методы оценки",
+    "g_categories": "Категории воздействия",
+    "g_results": "Результаты",
+    "g_units": "Единицы измерения",
+    "g_flowprops": "Свойства потоков",
+    "g_locations": "Локации",
+    "g_actors": "Акторы",
+    "g_sources": "Источники",
+    "g_dq": "Качество данных",
+    "g_params": "Параметры",
+    "g_currency": "Валюты",
+    "g_social": "Соц. индикаторы",
+    "meta_version": "версия",
+    "meta_entities": "сущностей",
+    "meta_size": "размер",
+    "meta_db": "исходная база",
+    "meta_saved": "сохранено",
+    "k_category": "Категория",
+    "k_location": "Локация",
+    "k_type": "Тип",
+    "k_version": "Версия",
+    "k_changed": "Изменён",
+    "k_description": "Описание",
+    "k_cas": "CAS",
+    "k_refunit": "Ед. измерения",
+    "k_ref_flow": "Ref-поток",
+    "k_unitgroup": "Группа единиц",
+    "k_value": "Значение",
+    "k_code": "Код",
+    "k_url": "URL",
+    "k_organisation": "Организация",
+    "s_inputs": "Входы",
+    "s_outputs": "Выходы",
+    "s_exchanges": "Обмены",
+    "s_flowprops": "Свойства потока",
+    "s_factors": "Коэффициенты воздействия",
+    "s_categories": "Категории метода",
+    "s_units": "Единицы",
+    "s_indicators": "Индикаторы DQ",
+    "s_processes": "Процессы системы",
+    "s_setup": "Параметры расчёта",
+    "s_results": "Результаты",
+    "s_links": "Связи процессов",
+    "s_other": "Данные",
+    "c_flow": "Поток",
+    "c_amount": "Кол-во",
+    "c_unit": "Ед.",
+    "c_provider": "Провайдер",
+    "c_io": "В/Вых",
+    "c_dq": "DQ",
+    "c_factor": "Фактор",
+    "c_prop": "Свойство",
+    "c_conv": "Конверсия",
+    "c_ref": "ref",
+    "c_position": "№",
+    "c_label": "Метка",
+    "c_target": "Целевое кол-во",
+    "c_refprocess": "Ref-процесс",
+    "more": "показать ещё ({n})",
+    "none": "—",
+    "in": "вход",
+    "out": "выход",
+    "empty_tree": "В снимке нет данных",
+    "no_selection": "Выберите элемент слева",
+    "projects_title": "Проекты",
+    "create": "Создать",
+    "project_name_prompt": "Название проекта",
+    "no_projects": "Нет проектов",
+    "calculations": "Расчёты",
+    "calcs_count": "расчётов",
+    "unnamed": "Без названия",
+    "rename": "Переименовать",
+    "rename_prompt": "Новое название проекта",
+    "archive": "В архив",
+    "restore": "Вернуть",
+    "archive_title": "Архив",
+    "delete": "Удалить",
+    "delete_btn": "Удалить",
+    "confirm_delete_project": "Удалить проект?",
+    "confirm_delete_project_text": "Все расчёты внутри проекта тоже будут удалены.",
+    "toast_project_created": "Проект создан",
+    "toast_project_renamed": "Проект переименован",
+    "toast_deleted": "Удалено",
+    "toast_archived": "Проект архивирован",
+    "toast_restored": "Проект восстановлен",
+    "toast_calc_deleted": "Расчёт удалён",
+    "confirm_delete_calc_from_proj": "Удалить расчёт из проекта?",
+    "confirm_delete_calc_text": "Это действие нельзя отменить.",
+    "target": "Цель",
+    "target_set": "Цель",
+    "target_base": "база",
+    "target_title": "Цель по снижению",
+    "target_text": "На сколько процентов снизить след относительно первого расчёта в проекте? Пусто — убрать цель.",
+    "save": "Сохранить",
+    "saved": "Сохранено",
+    "cancel": "Отмена",
+    "ok": "ОК",
+    "share": "Поделиться",
+    "share_title": "Поделиться",
+    "share_sub": "Получатель увидит отчёт только для чтения. Ссылку можно отозвать в любой момент.",
+    "share_expires": "Срок действия",
+    "share_email_label": "Отправить на email (необязательно)",
+    "share_email_ph": "colleague@example.com",
+    "share_get_link": "Создать ссылку",
+    "share_send": "Отправить",
+    "share_link_created": "Ссылка создана и скопирована",
+    "share_sent": "Письмо отправлено на {email}",
+    "share_no_mail": "Отправка почты не настроена на сервере. Ссылка создана — передайте её вручную.",
+    "share_failed": "Письмо не отправилось. Ссылка создана — передайте её вручную.",
+    "share_role_label": "Права получателя",
+    "share_role_view": "Только чтение",
+    "share_role_edit": "Чтение и редактирование",
+    "share_role_note_view": "Получатель сможет только смотреть отчёт.",
+    "share_role_note_edit": "Получатель сможет изменять количества и коэффициенты. Потребуется вход в аккаунт. Все правки попадут в журнал.",
+    "share_role_note_edit_proj": "Получатель сможет изменять любой расчёт внутри проекта. Потребуется вход. Все правки попадут в журнал.",
+    "copy": "Копировать",
+    "toast_link_copied": "Ссылка скопирована!",
+    "err_email": "Введите корректный email",
+    "snap_versions": "версий",
+    "snap_open": "Открыть облачный проект",
+    "archive_empty": "Архив пуст",
+    "back_list": "← К списку",
+    "open_snapshot": "Открыть снимок",
+    "archived_badge": "в архиве",
+    "exp_7": "7 дней",
+    "exp_30": "30 дней",
+    "exp_90": "90 дней",
+    "exp_365": "1 год",
+    "err_create": "Ошибка создания: ",
+    "err_delete": "Ошибка удаления: ",
+    "err_generic": "Ошибка: "
+  },
+  "en": {
+    "title": "LCA·AI — Projects",
+    "nav_home": "Home",
+    "nav_cabinet": "Cabinet",
+    "back": "← Cabinet",
+    "search_ph": "Search by name…",
+    "loading": "Loading…",
+    "err_no_id": "Project id missing",
+    "err_not_found": "Project not found or not accessible",
+    "err_load": "Load error: ",
+    "err_sb": "Supabase not loaded",
+    "g_processes": "Processes",
+    "g_flows": "Flows",
+    "g_systems": "Product systems",
+    "g_methods": "Impact methods",
+    "g_categories": "Impact categories",
+    "g_results": "Results",
+    "g_units": "Unit groups",
+    "g_flowprops": "Flow properties",
+    "g_locations": "Locations",
+    "g_actors": "Actors",
+    "g_sources": "Sources",
+    "g_dq": "Data quality",
+    "g_params": "Parameters",
+    "g_currency": "Currencies",
+    "g_social": "Social indicators",
+    "meta_version": "version",
+    "meta_entities": "entities",
+    "meta_size": "size",
+    "meta_db": "source database",
+    "meta_saved": "saved",
+    "k_category": "Category",
+    "k_location": "Location",
+    "k_type": "Type",
+    "k_version": "Version",
+    "k_changed": "Last change",
+    "k_description": "Description",
+    "k_cas": "CAS",
+    "k_refunit": "Reference unit",
+    "k_ref_flow": "Reference flow",
+    "k_unitgroup": "Unit group",
+    "k_value": "Value",
+    "k_code": "Code",
+    "k_url": "URL",
+    "k_organisation": "Organisation",
+    "s_inputs": "Inputs",
+    "s_outputs": "Outputs",
+    "s_exchanges": "Exchanges",
+    "s_flowprops": "Flow properties",
+    "s_factors": "Impact factors",
+    "s_categories": "Method categories",
+    "s_units": "Units",
+    "s_indicators": "DQ indicators",
+    "s_processes": "System processes",
+    "s_setup": "Calculation setup",
+    "s_results": "Results",
+    "s_links": "Process links",
+    "s_other": "Data",
+    "c_flow": "Flow",
+    "c_amount": "Amount",
+    "c_unit": "Unit",
+    "c_provider": "Provider",
+    "c_io": "In/Out",
+    "c_dq": "DQ",
+    "c_factor": "Factor",
+    "c_prop": "Property",
+    "c_conv": "Conversion",
+    "c_ref": "ref",
+    "c_position": "#",
+    "c_label": "Label",
+    "c_target": "Target amount",
+    "c_refprocess": "Reference process",
+    "more": "show more ({n})",
+    "none": "—",
+    "in": "in",
+    "out": "out",
+    "empty_tree": "Snapshot is empty",
+    "no_selection": "Select an item on the left",
+    "projects_title": "Projects",
+    "create": "Create",
+    "project_name_prompt": "Project name",
+    "no_projects": "No projects yet",
+    "calculations": "Calculations",
+    "calcs_count": "calculations",
+    "unnamed": "Untitled",
+    "rename": "Rename",
+    "rename_prompt": "New project name",
+    "archive": "Archive",
+    "restore": "Restore",
+    "archive_title": "Archive",
+    "delete": "Delete",
+    "delete_btn": "Delete",
+    "confirm_delete_project": "Delete project?",
+    "confirm_delete_project_text": "All calculations inside will be deleted too.",
+    "toast_project_created": "Project created",
+    "toast_project_renamed": "Project renamed",
+    "toast_deleted": "Deleted",
+    "toast_archived": "Project archived",
+    "toast_restored": "Project restored",
+    "toast_calc_deleted": "Calculation deleted",
+    "confirm_delete_calc_from_proj": "Remove calculation from project?",
+    "confirm_delete_calc_text": "This action cannot be undone.",
+    "target": "Target",
+    "target_set": "Target",
+    "target_base": "base",
+    "target_title": "Reduction target",
+    "target_text": "By what percentage should the footprint drop against the first calculation in this project? Leave empty to remove the target.",
+    "save": "Save",
+    "saved": "Saved",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "share": "Share",
+    "share_title": "Share",
+    "share_sub": "The recipient gets a read-only report. You can revoke the link at any time.",
+    "share_expires": "Expires in",
+    "share_email_label": "Send to email (optional)",
+    "share_email_ph": "colleague@example.com",
+    "share_get_link": "Create link",
+    "share_send": "Send",
+    "share_link_created": "Link created and copied",
+    "share_sent": "Email sent to {email}",
+    "share_no_mail": "Email sending is not configured on the server. The link was created — share it manually.",
+    "share_failed": "The email did not go out. The link was created — share it manually.",
+    "share_role_label": "Recipient rights",
+    "share_role_view": "Read only",
+    "share_role_edit": "Read and edit",
+    "share_role_note_view": "The recipient can only view the report.",
+    "share_role_note_edit": "The recipient can change amounts and factors. Sign-in required. Every edit is logged.",
+    "share_role_note_edit_proj": "The recipient can edit any calculation inside the project. Sign-in required. Every edit is logged.",
+    "copy": "Copy",
+    "toast_link_copied": "Link copied!",
+    "err_email": "Enter a valid email",
+    "snap_versions": "versions",
+    "snap_open": "Open cloud project",
+    "archive_empty": "Archive is empty",
+    "back_list": "← Back to list",
+    "open_snapshot": "Open snapshot",
+    "archived_badge": "archived",
+    "exp_7": "7 days",
+    "exp_30": "30 days",
+    "exp_90": "90 days",
+    "exp_365": "1 year",
+    "err_create": "Create error: ",
+    "err_delete": "Delete error: ",
+    "err_generic": "Error: "
+  },
+  "zh": {
+    "title": "LCA·AI — 项目",
+    "nav_home": "首页",
+    "nav_cabinet": "个人中心",
+    "back": "← 返回",
+    "search_ph": "按名称搜索…",
+    "loading": "加载中…",
+    "err_no_id": "缺少项目 ID",
+    "err_not_found": "项目未找到或无权访问",
+    "err_load": "加载错误：",
+    "err_sb": "Supabase 未加载",
+    "g_processes": "过程",
+    "g_flows": "流",
+    "g_systems": "产品系统",
+    "g_methods": "评价方法",
+    "g_categories": "影响类别",
+    "g_results": "结果",
+    "g_units": "单位组",
+    "g_flowprops": "流属性",
+    "g_locations": "地区",
+    "g_actors": "参与者",
+    "g_sources": "来源",
+    "g_dq": "数据质量",
+    "g_params": "参数",
+    "g_currency": "货币",
+    "g_social": "社会指标",
+    "meta_version": "版本",
+    "meta_entities": "实体",
+    "meta_size": "大小",
+    "meta_db": "源数据库",
+    "meta_saved": "保存于",
+    "k_category": "类别",
+    "k_location": "地区",
+    "k_type": "类型",
+    "k_version": "版本",
+    "k_changed": "修改时间",
+    "k_description": "描述",
+    "k_cas": "CAS",
+    "k_refunit": "参考单位",
+    "k_ref_flow": "参考流",
+    "k_unitgroup": "单位组",
+    "k_value": "值",
+    "k_code": "代码",
+    "k_url": "URL",
+    "k_organisation": "组织",
+    "s_inputs": "输入",
+    "s_outputs": "输出",
+    "s_exchanges": "交换",
+    "s_flowprops": "流属性",
+    "s_factors": "影响因子",
+    "s_categories": "方法类别",
+    "s_units": "单位",
+    "s_indicators": "DQ 指标",
+    "s_processes": "系统过程",
+    "s_setup": "计算设置",
+    "s_results": "结果",
+    "s_links": "过程链接",
+    "s_other": "数据",
+    "c_flow": "流",
+    "c_amount": "数量",
+    "c_unit": "单位",
+    "c_provider": "提供者",
+    "c_io": "入/出",
+    "c_dq": "DQ",
+    "c_factor": "因子",
+    "c_prop": "属性",
+    "c_conv": "换算",
+    "c_ref": "ref",
+    "c_position": "#",
+    "c_label": "标签",
+    "c_target": "目标数量",
+    "c_refprocess": "参考过程",
+    "more": "显示更多 ({n})",
+    "none": "—",
+    "in": "入",
+    "out": "出",
+    "empty_tree": "快照为空",
+    "no_selection": "请在左侧选择条目",
+    "projects_title": "项目",
+    "create": "创建",
+    "project_name_prompt": "项目名称",
+    "no_projects": "暂无项目",
+    "calculations": "计算",
+    "calcs_count": "次计算",
+    "unnamed": "未命名",
+    "rename": "重命名",
+    "rename_prompt": "新项目名称",
+    "archive": "归档",
+    "restore": "恢复",
+    "archive_title": "归档",
+    "delete": "删除",
+    "delete_btn": "删除",
+    "confirm_delete_project": "确定删除此项目？",
+    "confirm_delete_project_text": "项目内的所有计算也将被删除。",
+    "toast_project_created": "项目已创建",
+    "toast_project_renamed": "项目已重命名",
+    "toast_deleted": "已删除",
+    "toast_archived": "项目已归档",
+    "toast_restored": "项目已恢复",
+    "toast_calc_deleted": "计算已删除",
+    "confirm_delete_calc_from_proj": "确定从项目中删除此计算？",
+    "confirm_delete_calc_text": "此操作无法撤销。",
+    "target": "目标",
+    "target_set": "目标",
+    "target_base": "基准",
+    "target_title": "减排目标",
+    "target_text": "相对项目中第一次计算，碳足迹需下降多少百分比？留空则取消目标。",
+    "save": "保存",
+    "saved": "已保存",
+    "cancel": "取消",
+    "ok": "确定",
+    "share": "分享",
+    "share_title": "分享",
+    "share_sub": "接收方仅可只读查看报告。链接可随时撤销。",
+    "share_expires": "有效期",
+    "share_email_label": "发送到邮箱（可选）",
+    "share_email_ph": "colleague@example.com",
+    "share_get_link": "创建链接",
+    "share_send": "发送",
+    "share_link_created": "链接已创建并复制",
+    "share_sent": "邮件已发送至 {email}",
+    "share_no_mail": "服务器未配置邮件发送。链接已创建 — 请手动分享。",
+    "share_failed": "邮件未能发出。链接已创建 — 请手动分享。",
+    "share_role_label": "接收方权限",
+    "share_role_view": "仅查看",
+    "share_role_edit": "查看并编辑",
+    "share_role_note_view": "接收方只能查看报告。",
+    "share_role_note_edit": "接收方可修改数量与排放因子。需要登录，所有修改都会记入日志。",
+    "share_role_note_edit_proj": "接收方可编辑项目内任意计算。需要登录，所有修改都会记入日志。",
+    "copy": "复制",
+    "toast_link_copied": "链接已复制！",
+    "err_email": "请输入有效的邮箱",
+    "snap_versions": "个版本",
+    "snap_open": "打开云项目",
+    "archive_empty": "归档为空",
+    "back_list": "← 返回列表",
+    "open_snapshot": "打开快照",
+    "archived_badge": "已归档",
+    "exp_7": "7 天",
+    "exp_30": "30 天",
+    "exp_90": "90 天",
+    "exp_365": "1 年",
+    "err_create": "创建出错：",
+    "err_delete": "删除出错：",
+    "err_generic": "错误："
+  }
+};
     let pvLang = 'ru';
     function t(k) { return (PV_I18N[pvLang] && PV_I18N[pvLang][k]) || PV_I18N.ru[k] || k; }
     function applyLang(lang) {
@@ -275,6 +750,8 @@
         renderTree();
         if (state.sel) selectEntity(state.sel.type, state.sel.id, true);
         renderMeta();
+        if (state.mode === 'list') renderList();
+        if (state.mode === 'detail') { renderActions(); renderCalcs(); renderTarget(); }
     }
 
     /* ── theme ── */
@@ -299,6 +776,13 @@
     function fmtDate(iso) {
         return new Date(iso).toLocaleDateString(pvLang === 'zh' ? 'zh-CN' : pvLang, { year: 'numeric', month: 'short', day: 'numeric' });
     }
+    function fmtCo2(v) {
+        const n = parseFloat(v) || 0;
+        if (n >= 1000) return (n / 1000).toFixed(2) + ' t';
+        if (n >= 100) return n.toFixed(0);
+        if (n >= 1) return n.toFixed(2);
+        return n.toFixed(3);
+    }
     function fmtNum(v) {
         const n = parseFloat(v);
         if (isNaN(n)) return String(v ?? '');
@@ -307,11 +791,7 @@
     }
     const refId = r => r && typeof r === 'object' ? (r['@id'] || r.id || null) : null;
     const refName = r => (r && typeof r === 'object' && (r.name || r['@id'])) || (typeof r === 'string' ? r : null);
-    const catPath = c => {
-        const n = refName(c);
-        if (!n) return null;
-        return String(n);
-    };
+    const catPath = c => refName(c) ? String(refName(c)) : null;
 
     /* ── state ── */
     const GROUPS = [
@@ -332,24 +812,350 @@
         { key: 'SocialIndicator', i18n: 'g_social' },
     ];
     const state = {
+        mode: 'list',
         projectId: null, project: null,
-        snapshots: [], version: null,
-        entities: {}, index: new Map(), stats: null,
+        snapshots: [], version: null, savedAt: null, stats: null,
+        entities: {}, index: new Map(),
         sel: null, openGroups: new Set(['Process']),
         factorLimit: new Map(),
+        projects: [], calcsByProject: {}, snapByProject: {},
+        calcs: [],
     };
 
-    /* ── data loading ── */
-    let db = null;
+    let db = null, currentUser = null;
+
+    /* ══════════════════════════════════════════════════
+       Universal modal
+       ══════════════════════════════════════════════════ */
+    let modalResolve = null;
+    function openModal({ title, text, input, inputValue, okLabel, danger }) {
+        document.getElementById('modalTitle').textContent = title || '';
+        const txt = document.getElementById('modalText');
+        txt.style.display = text ? 'block' : 'none';
+        txt.textContent = text || '';
+        const inp = document.getElementById('modalInput');
+        inp.style.display = input ? 'block' : 'none';
+        inp.value = input ? (inputValue || '') : '';
+        const okBtn = document.getElementById('modalOk');
+        okBtn.textContent = okLabel || t('ok');
+        okBtn.className = danger ? 'btn btn-danger' : 'btn btn-primary';
+        document.getElementById('modalMask').classList.add('show');
+        if (input) setTimeout(() => inp.focus(), 60);
+        return new Promise(res => { modalResolve = res; });
+    }
+    function closeModal(result) {
+        document.getElementById('modalMask').classList.remove('show');
+        if (modalResolve) { modalResolve(result); modalResolve = null; }
+    }
+    document.getElementById('modalCancel').addEventListener('click', () => closeModal(null));
+    document.getElementById('modalOk').addEventListener('click', () => {
+        const inp = document.getElementById('modalInput');
+        closeModal(inp.style.display !== 'none' ? inp.value : true);
+    });
+    document.getElementById('modalMask').addEventListener('click', e => { if (e.target.id === 'modalMask') closeModal(null); });
+    document.getElementById('modalInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') closeModal(e.target.value);
+        if (e.key === 'Escape') closeModal(null);
+    });
+    async function promptModal(title, initial) { const v = await openModal({ title, input: true, inputValue: initial }); return (v && String(v).trim()) || null; }
+    async function confirmModal(title, text, danger = true) { const v = await openModal({ title, text, okLabel: t('delete_btn'), danger }); return v === true; }
+
+    async function logAudit(action, entity, entityId, details) {
+        if (!currentUser || !db) return;
+        try {
+            await db.from('audit_log').insert({
+                user_id: currentUser.id, action, entity_type: entity,
+                entity_id: entityId || null, details: details ? JSON.stringify(details) : null
+            });
+        } catch (e) { /* silent */ }
+    }
+
+    /* ══════════════════════════════════════════════════
+       Init
+       ══════════════════════════════════════════════════ */
     async function init() {
         if (!(window.supabase && window.supabase.createClient)) { showToast(t('err_sb')); return; }
         db = window.supabase.createClient(SB_URL, SB_KEY);
         const { data: { session } } = await db.auth.getSession();
         if (!session) { window.location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search); return; }
+        currentUser = session.user;
         const params = new URLSearchParams(location.search);
         state.projectId = params.get('id');
-        if (!state.projectId) { document.getElementById('projName').textContent = t('err_no_id'); return; }
-        const vParam = params.get('v');
+        if (state.projectId) {
+            state.mode = 'detail';
+            document.getElementById('detailView').style.display = 'block';
+            await initDetail(params.get('v'));
+        } else {
+            state.mode = 'list';
+            document.getElementById('listView').style.display = 'block';
+            await loadList();
+        }
+    }
+
+    /* ══════════════════════════════════════════════════
+       LIST MODE
+       ══════════════════════════════════════════════════ */
+    async function loadList() {
+        const list = document.getElementById('projList');
+        list.innerHTML = '<div class="empty">' + esc(t('loading')) + '</div>';
+        try {
+            const { data: projects, error } = await db.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+            if (error) throw error;
+            state.projects = projects || [];
+            const { data: calcs } = await db.from('project_calculations').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+            state.calcsByProject = {};
+            for (const c of (calcs || [])) {
+                if (!c.project_id) continue;
+                (state.calcsByProject[c.project_id] = state.calcsByProject[c.project_id] || []).push(c);
+            }
+            const { data: snaps } = await db.from('project_snapshots').select('project_id, version, stats').eq('user_id', currentUser.id).order('version', { ascending: false });
+            state.snapByProject = {};
+            for (const s of (snaps || [])) {
+                const m = state.snapByProject[s.project_id] || (state.snapByProject[s.project_id] = { count: 0, latest: 0, total: 0 });
+                m.count++;
+                if (s.version > m.latest) { m.latest = s.version; m.total = (s.stats && s.stats.total) || 0; }
+            }
+            renderList();
+        } catch (e) {
+            console.error(e);
+            list.innerHTML = '<div class="empty">' + esc(t('err_load') + (e.message || e)) + '</div>';
+        }
+    }
+
+    function targetBlockHtml(p) {
+        const calcs = state.calcsByProject[p.id] || [];
+        const tgt = parseFloat(p.target_pct);
+        if (isNaN(tgt) || tgt <= 0 || !calcs.length) return '';
+        const ordered = calcs.slice().sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        const val = c => parseFloat(c.report_data && c.report_data.total_co2eq) || 0;
+        const baseline = parseFloat(p.baseline_co2) || val(ordered[0]);
+        const current = val(ordered[ordered.length - 1]);
+        if (!(baseline > 0)) return '';
+        const goal = baseline * (1 - tgt / 100);
+        const cut = (baseline - current) / baseline * 100;
+        const pct = Math.max(0, Math.min(100, cut / tgt * 100));
+        const reached = current <= goal;
+        return '<div class="target">' +
+            '<div class="target-head"><span>' + esc(t('target')) + ' −' + tgt + '%' +
+            (p.target_date ? ' · ' + fmtDate(p.target_date) : '') + '</span>' +
+            '<span class="target-stat' + (reached ? ' reached' : '') + '">' + (cut >= 0 ? '−' : '+') + Math.abs(cut).toFixed(0) + '%</span></div>' +
+            '<div class="target-bar"><div class="target-fill' + (reached ? ' reached' : '') + '" style="width:' + pct.toFixed(1) + '%"></div></div>' +
+            '<div class="target-foot">' + fmtCo2(current) + ' → ' + fmtCo2(goal) + ' kgCO₂e · ' + esc(t('target_base')) + ' ' + fmtCo2(baseline) + '</div>' +
+            '</div>';
+    }
+
+    function renderList() {
+        const list = document.getElementById('projList');
+        const active = state.projects.filter(p => !p.archived);
+        const archived = state.projects.filter(p => p.archived);
+        if (!state.projects.length) {
+            list.innerHTML = '<div class="empty">' + esc(t('no_projects')) + '</div>';
+            return;
+        }
+        let html = '';
+        const card = p => {
+            const calcs = state.calcsByProject[p.id] || [];
+            const snap = state.snapByProject[p.id];
+            let h = '<div class="pcard">';
+            h += '<div class="pcard-head"><div class="pcard-title">' + esc(p.name) +
+                 (p.archived ? '<span class="badge">' + esc(t('archived_badge')) + '</span>' : '') + '</div>';
+            if (snap && snap.count > 0) {
+                h += '<a class="badge cloud" href="/project.html?id=' + p.id + '" title="' + esc(t('snap_open')) + '">☁ v' + snap.latest + ' · ' + snap.count + ' ' + esc(t('snap_versions')) + (snap.total ? ' · ' + snap.total + ' ent.' : '') + '</a>';
+            }
+            h += '<span class="badge">' + calcs.length + ' ' + esc(t('calcs_count')) + '</span>';
+            h += '<span class="pcard-date">' + fmtDate(p.created_at) + '</span></div>';
+            if (calcs.length) {
+                h += '<div style="margin-top:10px">';
+                for (const c of calcs) {
+                    const product = (c.report_data && c.report_data.product_title) || t('unnamed');
+                    const total = (c.report_data && c.report_data.total_co2eq) || 0;
+                    h += '<div class="calc-item">' +
+                        '<a class="calc-name" style="flex:1;text-decoration:none" href="/report.html?history=' + c.id + '">' + esc(product) +
+                        ' <span class="calc-date">' + fmtDate(c.created_at) + '</span></a>' +
+                        '<span class="calc-total">' + fmtCo2(total) + ' kgCO₂e</span>' +
+                        '<button class="btn btn-danger btn-sm del-calc-btn" data-id="' + c.id + '" title="' + esc(t('delete')) + '">×</button></div>';
+                }
+                h += '</div>';
+            }
+            h += targetBlockHtml(p);
+            h += '<div class="card-actions">';
+            if (snap && snap.count > 0) h += '<a class="btn btn-primary btn-sm" href="/project.html?id=' + p.id + '">' + esc(t('open_snapshot')) + '</a>';
+            h += '<button class="btn btn-sm target-btn" data-id="' + p.id + '" data-target="' + (p.target_pct || '') + '">' + esc(t('target_set')) + '</button>';
+            h += '<button class="btn btn-sm rename-project-btn" data-id="' + p.id + '" data-name="' + esc(p.name) + '">' + esc(t('rename')) + '</button>';
+            h += '<button class="btn btn-sm archive-btn" data-id="' + p.id + '">' + esc(p.archived ? t('restore') : t('archive')) + '</button>';
+            h += '<button class="btn btn-sm email-share-btn" data-id="' + p.id + '">' + esc(t('share')) + '</button>';
+            h += '<button class="btn btn-danger btn-sm delete-project-btn" data-id="' + p.id + '">' + esc(t('delete')) + '</button>';
+            h += '</div></div>';
+            return h;
+        };
+        if (!active.length) html += '<div class="empty">' + esc(t('no_projects')) + '</div>';
+        for (const p of active) html += card(p);
+        if (archived.length) {
+            html += '<details><summary style="cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--ink-mute);padding:8px 0">' + esc(t('archive_title')) + ' (' + archived.length + ')</summary>';
+            for (const p of archived) html += card(p);
+            html += '</details>';
+        }
+        list.innerHTML = html;
+    }
+
+    document.getElementById('projList').addEventListener('click', async e => {
+        const del = e.target.closest('.del-calc-btn');
+        if (del) { await deleteCalcFromProject(del.dataset.id); return; }
+        const ren = e.target.closest('.rename-project-btn');
+        if (ren) { await renameProject(ren.dataset.id, ren.dataset.name); return; }
+        const delP = e.target.closest('.delete-project-btn');
+        if (delP) { await deleteProject(delP.dataset.id); return; }
+        const arc = e.target.closest('.archive-btn');
+        if (arc) { await archiveProject(arc.dataset.id); return; }
+        const tgt = e.target.closest('.target-btn');
+        if (tgt) { await setTarget(tgt.dataset.id, tgt.dataset.target); return; }
+        const sh = e.target.closest('.email-share-btn');
+        if (sh) { openShare(sh.dataset.id); return; }
+    });
+
+    document.getElementById('newProjectBtn').addEventListener('click', createProject);
+
+    /* ══════════════════════════════════════════════════
+       Project management
+       ══════════════════════════════════════════════════ */
+    async function createProject() {
+        const name = await promptModal(t('project_name_prompt'));
+        if (!name) return;
+        try {
+            const { error } = await db.from('user_projects').insert({ user_id: currentUser.id, name });
+            if (error) throw error;
+            logAudit('create', 'project', null, { name });
+            showToast(t('toast_project_created'));
+            await loadList();
+        } catch (e) { showToast(t('err_create') + (e.message || e)); }
+    }
+    async function renameProject(id, oldName) {
+        const name = await promptModal(t('rename_prompt'), oldName);
+        if (!name || name === oldName) return;
+        try {
+            const { error } = await db.from('user_projects').update({ name }).eq('id', id);
+            if (error) throw error;
+            showToast(t('toast_project_renamed'));
+            if (state.mode === 'list') await loadList();
+            else { state.project.name = name; renderMeta(); renderActions(); }
+        } catch (e) { showToast(t('err_generic') + (e.message || e)); }
+    }
+    async function deleteProject(id) {
+        const ok = await confirmModal(t('confirm_delete_project'), t('confirm_delete_project_text'));
+        if (!ok) return;
+        try {
+            const { error: e1 } = await db.from('project_calculations').delete().eq('project_id', id);
+            const { error: e2 } = await db.from('user_projects').delete().eq('id', id);
+            if (e1 || e2) throw (e1 || e2);
+            logAudit('delete', 'project', id);
+            showToast(t('toast_deleted'));
+            if (state.mode === 'list') await loadList();
+            else window.location.href = '/project.html';
+        } catch (e) { showToast(t('err_delete') + (e.message || e)); }
+    }
+    async function deleteCalcFromProject(calcId) {
+        const ok = await confirmModal(t('confirm_delete_calc_from_proj'), t('confirm_delete_calc_text'));
+        if (!ok) return;
+        try {
+            const { error } = await db.from('project_calculations').delete().eq('id', calcId);
+            if (error) throw error;
+            showToast(t('toast_calc_deleted'));
+            if (state.mode === 'list') await loadList();
+            else await loadCalcs();
+        } catch (e) { showToast(t('err_delete') + (e.message || e)); }
+    }
+    async function archiveProject(id) {
+        try {
+            const { data: proj } = await db.from('user_projects').select('archived').eq('id', id).single();
+            const newVal = !(proj?.archived);
+            const { error } = await db.from('user_projects').update({ archived: newVal }).eq('id', id);
+            if (error) throw error;
+            showToast(newVal ? t('toast_archived') : t('toast_restored'));
+            if (state.mode === 'list') await loadList();
+            else { state.project.archived = newVal; renderActions(); }
+        } catch (e) { showToast(t('err_generic') + (e.message || e)); }
+    }
+    async function setTarget(id, cur) {
+        const val = await openModal({ title: t('target_title'), text: t('target_text'), input: true, inputValue: cur || '', okLabel: t('save') });
+        if (val === null || val === undefined || typeof val !== 'string') return;
+        const num = parseFloat(String(val).replace(',', '.'));
+        const payload = (!val.trim() || isNaN(num) || num <= 0) ? { target_pct: null } : { target_pct: Math.min(100, num) };
+        try {
+            const { error } = await db.from('user_projects').update(payload).eq('id', id).eq('user_id', currentUser.id);
+            if (error) throw error;
+            showToast(t('saved'));
+            if (state.mode === 'list') await loadList();
+            else { state.project.target_pct = payload.target_pct; renderTarget(); }
+        } catch (e) { showToast(String(e.message || e)); }
+    }
+
+    /* ══════════════════════════════════════════════════
+       Share
+       ══════════════════════════════════════════════════ */
+    let currentShareProjectId = null;
+    function openShare(id) {
+        currentShareProjectId = id;
+        document.getElementById('shareRole').value = 'view';
+        syncShareRoleUI();
+        document.getElementById('shareEmail').value = '';
+        document.getElementById('shareLinkRow').style.display = 'none';
+        document.getElementById('shareLinkInput').value = '';
+        document.getElementById('modalShare').style.display = 'flex';
+    }
+    function syncShareRoleUI() {
+        const sel = document.getElementById('shareRole');
+        document.getElementById('shareRoleNote').textContent =
+            sel.value === 'edit' ? t('share_role_note_edit_proj') : t('share_role_note_view');
+    }
+    document.getElementById('shareRole').addEventListener('change', syncShareRoleUI);
+    document.getElementById('modalShare').addEventListener('click', e => { if (e.target.id === 'modalShare') e.target.style.display = 'none'; });
+    document.getElementById('shareCancelBtn').addEventListener('click', () => { document.getElementById('modalShare').style.display = 'none'; });
+    document.getElementById('shareCopyBtn').addEventListener('click', () => {
+        navigator.clipboard.writeText(document.getElementById('shareLinkInput').value).then(() => showToast(t('toast_link_copied')));
+    });
+    document.getElementById('shareLinkBtn').addEventListener('click', async () => {
+        const days = parseInt(document.getElementById('shareExpires').value, 10) || 30;
+        try {
+            const token = (crypto.randomUUID && crypto.randomUUID()) || (Date.now() + '-' + Math.random().toString(16).slice(2));
+            const role = document.getElementById('shareRole').value === 'edit' ? 'edit' : 'view';
+            const { error } = await db.from('share_links').insert({
+                token, kind: 'project', target_id: currentShareProjectId,
+                owner_id: currentUser.id, role,
+                expires_at: new Date(Date.now() + days * 864e5).toISOString()
+            });
+            if (error) throw error;
+            const link = window.location.origin + '/share.html?token=' + token;
+            document.getElementById('shareLinkInput').value = link;
+            document.getElementById('shareLinkRow').style.display = 'flex';
+            navigator.clipboard?.writeText(link);
+            showToast(t('share_link_created'));
+        } catch (e) { showToast(String(e.message || e)); }
+    });
+    document.getElementById('shareConfirmBtn').addEventListener('click', async () => {
+        const email = document.getElementById('shareEmail').value.trim();
+        const days = parseInt(document.getElementById('shareExpires').value, 10) || 30;
+        if (!email || !currentShareProjectId) { showToast(t('err_email')); return; }
+        const btn = document.getElementById('shareConfirmBtn');
+        btn.disabled = true;
+        try {
+            const { data: { session } } = await db.auth.getSession();
+            const res = await fetch(SB_URL + '/functions/v1/send-share-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (session?.access_token || '') },
+                body: JSON.stringify({ kind: 'project', target_id: currentShareProjectId, role: document.getElementById('shareRole').value === 'edit' ? 'edit' : 'view', expires_days: days, email })
+            });
+            const out = await res.json().catch(() => ({}));
+            if (res.ok) { document.getElementById('modalShare').style.display = 'none'; showToast(t('share_sent').replace('{email}', email)); return; }
+            if (out.link) { document.getElementById('shareLinkInput').value = out.link; document.getElementById('shareLinkRow').style.display = 'flex'; }
+            showToast(res.status === 501 ? t('share_no_mail') : t('share_failed'));
+        } catch (e) { showToast(String(e.message || e)); }
+        finally { btn.disabled = false; }
+    });
+
+    /* ══════════════════════════════════════════════════
+       DETAIL MODE
+       ══════════════════════════════════════════════════ */
+    async function initDetail(vParam) {
         try {
             const { data: proj, error: pErr } = await db.from('user_projects').select('*').eq('id', state.projectId).single();
             if (pErr || !proj) throw new Error(t('err_not_found'));
@@ -359,7 +1165,14 @@
                 .eq('project_id', state.projectId).order('version', { ascending: false });
             if (sErr) throw sErr;
             state.snapshots = snaps || [];
-            if (!state.snapshots.length) throw new Error(t('err_not_found'));
+            renderMeta();
+            renderActions();
+            await loadCalcs();
+            renderTarget();
+            if (!state.snapshots.length) {
+                document.getElementById('detail').innerHTML = '<div class="empty">' + esc(t('empty_tree')) + '</div>';
+                return;
+            }
             const want = parseInt(vParam, 10);
             const chosen = state.snapshots.find(s => s.version === want) || state.snapshots[0];
             fillVersionSel(chosen.version);
@@ -369,6 +1182,66 @@
             document.getElementById('projName').textContent = t('err_not_found');
             document.getElementById('projMeta').textContent = String(e.message || e);
         }
+    }
+
+    function renderActions() {
+        const p = state.project;
+        if (!p) return;
+        const box = document.getElementById('projActions');
+        let h = '';
+        h += '<button class="btn btn-sm target-btn" data-id="' + p.id + '" data-target="' + (p.target_pct || '') + '">' + esc(t('target_set')) + '</button>';
+        h += '<button class="btn btn-sm rename-project-btn" data-id="' + p.id + '" data-name="' + esc(p.name) + '">' + esc(t('rename')) + '</button>';
+        h += '<button class="btn btn-sm archive-btn" data-id="' + p.id + '">' + esc(p.archived ? t('restore') : t('archive')) + '</button>';
+        h += '<button class="btn btn-sm email-share-btn" data-id="' + p.id + '">' + esc(t('share')) + '</button>';
+        h += '<button class="btn btn-danger btn-sm delete-project-btn" data-id="' + p.id + '">' + esc(t('delete')) + '</button>';
+        box.innerHTML = h;
+    }
+    document.getElementById('projActions').addEventListener('click', async e => {
+        const ren = e.target.closest('.rename-project-btn');
+        if (ren) { await renameProject(ren.dataset.id, ren.dataset.name); return; }
+        const delP = e.target.closest('.delete-project-btn');
+        if (delP) { await deleteProject(delP.dataset.id); return; }
+        const arc = e.target.closest('.archive-btn');
+        if (arc) { await archiveProject(arc.dataset.id); return; }
+        const tgt = e.target.closest('.target-btn');
+        if (tgt) { await setTarget(tgt.dataset.id, tgt.dataset.target); return; }
+        const sh = e.target.closest('.email-share-btn');
+        if (sh) { openShare(sh.dataset.id); return; }
+    });
+
+    async function loadCalcs() {
+        const { data } = await db.from('project_calculations').select('*').eq('project_id', state.projectId).order('created_at', { ascending: false });
+        state.calcs = data || [];
+        renderCalcs();
+    }
+    function renderCalcs() {
+        const card = document.getElementById('calcsCard');
+        const box = document.getElementById('calcsList');
+        if (!state.calcs.length) { card.style.display = 'none'; return; }
+        card.style.display = 'block';
+        let h = '';
+        for (const c of state.calcs) {
+            const product = (c.report_data && c.report_data.product_title) || t('unnamed');
+            const total = (c.report_data && c.report_data.total_co2eq) || 0;
+            h += '<div class="calc-item">' +
+                '<a class="calc-name" style="flex:1;text-decoration:none" href="/report.html?history=' + c.id + '">' + esc(product) +
+                ' <span class="calc-date">' + fmtDate(c.created_at) + '</span></a>' +
+                '<span class="calc-total">' + fmtCo2(total) + ' kgCO₂e</span>' +
+                '<button class="btn btn-danger btn-sm del-calc-btn" data-id="' + c.id + '" title="' + esc(t('delete')) + '">×</button>' +
+                '</div>';
+        }
+        box.innerHTML = h;
+    }
+    document.getElementById('calcsList').addEventListener('click', async e => {
+        const del = e.target.closest('.del-calc-btn');
+        if (del) await deleteCalcFromProject(del.dataset.id);
+    });
+
+    function renderTarget() {
+        const box = document.getElementById('targetBlock');
+        if (!state.project) { box.innerHTML = ''; return; }
+        const p = Object.assign({}, state.project);
+        box.innerHTML = targetBlockHtml(p) ? '<div class="card" style="margin-top:18px">' + targetBlockHtml(p) + '</div>' : '';
     }
 
     function fillVersionSel(current) {
@@ -429,6 +1302,7 @@
 
     /* ── tree ── */
     function renderTree() {
+        if (state.mode !== 'detail') return;
         const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
         const box = document.getElementById('tree');
         let html = '';
