@@ -542,6 +542,29 @@ export function DatabaseManager({ onClose }: { onClose: () => void }) {
             </table>
           </section>
 
+          <section className="space-y-3">
+            <h3 className="text-[12px] font-sans uppercase tracking-widest text-graphite-mid border-b border-line pb-1.5">
+              ⬇ {t('ex_title')} <span className="font-mono normal-case text-graphite-soft">{current}</span>
+            </h3>
+            <div className="flex gap-2 flex-wrap">
+              <Button variant="ghost" onClick={doExportExcel} disabled={!!busyMsg || !!exportBusy || !current}>
+                {exportBusy === 'excel' ? t('loading') : t('ex_excel')}
+              </Button>
+              <Button variant="ghost" onClick={doExportJson} disabled={!!busyMsg || !!exportBusy || !current}>
+                {exportBusy === 'json' ? t('loading') : t('ex_json')}
+              </Button>
+              <Button variant="ghost" onClick={doExportWord} disabled={!!busyMsg || !!exportBusy || !current}>
+                {exportBusy === 'word' ? t('loading') : t('ex_word')}
+              </Button>
+              <Button variant="ghost" onClick={doExportPdf} disabled={!!busyMsg || !!exportBusy || !current}>
+                {exportBusy === 'pdf' ? t('loading') : t('ex_pdf')}
+              </Button>
+              <Button variant="ghost" onClick={doGenReport} disabled={!!busyMsg || !!exportBusy || !current}>
+                {exportBusy === 'gen' ? t('loading') : t('ex_gen')}
+              </Button>
+            </div>
+          </section>
+
           <section className="grid grid-cols-2 gap-4">
             <div className="border border-line p-3 space-y-2">
               <div className="text-[11px] font-sans uppercase tracking-wide text-graphite-mid">{t('db_create_empty')}</div>
@@ -769,29 +792,6 @@ export function DatabaseManager({ onClose }: { onClose: () => void }) {
                 )}
               </>
             )}
-          </section>
-
-          <section className="space-y-3">
-            <h3 className="text-[12px] font-sans uppercase tracking-widest text-graphite-mid border-b border-line pb-1.5">
-              ⬇ {t('ex_title')} <span className="font-mono normal-case text-graphite-soft">{current}</span>
-            </h3>
-            <div className="flex gap-2 flex-wrap">
-              <Button variant="ghost" onClick={doExportExcel} disabled={!!busyMsg || !!exportBusy || !current}>
-                {exportBusy === 'excel' ? t('loading') : t('ex_excel')}
-              </Button>
-              <Button variant="ghost" onClick={doExportJson} disabled={!!busyMsg || !!exportBusy || !current}>
-                {exportBusy === 'json' ? t('loading') : t('ex_json')}
-              </Button>
-              <Button variant="ghost" onClick={doExportWord} disabled={!!busyMsg || !!exportBusy || !current}>
-                {exportBusy === 'word' ? t('loading') : t('ex_word')}
-              </Button>
-              <Button variant="ghost" onClick={doExportPdf} disabled={!!busyMsg || !!exportBusy || !current}>
-                {exportBusy === 'pdf' ? t('loading') : t('ex_pdf')}
-              </Button>
-              <Button variant="ghost" onClick={doGenReport} disabled={!!busyMsg || !!exportBusy || !current}>
-                {exportBusy === 'gen' ? t('loading') : t('ex_gen')}
-              </Button>
-            </div>
           </section>
         </div>
       </div>
