@@ -45,6 +45,8 @@ contextBridge.exposeInMainWorld('desktop', {
   cloudFoldersRename: (id, name) => ipcRenderer.invoke('cloud:folders-rename', { id, name }),
   cloudFoldersDelete: (id) => ipcRenderer.invoke('cloud:folders-delete', id),
   cloudProjectsMove: (projectId, folderId) => ipcRenderer.invoke('cloud:projects-move', { projectId, folderId }),
+  aiReportNarrative: (payload) => ipcRenderer.invoke('ai:report-narrative', { payload }),
+  cloudReportSave: (reportData) => ipcRenderer.invoke('cloud:report-save', { reportData }),
   authLogin: (email, password) => ipcRenderer.invoke('auth:login', { email, password }),
   authGet: () => ipcRenderer.invoke('auth:get'),
   authLogout: () => ipcRenderer.invoke('auth:logout'),

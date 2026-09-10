@@ -950,6 +950,86 @@ if (!app.requestSingleInstanceLock()) {
       return { ok: true }
     })
 
+    ipcMain.handle('ai:report-narrative', async (_e, { payload }) => {
+      const auth = loadAuth()
+      if (!auth?.access_token) throw new Error('LOGIN_REQUIRED')
+      const systemPrompt = [
+        'You are a senior LCA consultant writing the narrative sections of a technical report for a life cycle study.',
+        'You receive JSON with: the chosen impact category and method, computed stage results (screening LCIA over direct elementary flows), an inventory summary and database metadata.',
+        'All numbers in the input were computed from the database; you must not invent any additional numbers. You may reference the provided values and derived shares.',
+        'Return ONLY a JSON object with keys: "analysis" (string, 1-2 paragraphs interpreting the stage results and hotspots), "assumptions" (array of strings), "limitations" (array of strings), "recommendations" (array of strings).',
+        'Explicitly state in limitations that stage values are a screening estimate based on direct elementary flows of each process multiplied by the category characterization factors, without full supply-chain recursion, unless a saved calculation result was provided.',
+        'Write in the language of the "lang" field (ru, en or zh) using professional LCA terminology.',
+      ].join(' ')
+      const resp = await fetch('https://pbisngkepszwzzjivxus.supabase.co/functions/v1/lca-proxy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${auth.access_token}`,
+        },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: JSON.stringify(payload) },
+          ],
+          max_tokens: 4000,
+          temperature: 0.3,
+          stream: false,
+          response_format: { type: 'json_object' },
+        }),
+      })
+      if (resp.status === 401) throw new Error('TOKEN_EXPIRED')
+      if (resp.status === 429) throw new Error('RATE_LIMIT')
+      if (!resp.ok) throw new Error(`proxy HTTP ${resp.status}`)
+      const data = await resp.json()
+      const text = data?.choices?.[0]?.message?.content ?? ''
+      if (!text) throw new Error('EMPTY_RESPONSE')
+      const first = text.indexOf('{')
+      const last = text.lastIndexOf('}')
+      if (first < 0 || last < 0) throw new Error('BAD_JSON')
+      return JSON.parse(text.slice(first, last + 1))
+    })
+
+    ipcMain.handle('cloud:report-save', async (_e, { reportData }) => {
+      const auth = requireAuth()
+      const hist = await sbJson(`${SUPABASE_URL}/rest/v1/user_history`, auth, {
+        method: 'POST',
+        headers: { Prefer: 'return=representation' },
+        body: JSON.stringify({
+          user_id: auth.user_id,
+          product_title: reportData.product_title,
+          total_co2eq: reportData.total_co2eq,
+          report_data: reportData,
+        }),
+      })
+      const row = hist[0]
+      let projectId = null
+      try {
+        const cfg = loadConfig()
+        const proj = await sbJson(
+          `${SUPABASE_URL}/rest/v1/user_projects?name=eq.${encodeURIComponent(cfg.db)}&select=id`,
+          auth,
+        )
+        if (proj[0]) {
+          projectId = proj[0].id
+          await sbFetch(`${SUPABASE_URL}/rest/v1/project_calculations`, auth, {
+            method: 'POST',
+            headers: { Prefer: 'return=minimal' },
+            body: JSON.stringify({
+              project_id: proj[0].id,
+              user_id: auth.user_id,
+              report_data: reportData,
+              total_co2eq: reportData.total_co2eq,
+            }),
+          })
+        }
+      } catch {
+        // проект не найден — отчёт остаётся только в истории
+      }
+      return { id: row?.id ?? null, projectId }
+    })
+
     if (loadConfig().autoStart) startEngine()
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow()

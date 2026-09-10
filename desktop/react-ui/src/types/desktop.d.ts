@@ -60,7 +60,7 @@ export interface DesktopApi {
   dbImport: (zipPath: string, name: string) => Promise<{ total: number; failed: number; failures: string[] }>
   onDbProgress: (cb: (data: DbProgress) => void) => () => void
   onDbChanged: (cb: (data: { db: string }) => void) => () => void
-  dialogSave: (opts?: { defaultName?: string }) => Promise<string | null>
+  dialogSave: (opts?: { defaultName?: string; filters?: Array<{ name: string; extensions: string[] }> }) => Promise<string | null>
   dialogOpen: (opts?: { filters?: Array<{ name: string; extensions: string[] }> }) => Promise<string | null>
   dialogOpenMulti: (opts?: { filters?: Array<{ name: string; extensions: string[] }> }) => Promise<string[] | null>
   cloudProjectsList: () => Promise<CloudProject[]>
@@ -78,6 +78,13 @@ export interface DesktopApi {
   cloudFoldersRename: (id: string, name: string) => Promise<{ ok: boolean }>
   cloudFoldersDelete: (id: string) => Promise<{ ok: boolean }>
   cloudProjectsMove: (projectId: string, folderId: string | null) => Promise<{ ok: boolean }>
+  aiReportNarrative: (payload: unknown) => Promise<{
+    analysis?: string
+    assumptions?: string[]
+    limitations?: string[]
+    recommendations?: string[]
+  }>
+  cloudReportSave: (reportData: Record<string, unknown>) => Promise<{ id: string | null; projectId: string | null }>
   fileWrite: (path: string, content: string) => Promise<{ ok: boolean }>
   fileWriteBase64: (path: string, base64: string) => Promise<{ ok: boolean }>
   aiCalculate: (description: string, lang: string) => Promise<Record<string, unknown>>

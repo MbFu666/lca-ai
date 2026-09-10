@@ -1,5 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { CloudFolder, CloudProject, DbInfo, DbProgress } from '../types/desktop'
+import {
+  collectEntities,
+  chooseCategory,
+  screening,
+  functionalUnit,
+  buildEntitiesZipBase64,
+  reportDoc,
+  reportBody,
+  renderPdfBase64,
+  saveViaDialog,
+} from '../lib/dbexport'
 import { useI18n } from '../i18n'
 import { useEngine } from '../stores/engine'
 import { rpc } from '../api/ipc'
@@ -37,6 +48,7 @@ export function DatabaseManager({ onClose }: { onClose: () => void }) {
   const [folderFilter, setFolderFilter] = useState('')
   const [folderEditor, setFolderEditor] = useState<{ id: string | null; name: string } | null>(null)
   const [confirmFolderDelete, setConfirmFolderDelete] = useState(false)
+  const [exportBusy, setExportBusy] = useState('')
 
   const desktop = window.desktop!
 
@@ -171,6 +183,159 @@ export function DatabaseManager({ onClose }: { onClose: () => void }) {
       setError(String(e instanceof Error ? e.message : e))
     } finally {
       setCloudBusy('')
+    }
+  }
+
+  /* ── exports (openLCA-style Excel zip, JSON, Word/PDF + AI, cloud report) ── */
+  const lang = useI18n((s) => s.lang)
+  const exLabels = () => ({
+    io: t('ex_l_io'), flow: t('ex_l_flow'), amount: t('ex_l_amount'), unit: t('ex_l_unit'),
+    provider: t('ex_l_provider'), dq: t('ex_l_dq'), factor: t('ex_l_factor'), conv: t('ex_l_conv'),
+    ref: t('ex_l_ref'), pos: t('ex_l_pos'), label: t('ex_l_label'), category: t('ex_l_category'), process: t('ex_l_process'),
+  })
+  const docLabels = () => ({
+    saved: t('ex_l_saved'), db: t('ex_l_db'), entities: t('ex_l_entities'), inventory: t('ex_inventory'), lcia: t('ex_lcia'),
+    io: t('ex_l_io'), flow: t('ex_l_flow'), amount: t('ex_l_amount'), unit: t('ex_l_unit'), provider: t('ex_l_provider'),
+    dq: t('ex_l_dq'), factor: t('ex_l_factor'), in: t('ex_l_in'), out: t('ex_l_out'),
+  })
+  const repSections = () => [
+    { key: 'analysis', label: t('ex_sec_analysis') },
+    { key: 'assumptions', label: t('ex_sec_assumptions') },
+    { key: 'limitations', label: t('ex_sec_limitations') },
+    { key: 'recommendations', label: t('ex_sec_recommendations') },
+  ]
+
+  const prepareReport = async () => {
+    const entities = await collectEntities()
+    const cat = chooseCategory(entities)
+    if (!cat) throw new Error(t('ex_no_cat'))
+    const scr = screening(entities, cat, t('ex_factor_source'))
+    const method = (entities.ImpactMethod || [])[0]?.name || '—'
+    const locs: Record<string, number> = {}
+    for (const p of entities.Process || []) {
+      const l = typeof p.location === 'string' ? p.location : p.location?.name
+      if (l) locs[l] = (locs[l] || 0) + 1
+    }
+    const region = Object.keys(locs).sort((a, b) => locs[b] - locs[a])[0] || '—'
+    const limits = [t('ex_note_screening').replace('{cat}', cat.name || '').replace('{method}', method)]
+    if (scr.resultsTotal !== null) limits.push(t('ex_note_results').replace('{v}', String(scr.resultsTotal)))
+    let ai: { analysis?: string; assumptions?: string[]; limitations?: string[]; recommendations?: string[] } = {}
+    try {
+      ai = await desktop.aiReportNarrative({
+        lang,
+        method,
+        impact_category: cat.name,
+        ref_unit: cat.refUnit || '',
+        functional_unit: functionalUnit(entities),
+        region,
+        total_screening: scr.sum,
+        saved_result: scr.resultsTotal,
+        stages: scr.stages.map((g) => ({ name: g.name, value: g.co2eq, share_pct: g.share_pct, processes: g.sub_processes.map((x) => x.name) })),
+        db: current,
+        entities: Object.values(entities).reduce((a, x) => a + x.length, 0),
+      })
+    } catch {
+      ai = {}
+    }
+    const rd = {
+      source: 'db',
+      product_title: `${current} — ${t('ex_report_suffix')}`,
+      functional_unit: functionalUnit(entities),
+      system_boundary: t('ex_boundary'),
+      method: `${method} / ${cat.name || ''}`,
+      region,
+      total_co2eq: scr.resultsTotal !== null ? scr.resultsTotal : scr.sum,
+      total_description: ai.analysis || '',
+      stages: scr.stages,
+      assumptions: ai.assumptions || [],
+      limitations: (ai.limitations || []).concat(limits),
+      recommendations: ai.recommendations || [],
+      db_name: current,
+    }
+    const inp = {
+      title: rd.product_title,
+      savedAt: new Date().toLocaleString(),
+      dbName: current,
+      entitiesTotal: Object.values(entities).reduce((a, x) => a + x.length, 0),
+      rep: ai,
+      sections: repSections(),
+      entities,
+      labels: docLabels(),
+    }
+    return { rd, inp }
+  }
+
+  const doExportExcel = async () => {
+    setExportBusy('excel')
+    setError('')
+    try {
+      const entities = await collectEntities()
+      const b64 = await buildEntitiesZipBase64(entities, exLabels())
+      const p = await saveViaDialog(desktop, `${current}_excel.zip`, [{ name: 'ZIP', extensions: ['zip'] }], b64, true)
+      if (p) setImportMsg(`${t('ex_done')}: ${p}`)
+    } catch (e) {
+      setError(String(e instanceof Error ? e.message : e))
+    } finally {
+      setExportBusy('')
+    }
+  }
+
+  const doExportJson = async () => {
+    setExportBusy('json')
+    setError('')
+    try {
+      const entities = await collectEntities()
+      const text = JSON.stringify({ db: current, generated: new Date().toISOString(), entities }, null, 2)
+      const p = await saveViaDialog(desktop, `${current}.json`, [{ name: 'JSON', extensions: ['json'] }], text, false)
+      if (p) setImportMsg(`${t('ex_done')}: ${p}`)
+    } catch (e) {
+      setError(String(e instanceof Error ? e.message : e))
+    } finally {
+      setExportBusy('')
+    }
+  }
+
+  const doExportWord = async () => {
+    setExportBusy('word')
+    setError('')
+    try {
+      const { inp } = await prepareReport()
+      const p = await saveViaDialog(desktop, `${current}_report.doc`, [{ name: 'Word', extensions: ['doc'] }], '\ufeff' + reportDoc(inp), false)
+      if (p) setImportMsg(`${t('ex_done')}: ${p}`)
+    } catch (e) {
+      setError(String(e instanceof Error ? e.message : e))
+    } finally {
+      setExportBusy('')
+    }
+  }
+
+  const doExportPdf = async () => {
+    setExportBusy('pdf')
+    setError('')
+    try {
+      const { inp } = await prepareReport()
+      const b64 = await renderPdfBase64(reportBody(inp))
+      const p = await saveViaDialog(desktop, `${current}_report.pdf`, [{ name: 'PDF', extensions: ['pdf'] }], b64, true)
+      if (p) setImportMsg(`${t('ex_done')}: ${p}`)
+    } catch (e) {
+      setError(String(e instanceof Error ? e.message : e))
+    } finally {
+      setExportBusy('')
+    }
+  }
+
+  const doGenReport = async () => {
+    setExportBusy('gen')
+    setError('')
+    try {
+      const { rd } = await prepareReport()
+      const r = await desktop.cloudReportSave(rd)
+      setImportMsg(`${t('ex_saved_report')}${r.projectId ? ' (+ ' + t('ex_linked_project') + ')' : ''}`)
+      await loadCloud()
+    } catch (e) {
+      setError(String(e instanceof Error ? e.message : e))
+    } finally {
+      setExportBusy('')
     }
   }
 
@@ -604,6 +769,29 @@ export function DatabaseManager({ onClose }: { onClose: () => void }) {
                 )}
               </>
             )}
+          </section>
+
+          <section className="space-y-3">
+            <h3 className="text-[12px] font-sans uppercase tracking-widest text-graphite-mid border-b border-line pb-1.5">
+              ⬇ {t('ex_title')} <span className="font-mono normal-case text-graphite-soft">{current}</span>
+            </h3>
+            <div className="flex gap-2 flex-wrap">
+              <Button variant="ghost" onClick={doExportExcel} disabled={!!busyMsg || !!exportBusy || !current}>
+                {exportBusy === 'excel' ? t('loading') : t('ex_excel')}
+              </Button>
+              <Button variant="ghost" onClick={doExportJson} disabled={!!busyMsg || !!exportBusy || !current}>
+                {exportBusy === 'json' ? t('loading') : t('ex_json')}
+              </Button>
+              <Button variant="ghost" onClick={doExportWord} disabled={!!busyMsg || !!exportBusy || !current}>
+                {exportBusy === 'word' ? t('loading') : t('ex_word')}
+              </Button>
+              <Button variant="ghost" onClick={doExportPdf} disabled={!!busyMsg || !!exportBusy || !current}>
+                {exportBusy === 'pdf' ? t('loading') : t('ex_pdf')}
+              </Button>
+              <Button variant="ghost" onClick={doGenReport} disabled={!!busyMsg || !!exportBusy || !current}>
+                {exportBusy === 'gen' ? t('loading') : t('ex_gen')}
+              </Button>
+            </div>
           </section>
         </div>
       </div>
