@@ -153,6 +153,13 @@
 
         /* ── project list / cards ── */
         .plist { padding: 24px 0 60px; display: flex; flex-direction: column; gap: 16px; }
+        .fbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 14px 0 0; }
+        .fchip { font-family: var(--mono); font-size: 11px; letter-spacing: .04em; padding: 6px 12px; border: 1px solid var(--rule); background: transparent; color: var(--ink-soft); cursor: pointer; }
+        .fchip:hover { border-color: var(--graphite); color: var(--graphite); }
+        .fchip.active { background: var(--graphite); color: var(--paper); border-color: var(--graphite); }
+        .fchip .cnt { opacity: .6; margin-left: 6px; }
+        .fchip-act { font-family: var(--mono); font-size: 10px; padding: 6px 8px; border: 1px solid var(--rule); background: transparent; color: var(--ink-mute); cursor: pointer; }
+        .fchip-act:hover { color: var(--e-4); border-color: var(--e-4); }
         .pcard { background: var(--bg-card); border: 1px solid var(--rule); padding: 20px 24px; }
         .pcard-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .pcard-title { font-family: var(--display); font-size: 18px; font-weight: 600; flex: 1; min-width: 200px; word-break: break-word; }
@@ -230,6 +237,7 @@
                     <button class="btn btn-primary" id="newProjectBtn">+ <span data-i18n="create">Создать</span></button>
                 </div>
             </div>
+            <div class="fbar" id="folderBar"></div>
             <div class="plist" id="projList"></div>
         </div>
 
@@ -272,6 +280,7 @@
         <div class="modal">
             <h3 id="modalTitle"></h3>
             <p id="modalText" style="display:none"></p>
+            <div id="modalOptions" style="display:none"></div>
             <input id="modalInput" style="display:none">
             <div class="modal-actions">
                 <button class="btn" id="modalCancel" data-i18n="cancel">Отменить</button>
@@ -481,7 +490,13 @@
     "rep_lcia": "Оценка воздействия на жизненном цикле",
     "rep_interp": "Интерпретация",
     "rep_limits": "Допущения и ограничения",
-    "rep_reco": "Рекомендации"
+    "rep_reco": "Рекомендации",
+    "fld_all": "Все",
+    "fld_create": "Папка",
+    "fld_title_prompt": "Название папки",
+    "fld_confirm_delete": "Удалить папку? Проекты останутся, но станут без папки.",
+    "fld_move": "Папка",
+    "fld_none": "Без папки"
   },
   "en": {
     "title": "LCA·AI — Projects",
@@ -644,7 +659,13 @@
     "rep_lcia": "Life cycle impact assessment",
     "rep_interp": "Interpretation",
     "rep_limits": "Assumptions and limitations",
-    "rep_reco": "Recommendations"
+    "rep_reco": "Recommendations",
+    "fld_all": "All",
+    "fld_create": "Folder",
+    "fld_title_prompt": "Folder name",
+    "fld_confirm_delete": "Delete folder? Projects will remain but become uncategorized.",
+    "fld_move": "Folder",
+    "fld_none": "No folder"
   },
   "zh": {
     "title": "LCA·AI — 项目",
@@ -807,7 +828,13 @@
     "rep_lcia": "生命周期影响评价",
     "rep_interp": "解释",
     "rep_limits": "假设与局限",
-    "rep_reco": "建议"
+    "rep_reco": "建议",
+    "fld_all": "全部",
+    "fld_create": "文件夹",
+    "fld_title_prompt": "文件夹名称",
+    "fld_confirm_delete": "删除文件夹？项目将保留但变为未分类。",
+    "fld_move": "文件夹",
+    "fld_none": "无文件夹"
   }
 };
     let pvLang = 'ru';
@@ -891,6 +918,7 @@
         factorLimit: new Map(),
         projects: [], calcsByProject: {}, snapByProject: {},
         calcs: [],
+        folders: [], folderFilter: null,
     };
 
     let db = null, currentUser = null;
@@ -899,7 +927,7 @@
        Universal modal
        ══════════════════════════════════════════════════ */
     let modalResolve = null;
-    function openModal({ title, text, input, inputValue, okLabel, danger }) {
+    function openModal({ title, text, input, inputValue, okLabel, danger, options, current }) {
         document.getElementById('modalTitle').textContent = title || '';
         const txt = document.getElementById('modalText');
         txt.style.display = text ? 'block' : 'none';
@@ -907,7 +935,24 @@
         const inp = document.getElementById('modalInput');
         inp.style.display = input ? 'block' : 'none';
         inp.value = input ? (inputValue || '') : '';
+        const optBox = document.getElementById('modalOptions');
         const okBtn = document.getElementById('modalOk');
+        if (options) {
+            optBox.style.display = 'block';
+            optBox.innerHTML = '';
+            for (const o of options) {
+                const b = document.createElement('button');
+                b.className = 'btn' + (String(o.value) === String(current || '') ? ' btn-primary' : '');
+                b.style.margin = '4px 8px 4px 0';
+                b.textContent = o.label;
+                b.addEventListener('click', () => closeModal(o.value));
+                optBox.appendChild(b);
+            }
+            okBtn.style.display = 'none';
+        } else {
+            optBox.style.display = 'none';
+            okBtn.style.display = '';
+        }
         okBtn.textContent = okLabel || t('ok');
         okBtn.className = danger ? 'btn btn-danger' : 'btn btn-primary';
         document.getElementById('modalMask').classList.add('show');
@@ -973,6 +1018,8 @@
             const { data: projects, error } = await db.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
             if (error) throw error;
             state.projects = projects || [];
+            const { data: folders } = await db.from('project_folders').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: true });
+            state.folders = folders || [];
             const { data: calcs } = await db.from('project_calculations').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
             state.calcsByProject = {};
             for (const c of (calcs || [])) {
@@ -1014,11 +1061,87 @@
             '</div>';
     }
 
+    function renderFolderBar() {
+        const box = document.getElementById('folderBar');
+        if (!box) return;
+        const cnt = (id) => state.projects.filter(p => p.folder_id === id && !p.archived).length;
+        let h = '<button class="fchip' + (!state.folderFilter ? ' active' : '') + '" data-f="">' + esc(t('fld_all')) +
+                '<span class="cnt">' + state.projects.filter(p => !p.archived).length + '</span></button>';
+        for (const f of state.folders) {
+            const act = state.folderFilter === f.id;
+            h += '<button class="fchip' + (act ? ' active' : '') + '" data-f="' + f.id + '">' + esc(f.name) + '<span class="cnt">' + cnt(f.id) + '</span></button>';
+            if (act) {
+                h += '<button class="fchip-act" data-fren="' + f.id + '" title="' + esc(t('rename')) + '">✎</button>' +
+                     '<button class="fchip-act" data-fdel="' + f.id + '" title="' + esc(t('delete')) + '">×</button>';
+            }
+        }
+        h += '<button class="fchip" data-fnew="1">+ ' + esc(t('fld_create')) + '</button>';
+        box.innerHTML = h;
+    }
+
+    document.getElementById('folderBar').addEventListener('click', async e => {
+        const nw = e.target.closest('[data-fnew]');
+        if (nw) { await createFolder(); return; }
+        const ren = e.target.closest('[data-fren]');
+        if (ren) { await renameFolder(ren.dataset.fren); return; }
+        const del = e.target.closest('[data-fdel]');
+        if (del) { await deleteFolder(del.dataset.fdel); return; }
+        const chip = e.target.closest('[data-f]');
+        if (chip) { state.folderFilter = chip.dataset.f || null; renderFolderBar(); renderList(); }
+    });
+
+    async function createFolder() {
+        const name = await promptModal(t('fld_title_prompt'));
+        if (!name) return;
+        try {
+            const { error } = await db.from('project_folders').insert({ user_id: currentUser.id, name });
+            if (error) throw error;
+            showToast(t('saved'));
+            await loadList();
+        } catch (e) { showToast(t('err_create') + (e.message || e)); }
+    }
+    async function renameFolder(id) {
+        const f = state.folders.find(x => x.id === id);
+        const name = await promptModal(t('fld_title_prompt'), f ? f.name : '');
+        if (!name || (f && name === f.name)) return;
+        try {
+            const { error } = await db.from('project_folders').update({ name }).eq('id', id);
+            if (error) throw error;
+            showToast(t('saved'));
+            await loadList();
+        } catch (e) { showToast(t('err_generic') + (e.message || e)); }
+    }
+    async function deleteFolder(id) {
+        const ok = await confirmModal(t('delete'), t('fld_confirm_delete'));
+        if (!ok) return;
+        try {
+            const { error } = await db.from('project_folders').delete().eq('id', id);
+            if (error) throw error;
+            if (state.folderFilter === id) state.folderFilter = null;
+            showToast(t('toast_deleted'));
+            await loadList();
+        } catch (e) { showToast(t('err_delete') + (e.message || e)); }
+    }
+    async function moveProject(id) {
+        const opts = [{ value: '', label: t('fld_none') }, ...state.folders.map(f => ({ value: f.id, label: f.name }))];
+        const cur = (state.projects.find(p => p.id === id) || {}).folder_id || '';
+        const val = await openModal({ title: t('fld_move'), options: opts, current: cur });
+        if (val === null || val === undefined) return;
+        try {
+            const { error } = await db.from('user_projects').update({ folder_id: val || null }).eq('id', id);
+            if (error) throw error;
+            showToast(t('saved'));
+            await loadList();
+        } catch (e) { showToast(t('err_generic') + (e.message || e)); }
+    }
+
     function renderList() {
+        renderFolderBar();
         const list = document.getElementById('projList');
-        const active = state.projects.filter(p => !p.archived);
-        const archived = state.projects.filter(p => p.archived);
-        if (!state.projects.length) {
+        const visible = state.folderFilter ? state.projects.filter(p => p.folder_id === state.folderFilter) : state.projects;
+        const active = visible.filter(p => !p.archived);
+        const archived = visible.filter(p => p.archived);
+        if (!visible.length) {
             list.innerHTML = '<div class="empty">' + esc(t('no_projects')) + '</div>';
             return;
         }
@@ -1026,9 +1149,11 @@
         const card = p => {
             const calcs = state.calcsByProject[p.id] || [];
             const snap = state.snapByProject[p.id];
+            const fld = state.folders.find(f => f.id === p.folder_id);
             let h = '<div class="pcard">';
             h += '<div class="pcard-head"><div class="pcard-title">' + esc(p.name) +
-                 (p.archived ? '<span class="badge">' + esc(t('archived_badge')) + '</span>' : '') + '</div>';
+                 (p.archived ? '<span class="badge">' + esc(t('archived_badge')) + '</span>' : '') +
+                 (fld ? '<span class="badge">' + esc(fld.name) + '</span>' : '') + '</div>';
             if (snap) {
                 h += '<a class="badge cloud" href="/project.html?id=' + p.id + '" title="' + esc(t('snap_open')) + '">☁ ' + (snap.total ? snap.total + ' ent. · ' : '') + fmtDate(snap.saved_at) + '</a>';
             }
@@ -1052,6 +1177,7 @@
             if (snap) h += '<a class="btn btn-primary btn-sm" href="/project.html?id=' + p.id + '">' + esc(t('open_snapshot')) + '</a>';
             h += '<button class="btn btn-sm target-btn" data-id="' + p.id + '" data-target="' + (p.target_pct || '') + '">' + esc(t('target_set')) + '</button>';
             h += '<button class="btn btn-sm rename-project-btn" data-id="' + p.id + '" data-name="' + esc(p.name) + '">' + esc(t('rename')) + '</button>';
+            h += '<button class="btn btn-sm move-project-btn" data-id="' + p.id + '">' + esc(t('fld_move')) + '</button>';
             h += '<button class="btn btn-sm archive-btn" data-id="' + p.id + '">' + esc(p.archived ? t('restore') : t('archive')) + '</button>';
             h += '<button class="btn btn-sm email-share-btn" data-id="' + p.id + '">' + esc(t('share')) + '</button>';
             h += '<button class="btn btn-danger btn-sm delete-project-btn" data-id="' + p.id + '">' + esc(t('delete')) + '</button>';
@@ -1073,6 +1199,8 @@
         if (del) { await deleteCalcFromProject(del.dataset.id); return; }
         const ren = e.target.closest('.rename-project-btn');
         if (ren) { await renameProject(ren.dataset.id, ren.dataset.name); return; }
+        const mv = e.target.closest('.move-project-btn');
+        if (mv) { await moveProject(mv.dataset.id); return; }
         const delP = e.target.closest('.delete-project-btn');
         if (delP) { await deleteProject(delP.dataset.id); return; }
         const arc = e.target.closest('.archive-btn');

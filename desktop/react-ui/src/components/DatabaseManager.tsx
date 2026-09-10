@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { CloudProject, DbInfo, DbProgress } from '../types/desktop'
+import type { CloudFolder, CloudProject, DbInfo, DbProgress } from '../types/desktop'
 import { useI18n } from '../i18n'
 import { useEngine } from '../stores/engine'
 import { rpc } from '../api/ipc'
@@ -33,6 +33,10 @@ export function DatabaseManager({ onClose }: { onClose: () => void }) {
   const [cloudName, setCloudName] = useState('')
   const [cloudBusy, setCloudBusy] = useState('')
   const [confirmCloudDelete, setConfirmCloudDelete] = useState('')
+  const [folders, setFolders] = useState<CloudFolder[] | null>(null)
+  const [folderFilter, setFolderFilter] = useState('')
+  const [folderEditor, setFolderEditor] = useState<{ id: string | null; name: string } | null>(null)
+  const [confirmFolderDelete, setConfirmFolderDelete] = useState(false)
 
   const desktop = window.desktop!
 
@@ -48,9 +52,12 @@ export function DatabaseManager({ onClose }: { onClose: () => void }) {
 
   const loadCloud = useCallback(async () => {
     try {
-      setCloudProjects(await desktop.cloudProjectsList())
+      const [ps, fs] = await Promise.all([desktop.cloudProjectsList(), desktop.cloudFoldersList()])
+      setCloudProjects(ps)
+      setFolders(fs)
     } catch {
       setCloudProjects([])
+      setFolders([])
     }
   }, [])
 
@@ -114,6 +121,51 @@ export function DatabaseManager({ onClose }: { onClose: () => void }) {
     try {
       await desktop.cloudProjectsDelete(id)
       setConfirmCloudDelete('')
+      await loadCloud()
+    } catch (e) {
+      setError(String(e instanceof Error ? e.message : e))
+    } finally {
+      setCloudBusy('')
+    }
+  }
+
+  const saveFolder = async () => {
+    const ed = folderEditor
+    if (!ed || !ed.name.trim()) return
+    setCloudBusy('folder')
+    setError('')
+    try {
+      if (ed.id) await desktop.cloudFoldersRename(ed.id, ed.name.trim())
+      else await desktop.cloudFoldersCreate(ed.name.trim())
+      setFolderEditor(null)
+      await loadCloud()
+    } catch (e) {
+      setError(String(e instanceof Error ? e.message : e))
+    } finally {
+      setCloudBusy('')
+    }
+  }
+
+  const deleteFolder = async (id: string) => {
+    setCloudBusy('folder')
+    setError('')
+    try {
+      await desktop.cloudFoldersDelete(id)
+      setConfirmFolderDelete(false)
+      if (folderFilter === id) setFolderFilter('')
+      await loadCloud()
+    } catch (e) {
+      setError(String(e instanceof Error ? e.message : e))
+    } finally {
+      setCloudBusy('')
+    }
+  }
+
+  const moveCloud = async (projectId: string, folderId: string | null) => {
+    setCloudBusy('move:' + projectId)
+    setError('')
+    try {
+      await desktop.cloudProjectsMove(projectId, folderId)
       await loadCloud()
     } catch (e) {
       setError(String(e instanceof Error ? e.message : e))
@@ -410,12 +462,79 @@ export function DatabaseManager({ onClose }: { onClose: () => void }) {
 
             {cloudProjects === null ? (
               <Spinner label={t('loading')} />
-            ) : cloudProjects.length === 0 ? (
-              <div className="text-[12px] text-graphite-soft">—</div>
             ) : (
+              <>
+                <div className="flex gap-2 items-center flex-wrap">
+                  <select
+                    value={folderFilter}
+                    onChange={(e) => setFolderFilter(e.target.value)}
+                    className="px-2 py-1.5 bg-paper border border-line text-[12px] font-mono outline-none"
+                  >
+                    <option value="">{t('fld_all')}</option>
+                    {(folders || []).map((f) => (
+                      <option key={f.id} value={f.id}>{f.name}</option>
+                    ))}
+                  </select>
+                  {folderFilter && !confirmFolderDelete && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        disabled={!!cloudBusy}
+                        onClick={() => {
+                          const f = (folders || []).find((x) => x.id === folderFilter)
+                          if (f) setFolderEditor({ id: f.id, name: f.name })
+                        }}
+                      >
+                        ✎
+                      </Button>
+                      <Button variant="ghost" disabled={!!cloudBusy} onClick={() => setConfirmFolderDelete(true)}>
+                        ×
+                      </Button>
+                    </>
+                  )}
+                  {confirmFolderDelete && (
+                    <span className="text-[12px]">
+                      <button
+                        onClick={() => deleteFolder(folderFilter)}
+                        disabled={!!cloudBusy}
+                        className="text-e-4 cursor-pointer mr-2 disabled:opacity-40"
+                      >
+                        {t('fld_confirm_delete')}
+                      </button>
+                      <button onClick={() => setConfirmFolderDelete(false)} className="text-graphite-soft cursor-pointer">
+                        {t('db_cancel')}
+                      </button>
+                    </span>
+                  )}
+                  {folderEditor ? (
+                    <span className="flex gap-2">
+                      <input
+                        value={folderEditor.name}
+                        onChange={(e) => setFolderEditor({ ...folderEditor, name: e.target.value })}
+                        placeholder={t('fld_title_prompt')}
+                        className="px-2 py-1 bg-paper border border-line text-[12px] font-mono outline-none focus:border-graphite-mid"
+                      />
+                      <Button variant="ghost" onClick={saveFolder} disabled={!!cloudBusy || !folderEditor.name.trim()}>
+                        {t('fld_create')}
+                      </Button>
+                      <Button variant="ghost" onClick={() => setFolderEditor(null)}>
+                        {t('db_cancel')}
+                      </Button>
+                    </span>
+                  ) : (
+                    <Button variant="ghost" disabled={!!cloudBusy} onClick={() => setFolderEditor({ id: null, name: '' })}>
+                      + {t('fld_create')}
+                    </Button>
+                  )}
+                </div>
+                {cloudProjects.length === 0 ? (
+                  <div className="text-[12px] text-graphite-soft">—</div>
+                ) : (
               <table className="w-full text-[13px] border-collapse">
                 <tbody>
-                  {cloudProjects.map((p) => {
+                  {cloudProjects
+                    .filter((p) => !folderFilter || p.folder_id === folderFilter)
+                    .map((p) => {
                     const snap = p.snapshot
                     return (
                       <tr key={p.id} className="border-t border-line">
@@ -426,6 +545,20 @@ export function DatabaseManager({ onClose }: { onClose: () => void }) {
                             {snap?.stats?.total ? ` · ${snap.stats.total}` : ''}
                             {snap ? ` · ${String(snap.saved_at).slice(0, 10)}` : ''}
                           </div>
+                        </td>
+                        <td className="py-2 pr-3 whitespace-nowrap">
+                          <select
+                            value={p.folder_id || ''}
+                            onChange={(e) => moveCloud(p.id, e.target.value || null)}
+                            disabled={!!cloudBusy}
+                            title={t('fld_move')}
+                            className="bg-paper border border-line text-[11px] font-mono px-1 py-0.5 outline-none"
+                          >
+                            <option value="">{t('fld_none')}</option>
+                            {(folders || []).map((f) => (
+                              <option key={f.id} value={f.id}>{f.name}</option>
+                            ))}
+                          </select>
                         </td>
                         <td className="py-2 text-right whitespace-nowrap">
                           {confirmCloudDelete === p.id ? (
@@ -468,6 +601,8 @@ export function DatabaseManager({ onClose }: { onClose: () => void }) {
                   })}
                 </tbody>
               </table>
+                )}
+              </>
             )}
           </section>
         </div>

@@ -904,6 +904,52 @@ if (!app.requestSingleInstanceLock()) {
       return { ok: true }
     })
 
+    ipcMain.handle('cloud:folders-list', async () => {
+      const auth = requireAuth()
+      return await sbJson(
+        `${SUPABASE_URL}/rest/v1/project_folders?select=*&order=created_at`,
+        auth,
+      )
+    })
+
+    ipcMain.handle('cloud:folders-create', async (_e, { name }) => {
+      const auth = requireAuth()
+      const r = await sbJson(`${SUPABASE_URL}/rest/v1/project_folders`, auth, {
+        method: 'POST',
+        headers: { Prefer: 'return=representation' },
+        body: JSON.stringify({ user_id: auth.user_id, name }),
+      })
+      return r[0]
+    })
+
+    ipcMain.handle('cloud:folders-rename', async (_e, { id, name }) => {
+      const auth = requireAuth()
+      await sbFetch(`${SUPABASE_URL}/rest/v1/project_folders?id=eq.${id}`, auth, {
+        method: 'PATCH',
+        headers: { Prefer: 'return=minimal' },
+        body: JSON.stringify({ name }),
+      })
+      return { ok: true }
+    })
+
+    ipcMain.handle('cloud:folders-delete', async (_e, id) => {
+      const auth = requireAuth()
+      await sbFetch(`${SUPABASE_URL}/rest/v1/project_folders?id=eq.${id}`, auth, {
+        method: 'DELETE',
+      })
+      return { ok: true }
+    })
+
+    ipcMain.handle('cloud:projects-move', async (_e, { projectId, folderId }) => {
+      const auth = requireAuth()
+      await sbFetch(`${SUPABASE_URL}/rest/v1/user_projects?id=eq.${projectId}`, auth, {
+        method: 'PATCH',
+        headers: { Prefer: 'return=minimal' },
+        body: JSON.stringify({ folder_id: folderId || null }),
+      })
+      return { ok: true }
+    })
+
     if (loadConfig().autoStart) startEngine()
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow()

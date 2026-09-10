@@ -40,6 +40,11 @@ contextBridge.exposeInMainWorld('desktop', {
   cloudProjectsOpen: (projectId, dbName) =>
     ipcRenderer.invoke('cloud:projects-open', { projectId, dbName }),
   cloudProjectsDelete: (projectId) => ipcRenderer.invoke('cloud:projects-delete', projectId),
+  cloudFoldersList: () => ipcRenderer.invoke('cloud:folders-list'),
+  cloudFoldersCreate: (name) => ipcRenderer.invoke('cloud:folders-create', { name }),
+  cloudFoldersRename: (id, name) => ipcRenderer.invoke('cloud:folders-rename', { id, name }),
+  cloudFoldersDelete: (id) => ipcRenderer.invoke('cloud:folders-delete', id),
+  cloudProjectsMove: (projectId, folderId) => ipcRenderer.invoke('cloud:projects-move', { projectId, folderId }),
   authLogin: (email, password) => ipcRenderer.invoke('auth:login', { email, password }),
   authGet: () => ipcRenderer.invoke('auth:get'),
   authLogout: () => ipcRenderer.invoke('auth:logout'),

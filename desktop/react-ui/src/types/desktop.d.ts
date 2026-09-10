@@ -23,6 +23,12 @@ export interface DbProgress {
   note?: string
 }
 
+export interface CloudFolder {
+  id: string
+  name: string
+  created_at: string
+}
+
 export interface CloudProjectSnapshot {
   saved_at: string
   stats?: { total?: number; sizeMb?: number; db?: string } | null
@@ -32,6 +38,7 @@ export interface CloudProject {
   id: string
   name: string
   db_name?: string | null
+  folder_id?: string | null
   created_at: string
   snapshot: CloudProjectSnapshot | null
 }
@@ -66,6 +73,11 @@ export interface DesktopApi {
     dbName: string,
   ) => Promise<{ db: string; total: number; failed: number; failures: string[] }>
   cloudProjectsDelete: (projectId: string) => Promise<{ ok: boolean }>
+  cloudFoldersList: () => Promise<CloudFolder[]>
+  cloudFoldersCreate: (name: string) => Promise<CloudFolder>
+  cloudFoldersRename: (id: string, name: string) => Promise<{ ok: boolean }>
+  cloudFoldersDelete: (id: string) => Promise<{ ok: boolean }>
+  cloudProjectsMove: (projectId: string, folderId: string | null) => Promise<{ ok: boolean }>
   fileWrite: (path: string, content: string) => Promise<{ ok: boolean }>
   fileWriteBase64: (path: string, base64: string) => Promise<{ ok: boolean }>
   aiCalculate: (description: string, lang: string) => Promise<Record<string, unknown>>
