@@ -229,18 +229,6 @@
     </header>
 
     <div class="container">
-        <!-- ══ LIST MODE ══ -->
-        <div id="listView" style="display:none">
-            <div class="topbar">
-                <div><h1 data-i18n="projects_title">Проекты</h1></div>
-                <div class="top-actions">
-                    <button class="btn btn-primary" id="newProjectBtn">+ <span data-i18n="create">Создать</span></button>
-                </div>
-            </div>
-            <div class="fbar" id="folderBar"></div>
-            <div class="plist" id="projList"></div>
-        </div>
-
         <!-- ══ DETAIL MODE ══ -->
         <div id="detailView" style="display:none">
             <div class="topbar">
@@ -249,6 +237,7 @@
                     <div class="sub" id="projMeta"></div>
                 </div>
                 <div class="top-actions" id="expBar">
+                    <button class="btn btn-primary" id="genReportBtn" title="Report">⚑ <span data-i18n="gen_report">Сформировать отчёт по базе</span></button>
                     <button class="btn" id="expExcel" title="Excel">⬇ Excel</button>
                     <button class="btn" id="expWord" title="Word">⬇ Word</button>
                     <button class="btn" id="expJson" title="JSON">⬇ JSON</button>
@@ -256,12 +245,6 @@
                     <button class="btn" id="expPrint" title="Print">🖨</button>
                     <a class="btn" href="/project.html" data-i18n="back_list">← К списку</a>
                 </div>
-            </div>
-            <div class="card-actions" style="border-top:none;padding-top:14px" id="projActions"></div>
-            <div id="targetBlock"></div>
-            <div class="card" id="calcsCard" style="display:none;margin-top:18px">
-                <div class="sect" style="margin-top:0" data-i18n="calculations">Расчёты</div>
-                <div id="calcsList"></div>
             </div>
             <div class="pv-layout">
                 <aside class="pv-side">
@@ -271,52 +254,6 @@
                 <main class="pv-main" id="detail">
                     <div class="empty">…</div>
                 </main>
-            </div>
-        </div>
-    </div>
-
-    <!-- ══ Universal modal ══ -->
-    <div class="modal-mask" id="modalMask">
-        <div class="modal">
-            <h3 id="modalTitle"></h3>
-            <p id="modalText" style="display:none"></p>
-            <div id="modalOptions" style="display:none"></div>
-            <input id="modalInput" style="display:none">
-            <div class="modal-actions">
-                <button class="btn" id="modalCancel" data-i18n="cancel">Отменить</button>
-                <button class="btn btn-primary" id="modalOk">OK</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ══ Share modal ══ -->
-    <div class="modal-mask" id="modalShare" style="display:none">
-        <div class="modal">
-            <h3 data-i18n="share_title">Поделиться</h3>
-            <p data-i18n="share_sub">Получатель увидит отчёт только для чтения. Ссылку можно отозвать в любой момент.</p>
-            <label data-i18n="share_role_label">Права получателя</label>
-            <select id="shareRole">
-                <option value="view" data-i18n="share_role_view">Только чтение</option>
-                <option value="edit" data-i18n="share_role_edit">Чтение и редактирование</option>
-            </select>
-            <div class="share-role-note" id="shareRoleNote" data-i18n="share_role_note_view">Получатель сможет только смотреть отчёт.</div>
-            <label data-i18n="share_expires">Срок действия</label>
-            <select id="shareExpires">
-                <option value="7" data-i18n="exp_7">7 дней</option>
-                <option value="30" selected data-i18n="exp_30">30 дней</option>
-                <option value="90" data-i18n="exp_90">90 дней</option>
-                <option value="365" data-i18n="exp_365">1 год</option>
-            </select>
-            <label data-i18n="share_email_label">Отправить на email (необязательно)</label>
-            <input type="email" id="shareEmail" data-i18n-placeholder="share_email_ph" placeholder="colleague@example.com">
-            <div class="share-link-row" id="shareLinkRow" style="display:none">
-                <input type="text" id="shareLinkInput" readonly>
-                <button class="btn" id="shareCopyBtn" data-i18n="copy">Копировать</button>
-            </div>
-            <div class="modal-actions">
-                <button class="btn" id="shareCancelBtn" data-i18n="cancel">Отменить</button>
-                <button class="btn" id="shareLinkBtn" data-i18n="share_get_link">Создать ссылку</button>
-                <button class="btn btn-primary" id="shareConfirmBtn" data-i18n="share_send">Отправить</button>
             </div>
         </div>
     </div>
@@ -496,7 +433,16 @@
     "fld_title_prompt": "Название папки",
     "fld_confirm_delete": "Удалить папку? Проекты останутся, но станут без папки.",
     "fld_move": "Папка",
-    "fld_none": "Без папки"
+    "fld_none": "Без папки",
+    "gen_report": "Сформировать отчёт по базе",
+    "gen_report_short": "отчёт по базе",
+    "rep_boundary": "От колыбели до ворот (по структуре процессов базы)",
+    "rep_stage_other": "Прочее",
+    "rep_factor_source": "скрининг: прямые потоки × коэфф. категории",
+    "rep_note_screening": "Значения стадий — скрининг-оценка: прямые элементарные потоки процессов, умноженные на характеристические факторы категории «{cat}» ({method}), без рекурсии по цепочке поставок.",
+    "rep_note_results": "В базе найден сохранённый результат расчёта: {v} — он использован как итоговое значение.",
+    "rep_saved": "Отчёт сохранён и открыт",
+    "err_no_cat": "В базе нет категорий воздействия"
   },
   "en": {
     "title": "LCA·AI — Projects",
@@ -665,7 +611,16 @@
     "fld_title_prompt": "Folder name",
     "fld_confirm_delete": "Delete folder? Projects will remain but become uncategorized.",
     "fld_move": "Folder",
-    "fld_none": "No folder"
+    "fld_none": "No folder",
+    "gen_report": "Generate LCA Report",
+    "gen_report_short": "database report",
+    "rep_boundary": "Cradle-to-gate (per database process structure)",
+    "rep_stage_other": "Other",
+    "rep_factor_source": "screening: direct elementary flows × category factors",
+    "rep_note_screening": "Stage values are a screening estimate: direct elementary flows of each process multiplied by characterization factors of category \"{cat}\" ({method}), without supply-chain recursion.",
+    "rep_note_results": "A saved calculation result was found in the database: {v} — used as the total value.",
+    "rep_saved": "Report saved and opened",
+    "err_no_cat": "No impact categories in database"
   },
   "zh": {
     "title": "LCA·AI — 项目",
@@ -834,7 +789,16 @@
     "fld_title_prompt": "文件夹名称",
     "fld_confirm_delete": "删除文件夹？项目将保留但变为未分类。",
     "fld_move": "文件夹",
-    "fld_none": "无文件夹"
+    "fld_none": "无文件夹",
+    "gen_report": "生成 LCA 报告",
+    "gen_report_short": "数据库报告",
+    "rep_boundary": "从摇篮到大门（依据数据库过程结构）",
+    "rep_stage_other": "其他",
+    "rep_factor_source": "筛查：直接基本流 × 类别因子",
+    "rep_note_screening": "阶段值为筛查估算：各过程的直接基本流乘以类别「{cat}」({method}) 的特征化因子，未沿供应链递归。",
+    "rep_note_results": "数据库中找到已保存的计算结果：{v} — 已用作总值。",
+    "rep_saved": "报告已保存并打开",
+    "err_no_cat": "数据库中没有影响类别"
   }
 };
     let pvLang = 'ru';
@@ -848,8 +812,6 @@
         renderTree();
         if (state.sel) selectEntity(state.sel.type, state.sel.id, true);
         renderMeta();
-        if (state.mode === 'list') renderList();
-        if (state.mode === 'detail') { renderActions(); renderCalcs(); renderTarget(); }
     }
 
     /* ── theme ── */
@@ -910,15 +872,11 @@
         { key: 'SocialIndicator', i18n: 'g_social' },
     ];
     const state = {
-        mode: 'list',
         projectId: null, project: null,
         savedAt: null, stats: null,
         entities: {}, index: new Map(),
         sel: null, openGroups: new Set(['Process']),
         factorLimit: new Map(),
-        projects: [], calcsByProject: {}, snapByProject: {},
-        calcs: [],
-        folders: [], folderFilter: null,
     };
 
     let db = null, currentUser = null;
@@ -926,56 +884,6 @@
     /* ══════════════════════════════════════════════════
        Universal modal
        ══════════════════════════════════════════════════ */
-    let modalResolve = null;
-    function openModal({ title, text, input, inputValue, okLabel, danger, options, current }) {
-        document.getElementById('modalTitle').textContent = title || '';
-        const txt = document.getElementById('modalText');
-        txt.style.display = text ? 'block' : 'none';
-        txt.textContent = text || '';
-        const inp = document.getElementById('modalInput');
-        inp.style.display = input ? 'block' : 'none';
-        inp.value = input ? (inputValue || '') : '';
-        const optBox = document.getElementById('modalOptions');
-        const okBtn = document.getElementById('modalOk');
-        if (options) {
-            optBox.style.display = 'block';
-            optBox.innerHTML = '';
-            for (const o of options) {
-                const b = document.createElement('button');
-                b.className = 'btn' + (String(o.value) === String(current || '') ? ' btn-primary' : '');
-                b.style.margin = '4px 8px 4px 0';
-                b.textContent = o.label;
-                b.addEventListener('click', () => closeModal(o.value));
-                optBox.appendChild(b);
-            }
-            okBtn.style.display = 'none';
-        } else {
-            optBox.style.display = 'none';
-            okBtn.style.display = '';
-        }
-        okBtn.textContent = okLabel || t('ok');
-        okBtn.className = danger ? 'btn btn-danger' : 'btn btn-primary';
-        document.getElementById('modalMask').classList.add('show');
-        if (input) setTimeout(() => inp.focus(), 60);
-        return new Promise(res => { modalResolve = res; });
-    }
-    function closeModal(result) {
-        document.getElementById('modalMask').classList.remove('show');
-        if (modalResolve) { modalResolve(result); modalResolve = null; }
-    }
-    document.getElementById('modalCancel').addEventListener('click', () => closeModal(null));
-    document.getElementById('modalOk').addEventListener('click', () => {
-        const inp = document.getElementById('modalInput');
-        closeModal(inp.style.display !== 'none' ? inp.value : true);
-    });
-    document.getElementById('modalMask').addEventListener('click', e => { if (e.target.id === 'modalMask') closeModal(null); });
-    document.getElementById('modalInput').addEventListener('keydown', e => {
-        if (e.key === 'Enter') closeModal(e.target.value);
-        if (e.key === 'Escape') closeModal(null);
-    });
-    async function promptModal(title, initial) { const v = await openModal({ title, input: true, inputValue: initial }); return (v && String(v).trim()) || null; }
-    async function confirmModal(title, text, danger = true) { const v = await openModal({ title, text, okLabel: t('delete_btn'), danger }); return v === true; }
-
     async function logAudit(action, entity, entityId, details) {
         if (!currentUser || !db) return;
         try {
@@ -997,361 +905,13 @@
         currentUser = session.user;
         const params = new URLSearchParams(location.search);
         state.projectId = params.get('id');
-        if (state.projectId) {
-            state.mode = 'detail';
-            document.getElementById('detailView').style.display = 'block';
-            await initDetail();
-        } else {
-            state.mode = 'list';
-            document.getElementById('listView').style.display = 'block';
-            await loadList();
-        }
+        if (!state.projectId) { window.location.href = '/cabinet.html'; return; }
+        document.getElementById('detailView').style.display = 'block';
+        await initDetail();
     }
 
     /* ══════════════════════════════════════════════════
        LIST MODE
-       ══════════════════════════════════════════════════ */
-    async function loadList() {
-        const list = document.getElementById('projList');
-        list.innerHTML = '<div class="empty">' + esc(t('loading')) + '</div>';
-        try {
-            const { data: projects, error } = await db.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-            if (error) throw error;
-            state.projects = projects || [];
-            const { data: folders } = await db.from('project_folders').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: true });
-            state.folders = folders || [];
-            const { data: calcs } = await db.from('project_calculations').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-            state.calcsByProject = {};
-            for (const c of (calcs || [])) {
-                if (!c.project_id) continue;
-                (state.calcsByProject[c.project_id] = state.calcsByProject[c.project_id] || []).push(c);
-            }
-            const { data: snaps } = await db.from('project_snapshots').select('project_id, stats, created_at').eq('user_id', currentUser.id).order('version', { ascending: false });
-            state.snapByProject = {};
-            for (const s of (snaps || [])) {
-                if (state.snapByProject[s.project_id]) continue;
-                state.snapByProject[s.project_id] = { total: (s.stats && s.stats.total) || 0, saved_at: s.created_at };
-            }
-            renderList();
-        } catch (e) {
-            console.error(e);
-            list.innerHTML = '<div class="empty">' + esc(t('err_load') + (e.message || e)) + '</div>';
-        }
-    }
-
-    function targetBlockHtml(p) {
-        const calcs = state.calcsByProject[p.id] || [];
-        const tgt = parseFloat(p.target_pct);
-        if (isNaN(tgt) || tgt <= 0 || !calcs.length) return '';
-        const ordered = calcs.slice().sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-        const val = c => parseFloat(c.report_data && c.report_data.total_co2eq) || 0;
-        const baseline = parseFloat(p.baseline_co2) || val(ordered[0]);
-        const current = val(ordered[ordered.length - 1]);
-        if (!(baseline > 0)) return '';
-        const goal = baseline * (1 - tgt / 100);
-        const cut = (baseline - current) / baseline * 100;
-        const pct = Math.max(0, Math.min(100, cut / tgt * 100));
-        const reached = current <= goal;
-        return '<div class="target">' +
-            '<div class="target-head"><span>' + esc(t('target')) + ' −' + tgt + '%' +
-            (p.target_date ? ' · ' + fmtDate(p.target_date) : '') + '</span>' +
-            '<span class="target-stat' + (reached ? ' reached' : '') + '">' + (cut >= 0 ? '−' : '+') + Math.abs(cut).toFixed(0) + '%</span></div>' +
-            '<div class="target-bar"><div class="target-fill' + (reached ? ' reached' : '') + '" style="width:' + pct.toFixed(1) + '%"></div></div>' +
-            '<div class="target-foot">' + fmtCo2(current) + ' → ' + fmtCo2(goal) + ' kgCO₂e · ' + esc(t('target_base')) + ' ' + fmtCo2(baseline) + '</div>' +
-            '</div>';
-    }
-
-    function renderFolderBar() {
-        const box = document.getElementById('folderBar');
-        if (!box) return;
-        const cnt = (id) => state.projects.filter(p => p.folder_id === id && !p.archived).length;
-        let h = '<button class="fchip' + (!state.folderFilter ? ' active' : '') + '" data-f="">' + esc(t('fld_all')) +
-                '<span class="cnt">' + state.projects.filter(p => !p.archived).length + '</span></button>';
-        for (const f of state.folders) {
-            const act = state.folderFilter === f.id;
-            h += '<button class="fchip' + (act ? ' active' : '') + '" data-f="' + f.id + '">' + esc(f.name) + '<span class="cnt">' + cnt(f.id) + '</span></button>';
-            if (act) {
-                h += '<button class="fchip-act" data-fren="' + f.id + '" title="' + esc(t('rename')) + '">✎</button>' +
-                     '<button class="fchip-act" data-fdel="' + f.id + '" title="' + esc(t('delete')) + '">×</button>';
-            }
-        }
-        h += '<button class="fchip" data-fnew="1">+ ' + esc(t('fld_create')) + '</button>';
-        box.innerHTML = h;
-    }
-
-    document.getElementById('folderBar').addEventListener('click', async e => {
-        const nw = e.target.closest('[data-fnew]');
-        if (nw) { await createFolder(); return; }
-        const ren = e.target.closest('[data-fren]');
-        if (ren) { await renameFolder(ren.dataset.fren); return; }
-        const del = e.target.closest('[data-fdel]');
-        if (del) { await deleteFolder(del.dataset.fdel); return; }
-        const chip = e.target.closest('[data-f]');
-        if (chip) { state.folderFilter = chip.dataset.f || null; renderFolderBar(); renderList(); }
-    });
-
-    async function createFolder() {
-        const name = await promptModal(t('fld_title_prompt'));
-        if (!name) return;
-        try {
-            const { error } = await db.from('project_folders').insert({ user_id: currentUser.id, name });
-            if (error) throw error;
-            showToast(t('saved'));
-            await loadList();
-        } catch (e) { showToast(t('err_create') + (e.message || e)); }
-    }
-    async function renameFolder(id) {
-        const f = state.folders.find(x => x.id === id);
-        const name = await promptModal(t('fld_title_prompt'), f ? f.name : '');
-        if (!name || (f && name === f.name)) return;
-        try {
-            const { error } = await db.from('project_folders').update({ name }).eq('id', id);
-            if (error) throw error;
-            showToast(t('saved'));
-            await loadList();
-        } catch (e) { showToast(t('err_generic') + (e.message || e)); }
-    }
-    async function deleteFolder(id) {
-        const ok = await confirmModal(t('delete'), t('fld_confirm_delete'));
-        if (!ok) return;
-        try {
-            const { error } = await db.from('project_folders').delete().eq('id', id);
-            if (error) throw error;
-            if (state.folderFilter === id) state.folderFilter = null;
-            showToast(t('toast_deleted'));
-            await loadList();
-        } catch (e) { showToast(t('err_delete') + (e.message || e)); }
-    }
-    async function moveProject(id) {
-        const opts = [{ value: '', label: t('fld_none') }, ...state.folders.map(f => ({ value: f.id, label: f.name }))];
-        const cur = (state.projects.find(p => p.id === id) || {}).folder_id || '';
-        const val = await openModal({ title: t('fld_move'), options: opts, current: cur });
-        if (val === null || val === undefined) return;
-        try {
-            const { error } = await db.from('user_projects').update({ folder_id: val || null }).eq('id', id);
-            if (error) throw error;
-            showToast(t('saved'));
-            await loadList();
-        } catch (e) { showToast(t('err_generic') + (e.message || e)); }
-    }
-
-    function renderList() {
-        renderFolderBar();
-        const list = document.getElementById('projList');
-        const visible = state.folderFilter ? state.projects.filter(p => p.folder_id === state.folderFilter) : state.projects;
-        const active = visible.filter(p => !p.archived);
-        const archived = visible.filter(p => p.archived);
-        if (!visible.length) {
-            list.innerHTML = '<div class="empty">' + esc(t('no_projects')) + '</div>';
-            return;
-        }
-        let html = '';
-        const card = p => {
-            const calcs = state.calcsByProject[p.id] || [];
-            const snap = state.snapByProject[p.id];
-            const fld = state.folders.find(f => f.id === p.folder_id);
-            let h = '<div class="pcard">';
-            h += '<div class="pcard-head"><div class="pcard-title">' + esc(p.name) +
-                 (p.archived ? '<span class="badge">' + esc(t('archived_badge')) + '</span>' : '') +
-                 (fld ? '<span class="badge">' + esc(fld.name) + '</span>' : '') + '</div>';
-            if (snap) {
-                h += '<a class="badge cloud" href="/project.html?id=' + p.id + '" title="' + esc(t('snap_open')) + '">☁ ' + (snap.total ? snap.total + ' ent. · ' : '') + fmtDate(snap.saved_at) + '</a>';
-            }
-            h += '<span class="badge">' + calcs.length + ' ' + esc(t('calcs_count')) + '</span>';
-            h += '<span class="pcard-date">' + fmtDate(p.created_at) + '</span></div>';
-            if (calcs.length) {
-                h += '<div style="margin-top:10px">';
-                for (const c of calcs) {
-                    const product = (c.report_data && c.report_data.product_title) || t('unnamed');
-                    const total = (c.report_data && c.report_data.total_co2eq) || 0;
-                    h += '<div class="calc-item">' +
-                        '<a class="calc-name" style="flex:1;text-decoration:none" href="/report.html?history=' + c.id + '">' + esc(product) +
-                        ' <span class="calc-date">' + fmtDate(c.created_at) + '</span></a>' +
-                        '<span class="calc-total">' + fmtCo2(total) + ' kgCO₂e</span>' +
-                        '<button class="btn btn-danger btn-sm del-calc-btn" data-id="' + c.id + '" title="' + esc(t('delete')) + '">×</button></div>';
-                }
-                h += '</div>';
-            }
-            h += targetBlockHtml(p);
-            h += '<div class="card-actions">';
-            if (snap) h += '<a class="btn btn-primary btn-sm" href="/project.html?id=' + p.id + '">' + esc(t('open_snapshot')) + '</a>';
-            h += '<button class="btn btn-sm target-btn" data-id="' + p.id + '" data-target="' + (p.target_pct || '') + '">' + esc(t('target_set')) + '</button>';
-            h += '<button class="btn btn-sm rename-project-btn" data-id="' + p.id + '" data-name="' + esc(p.name) + '">' + esc(t('rename')) + '</button>';
-            h += '<button class="btn btn-sm move-project-btn" data-id="' + p.id + '">' + esc(t('fld_move')) + '</button>';
-            h += '<button class="btn btn-sm archive-btn" data-id="' + p.id + '">' + esc(p.archived ? t('restore') : t('archive')) + '</button>';
-            h += '<button class="btn btn-sm email-share-btn" data-id="' + p.id + '">' + esc(t('share')) + '</button>';
-            h += '<button class="btn btn-danger btn-sm delete-project-btn" data-id="' + p.id + '">' + esc(t('delete')) + '</button>';
-            h += '</div></div>';
-            return h;
-        };
-        if (!active.length) html += '<div class="empty">' + esc(t('no_projects')) + '</div>';
-        for (const p of active) html += card(p);
-        if (archived.length) {
-            html += '<details><summary style="cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--ink-mute);padding:8px 0">' + esc(t('archive_title')) + ' (' + archived.length + ')</summary>';
-            for (const p of archived) html += card(p);
-            html += '</details>';
-        }
-        list.innerHTML = html;
-    }
-
-    document.getElementById('projList').addEventListener('click', async e => {
-        const del = e.target.closest('.del-calc-btn');
-        if (del) { await deleteCalcFromProject(del.dataset.id); return; }
-        const ren = e.target.closest('.rename-project-btn');
-        if (ren) { await renameProject(ren.dataset.id, ren.dataset.name); return; }
-        const mv = e.target.closest('.move-project-btn');
-        if (mv) { await moveProject(mv.dataset.id); return; }
-        const delP = e.target.closest('.delete-project-btn');
-        if (delP) { await deleteProject(delP.dataset.id); return; }
-        const arc = e.target.closest('.archive-btn');
-        if (arc) { await archiveProject(arc.dataset.id); return; }
-        const tgt = e.target.closest('.target-btn');
-        if (tgt) { await setTarget(tgt.dataset.id, tgt.dataset.target); return; }
-        const sh = e.target.closest('.email-share-btn');
-        if (sh) { openShare(sh.dataset.id); return; }
-    });
-
-    document.getElementById('newProjectBtn').addEventListener('click', createProject);
-
-    /* ══════════════════════════════════════════════════
-       Project management
-       ══════════════════════════════════════════════════ */
-    async function createProject() {
-        const name = await promptModal(t('project_name_prompt'));
-        if (!name) return;
-        try {
-            const { error } = await db.from('user_projects').insert({ user_id: currentUser.id, name });
-            if (error) throw error;
-            logAudit('create', 'project', null, { name });
-            showToast(t('toast_project_created'));
-            await loadList();
-        } catch (e) { showToast(t('err_create') + (e.message || e)); }
-    }
-    async function renameProject(id, oldName) {
-        const name = await promptModal(t('rename_prompt'), oldName);
-        if (!name || name === oldName) return;
-        try {
-            const { error } = await db.from('user_projects').update({ name }).eq('id', id);
-            if (error) throw error;
-            showToast(t('toast_project_renamed'));
-            if (state.mode === 'list') await loadList();
-            else { state.project.name = name; renderMeta(); renderActions(); }
-        } catch (e) { showToast(t('err_generic') + (e.message || e)); }
-    }
-    async function deleteProject(id) {
-        const ok = await confirmModal(t('confirm_delete_project'), t('confirm_delete_project_text'));
-        if (!ok) return;
-        try {
-            const { error: e1 } = await db.from('project_calculations').delete().eq('project_id', id);
-            const { error: e2 } = await db.from('user_projects').delete().eq('id', id);
-            if (e1 || e2) throw (e1 || e2);
-            logAudit('delete', 'project', id);
-            showToast(t('toast_deleted'));
-            if (state.mode === 'list') await loadList();
-            else window.location.href = '/project.html';
-        } catch (e) { showToast(t('err_delete') + (e.message || e)); }
-    }
-    async function deleteCalcFromProject(calcId) {
-        const ok = await confirmModal(t('confirm_delete_calc_from_proj'), t('confirm_delete_calc_text'));
-        if (!ok) return;
-        try {
-            const { error } = await db.from('project_calculations').delete().eq('id', calcId);
-            if (error) throw error;
-            showToast(t('toast_calc_deleted'));
-            if (state.mode === 'list') await loadList();
-            else await loadCalcs();
-        } catch (e) { showToast(t('err_delete') + (e.message || e)); }
-    }
-    async function archiveProject(id) {
-        try {
-            const { data: proj } = await db.from('user_projects').select('archived').eq('id', id).single();
-            const newVal = !(proj?.archived);
-            const { error } = await db.from('user_projects').update({ archived: newVal }).eq('id', id);
-            if (error) throw error;
-            showToast(newVal ? t('toast_archived') : t('toast_restored'));
-            if (state.mode === 'list') await loadList();
-            else { state.project.archived = newVal; renderActions(); }
-        } catch (e) { showToast(t('err_generic') + (e.message || e)); }
-    }
-    async function setTarget(id, cur) {
-        const val = await openModal({ title: t('target_title'), text: t('target_text'), input: true, inputValue: cur || '', okLabel: t('save') });
-        if (val === null || val === undefined || typeof val !== 'string') return;
-        const num = parseFloat(String(val).replace(',', '.'));
-        const payload = (!val.trim() || isNaN(num) || num <= 0) ? { target_pct: null } : { target_pct: Math.min(100, num) };
-        try {
-            const { error } = await db.from('user_projects').update(payload).eq('id', id).eq('user_id', currentUser.id);
-            if (error) throw error;
-            showToast(t('saved'));
-            if (state.mode === 'list') await loadList();
-            else { state.project.target_pct = payload.target_pct; renderTarget(); }
-        } catch (e) { showToast(String(e.message || e)); }
-    }
-
-    /* ══════════════════════════════════════════════════
-       Share
-       ══════════════════════════════════════════════════ */
-    let currentShareProjectId = null;
-    function openShare(id) {
-        currentShareProjectId = id;
-        document.getElementById('shareRole').value = 'view';
-        syncShareRoleUI();
-        document.getElementById('shareEmail').value = '';
-        document.getElementById('shareLinkRow').style.display = 'none';
-        document.getElementById('shareLinkInput').value = '';
-        document.getElementById('modalShare').style.display = 'flex';
-    }
-    function syncShareRoleUI() {
-        const sel = document.getElementById('shareRole');
-        document.getElementById('shareRoleNote').textContent =
-            sel.value === 'edit' ? t('share_role_note_edit_proj') : t('share_role_note_view');
-    }
-    document.getElementById('shareRole').addEventListener('change', syncShareRoleUI);
-    document.getElementById('modalShare').addEventListener('click', e => { if (e.target.id === 'modalShare') e.target.style.display = 'none'; });
-    document.getElementById('shareCancelBtn').addEventListener('click', () => { document.getElementById('modalShare').style.display = 'none'; });
-    document.getElementById('shareCopyBtn').addEventListener('click', () => {
-        navigator.clipboard.writeText(document.getElementById('shareLinkInput').value).then(() => showToast(t('toast_link_copied')));
-    });
-    document.getElementById('shareLinkBtn').addEventListener('click', async () => {
-        const days = parseInt(document.getElementById('shareExpires').value, 10) || 30;
-        try {
-            const token = (crypto.randomUUID && crypto.randomUUID()) || (Date.now() + '-' + Math.random().toString(16).slice(2));
-            const role = document.getElementById('shareRole').value === 'edit' ? 'edit' : 'view';
-            const { error } = await db.from('share_links').insert({
-                token, kind: 'project', target_id: currentShareProjectId,
-                owner_id: currentUser.id, role,
-                expires_at: new Date(Date.now() + days * 864e5).toISOString()
-            });
-            if (error) throw error;
-            const link = window.location.origin + '/share.html?token=' + token;
-            document.getElementById('shareLinkInput').value = link;
-            document.getElementById('shareLinkRow').style.display = 'flex';
-            navigator.clipboard?.writeText(link);
-            showToast(t('share_link_created'));
-        } catch (e) { showToast(String(e.message || e)); }
-    });
-    document.getElementById('shareConfirmBtn').addEventListener('click', async () => {
-        const email = document.getElementById('shareEmail').value.trim();
-        const days = parseInt(document.getElementById('shareExpires').value, 10) || 30;
-        if (!email || !currentShareProjectId) { showToast(t('err_email')); return; }
-        const btn = document.getElementById('shareConfirmBtn');
-        btn.disabled = true;
-        try {
-            const { data: { session } } = await db.auth.getSession();
-            const res = await fetch(SB_URL + '/functions/v1/send-share-email', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (session?.access_token || '') },
-                body: JSON.stringify({ kind: 'project', target_id: currentShareProjectId, role: document.getElementById('shareRole').value === 'edit' ? 'edit' : 'view', expires_days: days, email })
-            });
-            const out = await res.json().catch(() => ({}));
-            if (res.ok) { document.getElementById('modalShare').style.display = 'none'; showToast(t('share_sent').replace('{email}', email)); return; }
-            if (out.link) { document.getElementById('shareLinkInput').value = out.link; document.getElementById('shareLinkRow').style.display = 'flex'; }
-            showToast(res.status === 501 ? t('share_no_mail') : t('share_failed'));
-        } catch (e) { showToast(String(e.message || e)); }
-        finally { btn.disabled = false; }
-    });
-
-    /* ══════════════════════════════════════════════════
-       DETAIL MODE
        ══════════════════════════════════════════════════ */
     async function initDetail() {
         try {
@@ -1359,75 +919,12 @@
             if (pErr || !proj) throw new Error(t('err_not_found'));
             state.project = proj;
             renderMeta();
-            renderActions();
-            await loadCalcs();
-            renderTarget();
             await loadSnapshot();
         } catch (e) {
             console.error(e);
             document.getElementById('projName').textContent = t('err_not_found');
             document.getElementById('projMeta').textContent = String(e.message || e);
         }
-    }
-
-    function renderActions() {
-        const p = state.project;
-        if (!p) return;
-        const box = document.getElementById('projActions');
-        let h = '';
-        h += '<button class="btn btn-sm target-btn" data-id="' + p.id + '" data-target="' + (p.target_pct || '') + '">' + esc(t('target_set')) + '</button>';
-        h += '<button class="btn btn-sm rename-project-btn" data-id="' + p.id + '" data-name="' + esc(p.name) + '">' + esc(t('rename')) + '</button>';
-        h += '<button class="btn btn-sm archive-btn" data-id="' + p.id + '">' + esc(p.archived ? t('restore') : t('archive')) + '</button>';
-        h += '<button class="btn btn-sm email-share-btn" data-id="' + p.id + '">' + esc(t('share')) + '</button>';
-        h += '<button class="btn btn-danger btn-sm delete-project-btn" data-id="' + p.id + '">' + esc(t('delete')) + '</button>';
-        box.innerHTML = h;
-    }
-    document.getElementById('projActions').addEventListener('click', async e => {
-        const ren = e.target.closest('.rename-project-btn');
-        if (ren) { await renameProject(ren.dataset.id, ren.dataset.name); return; }
-        const delP = e.target.closest('.delete-project-btn');
-        if (delP) { await deleteProject(delP.dataset.id); return; }
-        const arc = e.target.closest('.archive-btn');
-        if (arc) { await archiveProject(arc.dataset.id); return; }
-        const tgt = e.target.closest('.target-btn');
-        if (tgt) { await setTarget(tgt.dataset.id, tgt.dataset.target); return; }
-        const sh = e.target.closest('.email-share-btn');
-        if (sh) { openShare(sh.dataset.id); return; }
-    });
-
-    async function loadCalcs() {
-        const { data } = await db.from('project_calculations').select('*').eq('project_id', state.projectId).order('created_at', { ascending: false });
-        state.calcs = data || [];
-        renderCalcs();
-    }
-    function renderCalcs() {
-        const card = document.getElementById('calcsCard');
-        const box = document.getElementById('calcsList');
-        if (!state.calcs.length) { card.style.display = 'none'; return; }
-        card.style.display = 'block';
-        let h = '';
-        for (const c of state.calcs) {
-            const product = (c.report_data && c.report_data.product_title) || t('unnamed');
-            const total = (c.report_data && c.report_data.total_co2eq) || 0;
-            h += '<div class="calc-item">' +
-                '<a class="calc-name" style="flex:1;text-decoration:none" href="/report.html?history=' + c.id + '">' + esc(product) +
-                ' <span class="calc-date">' + fmtDate(c.created_at) + '</span></a>' +
-                '<span class="calc-total">' + fmtCo2(total) + ' kgCO₂e</span>' +
-                '<button class="btn btn-danger btn-sm del-calc-btn" data-id="' + c.id + '" title="' + esc(t('delete')) + '">×</button>' +
-                '</div>';
-        }
-        box.innerHTML = h;
-    }
-    document.getElementById('calcsList').addEventListener('click', async e => {
-        const del = e.target.closest('.del-calc-btn');
-        if (del) await deleteCalcFromProject(del.dataset.id);
-    });
-
-    function renderTarget() {
-        const box = document.getElementById('targetBlock');
-        if (!state.project) { box.innerHTML = ''; return; }
-        const p = Object.assign({}, state.project);
-        box.innerHTML = targetBlockHtml(p) ? '<div class="card" style="margin-top:18px">' + targetBlockHtml(p) + '</div>' : '';
     }
 
     async function loadSnapshot() {
@@ -1485,7 +982,6 @@
 
     /* ── tree ── */
     function renderTree() {
-        if (state.mode !== 'detail') return;
         const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
         const box = document.getElementById('tree');
         let html = '';
@@ -2148,6 +1644,144 @@
     document.getElementById('expJson').addEventListener('click', downloadJson);
     document.getElementById('expPdf').addEventListener('click', downloadPdf);
     document.getElementById('expPrint').addEventListener('click', () => window.print());
+
+    /* ══════════════════════════════════════════════════
+       LCA report from DB data: screening LCIA + saved Results + AI narrative
+       ══════════════════════════════════════════════════ */
+    const AI_SYSTEM_REPORT = [
+        'You are a senior LCA consultant writing the narrative sections of a technical report for a life cycle study.',
+        'You receive JSON with: the chosen impact category and method, computed stage results (screening LCIA over direct elementary flows), an inventory summary and database metadata.',
+        'All numbers in the input were computed from the database; you must not invent any additional numbers. You may reference the provided values and derived shares.',
+        'Return ONLY a JSON object with keys: "analysis" (string, 1-2 paragraphs interpreting the stage results and hotspots), "assumptions" (array of strings), "limitations" (array of strings), "recommendations" (array of strings).',
+        'Explicitly state in limitations that stage values are a screening estimate based on direct elementary flows of each process multiplied by the category characterization factors, without full supply-chain recursion, unless a saved calculation result was provided.',
+        'Write in the language of the "lang" field (ru, en or zh) using professional LCA terminology.',
+    ].join(' ');
+
+    function chooseCategory() {
+        const cats = state.entities.ImpactCategory || [];
+        if (!cats.length) return null;
+        return cats.find(c => /climate|global warming|co2|парник|климат/i.test(c.name || '')) || cats[0];
+    }
+
+    function screening(cat) {
+        const factors = new Map();
+        for (const f of (cat.impactFactors || [])) {
+            const id = refId(f.flow);
+            if (id) factors.set(id, parseFloat(f.value) || 0);
+        }
+        const flows = new Map();
+        for (const fl of (state.entities.Flow || [])) flows.set(fl['@id'], fl);
+        const groups = new Map();
+        for (const p of (state.entities.Process || [])) {
+            let v = 0;
+            for (const x of (p.exchanges || [])) {
+                const fid = refId(x.flow);
+                if (!fid || !factors.has(fid)) continue;
+                const fl = flows.get(fid);
+                if (!fl || String(fl.flowType || '') !== 'ELEMENTARY_FLOW') continue;
+                const amt = parseFloat(x.amount);
+                if (!isNaN(amt)) v += amt * factors.get(fid);
+            }
+            const path = String(catPath(p.category) || '').split('/')[0].trim() || t('rep_stage_other');
+            const g = groups.get(path) || { name: path, co2eq: 0, sub_processes: [] };
+            const rq = parseFloat(p.refQuantity) || 0;
+            g.co2eq += v;
+            g.sub_processes.push({
+                name: p.name || '', amount: rq, unit: refName(p.unit) || '',
+                factor: rq ? v / rq : v, factor_source: t('rep_factor_source'), co2eq: v,
+            });
+            groups.set(path, g);
+        }
+        const stages = [...groups.values()].filter(g => Math.abs(g.co2eq) > 1e-12);
+        const sum = stages.reduce((a, g) => a + g.co2eq, 0);
+        for (const g of stages) g.share_pct = sum ? Math.round((g.co2eq / sum) * 1000) / 10 : 0;
+        stages.sort((a, b) => b.co2eq - a.co2eq);
+        let resultsTotal = null;
+        for (const r of (state.entities.Result || [])) {
+            const ir = r.impactResults || r.impacts || [];
+            for (const row of ir) {
+                const c = row.impactCategory || row.category || {};
+                if ((refId(c) === cat['@id'] || (refName(c) || '') === (cat.name || '')) && row.amount != null) {
+                    resultsTotal = parseFloat(row.amount) || 0;
+                }
+            }
+        }
+        return { stages, sum, resultsTotal };
+    }
+
+    function functionalUnit() {
+        const ps = (state.entities.ProductSystem || [])[0];
+        if (ps && ps.targetAmount != null) return fmtNum(ps.targetAmount) + ' ' + (refName(ps.targetUnit) || '');
+        const p = (state.entities.Process || [])[0];
+        if (p && p.refQuantity != null) return fmtNum(p.refQuantity) + ' ' + (refName(p.unit) || '') + ' (' + (refName(p.refFlow) || '') + ')';
+        return '—';
+    }
+
+    async function generateReport() {
+        const cat = chooseCategory();
+        if (!cat) { showToast(t('err_no_cat')); return; }
+        showToast(t('ai_generating'));
+        const { stages, sum, resultsTotal } = screening(cat);
+        const method = ((state.entities.ImpactMethod || [])[0] || {}).name || '—';
+        const locs = {};
+        for (const p of (state.entities.Process || [])) { const l = refName(p.location); if (l) locs[l] = (locs[l] || 0) + 1; }
+        const region = Object.keys(locs).sort((a, b) => locs[b] - locs[a])[0] || '—';
+        const limits = [t('rep_note_screening').replace('{cat}', cat.name || '').replace('{method}', method)];
+        if (resultsTotal !== null) limits.push(t('rep_note_results').replace('{v}', fmtNum(resultsTotal)));
+        let ai = { analysis: '', assumptions: [], limitations: [], recommendations: [] };
+        try {
+            const { data: { session } } = await db.auth.getSession();
+            if (session) {
+                const payload = {
+                    lang: pvLang, method, impact_category: cat.name, ref_unit: cat.refUnit || '',
+                    functional_unit: functionalUnit(), region,
+                    total_screening: sum, saved_result: resultsTotal,
+                    stages: stages.map(g => ({ name: g.name, value: g.co2eq, share_pct: g.share_pct, processes: g.sub_processes.map(x => x.name) })),
+                    db: (state.stats || {}).db || '', entities: (state.stats || {}).total || 0,
+                };
+                const res = await fetch(SB_URL + '/functions/v1/lca-proxy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token },
+                    body: JSON.stringify({
+                        model: 'deepseek-chat', max_tokens: 4000, temperature: 0.3,
+                        response_format: { type: 'json_object' },
+                        messages: [{ role: 'system', content: AI_SYSTEM_REPORT }, { role: 'user', content: JSON.stringify(payload) }],
+                    }),
+                });
+                if (res.ok) {
+                    const out = await res.json();
+                    const txt = out && out.choices && out.choices[0] && out.choices[0].message && out.choices[0].message.content;
+                    if (txt) ai = Object.assign(ai, JSON.parse(txt));
+                }
+            }
+        } catch (e) { console.warn('AI narrative failed:', e); }
+        const rd = {
+            source: 'db',
+            product_title: (state.project ? state.project.name : 'DB') + ' — ' + t('gen_report_short'),
+            functional_unit: functionalUnit(),
+            system_boundary: t('rep_boundary'),
+            method: method + ' / ' + (cat.name || ''),
+            region,
+            total_co2eq: resultsTotal !== null ? resultsTotal : sum,
+            total_description: ai.analysis || '',
+            stages,
+            assumptions: ai.assumptions || [],
+            limitations: (ai.limitations || []).concat(limits),
+            recommendations: ai.recommendations || [],
+            db_name: (state.stats || {}).db || '',
+        };
+        try {
+            const { data: hist, error } = await db.from('user_history')
+                .insert({ user_id: currentUser.id, product_title: rd.product_title, total_co2eq: rd.total_co2eq, report_data: rd })
+                .select().single();
+            if (error) throw error;
+            await db.from('project_calculations').insert({ project_id: state.projectId, user_id: currentUser.id, report_data: rd, total_co2eq: rd.total_co2eq });
+            logAudit('create', 'report', hist.id, { source: 'db' });
+            showToast(t('rep_saved'));
+            window.location.href = '/report.html?history=' + hist.id;
+        } catch (e) { showToast(t('err_generic') + String(e.message || e)); }
+    }
+    document.getElementById('genReportBtn').addEventListener('click', generateReport);
 
     /* ── lang init ── */
     (function () {

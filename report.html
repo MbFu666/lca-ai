@@ -3189,6 +3189,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
       <div class="crumbs">
         <button class="back" id="resetBtn2" title="Назад">‹</button>
         <b id="crumbProduct">—</b>
+        <span id="crumbSrcBadge" style="display:none;font-size:10px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--rule);color:var(--ink-soft);padding:2px 6px;margin-left:8px"></span>
         <span data-i18n="crumb_suffix">Carbon Footprint</span>
       </div>
 
@@ -5151,6 +5152,12 @@ function renderReport(d) {
 
   // ─── strip + toolbar (above the step panels) ───
   $('#crumbProduct').textContent = d.product_title || '—';
+  const srcLabels = { db: { ru: 'Отчёт по базе', en: 'Database report', zh: '数据库报告' }, engine: { ru: 'Расчёт из приложения', en: 'App calculation', zh: '应用计算' } };
+  const srcBadge = document.getElementById('crumbSrcBadge');
+  if (srcBadge) {
+    if (d.source && srcLabels[d.source]) { srcBadge.style.display = ''; srcBadge.textContent = srcLabels[d.source][currentLang] || srcLabels[d.source].en; }
+    else srcBadge.style.display = 'none';
+  }
   $('#metaFU').textContent        = d.functional_unit || '—';
   $('#metaSBPill').textContent    = d.system_boundary || '—';
 

@@ -549,7 +549,24 @@
 
 .skip-link { position: absolute; left: -9999px; top: 0; z-index: 9999; padding: 8px 16px; background: var(--graphite); color: var(--paper); font-family: var(--mono); font-size: 12px; text-decoration: none; }
 .skip-link:focus { left: 8px; top: 8px; }
-</style>
+        /* ── folders bar & project sections ── */
+        .fbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 4px 0 16px; }
+        .fchip { font-family: var(--mono); font-size: 11px; letter-spacing: .04em; padding: 6px 12px; border: 1px solid var(--rule); background: transparent; color: var(--ink-soft); cursor: pointer; }
+        .fchip:hover { border-color: var(--graphite); color: var(--graphite); }
+        .fchip.active { background: var(--graphite); color: var(--paper); border-color: var(--graphite); }
+        .fchip .cnt { opacity: .6; margin-left: 6px; }
+        .fchip-act { font-family: var(--mono); font-size: 10px; padding: 6px 8px; border: 1px solid var(--rule); background: transparent; color: var(--ink-mute); cursor: pointer; }
+        .fchip-act:hover { color: var(--c-rust); border-color: var(--c-rust); }
+        .psec { margin-top: 12px; }
+        .psec-title { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 6px; }
+        .prow { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-top: 1px solid var(--rule); font-size: 13px; }
+        .prow:first-of-type { border-top: none; }
+        .prow a.prow-name { flex: 1; color: var(--ink); text-decoration: none; }
+        .prow a.prow-name:hover { color: var(--jade); }
+        .prow .prow-date { font-family: var(--mono); font-size: 11px; color: var(--ink-mute); }
+        .prow .prow-val { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
+        .prow-none { color: var(--ink-mute); font-size: 12px; padding: 4px 10px; }
+    </style>
 </head>
 <body>
     <a class="skip-link" href="#main">Skip to content</a>>
@@ -592,7 +609,7 @@
                 <ul class="menu">
                     <li><a href="#" class="active" data-tab="overview"><span class="menu-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11L12 4l8 7"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/></svg></span> <span data-i18n="menu_overview">Обзор</span></a></li>
                     <li><a href="#" data-tab="history"><span class="menu-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.3"/><path d="M12 7.5V12l3 2"/></svg></span> <span data-i18n="menu_history">История</span></a></li>
-                    <li><a href="/project.html"><span class="menu-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5a1 1 0 0 1 1-1h4.3l2 2H20a1 1 0 0 1 1 1V18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6.5z"/></svg></span> <span data-i18n="menu_projects">Проекты</span></a></li>
+                    <li><a href="#" data-tab="projects"><span class="menu-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5a1 1 0 0 1 1-1h4.3l2 2H20a1 1 0 0 1 1 1V18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6.5z"/></svg></span> <span data-i18n="menu_projects">Проекты</span></a></li>
                     <li><a href="#" data-tab="settings"><span class="menu-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 4v2.2M12 17.8V20M4 12h2.2M17.8 12H20M6.3 6.3l1.5 1.5M16.2 16.2l1.5 1.5M17.7 6.3l-1.5 1.5M7.8 16.2l-1.5 1.5"/></svg></span> <span data-i18n="menu_settings">Настройки</span></a></li>
                     <li><a href="#" data-tab="logout"><span class="menu-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4"/><path d="M14 8l4 4-4 4M18 12H9"/></svg></span> <span data-i18n="menu_logout">Выйти</span></a></li>
                 </ul>
@@ -706,6 +723,16 @@
                         <button class="btn btn-sm" id="batchDelete" style="color:var(--c-rust)" data-i18n="delete">Удалить</button>
                         <button class="btn btn-sm" id="batchDeselect" data-i18n="cancel">Отменить</button>
                     </div>
+                </div>
+
+                <!-- ══ PROJECTS ══ -->
+                <div class="tab-content" id="tab-projects" style="display:none">
+                    <div class="section-head">
+                        <h2 class="section-title" data-i18n="projects_title">Проекты</h2>
+                        <button class="btn btn-primary" id="newProjectBtn" data-i18n="new_project">+ Новый проект</button>
+                    </div>
+                    <div class="fbar" id="folderBar"></div>
+                    <div id="projectsList"></div>
                 </div>
 
                 <!-- ══ SETTINGS ══ -->
@@ -977,331 +1004,760 @@
 
         /* ── i18n ── */
         const CABINET_I18N = {
-            ru: {
-                change: 'Изменить', send: 'Отправить', copy: 'Копировать', connected: 'подключён',
-                org_label: 'Организация', org_ph: 'Университет, компания',
-                role_label: 'Должность', role_ph: 'LCA-аналитик, аспирант',
-                country_label: 'Страна', country_ph: 'Россия', site_label: 'Сайт / ORCID',
-                err_site_url: 'Сайт должен начинаться с http:// или https://',
-                providers_title: 'Способ входа',
-                sessions_title: 'Активные сессии', sess_current: 'Текущее устройство', sess_last: 'Последний вход',
-                sess_note: 'Supabase не отдаёт полный список устройств. «Выйти везде» отзывает все токены — на всех устройствах потребуется войти заново.',
-                signout_all: 'Выйти на всех устройствах',
-                signout_all_text: 'Все сессии будут завершены. На этом устройстве тоже потребуется войти заново.',
-                change_email: 'Изменить email',
-                change_email_text: 'На новый адрес придёт письмо для подтверждения. Пока вы не подтвердите — останется старый.',
-                change_email_sent: 'Письмо для подтверждения отправлено',
-                err_email: 'Введите корректный email',
-                danger_zone: 'Опасная зона',
-                delete_type_email: 'Это необратимо. Чтобы подтвердить, введите ваш email: {email}',
-                delete_mismatch: 'Email не совпадает — удаление отменено',
-                delete_partial: 'Данные удалены, но сам аккаунт остался: серверная функция delete-account не задеплоена. Пока она не установлена, полностью удалить аккаунт из браузера невозможно.',
-                share: 'Поделиться', share_title: 'Поделиться',
-                share_sub: 'Получатель увидит отчёт только для чтения. Ссылку можно отозвать в любой момент.',
-                share_expires: 'Срок действия', share_email_label: 'Отправить на email (необязательно)',
-                share_email_ph: 'colleague@example.com',
-                share_get_link: 'Создать ссылку', share_send: 'Отправить',
-                share_link_created: 'Ссылка создана и скопирована',
-                share_sent: 'Письмо отправлено на {email}',
-                share_no_mail: 'Отправка почты не настроена на сервере. Ссылка создана — передайте её вручную.',
-                share_failed: 'Письмо не отправилось. Ссылка создана — передайте её вручную.',
-                kpi_median: 'Медианный след',
-                pick_project: 'Выберите проект',
-                share_role_label: 'Права получателя', share_role_view: 'Только чтение', share_role_edit: 'Чтение и редактирование',
-                share_role_note_view: 'Получатель сможет только смотреть отчёт.',
-                share_role_note_edit: 'Получатель сможет изменять количества и коэффициенты. Потребуется вход в аккаунт. Все правки попадут в журнал.',
-                share_role_note_edit_proj: 'Получатель сможет изменять любой расчёт внутри проекта. Потребуется вход. Все правки попадут в журнал.',
-                vs_parent: 'к исходному:', err_jszip: 'JSZip не загружен', toast_exported: 'Данные экспортированы',
-                xstats_title: 'Статистика', xstats_by_month: 'CO₂ по месяцам', xstats_top5: 'Топ-5 по следу', xstats_avg: 'Среднее',
-                portfolio_title: 'Где углерод в вашем портфеле',
-                pf_verdict: 'В {n} из {total} расчётов доминирует «{stage}» — в среднем {pct}% следа. Начинайте снижение отсюда.',
-                spark_empty: 'Нужно минимум два расчёта, чтобы увидеть тренд',
-                spark_trend: 'Тренд', spark_falling: 'снижается', spark_rising: 'растёт',
-                filters: 'Фильтры', f_co2: 'CO₂, kg', f_date: 'Дата', f_tag: 'Тег', f_any: 'любой',
-                f_reset: 'Сбросить', f_active: 'Найдено: {n}',
-                show_archive: 'Архив', back_to_history: 'К истории', archive_empty: 'Архив пуст',
-                archive: 'В архив', archived: 'Перенесено в архив', restore: 'Вернуть', restored: 'Восстановлено',
-                delete_forever: 'Удалить навсегда',
-                selected: 'Выбрано', cancel: 'Отменить',
-                variant: 'Вариант', note: 'Заметка', tag: 'Тег',
-                note_title: 'Заметка к расчёту', note_ph: 'Например: допущение по транспорту согласовано с поставщиком 12.03',
-                tag_title: 'Добавить тег', tag_ph: 'упаковка, клиент А, черновик…', add: 'Добавить',
-                save: 'Сохранить', saved: 'Сохранено', close: 'Закрыть',
-                compare: 'Сравнить', cmp_title: 'Сравнение расчётов',
-                cmp_need2: 'Выберите минимум два расчёта', cmp_max3: 'Не больше трёх за раз',
-                cmp_base: 'база', cmp_is_base: 'точка отсчёта', cmp_vs_base: 'к базе',
-                cmp_nodata: 'нет разбивки по стадиям',
-                cmp_warn_fu: 'У расчётов разные функциональные единицы. Сравнение абсолютных значений некорректно — смотрите на структуру стадий, а не на итоговое число.',
-                batch_delete_text: 'Удалить {n} расчётов безвозвратно?',
-                batch_deleted: 'Удалено: {n}', batch_archived: 'В архив: {n}', batch_to_project: 'Добавлено в проект: {n}',
-                title: 'LCA·AI — Личный кабинет',
-                nav_home: 'Главная', nav_cabinet: 'Кабинет',
-                loading: 'Загрузка...', stat_calcs: 'Расчётов', stat_projects: 'Проектов',
-                menu_overview: 'Обзор', menu_history: 'История', menu_projects: 'Проекты', menu_settings: 'Настройки', menu_logout: 'Выйти',
-                overview_title: 'Обзор', history_title: 'История расчётов', settings_title: 'Настройки',
-                greeting_morning: 'Доброе утро', greeting_day: 'Добрый день', greeting_evening: 'Добрый вечер', greeting_night: 'Доброй ночи',
-                greeting_sub: 'Вот сводка вашей активности',
-                new_calc: '+ Новый расчёт',
-                kpi_calcs: 'Всего расчётов', kpi_total: 'Суммарный след', kpi_avg: 'Средний на расчёт', kpi_projects: 'Проектов',
-                chart_title: 'Активность за 30 дней', chart_sub: 'Количество расчётов по дням',
-                recent_title: 'Недавние расчёты', recent_sub: 'Последние 5 записей', no_recent: 'Пока нет расчётов',
-                export_csv: 'CSV', search_ph: 'Поиск по продукту…',
-                sort_new: 'Сначала новые', sort_old: 'Сначала старые', sort_co2_desc: 'CO₂ по убыванию', sort_co2_asc: 'CO₂ по возрастанию',
-                load_more: 'Показать ещё', nothing_found: 'Ничего не найдено',
-                dark_theme: 'Тёмная тема', dark_theme_desc: 'Переключить оформление',
-                language: 'Язык', language_desc: 'Язык интерфейса',
-                export_all: 'Скачать все данные',
-                delete_account: 'Удалить аккаунт', delete_account_desc: 'Удалить все данные безвозвратно',
-                delete_btn: 'Удалить',
-                profile_title: 'Профиль', profile_name_ph: 'Имя',
-                avatar_upload_title: 'Загрузить аватар', avatar_upload_desc: 'JPG, PNG или WebP, до 500 КБ', avatar_remove: 'Удалить фото',
-                save_profile: 'Сохранить профиль',
-                change_pw_title: 'Изменить пароль', old_pw_ph: 'Текущий пароль', new_pw_ph: 'Новый пароль', confirm_pw_ph: 'Подтвердите пароль',
-                change_pw_btn: 'Изменить пароль',
-                view: 'Посмотреть', delete: 'Удалить', calculations: 'Расчёты', to_project: 'В проект', rename: 'Переименовать',
-                no_history: 'Нет расчётов', do_calc: 'Сделать расчёт', create: 'Создать',
-                unnamed: 'Без названия',
-                confirm_delete_calc: 'Удалить расчёт?', confirm_delete_calc_text: 'Это действие нельзя отменить.', confirm_delete_account: 'Удалить аккаунт и все данные?',
-                confirm_delete_account_text: 'Все расчёты, проекты и профиль будут удалены безвозвратно.',
-                pick_project_title: 'Добавить в проект', pick_project_empty: 'Проектов пока нет — создайте первый на вкладке «Проекты»',
-                cancel: 'Отмена', ok: 'ОК',
-                toast_deleted: 'Удалено', toast_added_to_project: 'Добавлено в проект',
-                toast_profile_saved: 'Профиль обновлён', toast_pw_changed: 'Пароль изменён', toast_lang_saved: 'Язык сохранён',
-                toast_link_copied: 'Ссылка скопирована!', toast_avatar_saved: 'Аватар обновлён',
-                toast_avatar_too_big: 'Файл слишком большой (макс. 500 КБ)', toast_csv_done: 'CSV выгружен',
-                toast_archived: 'Проект архивирован', toast_restored: 'Проект восстановлен',
-                err_sb_not_loaded: 'Ошибка: Supabase не загружен', err_auth: 'Ошибка авторизации: ',
-                err_load_history: 'Ошибка загрузки истории: ', err_load_projects: 'Ошибка загрузки проектов: ',
-                err_load_stats: 'Ошибка загрузки статистики', err_delete: 'Ошибка удаления: ',
-                err_create: 'Ошибка создания: ', err_generic: 'Ошибка: ',
-                pw_mismatch: 'Пароли не совпадают', pw_min6: 'Минимум 6 символов',
-                pw_wrong_old: 'Неверный текущий пароль', pw_old_required: 'Введите текущий пароль',
-                status_done: 'Готово', status_pending: 'В процессе',
-                src_engine: 'Расчёт из приложения',
-                tab_profile: 'Профиль', tab_security: 'Безопасность', tab_calc: 'Расчёты', tab_interface: 'Интерфейс', tab_data: 'Данные',
-                calc_settings: 'Параметры расчётов', unit_label: 'Единицы CO₂', precision_label: 'Точность AI', region_label: 'Регион по умолчанию',
-                precision_fast: 'Быстрая (меньше деталей)', precision_deep: 'Глубокая (полный LCA)',
-                region_auto: 'Авто (по описанию)', region_europe: 'Европа', region_na: 'Северная Америка', region_asia: 'Азия',
-                save_calc: 'Сохранить', data_export: 'Экспорт данных', webhook_title: 'Webhook', webhook_url_ph: 'URL для уведомлений',
-                toast_saved: 'Сохранено', email_label: 'Email', bio_label: 'О себе', bio_ph: 'Расскажите о себе…'
-            },
-            en: {
-                change: 'Change', send: 'Send', copy: 'Copy', connected: 'connected',
-                org_label: 'Organisation', org_ph: 'University, company',
-                role_label: 'Role', role_ph: 'LCA analyst, PhD student',
-                country_label: 'Country', country_ph: 'Poland', site_label: 'Website / ORCID',
-                err_site_url: 'The website must start with http:// or https://',
-                providers_title: 'Sign-in method',
-                sessions_title: 'Active sessions', sess_current: 'Current device', sess_last: 'Last sign-in',
-                sess_note: 'Supabase does not expose a full device list. “Sign out everywhere” revokes all tokens — every device will need to sign in again.',
-                signout_all: 'Sign out everywhere',
-                signout_all_text: 'All sessions will end. You will need to sign in again on this device too.',
-                change_email: 'Change email',
-                change_email_text: 'A confirmation email will be sent to the new address. The old one stays active until you confirm.',
-                change_email_sent: 'Confirmation email sent',
-                err_email: 'Enter a valid email',
-                danger_zone: 'Danger zone',
-                delete_type_email: 'This cannot be undone. To confirm, type your email: {email}',
-                delete_mismatch: 'Email does not match — deletion cancelled',
-                delete_partial: 'Your data was deleted, but the account itself remains: the delete-account server function is not deployed. Until it is installed, the account cannot be fully removed from the browser.',
-                share: 'Share', share_title: 'Share',
-                share_sub: 'The recipient gets a read-only report. You can revoke the link at any time.',
-                share_expires: 'Expires in', share_email_label: 'Send to email (optional)',
-                share_email_ph: 'colleague@example.com',
-                share_get_link: 'Create link', share_send: 'Send',
-                share_link_created: 'Link created and copied',
-                share_sent: 'Email sent to {email}',
-                share_no_mail: 'Email sending is not configured on the server. The link was created — share it manually.',
-                share_failed: 'The email did not go out. The link was created — share it manually.',
-                kpi_median: 'Median footprint',
-                pick_project: 'Pick a project',
-                share_role_label: 'Recipient rights', share_role_view: 'Read only', share_role_edit: 'Read and edit',
-                share_role_note_view: 'The recipient can only view the report.',
-                share_role_note_edit: 'The recipient can change amounts and factors. Sign-in required. Every edit is logged.',
-                share_role_note_edit_proj: 'The recipient can edit any calculation inside the project. Sign-in required. Every edit is logged.',
-                vs_parent: 'vs original:', err_jszip: 'JSZip not loaded', toast_exported: 'Data exported',
-                xstats_title: 'Statistics', xstats_by_month: 'CO₂ by month', xstats_top5: 'Top 5 by footprint', xstats_avg: 'Average',
-                portfolio_title: 'Where the carbon is across your portfolio',
-                pf_verdict: '“{stage}” dominates in {n} of {total} calculations — {pct}% of the footprint on average. Start reducing here.',
-                spark_empty: 'At least two calculations are needed to see a trend',
-                spark_trend: 'Trend', spark_falling: 'falling', spark_rising: 'rising',
-                filters: 'Filters', f_co2: 'CO₂, kg', f_date: 'Date', f_tag: 'Tag', f_any: 'any',
-                f_reset: 'Reset', f_active: 'Found: {n}',
-                show_archive: 'Archive', back_to_history: 'Back to history', archive_empty: 'Archive is empty',
-                archive: 'Archive', archived: 'Moved to archive', restore: 'Restore', restored: 'Restored',
-                delete_forever: 'Delete forever',
-                selected: 'Selected', cancel: 'Cancel',
-                variant: 'Variant', note: 'Note', tag: 'Tag',
-                note_title: 'Note on calculation', note_ph: 'e.g. transport assumption confirmed with supplier on 12 Mar',
-                tag_title: 'Add tag', tag_ph: 'packaging, client A, draft…', add: 'Add',
-                save: 'Save', saved: 'Saved', close: 'Close',
-                compare: 'Compare', cmp_title: 'Compare calculations',
-                cmp_need2: 'Select at least two calculations', cmp_max3: 'Three at most',
-                cmp_base: 'base', cmp_is_base: 'baseline', cmp_vs_base: 'vs base',
-                cmp_nodata: 'no stage breakdown',
-                cmp_warn_fu: 'These calculations use different functional units. Comparing absolute values is not valid — read the stage structure, not the bottom-line number.',
-                batch_delete_text: 'Delete {n} calculations permanently?',
-                batch_deleted: 'Deleted: {n}', batch_archived: 'Archived: {n}', batch_to_project: 'Added to project: {n}',
-                title: 'LCA·AI — Dashboard',
-                nav_home: 'Home', nav_cabinet: 'Dashboard',
-                loading: 'Loading...', stat_calcs: 'Calcs', stat_projects: 'Projects',
-                menu_overview: 'Overview', menu_history: 'History', menu_projects: 'Projects', menu_settings: 'Settings', menu_logout: 'Sign out',
-                overview_title: 'Overview', history_title: 'Calculation history', settings_title: 'Settings',
-                greeting_morning: 'Good morning', greeting_day: 'Good afternoon', greeting_evening: 'Good evening', greeting_night: 'Good night',
-                greeting_sub: 'Here is your activity summary',
-                new_calc: '+ New calculation',
-                kpi_calcs: 'Total calculations', kpi_total: 'Total footprint', kpi_avg: 'Average per calc', kpi_projects: 'Projects',
-                chart_title: '30-day activity', chart_sub: 'Calculations per day',
-                recent_title: 'Recent calculations', recent_sub: 'Last 5 records', no_recent: 'No calculations yet',
-                export_csv: 'CSV', search_ph: 'Search by product…',
-                sort_new: 'Newest first', sort_old: 'Oldest first', sort_co2_desc: 'CO₂ high → low', sort_co2_asc: 'CO₂ low → high',
-                load_more: 'Load more', nothing_found: 'Nothing found',
-                dark_theme: 'Dark theme', dark_theme_desc: 'Switch appearance',
-                language: 'Language', language_desc: 'Interface language',
-                export_all: 'Download all data',
-                delete_account: 'Delete account', delete_account_desc: 'Permanently delete all data',
-                delete_btn: 'Delete',
-                profile_title: 'Profile', profile_name_ph: 'Name',
-                avatar_upload_title: 'Upload avatar', avatar_upload_desc: 'JPG, PNG or WebP, up to 500 KB', avatar_remove: 'Remove photo',
-                save_profile: 'Save profile',
-                change_pw_title: 'Change password', old_pw_ph: 'Current password', new_pw_ph: 'New password', confirm_pw_ph: 'Confirm password',
-                change_pw_btn: 'Change password',
-                view: 'View', delete: 'Delete', calculations: 'Calculations', to_project: 'To project', rename: 'Rename',
-                no_history: 'No calculations yet', do_calc: 'Make a calculation', create: 'Create',
-                unnamed: 'Untitled',
-                confirm_delete_calc: 'Delete calculation?', confirm_delete_calc_text: 'This action cannot be undone.', confirm_delete_account: 'Delete account and all data?',
-                confirm_delete_account_text: 'All calculations, projects and profile will be permanently deleted.',
-                pick_project_title: 'Add to project', pick_project_empty: 'No projects yet — create one in the Projects tab',
-                cancel: 'Cancel', ok: 'OK',
-                toast_deleted: 'Deleted', toast_added_to_project: 'Added to project',
-                toast_profile_saved: 'Profile updated', toast_pw_changed: 'Password changed', toast_lang_saved: 'Language saved',
-                toast_link_copied: 'Link copied!', toast_avatar_saved: 'Avatar updated',
-                toast_avatar_too_big: 'File too large (max 500 KB)', toast_csv_done: 'CSV exported',
-                toast_archived: 'Project archived', toast_restored: 'Project restored',
-                err_sb_not_loaded: 'Error: Supabase not loaded', err_auth: 'Auth error: ',
-                err_load_history: 'Error loading history: ', err_load_projects: 'Error loading projects: ',
-                err_load_stats: 'Error loading stats', err_delete: 'Delete error: ',
-                err_create: 'Create error: ', err_generic: 'Error: ',
-                pw_mismatch: 'Passwords do not match', pw_min6: 'Minimum 6 characters',
-                pw_wrong_old: 'Wrong current password', pw_old_required: 'Enter current password',
-                status_done: 'Done', status_pending: 'In progress',
-                src_engine: 'App calculation',
-                tab_profile: 'Profile', tab_security: 'Security', tab_calc: 'Calculations', tab_interface: 'Interface', tab_data: 'Data',
-                calc_settings: 'Calculation settings', unit_label: 'CO₂ units', precision_label: 'AI precision', region_label: 'Default region',
-                precision_fast: 'Fast (less detail)', precision_deep: 'Deep (full LCA)',
-                region_auto: 'Auto (from description)', region_europe: 'Europe', region_na: 'North America', region_asia: 'Asia',
-                save_calc: 'Save', data_export: 'Data export', webhook_title: 'Webhook', webhook_url_ph: 'Notification URL',
-                toast_saved: 'Saved', email_label: 'Email', bio_label: 'About you', bio_ph: 'Tell us about yourself…'
-            },
-            zh: {
-                change: '修改', send: '发送', copy: '复制', connected: '已连接',
-                org_label: '组织', org_ph: '大学、公司',
-                role_label: '职位', role_ph: 'LCA 分析师、研究生',
-                country_label: '国家', country_ph: '中国', site_label: '网站 / ORCID',
-                err_site_url: '网址须以 http:// 或 https:// 开头',
-                providers_title: '登录方式',
-                sessions_title: '活动会话', sess_current: '当前设备', sess_last: '上次登录',
-                sess_note: 'Supabase 不提供完整设备列表。「在所有设备退出」将吊销全部令牌，所有设备均需重新登录。',
-                signout_all: '在所有设备退出',
-                signout_all_text: '所有会话都将结束，本设备也需要重新登录。',
-                change_email: '修改邮箱',
-                change_email_text: '确认邮件将发送至新地址。在您确认之前，原邮箱仍然有效。',
-                change_email_sent: '确认邮件已发送',
-                err_email: '请输入有效的邮箱',
-                danger_zone: '危险区域',
-                delete_type_email: '此操作不可撤销。请输入您的邮箱以确认：{email}',
-                delete_mismatch: '邮箱不匹配 — 已取消删除',
-                delete_partial: '数据已删除，但账户本身仍然存在：服务器端 delete-account 函数尚未部署。在其安装之前，无法从浏览器彻底删除账户。',
-                share: '分享', share_title: '分享',
-                share_sub: '接收方仅可只读查看报告。链接可随时撤销。',
-                share_expires: '有效期', share_email_label: '发送到邮箱（可选）',
-                share_email_ph: 'colleague@example.com',
-                share_get_link: '创建链接', share_send: '发送',
-                share_link_created: '链接已创建并复制',
-                share_sent: '邮件已发送至 {email}',
-                share_no_mail: '服务器未配置邮件发送。链接已创建 — 请手动分享。',
-                share_failed: '邮件未能发出。链接已创建 — 请手动分享。',
-                kpi_median: '中位碳足迹',
-                pick_project: '选择项目',
-                share_role_label: '接收方权限', share_role_view: '仅查看', share_role_edit: '查看并编辑',
-                share_role_note_view: '接收方只能查看报告。',
-                share_role_note_edit: '接收方可修改数量与排放因子。需要登录，所有修改都会记入日志。',
-                share_role_note_edit_proj: '接收方可编辑项目内任意计算。需要登录，所有修改都会记入日志。',
-                vs_parent: '相对原始：', err_jszip: 'JSZip 未加载', toast_exported: '数据已导出',
-                xstats_title: '统计', xstats_by_month: '各月 CO₂', xstats_top5: '碳足迹前五', xstats_avg: '平均值',
-                portfolio_title: '碳集中在您的哪些环节',
-                pf_verdict: '在 {total} 次计算中有 {n} 次以「{stage}」为主导 — 平均占足迹的 {pct}%。减排应从这里入手。',
-                spark_empty: '至少需要两次计算才能看出趋势',
-                spark_trend: '趋势', spark_falling: '下降', spark_rising: '上升',
-                filters: '筛选', f_co2: 'CO₂, kg', f_date: '日期', f_tag: '标签', f_any: '任意',
-                f_reset: '重置', f_active: '找到 {n} 条',
-                show_archive: '归档', back_to_history: '返回历史', archive_empty: '归档为空',
-                archive: '归档', archived: '已归档', restore: '恢复', restored: '已恢复',
-                delete_forever: '永久删除',
-                selected: '已选', cancel: '取消',
-                variant: '变体', note: '备注', tag: '标签',
-                note_title: '计算备注', note_ph: '例如：运输假设已于 3 月 12 日与供应商确认',
-                tag_title: '添加标签', tag_ph: '包装、客户 A、草稿…', add: '添加',
-                save: '保存', saved: '已保存', close: '关闭',
-                compare: '对比', cmp_title: '对比计算结果',
-                cmp_need2: '请至少选择两项计算', cmp_max3: '一次最多三项',
-                cmp_base: '基准', cmp_is_base: '基准项', cmp_vs_base: '相对基准',
-                cmp_nodata: '无阶段拆解数据',
-                cmp_warn_fu: '这些计算使用了不同的功能单位，直接比较绝对数值并不可靠 — 请关注阶段构成，而非最终数字。',
-                batch_delete_text: '永久删除 {n} 条计算记录？',
-                batch_deleted: '已删除 {n} 条', batch_archived: '已归档 {n} 条', batch_to_project: '已添加到项目 {n} 条',
-                title: 'LCA·AI — 个人中心',
-                nav_home: '首页', nav_cabinet: '个人中心',
-                loading: '加载中...', stat_calcs: '计算', stat_projects: '项目',
-                menu_overview: '概览', menu_history: '历史', menu_projects: '项目', menu_settings: '设置', menu_logout: '退出',
-                overview_title: '概览', history_title: '计算历史', settings_title: '设置',
-                greeting_morning: '早上好', greeting_day: '下午好', greeting_evening: '晚上好', greeting_night: '夜深了',
-                greeting_sub: '这是您的活动摘要',
-                new_calc: '+ 新建计算',
-                kpi_calcs: '计算总数', kpi_total: '总碳足迹', kpi_avg: '平均每次', kpi_projects: '项目',
-                chart_title: '近30天活动', chart_sub: '每日计算数量',
-                recent_title: '最近计算', recent_sub: '最近5条记录', no_recent: '暂无计算记录',
-                export_csv: 'CSV', search_ph: '按产品搜索…',
-                sort_new: '最新优先', sort_old: '最早优先', sort_co2_desc: 'CO₂ 从高到低', sort_co2_asc: 'CO₂ 从低到高',
-                load_more: '加载更多', nothing_found: '未找到结果',
-                dark_theme: '深色主题', dark_theme_desc: '切换外观',
-                language: '语言', language_desc: '界面语言',
-                export_all: '下载所有数据',
-                delete_account: '删除账户', delete_account_desc: '永久删除所有数据',
-                delete_btn: '删除',
-                profile_title: '个人资料', profile_name_ph: '名称',
-                avatar_upload_title: '上传头像', avatar_upload_desc: 'JPG、PNG 或 WebP，最大 500 KB', avatar_remove: '删除照片',
-                save_profile: '保存资料',
-                change_pw_title: '修改密码', old_pw_ph: '当前密码', new_pw_ph: '新密码', confirm_pw_ph: '确认密码',
-                change_pw_btn: '修改密码',
-                view: '查看', delete: '删除', calculations: '计算', to_project: '加入项目', rename: '重命名',
-                no_history: '暂无计算记录', do_calc: '开始计算', create: '创建',
-                unnamed: '未命名',
-                confirm_delete_calc: '确定删除此计算？', confirm_delete_calc_text: '此操作无法撤销。', confirm_delete_account: '确定删除账户及所有数据？',
-                confirm_delete_account_text: '所有计算、项目和个人资料将被永久删除。',
-                pick_project_title: '加入项目', pick_project_empty: '暂无项目 — 请先在"项目"页创建',
-                cancel: '取消', ok: '确定',
-                toast_deleted: '已删除', toast_added_to_project: '已加入项目',
-                toast_profile_saved: '资料已更新', toast_pw_changed: '密码已修改', toast_lang_saved: '语言已保存',
-                toast_link_copied: '链接已复制！', toast_avatar_saved: '头像已更新',
-                toast_avatar_too_big: '文件太大（最大 500 KB）', toast_csv_done: 'CSV 已导出',
-                toast_archived: '项目已归档', toast_restored: '项目已恢复',
-                err_sb_not_loaded: '错误：Supabase 未加载', err_auth: '认证错误：',
-                err_load_history: '加载历史出错：', err_load_projects: '加载项目出错：',
-                err_load_stats: '加载统计数据出错', err_delete: '删除出错：',
-                err_create: '创建出错：', err_generic: '错误：',
-                pw_mismatch: '密码不匹配', pw_min6: '至少6个字符',
-                pw_wrong_old: '当前密码错误', pw_old_required: '请输入当前密码',
-                status_done: '已完成', status_pending: '进行中',
-                src_engine: '应用计算',
-                tab_profile: '个人资料', tab_security: '安全', tab_calc: '计算', tab_interface: '界面', tab_data: '数据',
-                calc_settings: '计算参数', unit_label: 'CO₂ 单位', precision_label: 'AI 精度', region_label: '默认区域',
-                precision_fast: '快速（较少细节）', precision_deep: '深度（完整 LCA）',
-                region_auto: '自动（根据描述）', region_europe: '欧洲', region_na: '北美', region_asia: '亚洲',
-                save_calc: '保存', data_export: '数据导出', webhook_title: 'Webhook', webhook_url_ph: '通知 URL',
-                toast_saved: '已保存', email_label: '邮箱', bio_label: '简介', bio_ph: '介绍一下自己…'
-            }
-        };
+        "ru": {
+                "change": "Изменить",
+                "send": "Отправить",
+                "copy": "Копировать",
+                "connected": "подключён",
+                "org_label": "Организация",
+                "org_ph": "Университет, компания",
+                "role_label": "Должность",
+                "role_ph": "LCA-аналитик, аспирант",
+                "country_label": "Страна",
+                "country_ph": "Россия",
+                "site_label": "Сайт / ORCID",
+                "err_site_url": "Сайт должен начинаться с http:// или https://",
+                "providers_title": "Способ входа",
+                "sessions_title": "Активные сессии",
+                "sess_current": "Текущее устройство",
+                "sess_last": "Последний вход",
+                "sess_note": "Supabase не отдаёт полный список устройств. «Выйти везде» отзывает все токены — на всех устройствах потребуется войти заново.",
+                "signout_all": "Выйти на всех устройствах",
+                "signout_all_text": "Все сессии будут завершены. На этом устройстве тоже потребуется войти заново.",
+                "change_email": "Изменить email",
+                "change_email_text": "На новый адрес придёт письмо для подтверждения. Пока вы не подтвердите — останется старый.",
+                "change_email_sent": "Письмо для подтверждения отправлено",
+                "err_email": "Введите корректный email",
+                "danger_zone": "Опасная зона",
+                "delete_type_email": "Это необратимо. Чтобы подтвердить, введите ваш email: {email}",
+                "delete_mismatch": "Email не совпадает — удаление отменено",
+                "delete_partial": "Данные удалены, но сам аккаунт остался: серверная функция delete-account не задеплоена. Пока она не установлена, полностью удалить аккаунт из браузера невозможно.",
+                "share": "Поделиться",
+                "share_title": "Поделиться",
+                "share_sub": "Получатель увидит отчёт только для чтения. Ссылку можно отозвать в любой момент.",
+                "share_expires": "Срок действия",
+                "share_email_label": "Отправить на email (необязательно)",
+                "share_email_ph": "colleague@example.com",
+                "share_get_link": "Создать ссылку",
+                "share_send": "Отправить",
+                "share_link_created": "Ссылка создана и скопирована",
+                "share_sent": "Письмо отправлено на {email}",
+                "share_no_mail": "Отправка почты не настроена на сервере. Ссылка создана — передайте её вручную.",
+                "share_failed": "Письмо не отправилось. Ссылка создана — передайте её вручную.",
+                "kpi_median": "Медианный след",
+                "pick_project": "Выберите проект",
+                "share_role_label": "Права получателя",
+                "share_role_view": "Только чтение",
+                "share_role_edit": "Чтение и редактирование",
+                "share_role_note_view": "Получатель сможет только смотреть отчёт.",
+                "share_role_note_edit": "Получатель сможет изменять количества и коэффициенты. Потребуется вход в аккаунт. Все правки попадут в журнал.",
+                "share_role_note_edit_proj": "Получатель сможет изменять любой расчёт внутри проекта. Потребуется вход. Все правки попадут в журнал.",
+                "vs_parent": "к исходному:",
+                "err_jszip": "JSZip не загружен",
+                "toast_exported": "Данные экспортированы",
+                "xstats_title": "Статистика",
+                "xstats_by_month": "CO₂ по месяцам",
+                "xstats_top5": "Топ-5 по следу",
+                "xstats_avg": "Среднее",
+                "portfolio_title": "Где углерод в вашем портфеле",
+                "pf_verdict": "В {n} из {total} расчётов доминирует «{stage}» — в среднем {pct}% следа. Начинайте снижение отсюда.",
+                "spark_empty": "Нужно минимум два расчёта, чтобы увидеть тренд",
+                "spark_trend": "Тренд",
+                "spark_falling": "снижается",
+                "spark_rising": "растёт",
+                "filters": "Фильтры",
+                "f_co2": "CO₂, kg",
+                "f_date": "Дата",
+                "f_tag": "Тег",
+                "f_any": "любой",
+                "f_reset": "Сбросить",
+                "f_active": "Найдено: {n}",
+                "show_archive": "Архив",
+                "back_to_history": "К истории",
+                "archive_empty": "Архив пуст",
+                "archive": "В архив",
+                "archived": "В архиве",
+                "restore": "Вернуть",
+                "restored": "Восстановлено",
+                "delete_forever": "Удалить навсегда",
+                "selected": "Выбрано",
+                "cancel": "Отмена",
+                "variant": "Вариант",
+                "note": "Заметка",
+                "tag": "Тег",
+                "note_title": "Заметка к расчёту",
+                "note_ph": "Например: допущение по транспорту согласовано с поставщиком 12.03",
+                "tag_title": "Добавить тег",
+                "tag_ph": "упаковка, клиент А, черновик…",
+                "add": "Добавить",
+                "save": "Сохранить",
+                "saved": "Сохранено",
+                "close": "Закрыть",
+                "compare": "Сравнить",
+                "cmp_title": "Сравнение расчётов",
+                "cmp_need2": "Выберите минимум два расчёта",
+                "cmp_max3": "Не больше трёх за раз",
+                "cmp_base": "база",
+                "cmp_is_base": "точка отсчёта",
+                "cmp_vs_base": "к базе",
+                "cmp_nodata": "нет разбивки по стадиям",
+                "cmp_warn_fu": "У расчётов разные функциональные единицы. Сравнение абсолютных значений некорректно — смотрите на структуру стадий, а не на итоговое число.",
+                "batch_delete_text": "Удалить {n} расчётов безвозвратно?",
+                "batch_deleted": "Удалено: {n}",
+                "batch_archived": "В архив: {n}",
+                "batch_to_project": "Добавлено в проект: {n}",
+                "title": "LCA·AI — Личный кабинет",
+                "nav_home": "Главная",
+                "nav_cabinet": "Кабинет",
+                "loading": "Загрузка...",
+                "stat_calcs": "Расчётов",
+                "stat_projects": "Проектов",
+                "menu_overview": "Обзор",
+                "menu_history": "История",
+                "menu_projects": "Проекты",
+                "menu_settings": "Настройки",
+                "menu_logout": "Выйти",
+                "overview_title": "Обзор",
+                "history_title": "История расчётов",
+                "settings_title": "Настройки",
+                "greeting_morning": "Доброе утро",
+                "greeting_day": "Добрый день",
+                "greeting_evening": "Добрый вечер",
+                "greeting_night": "Доброй ночи",
+                "greeting_sub": "Вот сводка вашей активности",
+                "new_calc": "+ Новый расчёт",
+                "kpi_calcs": "Всего расчётов",
+                "kpi_total": "Суммарный след",
+                "kpi_avg": "Средний на расчёт",
+                "kpi_projects": "Проектов",
+                "chart_title": "Активность за 30 дней",
+                "chart_sub": "Количество расчётов по дням",
+                "recent_title": "Недавние расчёты",
+                "recent_sub": "Последние 5 записей",
+                "no_recent": "Пока нет расчётов",
+                "export_csv": "CSV",
+                "search_ph": "Поиск по продукту…",
+                "sort_new": "Сначала новые",
+                "sort_old": "Сначала старые",
+                "sort_co2_desc": "CO₂ по убыванию",
+                "sort_co2_asc": "CO₂ по возрастанию",
+                "load_more": "Показать ещё",
+                "nothing_found": "Ничего не найдено",
+                "dark_theme": "Тёмная тема",
+                "dark_theme_desc": "Переключить оформление",
+                "language": "Язык",
+                "language_desc": "Язык интерфейса",
+                "export_all": "Скачать все данные",
+                "delete_account": "Удалить аккаунт",
+                "delete_account_desc": "Удалить все данные безвозвратно",
+                "delete_btn": "Удалить",
+                "profile_title": "Профиль",
+                "profile_name_ph": "Имя",
+                "avatar_upload_title": "Загрузить аватар",
+                "avatar_upload_desc": "JPG, PNG или WebP, до 500 КБ",
+                "avatar_remove": "Удалить фото",
+                "save_profile": "Сохранить профиль",
+                "change_pw_title": "Изменить пароль",
+                "old_pw_ph": "Текущий пароль",
+                "new_pw_ph": "Новый пароль",
+                "confirm_pw_ph": "Подтвердите пароль",
+                "change_pw_btn": "Изменить пароль",
+                "view": "Посмотреть",
+                "delete": "Удалить",
+                "calculations": "Расчёты",
+                "to_project": "В проект",
+                "rename": "Переименовать",
+                "no_history": "Нет расчётов",
+                "do_calc": "Сделать расчёт",
+                "create": "Создать",
+                "unnamed": "Без названия",
+                "confirm_delete_calc": "Удалить расчёт?",
+                "confirm_delete_calc_text": "Действие нельзя отменить.",
+                "confirm_delete_account": "Удалить аккаунт и все данные?",
+                "confirm_delete_account_text": "Все расчёты, проекты и профиль будут удалены безвозвратно.",
+                "pick_project_title": "Добавить в проект",
+                "pick_project_empty": "Проектов пока нет — создайте первый на вкладке «Проекты»",
+                "ok": "ОК",
+                "toast_deleted": "Удалено",
+                "toast_added_to_project": "Добавлено в проект",
+                "toast_profile_saved": "Профиль обновлён",
+                "toast_pw_changed": "Пароль изменён",
+                "toast_lang_saved": "Язык сохранён",
+                "toast_link_copied": "Ссылка скопирована!",
+                "toast_avatar_saved": "Аватар обновлён",
+                "toast_avatar_too_big": "Файл слишком большой (макс. 500 КБ)",
+                "toast_csv_done": "CSV выгружен",
+                "toast_archived": "Проект архивирован",
+                "toast_restored": "Проект восстановлен",
+                "err_sb_not_loaded": "Ошибка: Supabase не загружен",
+                "err_auth": "Ошибка авторизации: ",
+                "err_load_history": "Ошибка загрузки истории: ",
+                "err_load_projects": "Ошибка загрузки проектов: ",
+                "err_load_stats": "Ошибка загрузки статистики",
+                "err_delete": "Ошибка удаления: ",
+                "err_create": "Ошибка создания: ",
+                "err_generic": "Ошибка: ",
+                "pw_mismatch": "Пароли не совпадают",
+                "pw_min6": "Минимум 6 символов",
+                "pw_wrong_old": "Неверный текущий пароль",
+                "pw_old_required": "Введите текущий пароль",
+                "status_done": "Готово",
+                "status_pending": "В процессе",
+                "src_engine": "Расчёт из приложения",
+                "tab_profile": "Профиль",
+                "tab_security": "Безопасность",
+                "tab_calc": "Расчёты",
+                "tab_interface": "Интерфейс",
+                "tab_data": "Данные",
+                "calc_settings": "Параметры расчётов",
+                "unit_label": "Единицы CO₂",
+                "precision_label": "Точность AI",
+                "region_label": "Регион по умолчанию",
+                "precision_fast": "Быстрая (меньше деталей)",
+                "precision_deep": "Глубокая (полный LCA)",
+                "region_auto": "Авто (по описанию)",
+                "region_europe": "Европа",
+                "region_na": "Северная Америка",
+                "region_asia": "Азия",
+                "save_calc": "Сохранить",
+                "data_export": "Экспорт данных",
+                "webhook_title": "Webhook",
+                "webhook_url_ph": "URL для уведомлений",
+                "toast_saved": "Сохранено",
+                "email_label": "Email",
+                "bio_label": "О себе",
+                "bio_ph": "Расскажите о себе…",
+                "projects_title": "Проекты",
+                "new_project": "+ Новый проект",
+                "project_name_prompt": "Название проекта",
+                "rename_prompt": "Новое название",
+                "confirm_delete_project": "Удалить проект?",
+                "confirm_delete_project_text": "Расчёты проекта и его облачная база будут удалены безвозвратно.",
+                "toast_project_created": "Проект создан",
+                "toast_project_renamed": "Проект переименован",
+                "calcs_count": "расчётов",
+                "no_projects": "Нет проектов",
+                "sec_calcs": "Расчёты",
+                "sec_dbs": "Базы",
+                "open_db": "Открыть БД",
+                "no_db": "Нет сохранённой базы",
+                "badge_db": "База",
+                "fld_all": "Все",
+                "fld_create": "Папка",
+                "fld_none": "Без папки",
+                "fld_title_prompt": "Название папки",
+                "fld_confirm_delete": "Удалить папку? Проекты останутся, но станут без папки.",
+                "fld_move": "Папка",
+                "meta_entities": "сущностей",
+                "none": "—",
+                "archive_title": "Архив",
+                "src_db": "Отчёт по базе",
+                "confirm_delete_calc_from_proj": "Убрать расчёт из проекта?",
+                "toast_calc_deleted": "Расчёт удалён"
+        },
+        "en": {
+                "change": "Change",
+                "send": "Send",
+                "copy": "Copy",
+                "connected": "connected",
+                "org_label": "Organisation",
+                "org_ph": "University, company",
+                "role_label": "Role",
+                "role_ph": "LCA analyst, PhD student",
+                "country_label": "Country",
+                "country_ph": "Poland",
+                "site_label": "Website / ORCID",
+                "err_site_url": "The website must start with http:// or https://",
+                "providers_title": "Sign-in method",
+                "sessions_title": "Active sessions",
+                "sess_current": "Current device",
+                "sess_last": "Last sign-in",
+                "sess_note": "Supabase does not expose a full device list. “Sign out everywhere” revokes all tokens — every device will need to sign in again.",
+                "signout_all": "Sign out everywhere",
+                "signout_all_text": "All sessions will end. You will need to sign in again on this device too.",
+                "change_email": "Change email",
+                "change_email_text": "A confirmation email will be sent to the new address. The old one stays active until you confirm.",
+                "change_email_sent": "Confirmation email sent",
+                "err_email": "Enter a valid email",
+                "danger_zone": "Danger zone",
+                "delete_type_email": "This cannot be undone. To confirm, type your email: {email}",
+                "delete_mismatch": "Email does not match — deletion cancelled",
+                "delete_partial": "Your data was deleted, but the account itself remains: the delete-account server function is not deployed. Until it is installed, the account cannot be fully removed from the browser.",
+                "share": "Share",
+                "share_title": "Share",
+                "share_sub": "The recipient gets a read-only report. You can revoke the link at any time.",
+                "share_expires": "Expires in",
+                "share_email_label": "Send to email (optional)",
+                "share_email_ph": "colleague@example.com",
+                "share_get_link": "Create link",
+                "share_send": "Send",
+                "share_link_created": "Link created and copied",
+                "share_sent": "Email sent to {email}",
+                "share_no_mail": "Email sending is not configured on the server. The link was created — share it manually.",
+                "share_failed": "The email did not go out. The link was created — share it manually.",
+                "kpi_median": "Median footprint",
+                "pick_project": "Pick a project",
+                "share_role_label": "Recipient rights",
+                "share_role_view": "Read only",
+                "share_role_edit": "Read and edit",
+                "share_role_note_view": "The recipient can only view the report.",
+                "share_role_note_edit": "The recipient can change amounts and factors. Sign-in required. Every edit is logged.",
+                "share_role_note_edit_proj": "The recipient can edit any calculation inside the project. Sign-in required. Every edit is logged.",
+                "vs_parent": "vs original:",
+                "err_jszip": "JSZip not loaded",
+                "toast_exported": "Data exported",
+                "xstats_title": "Statistics",
+                "xstats_by_month": "CO₂ by month",
+                "xstats_top5": "Top 5 by footprint",
+                "xstats_avg": "Average",
+                "portfolio_title": "Where the carbon is across your portfolio",
+                "pf_verdict": "“{stage}” dominates in {n} of {total} calculations — {pct}% of the footprint on average. Start reducing here.",
+                "spark_empty": "At least two calculations are needed to see a trend",
+                "spark_trend": "Trend",
+                "spark_falling": "falling",
+                "spark_rising": "rising",
+                "filters": "Filters",
+                "f_co2": "CO₂, kg",
+                "f_date": "Date",
+                "f_tag": "Tag",
+                "f_any": "any",
+                "f_reset": "Reset",
+                "f_active": "Found: {n}",
+                "show_archive": "Archive",
+                "back_to_history": "Back to history",
+                "archive_empty": "Archive is empty",
+                "archive": "Archive",
+                "archived": "Archived",
+                "restore": "Restore",
+                "restored": "Restored",
+                "delete_forever": "Delete forever",
+                "selected": "Selected",
+                "cancel": "Cancel",
+                "variant": "Variant",
+                "note": "Note",
+                "tag": "Tag",
+                "note_title": "Note on calculation",
+                "note_ph": "e.g. transport assumption confirmed with supplier on 12 Mar",
+                "tag_title": "Add tag",
+                "tag_ph": "packaging, client A, draft…",
+                "add": "Add",
+                "save": "Save",
+                "saved": "Saved",
+                "close": "Close",
+                "compare": "Compare",
+                "cmp_title": "Compare calculations",
+                "cmp_need2": "Select at least two calculations",
+                "cmp_max3": "Three at most",
+                "cmp_base": "base",
+                "cmp_is_base": "baseline",
+                "cmp_vs_base": "vs base",
+                "cmp_nodata": "no stage breakdown",
+                "cmp_warn_fu": "These calculations use different functional units. Comparing absolute values is not valid — read the stage structure, not the bottom-line number.",
+                "batch_delete_text": "Delete {n} calculations permanently?",
+                "batch_deleted": "Deleted: {n}",
+                "batch_archived": "Archived: {n}",
+                "batch_to_project": "Added to project: {n}",
+                "title": "LCA·AI — Dashboard",
+                "nav_home": "Home",
+                "nav_cabinet": "Dashboard",
+                "loading": "Loading...",
+                "stat_calcs": "Calcs",
+                "stat_projects": "Projects",
+                "menu_overview": "Overview",
+                "menu_history": "History",
+                "menu_projects": "Projects",
+                "menu_settings": "Settings",
+                "menu_logout": "Sign out",
+                "overview_title": "Overview",
+                "history_title": "Calculation history",
+                "settings_title": "Settings",
+                "greeting_morning": "Good morning",
+                "greeting_day": "Good afternoon",
+                "greeting_evening": "Good evening",
+                "greeting_night": "Good night",
+                "greeting_sub": "Here is your activity summary",
+                "new_calc": "+ New calculation",
+                "kpi_calcs": "Total calculations",
+                "kpi_total": "Total footprint",
+                "kpi_avg": "Average per calc",
+                "kpi_projects": "Projects",
+                "chart_title": "30-day activity",
+                "chart_sub": "Calculations per day",
+                "recent_title": "Recent calculations",
+                "recent_sub": "Last 5 records",
+                "no_recent": "No calculations yet",
+                "export_csv": "CSV",
+                "search_ph": "Search by product…",
+                "sort_new": "Newest first",
+                "sort_old": "Oldest first",
+                "sort_co2_desc": "CO₂ high → low",
+                "sort_co2_asc": "CO₂ low → high",
+                "load_more": "Load more",
+                "nothing_found": "Nothing found",
+                "dark_theme": "Dark theme",
+                "dark_theme_desc": "Switch appearance",
+                "language": "Language",
+                "language_desc": "Interface language",
+                "export_all": "Download all data",
+                "delete_account": "Delete account",
+                "delete_account_desc": "Permanently delete all data",
+                "delete_btn": "Delete",
+                "profile_title": "Profile",
+                "profile_name_ph": "Name",
+                "avatar_upload_title": "Upload avatar",
+                "avatar_upload_desc": "JPG, PNG or WebP, up to 500 KB",
+                "avatar_remove": "Remove photo",
+                "save_profile": "Save profile",
+                "change_pw_title": "Change password",
+                "old_pw_ph": "Current password",
+                "new_pw_ph": "New password",
+                "confirm_pw_ph": "Confirm password",
+                "change_pw_btn": "Change password",
+                "view": "View",
+                "delete": "Delete",
+                "calculations": "Calculations",
+                "to_project": "To project",
+                "rename": "Rename",
+                "no_history": "No calculations yet",
+                "do_calc": "Make a calculation",
+                "create": "Create",
+                "unnamed": "Untitled",
+                "confirm_delete_calc": "Delete calculation?",
+                "confirm_delete_calc_text": "This action cannot be undone.",
+                "confirm_delete_account": "Delete account and all data?",
+                "confirm_delete_account_text": "All calculations, projects and profile will be permanently deleted.",
+                "pick_project_title": "Add to project",
+                "pick_project_empty": "No projects yet — create one in the Projects tab",
+                "ok": "OK",
+                "toast_deleted": "Deleted",
+                "toast_added_to_project": "Added to project",
+                "toast_profile_saved": "Profile updated",
+                "toast_pw_changed": "Password changed",
+                "toast_lang_saved": "Language saved",
+                "toast_link_copied": "Link copied!",
+                "toast_avatar_saved": "Avatar updated",
+                "toast_avatar_too_big": "File too large (max 500 KB)",
+                "toast_csv_done": "CSV exported",
+                "toast_archived": "Project archived",
+                "toast_restored": "Project restored",
+                "err_sb_not_loaded": "Error: Supabase not loaded",
+                "err_auth": "Auth error: ",
+                "err_load_history": "Error loading history: ",
+                "err_load_projects": "Error loading projects: ",
+                "err_load_stats": "Error loading stats",
+                "err_delete": "Delete error: ",
+                "err_create": "Create error: ",
+                "err_generic": "Error: ",
+                "pw_mismatch": "Passwords do not match",
+                "pw_min6": "Minimum 6 characters",
+                "pw_wrong_old": "Wrong current password",
+                "pw_old_required": "Enter current password",
+                "status_done": "Done",
+                "status_pending": "In progress",
+                "src_engine": "App calculation",
+                "tab_profile": "Profile",
+                "tab_security": "Security",
+                "tab_calc": "Calculations",
+                "tab_interface": "Interface",
+                "tab_data": "Data",
+                "calc_settings": "Calculation settings",
+                "unit_label": "CO₂ units",
+                "precision_label": "AI precision",
+                "region_label": "Default region",
+                "precision_fast": "Fast (less detail)",
+                "precision_deep": "Deep (full LCA)",
+                "region_auto": "Auto (from description)",
+                "region_europe": "Europe",
+                "region_na": "North America",
+                "region_asia": "Asia",
+                "save_calc": "Save",
+                "data_export": "Data export",
+                "webhook_title": "Webhook",
+                "webhook_url_ph": "Notification URL",
+                "toast_saved": "Saved",
+                "email_label": "Email",
+                "bio_label": "About you",
+                "bio_ph": "Tell us about yourself…",
+                "projects_title": "Projects",
+                "new_project": "+ New project",
+                "project_name_prompt": "Project name",
+                "rename_prompt": "New name",
+                "confirm_delete_project": "Delete project?",
+                "confirm_delete_project_text": "Project calculations and its cloud database will be permanently deleted.",
+                "toast_project_created": "Project created",
+                "toast_project_renamed": "Project renamed",
+                "calcs_count": "calculations",
+                "no_projects": "No projects",
+                "sec_calcs": "Calculations",
+                "sec_dbs": "Databases",
+                "open_db": "Open database",
+                "no_db": "No saved database",
+                "badge_db": "Database",
+                "fld_all": "All",
+                "fld_create": "Folder",
+                "fld_none": "No folder",
+                "fld_title_prompt": "Folder name",
+                "fld_confirm_delete": "Delete folder? Projects will remain but become uncategorized.",
+                "fld_move": "Folder",
+                "meta_entities": "entities",
+                "none": "—",
+                "archive_title": "Archive",
+                "src_db": "Database report",
+                "confirm_delete_calc_from_proj": "Remove calculation from project?",
+                "toast_calc_deleted": "Calculation deleted"
+        },
+        "zh": {
+                "change": "修改",
+                "send": "发送",
+                "copy": "复制",
+                "connected": "已连接",
+                "org_label": "组织",
+                "org_ph": "大学、公司",
+                "role_label": "职位",
+                "role_ph": "LCA 分析师、研究生",
+                "country_label": "国家",
+                "country_ph": "中国",
+                "site_label": "网站 / ORCID",
+                "err_site_url": "网址须以 http:// 或 https:// 开头",
+                "providers_title": "登录方式",
+                "sessions_title": "活动会话",
+                "sess_current": "当前设备",
+                "sess_last": "上次登录",
+                "sess_note": "Supabase 不提供完整设备列表。「在所有设备退出」将吊销全部令牌，所有设备均需重新登录。",
+                "signout_all": "在所有设备退出",
+                "signout_all_text": "所有会话都将结束，本设备也需要重新登录。",
+                "change_email": "修改邮箱",
+                "change_email_text": "确认邮件将发送至新地址。在您确认之前，原邮箱仍然有效。",
+                "change_email_sent": "确认邮件已发送",
+                "err_email": "请输入有效的邮箱",
+                "danger_zone": "危险区域",
+                "delete_type_email": "此操作不可撤销。请输入您的邮箱以确认：{email}",
+                "delete_mismatch": "邮箱不匹配 — 已取消删除",
+                "delete_partial": "数据已删除，但账户本身仍然存在：服务器端 delete-account 函数尚未部署。在其安装之前，无法从浏览器彻底删除账户。",
+                "share": "分享",
+                "share_title": "分享",
+                "share_sub": "接收方仅可只读查看报告。链接可随时撤销。",
+                "share_expires": "有效期",
+                "share_email_label": "发送到邮箱（可选）",
+                "share_email_ph": "colleague@example.com",
+                "share_get_link": "创建链接",
+                "share_send": "发送",
+                "share_link_created": "链接已创建并复制",
+                "share_sent": "邮件已发送至 {email}",
+                "share_no_mail": "服务器未配置邮件发送。链接已创建 — 请手动分享。",
+                "share_failed": "邮件未能发出。链接已创建 — 请手动分享。",
+                "kpi_median": "中位碳足迹",
+                "pick_project": "选择项目",
+                "share_role_label": "接收方权限",
+                "share_role_view": "仅查看",
+                "share_role_edit": "查看并编辑",
+                "share_role_note_view": "接收方只能查看报告。",
+                "share_role_note_edit": "接收方可修改数量与排放因子。需要登录，所有修改都会记入日志。",
+                "share_role_note_edit_proj": "接收方可编辑项目内任意计算。需要登录，所有修改都会记入日志。",
+                "vs_parent": "相对原始：",
+                "err_jszip": "JSZip 未加载",
+                "toast_exported": "数据已导出",
+                "xstats_title": "统计",
+                "xstats_by_month": "各月 CO₂",
+                "xstats_top5": "碳足迹前五",
+                "xstats_avg": "平均值",
+                "portfolio_title": "碳集中在您的哪些环节",
+                "pf_verdict": "在 {total} 次计算中有 {n} 次以「{stage}」为主导 — 平均占足迹的 {pct}%。减排应从这里入手。",
+                "spark_empty": "至少需要两次计算才能看出趋势",
+                "spark_trend": "趋势",
+                "spark_falling": "下降",
+                "spark_rising": "上升",
+                "filters": "筛选",
+                "f_co2": "CO₂, kg",
+                "f_date": "日期",
+                "f_tag": "标签",
+                "f_any": "任意",
+                "f_reset": "重置",
+                "f_active": "找到 {n} 条",
+                "show_archive": "归档",
+                "back_to_history": "返回历史",
+                "archive_empty": "归档为空",
+                "archive": "归档",
+                "archived": "已归档",
+                "restore": "恢复",
+                "restored": "已恢复",
+                "delete_forever": "永久删除",
+                "selected": "已选",
+                "cancel": "取消",
+                "variant": "变体",
+                "note": "备注",
+                "tag": "标签",
+                "note_title": "计算备注",
+                "note_ph": "例如：运输假设已于 3 月 12 日与供应商确认",
+                "tag_title": "添加标签",
+                "tag_ph": "包装、客户 A、草稿…",
+                "add": "添加",
+                "save": "保存",
+                "saved": "已保存",
+                "close": "关闭",
+                "compare": "对比",
+                "cmp_title": "对比计算结果",
+                "cmp_need2": "请至少选择两项计算",
+                "cmp_max3": "一次最多三项",
+                "cmp_base": "基准",
+                "cmp_is_base": "基准项",
+                "cmp_vs_base": "相对基准",
+                "cmp_nodata": "无阶段拆解数据",
+                "cmp_warn_fu": "这些计算使用了不同的功能单位，直接比较绝对数值并不可靠 — 请关注阶段构成，而非最终数字。",
+                "batch_delete_text": "永久删除 {n} 条计算记录？",
+                "batch_deleted": "已删除 {n} 条",
+                "batch_archived": "已归档 {n} 条",
+                "batch_to_project": "已添加到项目 {n} 条",
+                "title": "LCA·AI — 个人中心",
+                "nav_home": "首页",
+                "nav_cabinet": "个人中心",
+                "loading": "加载中...",
+                "stat_calcs": "计算",
+                "stat_projects": "项目",
+                "menu_overview": "概览",
+                "menu_history": "历史",
+                "menu_projects": "项目",
+                "menu_settings": "设置",
+                "menu_logout": "退出",
+                "overview_title": "概览",
+                "history_title": "计算历史",
+                "settings_title": "设置",
+                "greeting_morning": "早上好",
+                "greeting_day": "下午好",
+                "greeting_evening": "晚上好",
+                "greeting_night": "夜深了",
+                "greeting_sub": "这是您的活动摘要",
+                "new_calc": "+ 新建计算",
+                "kpi_calcs": "计算总数",
+                "kpi_total": "总碳足迹",
+                "kpi_avg": "平均每次",
+                "kpi_projects": "项目",
+                "chart_title": "近30天活动",
+                "chart_sub": "每日计算数量",
+                "recent_title": "最近计算",
+                "recent_sub": "最近5条记录",
+                "no_recent": "暂无计算记录",
+                "export_csv": "CSV",
+                "search_ph": "按产品搜索…",
+                "sort_new": "最新优先",
+                "sort_old": "最早优先",
+                "sort_co2_desc": "CO₂ 从高到低",
+                "sort_co2_asc": "CO₂ 从低到高",
+                "load_more": "加载更多",
+                "nothing_found": "未找到结果",
+                "dark_theme": "深色主题",
+                "dark_theme_desc": "切换外观",
+                "language": "语言",
+                "language_desc": "界面语言",
+                "export_all": "下载所有数据",
+                "delete_account": "删除账户",
+                "delete_account_desc": "永久删除所有数据",
+                "delete_btn": "删除",
+                "profile_title": "个人资料",
+                "profile_name_ph": "名称",
+                "avatar_upload_title": "上传头像",
+                "avatar_upload_desc": "JPG、PNG 或 WebP，最大 500 KB",
+                "avatar_remove": "删除照片",
+                "save_profile": "保存资料",
+                "change_pw_title": "修改密码",
+                "old_pw_ph": "当前密码",
+                "new_pw_ph": "新密码",
+                "confirm_pw_ph": "确认密码",
+                "change_pw_btn": "修改密码",
+                "view": "查看",
+                "delete": "删除",
+                "calculations": "计算",
+                "to_project": "加入项目",
+                "rename": "重命名",
+                "no_history": "暂无计算记录",
+                "do_calc": "开始计算",
+                "create": "创建",
+                "unnamed": "未命名",
+                "confirm_delete_calc": "确定删除此计算？",
+                "confirm_delete_calc_text": "此操作无法撤销。",
+                "confirm_delete_account": "确定删除账户及所有数据？",
+                "confirm_delete_account_text": "所有计算、项目和个人资料将被永久删除。",
+                "pick_project_title": "加入项目",
+                "pick_project_empty": "暂无项目 — 请先在\"项目\"页创建",
+                "ok": "确定",
+                "toast_deleted": "已删除",
+                "toast_added_to_project": "已加入项目",
+                "toast_profile_saved": "资料已更新",
+                "toast_pw_changed": "密码已修改",
+                "toast_lang_saved": "语言已保存",
+                "toast_link_copied": "链接已复制！",
+                "toast_avatar_saved": "头像已更新",
+                "toast_avatar_too_big": "文件太大（最大 500 KB）",
+                "toast_csv_done": "CSV 已导出",
+                "toast_archived": "项目已归档",
+                "toast_restored": "项目已恢复",
+                "err_sb_not_loaded": "错误：Supabase 未加载",
+                "err_auth": "认证错误：",
+                "err_load_history": "加载历史出错：",
+                "err_load_projects": "加载项目出错：",
+                "err_load_stats": "加载统计数据出错",
+                "err_delete": "删除出错：",
+                "err_create": "创建出错：",
+                "err_generic": "错误：",
+                "pw_mismatch": "密码不匹配",
+                "pw_min6": "至少6个字符",
+                "pw_wrong_old": "当前密码错误",
+                "pw_old_required": "请输入当前密码",
+                "status_done": "已完成",
+                "status_pending": "进行中",
+                "src_engine": "应用计算",
+                "tab_profile": "个人资料",
+                "tab_security": "安全",
+                "tab_calc": "计算",
+                "tab_interface": "界面",
+                "tab_data": "数据",
+                "calc_settings": "计算参数",
+                "unit_label": "CO₂ 单位",
+                "precision_label": "AI 精度",
+                "region_label": "默认区域",
+                "precision_fast": "快速（较少细节）",
+                "precision_deep": "深度（完整 LCA）",
+                "region_auto": "自动（根据描述）",
+                "region_europe": "欧洲",
+                "region_na": "北美",
+                "region_asia": "亚洲",
+                "save_calc": "保存",
+                "data_export": "数据导出",
+                "webhook_title": "Webhook",
+                "webhook_url_ph": "通知 URL",
+                "toast_saved": "已保存",
+                "email_label": "邮箱",
+                "bio_label": "简介",
+                "bio_ph": "介绍一下自己…",
+                "projects_title": "项目",
+                "new_project": "+ 新建项目",
+                "project_name_prompt": "项目名称",
+                "rename_prompt": "新名称",
+                "confirm_delete_project": "删除项目？",
+                "confirm_delete_project_text": "项目的计算及其云数据库将被永久删除。",
+                "toast_project_created": "项目已创建",
+                "toast_project_renamed": "项目已重命名",
+                "calcs_count": "个计算",
+                "no_projects": "无项目",
+                "sec_calcs": "计算",
+                "sec_dbs": "数据库",
+                "open_db": "打开数据库",
+                "no_db": "无已保存数据库",
+                "badge_db": "数据库",
+                "fld_all": "全部",
+                "fld_create": "文件夹",
+                "fld_none": "无文件夹",
+                "fld_title_prompt": "文件夹名称",
+                "fld_confirm_delete": "删除文件夹？项目将保留但变为未分类。",
+                "fld_move": "文件夹",
+                "meta_entities": "实体",
+                "none": "—",
+                "archive_title": "归档",
+                "src_db": "数据库报告",
+                "confirm_delete_calc_from_proj": "从项目中移除计算？",
+                "toast_calc_deleted": "计算已删除"
+        }
+};
         let cabinetLang = 'ru';
         function t(key) { return (CABINET_I18N[cabinetLang] && CABINET_I18N[cabinetLang][key]) || CABINET_I18N.ru[key] || key; }
 
@@ -1337,7 +1793,8 @@
         let pendingAvatarBase64 = null;
 
         /* ── Local state ── */
-        let historyCache = [];      // все строки user_history (загружаются один раз, фильтруются локально)
+        let historyCache = [];
+        let dbCache = [];           // все строки user_history (загружаются один раз, фильтруются локально)
         let historyShown = 10;      // пагинация «показать ещё»
         const PAGE = 10;
 
@@ -1582,6 +2039,7 @@
         async function loadTab(tab) {
             if (tab === 'overview') { await loadHistoryData(); renderOverview(); renderExtendedStats(); }
             if (tab === 'history') { await loadHistoryData(); historyShown = PAGE; renderHistory(); }
+            if (tab === 'projects') await loadProjects();
             if (tab === 'settings') { fillProfileFields(); }
         }
 
@@ -1594,6 +2052,11 @@
                 const { data, error } = await db.from('user_history').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
                 if (error) throw error;
                 historyCache = data || [];
+                const { data: snaps } = await db.from('project_snapshots').select('id, project_id, created_at, stats').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+                const { data: projs } = await db.from('user_projects').select('id, name').eq('user_id', currentUser.id);
+                const pmap = {};
+                (projs || []).forEach(pp => { pmap[pp.id] = pp.name; });
+                dbCache = (snaps || []).map(sn => ({ __db: true, id: sn.id, project_id: sn.project_id, project_name: pmap[sn.project_id] || '—', created_at: sn.created_at, stats: sn.stats }));
             } catch (e) {
                 console.error('loadHistoryData error:', e);
                 showToast(t('err_load_history') + (e.message || e));
@@ -1820,7 +2283,15 @@
 
         function renderHistory() {
             const list = document.getElementById('historyList');
-            const rows = filteredHistory();
+            let rows = filteredHistory();
+            if (!showArchive && dbCache.length) {
+                const sort = document.getElementById('historySort').value;
+                if (sort !== 'co2_desc' && sort !== 'co2_asc') {
+                    rows = rows.concat(dbCache).sort((a, b) =>
+                        sort === 'date_asc' ? new Date(a.created_at) - new Date(b.created_at)
+                                            : new Date(b.created_at) - new Date(a.created_at));
+                } else rows = rows.concat(dbCache);
+            }
             const shown = rows.slice(0, historyShown);
             const loadMoreBtn = document.getElementById('loadMoreBtn');
 
@@ -1843,7 +2314,7 @@
                 document.getElementById('filterToggle').classList.add('active');
             } else sum.style.display = 'none';
 
-            if (!historyCache.length) {
+            if (!historyCache.length && !dbCache.length) {
                 list.innerHTML = '<div class="empty"><div class="empty-text">' + esc(t('no_history')) + '</div><a href="/" class="btn btn-primary">' + esc(t('do_calc')) + '</a></div>';
                 loadMoreBtn.style.display = 'none';
                 return;
@@ -1856,6 +2327,26 @@
             }
 
             list.innerHTML = shown.map(h => {
+                if (h.__db) {
+                    const st = h.stats || {};
+                    return '<div class="card">' +
+                        '<div class="card-header">' +
+                            '<div style="flex:1"><div class="card-title">' + esc(h.project_name) + '</div></div>' +
+                            '<div style="display:flex;align-items:center;gap:8px">' +
+                                '<span class="badge badge-blue">' + esc(t('badge_db')) + '</span>' +
+                                '<div class="card-date">' + fmtDate(h.created_at) + '</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="card-meta">' +
+                            '<span>' + esc(t('meta_entities') ) + ': ' + esc(st.total || 0) + '</span>' +
+                            (st.sizeMb ? '<span>' + esc(st.sizeMb) + ' MB</span>' : '') +
+                            (st.db ? '<span>' + esc(st.db) + '</span>' : '') +
+                        '</div>' +
+                        '<div class="card-actions">' +
+                            '<a href="/project.html?id=' + h.project_id + '" class="btn btn-primary btn-sm">' + esc(t('open_db')) + '</a>' +
+                        '</div>' +
+                    '</div>';
+                }
                 const tags = (h.tags || []).map(x =>
                     '<span class="tag">' + esc(x) + '<button class="tag-x" data-id="' + h.id + '" data-tag="' + esc(x) + '">×</button></span>').join('');
                 const archived = !!h.archived_at;
@@ -1872,6 +2363,9 @@
                         '<span>' + esc(h.functional_unit || '—') + '</span>' +
                         (h.report_data && h.report_data.source === 'engine'
                             ? '<span style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--rule);color:var(--ink-soft);padding:2px 6px">' + esc(t('src_engine')) + '</span>'
+                            : '') +
+                        (h.report_data && h.report_data.source === 'db'
+                            ? '<span style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--rule);color:var(--ink-soft);padding:2px 6px">' + esc(t('src_db')) + '</span>'
                             : '') +
                         '<span class="card-co2">' + fmtCo2(h.total_co2eq) + ' kgCO₂e</span>' +
                     '</div>' +
@@ -2255,6 +2749,234 @@
         /* ══════════════════════════════════════════════════
            PROJECTS: create / rename / delete / expand
            ══════════════════════════════════════════════════ */
+        /* ══════════════════════════════════════════════════
+           PROJECTS: folders + cards with Calculations & Databases
+           ══════════════════════════════════════════════════ */
+        let projState = { projects: [], calcs: {}, snaps: {}, folders: [], filter: null };
+
+        async function loadProjects() {
+            if (!currentUser || !db) return;
+            const list = document.getElementById('projectsList');
+            list.innerHTML = '<div class="empty">' + esc(t('loading')) + '</div>';
+            try {
+                const { data: projects, error } = await db.from('user_projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+                if (error) throw error;
+                projState.projects = projects || [];
+                const { data: calcs } = await db.from('project_calculations').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+                projState.calcs = {};
+                for (const c of (calcs || [])) {
+                    if (!c.project_id) continue;
+                    (projState.calcs[c.project_id] = projState.calcs[c.project_id] || []).push(c);
+                }
+                const { data: snaps } = await db.from('project_snapshots').select('project_id, created_at, stats').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+                projState.snaps = {};
+                for (const sn of (snaps || [])) if (!projState.snaps[sn.project_id]) projState.snaps[sn.project_id] = sn;
+                const { data: folders } = await db.from('project_folders').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: true });
+                projState.folders = folders || [];
+                renderFolderBar();
+                renderProjects();
+            } catch (e) {
+                console.error('loadProjects error:', e);
+                list.innerHTML = '<div class="empty">' + esc(t('err_load_projects') + (e.message || e)) + '</div>';
+            }
+        }
+
+        function renderFolderBar() {
+            const box = document.getElementById('folderBar');
+            const cnt = id => projState.projects.filter(pp => pp.folder_id === id && !pp.archived).length;
+            let h = '<button class="fchip' + (!projState.filter ? ' active' : '') + '" data-f="">' + esc(t('fld_all')) +
+                    '<span class="cnt">' + projState.projects.filter(pp => !pp.archived).length + '</span></button>';
+            for (const f of projState.folders) {
+                const act = projState.filter === f.id;
+                h += '<button class="fchip' + (act ? ' active' : '') + '" data-f="' + f.id + '">' + esc(f.name) + '<span class="cnt">' + cnt(f.id) + '</span></button>';
+                if (act) h += '<button class="fchip-act" data-fren="' + f.id + '" title="' + esc(t('rename')) + '">✎</button>' +
+                              '<button class="fchip-act" data-fdel="' + f.id + '" title="' + esc(t('delete')) + '">×</button>';
+            }
+            h += '<button class="fchip" data-fnew="1">+ ' + esc(t('fld_create')) + '</button>';
+            box.innerHTML = h;
+        }
+
+        document.getElementById('folderBar').addEventListener('click', async e => {
+            const nw = e.target.closest('[data-fnew]');
+            if (nw) {
+                const name = await promptModal(t('fld_title_prompt'));
+                if (!name) return;
+                try {
+                    const { error } = await db.from('project_folders').insert({ user_id: currentUser.id, name });
+                    if (error) throw error;
+                    showToast(t('saved'));
+                    await loadProjects();
+                } catch (err) { showToast(t('err_create') + (err.message || err)); }
+                return;
+            }
+            const ren = e.target.closest('[data-fren]');
+            if (ren) {
+                const f = projState.folders.find(x => x.id === ren.dataset.fren);
+                const name = await promptModal(t('fld_title_prompt'), f ? f.name : '');
+                if (!name || (f && name === f.name)) return;
+                try {
+                    const { error } = await db.from('project_folders').update({ name }).eq('id', f.id);
+                    if (error) throw error;
+                    showToast(t('saved'));
+                    await loadProjects();
+                } catch (err) { showToast(t('err_generic') + (err.message || err)); }
+                return;
+            }
+            const del = e.target.closest('[data-fdel]');
+            if (del) {
+                const ok = await confirmModal(t('delete'), t('fld_confirm_delete'));
+                if (!ok) return;
+                try {
+                    const { error } = await db.from('project_folders').delete().eq('id', del.dataset.fdel);
+                    if (error) throw error;
+                    if (projState.filter === del.dataset.fdel) projState.filter = null;
+                    showToast(t('toast_deleted'));
+                    await loadProjects();
+                } catch (err) { showToast(t('err_delete') + (err.message || err)); }
+                return;
+            }
+            const chip = e.target.closest('[data-f]');
+            if (chip) { projState.filter = chip.dataset.f || null; renderFolderBar(); renderProjects(); }
+        });
+
+        function renderProjects() {
+            const list = document.getElementById('projectsList');
+            const visible = projState.filter ? projState.projects.filter(pp => pp.folder_id === projState.filter) : projState.projects;
+            const active = visible.filter(pp => !pp.archived);
+            const archived = visible.filter(pp => pp.archived);
+            if (!visible.length) {
+                list.innerHTML = '<div class="empty"><div class="empty-text">' + esc(t('no_projects')) + '</div></div>';
+                return;
+            }
+            const card = p => {
+                const calcs = projState.calcs[p.id] || [];
+                const snap = projState.snaps[p.id];
+                const fld = projState.folders.find(f => f.id === p.folder_id);
+                let h = '<div class="card">';
+                h += '<div class="card-header"><div style="flex:1"><div class="card-title">' + esc(p.name) +
+                     (p.archived ? ' <span class="badge">' + esc(t('archived')) + '</span>' : '') +
+                     (fld ? ' <span class="badge">' + esc(fld.name) + '</span>' : '') +
+                     '</div></div><div class="card-date">' + fmtDate(p.created_at) + '</div></div>';
+                h += '<div class="psec"><div class="psec-title">' + esc(t('sec_calcs')) + ' (' + calcs.length + ')</div>';
+                if (calcs.length) {
+                    for (const c of calcs) {
+                        const product = (c.report_data && c.report_data.product_title) || t('unnamed');
+                        const total = (c.report_data && c.report_data.total_co2eq) || 0;
+                        h += '<div class="prow"><a class="prow-name" href="/report.html?history=' + c.id + '">' + esc(product) +
+                             ' <span class="prow-date">' + fmtDate(c.created_at) + '</span></a>' +
+                             '<span class="prow-val">' + fmtCo2(total) + ' kgCO₂e</span>' +
+                             '<button class="btn btn-danger btn-sm del-projcalc-btn" data-id="' + c.id + '" title="' + esc(t('delete')) + '">×</button></div>';
+                    }
+                } else h += '<div class="prow-none">' + esc(t('none')) + '</div>';
+                h += '</div>';
+                h += '<div class="psec"><div class="psec-title">' + esc(t('sec_dbs')) + '</div>';
+                if (snap) {
+                    const st = snap.stats || {};
+                    h += '<div class="prow"><span class="prow-name">' + esc(st.db || '—') +
+                         ' <span class="prow-date">' + fmtDate(snap.created_at) + '</span></span>' +
+                         '<span class="prow-val">' + esc(st.total || 0) + ' ent.' + (st.sizeMb ? ' · ' + st.sizeMb + ' MB' : '') + '</span>' +
+                         '<a class="btn btn-primary btn-sm" href="/project.html?id=' + p.id + '">' + esc(t('open_db')) + '</a></div>';
+                } else h += '<div class="prow-none">' + esc(t('no_db')) + '</div>';
+                h += '</div>';
+                h += '<div class="card-actions">' +
+                    '<button class="btn btn-ghost btn-sm move-project-btn" data-id="' + p.id + '">' + esc(t('fld_move')) + '</button>' +
+                    '<button class="btn btn-ghost btn-sm rename-project-btn" data-id="' + p.id + '" data-name="' + esc(p.name) + '">' + esc(t('rename')) + '</button>' +
+                    '<button class="btn btn-ghost btn-sm archive-btn" data-id="' + p.id + '">' + esc(p.archived ? t('restore') : t('archive')) + '</button>' +
+                    '<button class="btn btn-ghost btn-sm email-share-btn" data-id="' + p.id + '">' + esc(t('share')) + '</button>' +
+                    '<button class="btn btn-danger btn-sm delete-project-btn" data-id="' + p.id + '">' + esc(t('delete')) + '</button>' +
+                    '</div></div>';
+                return h;
+            };
+            let html = '';
+            for (const p of active) html += card(p);
+            if (archived.length) {
+                html += '<details><summary style="cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--ink-mute);padding:8px 0">' + esc(t('archive_title')) + ' (' + archived.length + ')</summary>';
+                for (const p of archived) html += card(p);
+                html += '</details>';
+            }
+            list.innerHTML = html;
+        }
+
+        document.getElementById('newProjectBtn').addEventListener('click', async () => {
+            const name = await promptModal(t('project_name_prompt'));
+            if (!name) return;
+            try {
+                const { error } = await db.from('user_projects').insert({ user_id: currentUser.id, name });
+                if (error) throw error;
+                logAudit('create', 'project', null, { name });
+                showToast(t('toast_project_created'));
+                await loadProjects();
+                loadStats();
+            } catch (e) { showToast(t('err_create') + (e.message || e)); }
+        });
+
+        document.getElementById('projectsList').addEventListener('click', async e => {
+            const del = e.target.closest('.del-projcalc-btn');
+            if (del) {
+                const ok = await confirmModal(t('confirm_delete_calc_from_proj'), t('confirm_delete_calc_text'));
+                if (!ok) return;
+                try {
+                    const { error } = await db.from('project_calculations').delete().eq('id', del.dataset.id);
+                    if (error) throw error;
+                    showToast(t('toast_calc_deleted'));
+                    await loadProjects();
+                } catch (err) { showToast(t('err_delete') + (err.message || err)); }
+                return;
+            }
+            const ren = e.target.closest('.rename-project-btn');
+            if (ren) {
+                const name = await promptModal(t('rename_prompt'), ren.dataset.name);
+                if (!name || name === ren.dataset.name) return;
+                try {
+                    const { error } = await db.from('user_projects').update({ name }).eq('id', ren.dataset.id);
+                    if (error) throw error;
+                    showToast(t('toast_project_renamed'));
+                    await loadProjects();
+                } catch (err) { showToast(t('err_generic') + (err.message || err)); }
+                return;
+            }
+            const delP = e.target.closest('.delete-project-btn');
+            if (delP) {
+                const ok = await confirmModal(t('confirm_delete_project'), t('confirm_delete_project_text'));
+                if (!ok) return;
+                try {
+                    const { error: e1 } = await db.from('project_calculations').delete().eq('project_id', delP.dataset.id);
+                    const { error: e2 } = await db.from('user_projects').delete().eq('id', delP.dataset.id);
+                    if (e1 || e2) throw (e1 || e2);
+                    logAudit('delete', 'project', delP.dataset.id);
+                    showToast(t('toast_deleted'));
+                    await loadProjects();
+                    loadStats();
+                } catch (err) { showToast(t('err_delete') + (err.message || err)); }
+                return;
+            }
+            const arc = e.target.closest('.archive-btn');
+            if (arc) {
+                try {
+                    const { data: proj } = await db.from('user_projects').select('archived').eq('id', arc.dataset.id).single();
+                    const newVal = !(proj?.archived);
+                    const { error } = await db.from('user_projects').update({ archived: newVal }).eq('id', arc.dataset.id);
+                    if (error) throw error;
+                    showToast(newVal ? t('toast_archived') : t('toast_restored'));
+                    await loadProjects();
+                } catch (err) { showToast(t('err_generic') + (err.message || err)); }
+                return;
+            }
+            const mv = e.target.closest('.move-project-btn');
+            if (mv) {
+                const opts = [{ id: '', name: t('fld_none'), created_at: new Date().toISOString() }].concat(projState.folders);
+                const val = await openModal({ title: t('fld_move'), projects: opts });
+                if (val === null || val === undefined) return;
+                try {
+                    const { error } = await db.from('user_projects').update({ folder_id: val || null }).eq('id', mv.dataset.id);
+                    if (error) throw error;
+                    showToast(t('saved'));
+                    await loadProjects();
+                } catch (err) { showToast(t('err_generic') + (err.message || err)); }
+                return;
+            }
+        });
+
         /* ══════════════════════════════════════════════════
            Account deletion / password / avatar / profile
            ══════════════════════════════════════════════════ */
