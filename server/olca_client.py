@@ -30,10 +30,15 @@ class OlcaClient:
         if params is not None:
             payload["params"] = params
 
-        async with httpx.AsyncClient(timeout=timeout) as client:
-            resp = await client.post(self.base_url, json=payload)
-            resp.raise_for_status()
-            data = resp.json()
+        # Reuse a single AsyncClient (connection pooling) instead of one per call (review #18).
+        if getattr(self, "_client", None) is None or self._client.is_closed:
+            self._client = httpx.AsyncClient(timeout=timeout)
+        resp = await self._client.post(self.base_url, json=payload)
+        if resp.status_code >= 500:  # allow caller retries on transient server errors
+            logger.warning("openLCA RPC HTTP %s", resp.status_code)
+            return None
+        resp.raise_for_status()
+        data = resp.json()
 
         if "error" in data and data["error"]:
             logger.error("openLCA RPC error: %s", data["error"])
@@ -90,6 +95,8 @@ class OlcaClient:
             setup["impactMethod"] = {"@type": "ImpactMethod", "@id": method_id}
         state = await self._rpc("result/calculate", setup, timeout=60.0)
         if not state:
+            # Clean up the product system we just created (review #18).
+            await self.dispose_product_system(system.get("@id"))
             return None
         result_id = state.get("@id")
         ready = state.get("isReady", False)
@@ -119,6 +126,14 @@ class OlcaClient:
             await self._rpc("result/dispose", {"@id": result_id})
         except Exception as e:
             logger.warning("dispose failed: %s", e)
+
+    async def dispose_product_system(self, system_id: str) -> None:
+        if not system_id:
+            return
+        try:
+            await self._rpc("data/delete", {"@type": "ProductSystem", "@id": system_id})
+        except Exception as e:
+            logger.warning("dispose product system failed: %s", e)
 
     async def gwp_factor(self, process_id: str) -> Optional[dict]:
         """Real GWP100 factor per reference unit from the DB, via LCIA calculation."""

@@ -13,8 +13,11 @@ NS = {
     'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
 }
 
-DB_PATH = os.path.expanduser("~/.lca-app/lca.db")
-DATA_DIR = r"C:\Users\Administrator\Desktop\site\TianGong-LCA-Data-main\tiangong_lca_data"
+DB_PATH = os.environ.get("LCA_DB_PATH", os.path.expanduser("~/.lca-app/lca.db"))
+DATA_DIR = os.environ.get(
+    "LCA_DATA_DIR",
+    str(Path(__file__).resolve().parents[2] / "TianGong-LCA-Data-main" / "tiangong_lca_data"),
+)
 
 
 def init_db(db_path):
@@ -151,7 +154,8 @@ def import_all(db_path=DB_PATH, data_dir=DATA_DIR, limit=None):
                 continue
             flow_id = uuid_el.text.strip()
 
-            name_el = root.find('.//flow:name/flow:baseName[@xml:lang="en"]', NS)
+            XML_LANG = "{http://www.w3.org/XML/1998/namespace}lang"
+            name_el = root.find(f'.//flow:name/flow:baseName[@{XML_LANG}="en"]', NS)
             if name_el is None:
                 name_el = root.find('.//flow:name/flow:baseName', NS)
             name = name_el.text.strip() if name_el is not None and name_el.text else ""
@@ -167,8 +171,10 @@ def import_all(db_path=DB_PATH, data_dir=DATA_DIR, limit=None):
                 (flow_id, name, category, flow_type, flow_id),
             )
             flow_count += 1
-        except (ET.ParseError, Exception):
-            pass
+        except ET.ParseError as pe:
+            print(f"  [warn] unparseable flow file {ff}: {pe}")
+        except Exception as ex:  # noqa: BLE001 - log, never silently skip
+            print(f"  [warn] flow import error {ff}: {ex}")
 
     conn.commit()
     print(f"  Imported {flow_count} flows")

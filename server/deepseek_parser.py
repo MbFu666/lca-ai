@@ -125,9 +125,13 @@ class DeepSeekParser:
                         raise ValueError("lca-proxy auth failed: invalid or expired token")
                     if resp.status_code == 429:
                         raise ValueError("lca-proxy rate limit exceeded")
+                    if resp.status_code >= 500:
+                        last_error = f"upstream {resp.status_code}"
+                        continue  # transient: retry instead of aborting (review #18)
                     resp.raise_for_status()
                     data = resp.json()
-                text = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+                choices = data.get("choices") or [{}]
+                text = (choices[0].get("message") or {}).get("content", "") or ""
                 if text:
                     break
                 last_error = f"empty response from {model}"

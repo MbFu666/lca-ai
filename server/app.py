@@ -125,7 +125,8 @@ async def calculate(req: CalculateRequest, request: Request):
         raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         logger.error("Calculation error: %s", e)
-        raise HTTPException(status_code=500, detail=f"Calculation failed: {e}")
+        # Do not leak internal details to clients (review #18).
+        raise HTTPException(status_code=500, detail="Calculation failed. See server logs.")
 
 
 @app.get("/api/health")

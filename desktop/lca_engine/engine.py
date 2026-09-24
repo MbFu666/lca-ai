@@ -1,4 +1,11 @@
-"""LCA Calculation Engine — matrix-based LCA calculations."""
+"""LCA Calculation Engine — matrix-based LCA calculations.
+
+STATUS: legacy / reference implementation. Production desktop app computes via the
+bundled openLCA engine (JSON-RPC :8080), NOT this module. Kept for offline analysis
+and tests. Math corrected 2026-09: solves A·s = f (not Leontief (I−A)·s = f),
+demand lives in flow space, characterization applied to signed physical amounts
+(emissions positive, resource uptake positive).
+"""
 import sqlite3
 import numpy as np
 from scipy import sparse
@@ -105,10 +112,17 @@ class LcaEngine:
             (vals_A, (rows_A, cols_A)), shape=(n, p), dtype=np.float64
         )
 
-        # Build demand vector (first process is the reference)
-        f = np.zeros(p)
+        # Build demand vector in FLOW space: reference output of the first process.
+        f = np.zeros(n)
+        ref_flow = None
         if process_ids:
-            f[proc_idx[process_ids[0]]] = demand
+            exs = process_flow_map[process_ids[0]]
+            ref = next((e for e in exs if e.get("is_reference")), None) or next(
+                (e for e in exs if not e["is_input"]), None
+            )
+            if ref:
+                ref_flow = ref["flow_id"]
+                f[flow_idx[ref_flow]] = demand
 
         return {
             "technology_matrix": A,
@@ -117,6 +131,7 @@ class LcaEngine:
             "process_list": process_ids,
             "flow_index": flow_idx,
             "process_index": proc_idx,
+            "reference_flow": ref_flow,
         }
 
     # ─── LCA Calculation ───────────────────────────────────────────
@@ -133,14 +148,21 @@ class LcaEngine:
         process_list = product_system["process_list"]
 
         n, p = A.shape
-        I = sparse.eye(p, format="csr")
 
-        # Solve for scaling vector: (I - A) * s = f
+        # Correct LCA solve: A · s = f (least-squares when rectangular / singular).
+        Ad = A.toarray()
         try:
-            s = spla.spsolve(I - A, f)
-        except Exception as e:
-            # Fallback: use least squares for singular matrices
-            s, _, _, _ = spla.lsqr(I - A, f)
+            if n == p:
+                s = np.linalg.solve(Ad, f)
+            else:
+                s, _, _, _ = np.linalg.lstsq(Ad, f, rcond=None)
+        except np.linalg.LinAlgError:
+            s, _, _, _ = np.linalg.lstsq(Ad, f, rcond=None)
+
+        # Classify rows: emission-only (outputs) vs resource-only (inputs) so that
+        # characterization factors apply to positive physical amounts.
+        has_pos = np.asarray((A > 0).sum(axis=1)).ravel()
+        has_neg = np.asarray((A < 0).sum(axis=1)).ravel()
 
         # Get impact factors for this method
         impact_factors = self._get_impact_factors(method)
@@ -152,11 +174,12 @@ class LcaEngine:
         for i, flow_id in enumerate(flow_list):
             if flow_id in impact_factors:
                 factor = impact_factors[flow_id]
-                # The flow contribution is A[i, :] * s
-                flow_amount = A[i, :].dot(s)
-                impact = flow_amount * factor
+                net = float(A[i, :].dot(s))
+                # resource-only rows: consumption is the negation of the (negative) net
+                amount = -net if (has_neg[i] > 0 and has_pos[i] == 0) else net
+                impact = amount * factor
                 flow_impacts[flow_id] = {
-                    "amount": float(flow_amount),
+                    "amount": amount,
                     "factor": factor,
                     "impact": float(impact),
                 }

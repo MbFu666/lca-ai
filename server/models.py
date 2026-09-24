@@ -1,14 +1,15 @@
 """Data models for the LCA API server."""
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 
 
 class CalculateRequest(BaseModel):
-    description: str
-    lang: str = "ru"
-    mode: str = "full"
-    region: Optional[str] = None
-    precision: str = "fast"
+    # Bounded input: prevents uncontrolled DeepSeek token spend (review #18).
+    description: str = Field(..., min_length=1, max_length=4000)
+    lang: str = Field("ru", pattern="^(ru|en|zh)$")
+    mode: str = Field("full", pattern="^(full|screening)$")
+    region: Optional[str] = Field(None, max_length=120)
+    precision: str = Field("fast", pattern="^(fast|full)$")
 
 
 class OlcaProcessResult(BaseModel):

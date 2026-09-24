@@ -79,6 +79,8 @@ class ZolcaImporter:
                 "VALUES (?, ?, ?, ?, ?, ?)",
                 (process_id, name, category, location, process_type, process_id),
             )
+            # Idempotent re-import: clear prior exchanges so they are not doubled.
+            self.conn.execute("DELETE FROM exchanges WHERE process_id = ?", (process_id,))
             stats["processes"] += 1
 
             # Import exchanges
