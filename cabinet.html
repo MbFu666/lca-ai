@@ -26,6 +26,9 @@
             document.head.appendChild(s);
         }
     </script>
+    <link rel="stylesheet" href="assets/tokens.css">
+    <script src="assets/esc.js"></script>
+    <script src="assets/supabase-init.js"></script>
     <style>
         :root {
             /* Канонические ахроматичные токены — тот же источник правды,
@@ -1015,8 +1018,8 @@
         //   details JSONB,
         //   created_at TIMESTAMPTZ DEFAULT now()
         // );
-        const SB_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
-        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
+        const SB_URL = window.SB_URL || 'https://pbisngkepszwzzjivxus.supabase.co';
+        const SB_KEY = window.SB_KEY || '';
 
         /* ── i18n ── */
         const CABINET_I18N = {
@@ -1801,7 +1804,7 @@
         /* ── Supabase ── */
         function getSB() {
             console.log('[Cabinet] getSB: window.supabase=', !!window.supabase, 'createClient=', !!(window.supabase && window.supabase.createClient));
-            if (window.supabase && window.supabase.createClient) return window.supabase.createClient(SB_URL, SB_KEY);
+            if (window.sb) return window.sb; if (window.supabase && window.supabase.createClient) return window.supabase.createClient(SB_URL, SB_KEY);
             return null;
         }
         let db = null;
