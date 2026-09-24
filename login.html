@@ -226,9 +226,12 @@ html.dark .lang-switch button.active { background: var(--graphite); color: var(-
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="assets/tokens.css">
+    <script src="assets/esc.js"></script>
+    <script src="assets/supabase-init.js"></script>
     <script>
-        const SB_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
-        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
+        const SB_URL = window.SB_URL;
+        const SB_KEY = window.SB_KEY;
         /* Куда вернуть человека после входа.
            Раньше здесь было жёстко '/' — и любой, кто заходил залогиниться
            со страницы расшаренного отчёта или из кабинета, оказывался
@@ -341,7 +344,7 @@ html.dark .lang-switch button.active { background: var(--graphite); color: var(-
         let loginLang = 'ru';
         function loginT(key) { return LOGIN_I18N[loginLang]?.[key] || LOGIN_I18N.ru[key] || key; }
 
-        function initSupabase() { if (window.supabase) { sbClient = window.supabase.createClient(SB_URL, SB_KEY); return true; } showError(loginT('sb_sdk_missing')); return false; }
+        function initSupabase() { if (window.supabase) { sbClient = window.sb || window.supabase.createClient(SB_URL, SB_KEY); return true; } showError(loginT('sb_sdk_missing')); return false; }
 
         async function checkSession() {
             if (!sbClient) return;
