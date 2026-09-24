@@ -1,4 +1,4 @@
--- LCA·AI Desktop — SQLite schema
+﻿-- LCA·AI Desktop — SQLite schema
 -- Inspired by olca-core but simplified for local use
 
 CREATE TABLE IF NOT EXISTS processes (
@@ -74,6 +74,4 @@ CREATE INDEX IF NOT EXISTS idx_impact_factors_category ON impact_factors(impact_
 CREATE INDEX IF NOT EXISTS idx_processes_name ON processes(name);
 CREATE INDEX IF NOT EXISTS idx_flows_name ON flows(name);
 
--- FTS5 for full-text search
-CREATE VIRTUAL TABLE IF NOT EXISTS processes_fts USING fts5(name, category, content='processes', content_rowid='rowid');
-CREATE VIRTUAL TABLE IF NOT EXISTS flows_fts USING fts5(name, category, content='flows', content_rowid='rowid');
+-- FTS5 removed (review minor): tables were never populated or queried; search uses in-memory descriptors.

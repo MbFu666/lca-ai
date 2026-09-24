@@ -1,5 +1,5 @@
 import type { Descriptor, EntityType, Ref, UnitGroupDetail } from './types'
-import { getDescriptors, getEntity } from './ipc'
+import { getDescriptors, getEntity, rpc } from './ipc'
 
 const cache = new Map<EntityType, Descriptor[]>()
 
@@ -17,17 +17,30 @@ export function invalidateDescriptors(type?: EntityType) {
 }
 
 let unitGroups: UnitGroupDetail[] | null = null
+let unitGroupsPromise: Promise<UnitGroupDetail[]> | null = null
 
 export async function getAllUnitGroups(): Promise<UnitGroupDetail[]> {
   if (unitGroups) return unitGroups
-  const descriptors = await getDescriptorsCached('UnitGroup')
-  const groups = await Promise.all(descriptors.map((d) => getEntity<UnitGroupDetail>('UnitGroup', d['@id'])))
-  unitGroups = groups.filter((g): g is UnitGroupDetail => !!g)
-  return unitGroups
+  if (unitGroupsPromise) return unitGroupsPromise
+  // Single batched fetch (review: was N+1 getEntity per group).
+  unitGroupsPromise = rpc<UnitGroupDetail[]>('data/get/all', { '@type': 'UnitGroup' })
+    .then((all) => {
+      unitGroups = (all ?? []).filter((g): g is UnitGroupDetail => !!g)
+      return unitGroups
+    })
+    .catch(async () => {
+      // fallback to per-group if batch unsupported
+      const descriptors = await getDescriptorsCached('UnitGroup')
+      const groups = await Promise.all(descriptors.map((d) => getEntity<UnitGroupDetail>('UnitGroup', d['@id'])))
+      unitGroups = groups.filter((g): g is UnitGroupDetail => !!g)
+      return unitGroups
+    })
+  return unitGroupsPromise
 }
 
 export function invalidateUnitGroups() {
   unitGroups = null
+  unitGroupsPromise = null
 }
 
 export async function resolveUnit(unitName?: string): Promise<Ref | undefined> {

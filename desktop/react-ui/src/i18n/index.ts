@@ -384,6 +384,7 @@ const DICT: Record<string, Record<Lang, string>> = {
   up_error: { ru: 'Ошибка обновления', en: 'Update error', zh: '更新错误' },
   up_hide: { ru: 'Скрыть', en: 'Hide', zh: '隐藏' },
   up_later: { ru: 'Позже', en: 'Later', zh: '稍后' },
+  pick_scroll_more: { ru: 'прокрутите для загрузки ещё', en: 'scroll to load more', zh: '滚动加载更多' },
 }
 
 interface I18nState {

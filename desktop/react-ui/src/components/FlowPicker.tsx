@@ -19,6 +19,7 @@ export function FlowPicker({
   const [all, setAll] = useState<Descriptor[] | null>(null)
   const [error, setError] = useState('')
   const [query, setQuery] = useState('')
+  const [visible, setVisible] = useState(50)
 
   useEffect(() => {
     getDescriptorsCached('Flow')
@@ -29,9 +30,12 @@ export function FlowPicker({
   const filtered = useMemo(() => {
     if (!all) return []
     const q = query.trim().toLowerCase()
-    const list = q ? all.filter((d) => d.name.toLowerCase().includes(q)) : all
-    return list.slice(0, 300)
+    return q ? all.filter((d) => d.name.toLowerCase().includes(q)) : all
   }, [all, query])
+
+  useEffect(() => {
+    setVisible(50)
+  }, [query])
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center" onClick={onClose}>
@@ -60,13 +64,21 @@ export function FlowPicker({
             </button>
           )}
         </div>
-        <div className="flex-1 overflow-y-auto">
+        <div
+          className="flex-1 overflow-y-auto"
+          onScroll={(e) => {
+            const el = e.currentTarget
+            if (el.scrollTop + el.clientHeight >= el.scrollHeight - 40) {
+              setVisible((v) => Math.min(filtered.length, v + 50))
+            }
+          }}
+        >
           {error && <div className="p-3 text-[12px] text-e-ink font-mono">{error}</div>}
           {!all && !error && <div className="p-3"><Spinner label={t('loading')} /></div>}
           {all && (
             <table className="w-full text-[12px] border-collapse">
               <tbody>
-                {filtered.map((d) => (
+                {filtered.slice(0, visible).map((d) => (
                   <tr
                     key={d['@id']}
                     className="border-t border-line cursor-pointer hover:bg-paper-2"
@@ -82,6 +94,11 @@ export function FlowPicker({
                 ))}
               </tbody>
             </table>
+          )}
+          {all && filtered.length > visible && (
+            <div className="p-2 text-[11px] text-graphite-soft text-center num">
+              {visible} / {filtered.length} — {t('pick_scroll_more')}
+            </div>
           )}
           {all && filtered.length === 0 && (
             <div className="p-4 text-[13px] text-graphite-soft text-center">{t('no_results')}</div>
