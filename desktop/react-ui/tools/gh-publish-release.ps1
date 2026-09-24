@@ -10,16 +10,23 @@ param(
   [string]$Token,
   [string]$Owner = 'MbFu666',
   [string]$Repo = 'lca-ai-releases',
-  [string]$Tag = 'v0.2.0',
-  [string]$ReleaseDir = 'release'
+  [string]$Tag = 'v0.2.1',
+  [string]$ReleaseDir = 'release',
+  [string]$Version = '',   # defaults to version in latest.yml
+  [string]$PfxPath = 'buildResources\lcaai-codesign.pfx',
+  [string]$Password = $env:PFX_PASSWORD,   # NEVER hardcode; set $env:PFX_PASSWORD
+  [string]$Signtool = "$env:LOCALAPPDATA\electron-builder\Cache\winCodeSign-2.6.0\winCodeSign-2.6.0-5puky\windows-10\x64\signtool.exe"
 )
 $ErrorActionPreference = 'Stop'
 if (-not $Token) { Write-Error 'Pass -Token'; exit 1 }
 $H = @{ Authorization = "Bearer $Token"; 'User-Agent' = 'lcaai-publish'; Accept = 'application/vnd.github+json' }
 $root = (Get-Location).Path
-$exeName = 'LCA AI Studio-0.2.0-x64.exe'
-$exePath = Join-Path $root "$ReleaseDir\$exeName"
 $ymlPath = Join-Path $root "$ReleaseDir\latest.yml"
+if (-not $Version) {
+  $Version = (Select-String -Path $ymlPath -Pattern '^version:\s*(.+)$').Matches[0].Groups[1].Value.Trim()
+}
+$exeName = "LCA AI Studio-$Version-x64.exe"
+$exePath = Join-Path $root "$ReleaseDir\$exeName"
 
 # 1) ensure repo exists (public)
 try {
