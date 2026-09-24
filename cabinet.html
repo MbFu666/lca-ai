@@ -706,7 +706,7 @@
                     <!-- Расширенные фильтры -->
                     <div class="filters-panel" id="filtersPanel" style="display:none">
                         <div class="filter-field">
-                            <label data-i18n="f_co2">CO₂, kg</label>
+                            <label data-i18n="f_co2" for="fCo2Min">CO₂, kg</label>
                             <div class="filter-range">
                                 <input type="number" id="fCo2Min" placeholder="0" step="0.01">
                                 <span>—</span>
@@ -714,7 +714,7 @@
                             </div>
                         </div>
                         <div class="filter-field">
-                            <label data-i18n="f_date">Дата</label>
+                            <label data-i18n="f_date" for="fDateFrom">Дата</label>
                             <div class="filter-range">
                                 <input type="date" id="fDateFrom">
                                 <span>—</span>
@@ -722,7 +722,7 @@
                             </div>
                         </div>
                         <div class="filter-field">
-                            <label data-i18n="f_tag">Тег</label>
+                            <label data-i18n="f_tag" for="fTag">Тег</label>
                             <select id="fTag"><option value="" data-i18n="f_any">любой</option></select>
                         </div>
                         <button class="btn btn-ghost btn-sm" id="filterReset" data-i18n="f_reset">Сбросить</button>
@@ -782,10 +782,10 @@
                                 </div>
                                 <input type="file" id="avatarFileInput" accept="image/jpeg,image/png,image/webp">
                             </div>
-                            <label data-i18n="profile_name_ph">Имя</label>
+                            <label data-i18n="profile_name_ph" for="editProfileName">Имя</label>
                             <input type="text" id="editProfileName" class="settings-input" data-i18n-placeholder="profile_name_ph" placeholder="Имя">
 
-                            <label data-i18n="email_label">Email</label>
+                            <span class="field-label" data-i18n="email_label">Email</span>
                             <div class="field-row">
                                 <div id="settingsEmail" class="field-static">—</div>
                                 <button class="btn btn-ghost btn-sm" id="changeEmailBtn" data-i18n="change">Изменить</button>
@@ -793,7 +793,7 @@
 
                             <div class="settings-grid2">
                                 <div>
-                                    <label data-i18n="org_label">Организация</label>
+                                    <label data-i18n="org_label" for="editOrg">Организация</label>
                                     <input type="text" id="editOrg" class="settings-input" data-i18n-placeholder="org_ph" placeholder="Университет, компания">
                                 </div>
                                 <div>
