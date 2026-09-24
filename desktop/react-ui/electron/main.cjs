@@ -658,9 +658,30 @@ ipcMain.handle('app:download-updates', async () => {
 })
 ipcMain.handle('app:install-updates', async () => {
   if (!autoUpdater) return { ok: false }
-  autoUpdater.quitAndInstall()
+  // Silent install (isSilent=true) avoids the NSIS "cannot close app" wizard and
+  // is the standard UX for auto-update; force-run-after ensures relaunch.
+  try {
+    if (typeof killEngineTree === 'function') killEngineTree()
+  } catch {}
+  autoUpdater.quitAndInstall(true, true)
   return { ok: true }
 })
+
+// Cleanup downloaded update packages after a successful update (review/user request):
+// purge stale installer artifacts from the updater cache once they are >24h old.
+function purgeStaleUpdateCache() {
+  try {
+    const cacheDir = path.join(app.getPath('localAppData'), 'lca-ai-studio-updater')
+    if (!fs.existsSync(cacheDir)) return
+    const cutoff = Date.now() - 24 * 3600 * 1000
+    for (const f of fs.readdirSync(cacheDir)) {
+      if (!/\.(exe|blockmap|zip)$/i.test(f)) continue
+      const fp = path.join(cacheDir, f)
+      const st = fs.statSync(fp)
+      if (st.mtimeMs < cutoff) fs.rmSync(fp, { force: true })
+    }
+  } catch {}
+}
 
 function createWindow() {
   win = new BrowserWindow({
@@ -710,6 +731,7 @@ if (!app.requestSingleInstanceLock()) {
   app.whenReady().then(() => {
     createWindow()
     setupAutoUpdater()
+    setTimeout(purgeStaleUpdateCache, 30000)
     // silent background check shortly after launch
     setTimeout(() => {
       try {
@@ -1366,4 +1388,10 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', () => {
   if (weSpawned) killEngineTree()
+  // Watchdog: if quit hangs (open handles), force-exit so the updater installer proceeds.
+  setTimeout(() => {
+    try {
+      app.exit(0)
+    } catch {}
+  }, 5000)
 })
