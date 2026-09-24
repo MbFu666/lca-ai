@@ -19,6 +19,8 @@ import { ScenarioBuilder } from './components/ScenarioBuilder'
 import { PlantWizard } from './components/PlantWizard'
 import { ReportStudio } from './components/ReportStudio'
 import { AutoFill } from './components/AutoFill'
+import { CommandPalette } from './components/CommandPalette'
+import { Toasts } from './components/ui/charts'
 import { useCloud } from './stores/cloud'
 import { useTabs, tabKey, type Tab } from './stores/tabs'
 import { useEngine } from './stores/engine'
@@ -41,6 +43,23 @@ export default function App() {
   const [showReport, setShowReport] = useState(false)
   const [showAutoFill, setShowAutoFill] = useState(false)
   const [upd, setUpd] = useState('')
+  const [themeDark, setThemeDark] = useState(() => localStorage.getItem('lcaai-theme') === 'dark')
+  const [paletteOpen, setPaletteOpen] = useState(false)
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', themeDark)
+  }, [themeDark])
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'p') {
+        e.preventDefault()
+        setPaletteOpen((o) => !o)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   useEffect(() => {
     const d = window.desktop
@@ -101,80 +120,25 @@ export default function App() {
         >
           ƒ
         </button>
-        {window.desktop && (
-          <button
-            onClick={() => setShowAI(true)}
-            title={t('ai_title')}
-            className="text-[13px] text-graphite-soft hover:text-graphite cursor-pointer border border-line px-2 py-1"
-          >
-            ✦
-          </button>
-        )}
-        {window.desktop && (
-          <button
-            onClick={() => setShowScenario(true)}
-            title={t('scenario_title')}
-            className="text-[13px] text-graphite-soft hover:text-graphite cursor-pointer border border-line px-2 py-1"
-          >
-            ◈
-          </button>
-        )}
-        {window.desktop && (
-          <button
-            onClick={() => setShowPlant(true)}
-            title={t('pw_title')}
-            className="text-[13px] text-graphite-soft hover:text-graphite cursor-pointer border border-line px-2 py-1"
-          >
-            ⌂
-          </button>
-        )}
-        {window.desktop && (
-          <button
-            onClick={() => setShowReport(true)}
-            title={t('rs_title')}
-            className="text-[13px] text-graphite-soft hover:text-graphite cursor-pointer border border-line px-2 py-1"
-          >
-            ▤
-          </button>
-        )}
-        {window.desktop && (
-          <button
-            onClick={() => setShowAutoFill(true)}
-            title={t('af_title')}
-            className="text-[13px] text-graphite-soft hover:text-graphite cursor-pointer border border-line px-2 py-1"
-          >
-            📥
-          </button>
-        )}
-        {window.desktop && (
-          <button
-            onClick={async () => {
-              const d = window.desktop!
-              if (upd === 'ready') {
-                await d.installUpdates()
-                return
-              }
-              setUpd('check')
-              const r = await d.checkUpdates()
-              if (r && r.ok) await d.downloadUpdates()
-              else setUpd('')
-            }}
-            title={t('up_title')}
-            className="text-[13px] text-graphite-soft hover:text-graphite cursor-pointer border border-line px-2 py-1"
-          >
-            {upd === 'ready' ? '⬇' : '⟳'}
-            {upd && upd !== 'check' && upd !== 'ready' ? ` ${upd}` : ''}
-          </button>
-        )}
-        {window.desktop && (
-          <button
-            onClick={() => useCloud.getState().setOpen(true)}
-            title={t('cloud')}
-            className="text-[13px] text-graphite-soft hover:text-graphite cursor-pointer border border-line px-2 py-1"
-          >
-            ☁
-          </button>
-        )}
+        <button
+          onClick={() => setPaletteOpen(true)}
+          title="Command palette (Ctrl+Shift+P)"
+          className="text-[13px] text-graphite-soft hover:text-graphite cursor-pointer border border-line px-2 py-1"
+        >
+          ⌘
+        </button>
+        <button
+          onClick={() => {
+            const dark = !document.documentElement.classList.contains('dark')
+            document.documentElement.classList.toggle('dark', dark)
+            localStorage.setItem('lcaai-theme', dark ? 'dark' : 'light')
+            setThemeDark(dark)
+          }}
+          title={themeDark ? 'Light theme' : 'Dark theme'}
+          className="text-[13px] text-graphite-soft hover:text-graphite cursor-pointer border border-line px-2 py-1"
+        >
+          {themeDark ? '☀' : '🌙'}
+        </button>
         {window.desktop && <DbBadge onClick={() => setShowDbManager(true)} />}
         <EngineBadge />
         <select
@@ -187,6 +151,47 @@ export default function App() {
           <option value="zh">中文</option>
         </select>
       </header>
+      {window.desktop && (
+        <nav className="shrink-0 border-b border-line bg-paper flex items-center gap-1 px-3 py-1.5 overflow-x-auto">
+          {(
+            [
+              { ico: '✦', label: t('ai_title'), run: () => setShowAI(true) },
+              { ico: '◈', label: t('scenario_title'), run: () => setShowScenario(true) },
+              { ico: '⌂', label: t('pw_title'), run: () => setShowPlant(true) },
+              { ico: '▤', label: t('rs_title'), run: () => setShowReport(true) },
+              { ico: '📥', label: t('af_title'), run: () => setShowAutoFill(true) },
+              { ico: '☁', label: t('cloud'), run: () => useCloud.getState().setOpen(true) },
+            ] as Array<{ ico: string; label: string; run: () => void }>
+          ).map((m) => (
+            <button
+              key={m.label}
+              onClick={m.run}
+              className="flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-sans uppercase tracking-wide text-graphite-mid hover:text-graphite hover:bg-paper-2 border border-transparent hover:border-line rounded cursor-pointer whitespace-nowrap"
+            >
+              <span className="ico">{m.ico}</span>
+              {m.label}
+            </button>
+          ))}
+          <button
+            onClick={async () => {
+              const d = window.desktop!
+              if (upd === 'ready') {
+                await d.installUpdates()
+                return
+              }
+              setUpd('check')
+              const r = await d.checkUpdates()
+              if (r && r.ok) await d.downloadUpdates()
+              else setUpd('')
+            }}
+            className="ml-auto flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-sans uppercase tracking-wide text-graphite-mid hover:text-graphite hover:bg-paper-2 border border-transparent hover:border-line rounded cursor-pointer whitespace-nowrap"
+          >
+            <span className="ico">{upd === 'ready' ? '⬇' : '⟳'}</span>
+            {upd === 'ready' ? t('up_install') : t('up_title')}
+            {upd && upd !== 'check' && upd !== 'ready' ? ` ${upd}` : ''}
+          </button>
+        </nav>
+      )}
 
       <div className="flex-1 flex min-h-0">
         <Navigator />
@@ -291,6 +296,27 @@ export default function App() {
           }}
         />
       )}
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        actions={[
+          { id: 'search', label: t('search_all'), hint: 'Ctrl+K', run: () => setShowSearch(true) },
+          { id: 'ai', label: t('ai_title'), run: () => setShowAI(true) },
+          { id: 'scenario', label: t('scenario_title'), run: () => setShowScenario(true) },
+          { id: 'plant', label: t('pw_title'), run: () => setShowPlant(true) },
+          { id: 'report', label: t('rs_title'), run: () => setShowReport(true) },
+          { id: 'autofill', label: t('af_title'), run: () => setShowAutoFill(true) },
+          { id: 'cloud', label: t('cloud'), run: () => useCloud.getState().setOpen(true) },
+          { id: 'db', label: t('db_manager'), run: () => setShowDbManager(true) },
+          { id: 'gp', label: t('nav_global_params'), run: () => setShowGP(true) },
+          {
+            id: 'theme',
+            label: themeDark ? 'Switch to light theme' : 'Switch to dark theme',
+            run: () => setThemeDark((d) => !d),
+          },
+        ]}
+      />
+      <Toasts />
     </div>
   )
 }

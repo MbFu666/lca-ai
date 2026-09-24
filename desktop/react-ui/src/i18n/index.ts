@@ -369,6 +369,7 @@ const DICT: Record<string, Record<Lang, string>> = {
   af_apply: { ru: 'Применить в Plant Wizard', en: 'Apply to Plant Wizard', zh: '应用到 Plant Wizard' },
   af_applied: { ru: 'Применено — откройте ⌂', en: 'Applied — open ⌂', zh: '已应用—打开 ⌂' },
   up_title: { ru: 'Проверить обновления', en: 'Check for updates', zh: '检查更新' },
+  up_install: { ru: 'Установить обновление', en: 'Install update', zh: '安装更新' },
 }
 
 interface I18nState {

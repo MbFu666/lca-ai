@@ -120,6 +120,7 @@ export function sensitivity(inp: UncertInput): Array<{ key: string; label: strin
 export function monteCarlo(inp: UncertInput, n = 1000, cv = 0.2): {
   net: { mean: number; p5: number; p50: number; p95: number }
   fossil: { mean: number; p5: number; p50: number; p95: number }
+  histogram: Array<{ x0: number; x1: number; count: number }>
   samples: number
 } {
   const defs: Record<string, number> = {
@@ -154,9 +155,20 @@ export function monteCarlo(inp: UncertInput, n = 1000, cv = 0.2): {
     return s[Math.min(s.length - 1, Math.floor(f * (s.length - 1)))]
   }
   const mean = (arr: number[]) => arr.reduce((a, b) => a + b, 0) / arr.length
+  // histogram of net (12 buckets)
+  const lo = Math.min(...nets), hi = Math.max(...nets)
+  const buckets: Array<{ x0: number; x1: number; count: number }> = []
+  const B = 12
+  const w = (hi - lo) / B || 1
+  for (let b = 0; b < B; b++) buckets.push({ x0: lo + b * w, x1: lo + (b + 1) * w, count: 0 })
+  for (const v of nets) {
+    const idx = Math.min(B - 1, Math.max(0, Math.floor((v - lo) / w)))
+    buckets[idx].count++
+  }
   return {
     net: { mean: mean(nets), p5: q(nets, 0.05), p50: q(nets, 0.5), p95: q(nets, 0.95) },
     fossil: { mean: mean(fossils), p5: q(fossils, 0.05), p50: q(fossils, 0.5), p95: q(fossils, 0.95) },
+    histogram: buckets,
     samples: n,
   }
 }

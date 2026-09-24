@@ -1,9 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useI18n, type Lang } from '../i18n'
+import { getDescriptors } from '../api/ipc'
 import { takePendingAutofill } from '../lib/autofillStore'
 import { buildPlant, type CoprodMode, type PlantResult } from '../lib/plant'
 import { CULT_NORMS, FEEDS, GEO, TECHS, feedYield, resolveParams } from '../lib/refdata'
 import { monteCarlo, sensitivity, type UncertInput } from '../lib/uncertainty'
+import { toast } from '../lib/toast'
+import { Sankey } from './Sankey'
+import { BarList, Histogram, KpiCard, Tornado } from './ui/charts'
 import { Button, ErrorBox, Spinner } from './ui/primitives'
 
 const INPUT =
@@ -36,6 +40,18 @@ export function PlantWizard({
     mc: ReturnType<typeof monteCarlo>
     sens: ReturnType<typeof sensitivity>
   } | null>(null)
+  const [showSankey, setShowSankey] = useState(false)
+  const [sankeyCat, setSankeyCat] = useState('')
+
+  useEffect(() => {
+    if (!result) return
+    getDescriptors('ImpactCategory')
+      .then((cs) => {
+        const cc = cs.find((c) => /climate change/i.test(c.name) && !/fossil|biogenic/i.test(c.name))
+        if (cc) setSankeyCat(cc['@id'])
+      })
+      .catch(() => undefined)
+  }, [result])
 
   // Consume AI Auto-Fill pending overrides when the wizard opens
   useEffect(() => {
@@ -244,8 +260,11 @@ export function PlantWizard({
         },
       })
       setSaved(true)
+      toast.ok(t('sc_saved'))
     } catch (e) {
-      setError(String(e instanceof Error ? e.message : e))
+      const msg = String(e instanceof Error ? e.message : e)
+      setError(msg)
+      toast.err(msg)
     } finally {
       setBusy(false)
     }
@@ -511,6 +530,34 @@ export function PlantWizard({
                   )}
                 </tbody>
               </table>
+              {(() => {
+                const cc = result.impacts.find((i) => /climate change/i.test(i.name) && !/fossil|biogenic/i.test(i.name))
+                const fos = result.impacts.find((i) => /climate change - fossil/i.test(i.name))
+                const bio = result.impacts.find((i) => /climate change - biogenic/i.test(i.name))
+                return (
+                  <div className="space-y-3">
+                    <div className="kpi-grid">
+                      {cc && <KpiCard label={cc.name} value={cc.perT.toPrecision(4)} unit={cc.unit} tone={cc.perT < 0 ? 'pos' : 'neg'} />}
+                      {fos && <KpiCard label={fos.name} value={fos.perT.toPrecision(4)} unit={fos.unit} tone="neg" />}
+                      {bio && <KpiCard label={bio.name} value={bio.perT.toPrecision(4)} unit={bio.unit} tone="pos" />}
+                    </div>
+                    <BarList
+                      items={result.impacts.map((i) => ({
+                        label: `${i.name} [${i.unit}]`,
+                        value: i.perT,
+                        display: i.perT.toPrecision(4),
+                        neg: i.perT > 0,
+                      }))}
+                    />
+                    <div>
+                      <Button variant="ghost" onClick={() => setShowSankey((s) => !s)}>
+                        {showSankey ? '− Sankey' : '+ Sankey'}
+                      </Button>
+                    </div>
+                    {showSankey && sankeyCat && <Sankey psId={result.psId} impactCategoryId={sankeyCat} />}
+                  </div>
+                )
+              })()}
               {result.econ && (
                 <div className="space-y-1">
                   <div className="text-[12px] font-semibold uppercase tracking-wide">{t('ec_title')}</div>
@@ -584,46 +631,14 @@ export function PlantWizard({
                   <div className="text-[12px] font-semibold uppercase tracking-wide">
                     {t('un_title')} ({uncert.mc.samples} {t('un_samples')})
                   </div>
-                  <table className="w-full text-[12px] border-collapse">
-                    <thead>
-                      <tr className="bg-paper-2">
-                        <th className="text-left px-2 py-1 border border-line">{t('sc_category')}</th>
-                        <th className="text-right px-2 py-1 border border-line">P5</th>
-                        <th className="text-right px-2 py-1 border border-line">P50</th>
-                        <th className="text-right px-2 py-1 border border-line">Mean</th>
-                        <th className="text-right px-2 py-1 border border-line">P95</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="px-2 py-1 border border-line">Climate change (net)</td>
-                        <td className="px-2 py-1 border border-line text-right font-mono">{uncert.mc.net.p5.toFixed(0)}</td>
-                        <td className="px-2 py-1 border border-line text-right font-mono">{uncert.mc.net.p50.toFixed(0)}</td>
-                        <td className="px-2 py-1 border border-line text-right font-mono">{uncert.mc.net.mean.toFixed(0)}</td>
-                        <td className="px-2 py-1 border border-line text-right font-mono">{uncert.mc.net.p95.toFixed(0)}</td>
-                      </tr>
-                      <tr>
-                        <td className="px-2 py-1 border border-line">Climate change (fossil)</td>
-                        <td className="px-2 py-1 border border-line text-right font-mono">{uncert.mc.fossil.p5.toFixed(0)}</td>
-                        <td className="px-2 py-1 border border-line text-right font-mono">{uncert.mc.fossil.p50.toFixed(0)}</td>
-                        <td className="px-2 py-1 border border-line text-right font-mono">{uncert.mc.fossil.mean.toFixed(0)}</td>
-                        <td className="px-2 py-1 border border-line text-right font-mono">{uncert.mc.fossil.p95.toFixed(0)}</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                  <div className="kpi-grid">
+                    <KpiCard label="MC net P50" value={uncert.mc.net.p50.toFixed(0)} tone={uncert.mc.net.p50 < 0 ? 'pos' : 'neg'} />
+                    <KpiCard label="MC net mean" value={uncert.mc.net.mean.toFixed(0)} tone={uncert.mc.net.mean < 0 ? 'pos' : 'neg'} />
+                    <KpiCard label="MC net P5–P95" value={`${uncert.mc.net.p5.toFixed(0)} … ${uncert.mc.net.p95.toFixed(0)}`} />
+                  </div>
+                  <Histogram buckets={uncert.mc.histogram} unit="kg CO2-eq / t" />
                   <div className="text-[12px] font-semibold uppercase tracking-wide">{t('un_sens')}</div>
-                  <table className="w-full text-[12px] border-collapse">
-                    <tbody>
-                      {uncert.sens.map((s) => (
-                        <tr key={s.key}>
-                          <td className="px-2 py-1 border border-line">{s.label}</td>
-                          <td className="px-2 py-1 border border-line text-right font-mono">{s.low.toFixed(0)}</td>
-                          <td className="px-2 py-1 border border-line text-right font-mono">{s.high.toFixed(0)}</td>
-                          <td className="px-2 py-1 border border-line text-right font-mono">Δ{s.swing.toFixed(0)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <Tornado rows={uncert.sens.map((s) => ({ label: s.label, low: s.low, high: s.high }))} />
                 </div>
               )}
               <div className="flex items-center gap-3">
