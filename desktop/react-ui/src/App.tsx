@@ -305,11 +305,14 @@ export default function App() {
               }
               setUpd('check')
               const r = await d.checkUpdates()
-              if (r && r.ok && r.version) await d.downloadUpdates()
-              else {
-                setUpd('')
+              if (r && r.ok && r.version) {
+                await d.downloadUpdates()
+              } else if (r && r.ok) {
                 const v = await d.appVersion().catch(() => '')
                 toast.ok(`${t('up_latest')}: ${v}`)
+              } else {
+                setUpd('')
+                toast.warn(`${t('up_title')}: ${r?.reason ?? 'error'}`)
               }
             },
           },
