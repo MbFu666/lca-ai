@@ -200,12 +200,13 @@ footer a:hover { color:var(--e-ink); border-color:var(--e-3); }
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="assets/tokens.css">
+<script src="assets/esc.js"></script>
+<script src="assets/supabase-init.js"></script>
 <script>
-const SB_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
-/* Anon-ключ публичен по замыслу: лежит открыто во всех страницах сайта и сам
-   по себе ничего не открывает — доступ режет RLS. Нужен, чтобы пройти шлюз
-   Supabase и для операций от имени вошедшего пользователя. */
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
+// Shared bootstrap (assets/supabase-init.js) provides SB_URL/SB_KEY/sb.
+const SB_URL = window.SB_URL;
+const SB_KEY = window.SB_KEY;
 const RAMP = ['#F03B0C','#D9481C','#B4652A','#8A6A4F','#B8B4AC','#9B978F'];
 
 const I18N = {
@@ -679,7 +680,7 @@ $('saveBtn').addEventListener('click', saveEdit);
   // Авторизация необязательна: чтение работает и без неё.
   // С ней появляются «сохранить себе» и, если разрешено, правка.
   try {
-    sb = window.supabase.createClient(SB_URL, SB_KEY);
+    sb = window.sb || (window.supabase ? window.supabase.createClient(SB_URL, SB_KEY) : null);
     const u = await sb.auth.getUser();
     me = (u && u.data && u.data.user) ? u.data.user : null;
   } catch (e) { sb = null; me = null; }

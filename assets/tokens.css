@@ -1,0 +1,38 @@
+/* LCA·AI shared design tokens (review #15/#27). Link this instead of duplicating per page.
+   Axioms: 0 border-radius, 0 shadows, 0 gradients (except the sanctioned body grid),
+   achromatic graphite/paper palette + single accent. WCAG AA contrast for text tokens. */
+:root {
+  --paper: #F2F0EC;
+  --paper-2: #EAE7E1;
+  --paper-3: #E0DCD4;
+  --graphite: #1C1B19;
+  --graphite-mid: #6B6862;
+  --graphite-low: #67635C;   /* AA on --paper */
+  --line: #D5D1C8;
+  --accent: #0F6B4F;
+  --pos: #2F6B4F;
+  --neg: #C25406;
+  --warn: #B3740E;
+  --e-4: #F03B0C;
+  --e-ink: #7A2E10;
+  --serif: "Source Serif 4", "Noto Sans SC", Georgia, serif;
+  --sans: "Oswald", "Noto Sans SC", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+  --radius: 0px;
+}
+html.dark {
+  --paper: #131211;
+  --paper-2: #1B1A18;
+  --paper-3: #232120;
+  --graphite: #EDEAE4;
+  --graphite-mid: #9B978F;
+  --graphite-low: #8D8981;   /* AA on --paper (dark) */
+  --line: #2E2C29;
+  --accent: #4FB08A;
+  --pos: #4FB08A;
+  --neg: #FF8A50;
+  --warn: #E0A33C;
+  --e-4: #FF6B2C;
+  --e-ink: #FF8A50;
+}
+body { background: var(--paper); color: var(--graphite); }
