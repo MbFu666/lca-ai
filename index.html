@@ -69,12 +69,9 @@ async function checkAuth() {
     // Load user data from Supabase
     await loadUserData();
   } else {
-    // Check localStorage for cached session
-    const cachedUser = localStorage.getItem('supabase_user');
-    if (cachedUser) {
-      currentUser = JSON.parse(cachedUser);
-      updateAuthUI(true);
-    }
+    // No session: stay logged out. Do NOT trust localStorage (fake-auth pattern removed).
+    currentUser = null;
+    updateAuthUI(false);
   }
 }
 
@@ -5028,7 +5025,18 @@ async function apiCall(messages, opts = {}) {
 
   const t0 = Date.now();
   const { data: { session } } = await supabaseClient.auth.getSession();
-  const token = session?.access_token || SUPABASE_ANON_KEY;
+  if (!session) {
+    // Gate: lca-proxy requires a real user token; anon key is always rejected (401).
+    const msg = currentLang === 'ru'
+      ? 'Для AI-расчёта войдите в аккаунт (кнопка «Войти»).'
+      : currentLang === 'zh'
+        ? 'AI 计算需要登录账号。'
+        : 'Please sign in to use AI calculation.';
+    const e = new Error(msg);
+    e.code = 'AUTH_REQUIRED';
+    throw e;
+  }
+  const token = session.access_token;
   const headers = { 
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${token}`
@@ -5050,7 +5058,9 @@ async function apiCall(messages, opts = {}) {
   if (!res.ok) {
     const upstream = data.upstream_body || data.error || raw.slice(0, 200);
     let hint = '';
-    if (res.status === 401 || /insufficient|balance|payment/i.test(upstream)) {
+    if (res.status === 401) {
+      hint = ' — сессия истекла или отсутствует доступ: войдите снова.';
+    } else if (/insufficient|balance|payment/i.test(upstream)) {
       hint = ' — возможно, закончился баланс на DeepSeek.';
     } else if (res.status === 504 || /timeout/i.test(upstream)) {
       hint = ' — попробуйте более короткое описание.';
@@ -5365,12 +5375,14 @@ function renderReport(d) {
   if (typeof window.__flowSetData === 'function') window.__flowSetData(d);
 
   // ─── strip + toolbar (above the step panels) ───
-  $('#crumbProduct').textContent = d.product_title || '—';
-  $('#metaFU').textContent        = d.functional_unit || '—';
-  $('#metaSBPill').textContent    = d.system_boundary || '—';
+  // Guarded: these nodes live in report.html; index.html may not have them (hotfix for TypeError).
+  const setT = (sel, v) => { const e = document.querySelector(sel); if (e) e.textContent = v; };
+  setT('#crumbProduct', d.product_title || '—');
+  setT('#metaFU', d.functional_unit || '—');
+  setT('#metaSBPill', d.system_boundary || '—');
 
   // ─── step 2 hero ───
-  $('#resName').textContent   = d.product_title || '—';
+  setT('#resName', d.product_title || '—');
   // Count-up animation for CO2 value
   const target = parseFloat(d.total_co2eq) || 0;
   const el = $('#resValue');
@@ -6915,13 +6927,13 @@ function renderProjects() {
   list.querySelectorAll('.project-calc-item').forEach(item => {
     item.addEventListener('click', (e) => {
       if (e.target.classList.contains('project-calc-delete')) return;
-      const projectId = parseInt(item.dataset.project);
+      const projectId = item.dataset.project; // keep as string (UUID or numeric id)
       const rawCalcId = item.dataset.calc;
       const calcId = rawCalcId.includes('-') ? rawCalcId : parseInt(rawCalcId);
       const projects = getProjects();
-      const project = projects.find(p => p.id === projectId);
+      const project = projects.find(p => String(p.id) === String(projectId));
       if (project) {
-        const calc = project.calculations.find(c => c.id === calcId);
+        const calc = project.calculations.find(c => String(c.id) === String(calcId));
         if (calc) {
           renderReport(calc.data);
           closeModal('modalProjects');
@@ -6936,7 +6948,7 @@ function renderProjects() {
       e.stopPropagation();
       const rawCalcId = btn.dataset.calc;
       const calcId = rawCalcId.includes('-') ? rawCalcId : parseInt(rawCalcId);
-      deleteCalcFromProject(parseInt(btn.dataset.project), calcId);
+      deleteCalcFromProject(btn.dataset.project, calcId);
       renderProjects();
     });
   });
@@ -7141,13 +7153,9 @@ function showNewProjectModalForSave() {
       input.focus();
       return;
     }
-    const project = createProject(name);
+    const project = await createProject(name);
     addToProject(project.id, lastReport);
-    // Also save to Supabase if logged in
-    if (currentUser) {
-      const sbProject = await saveProject(name);
-      if (sbProject) await saveToProject(sbProject.id, lastReport);
-    }
+    // createProject() already persists to Supabase when logged in — do NOT saveProject() again (duplicate).
     closeModal('modalNewProjectSave');
     showToast(currentLang === 'ru' ? `Проект «${name}» создан и расчёт сохранён!` : currentLang === 'zh' ? `项目「${name}」已创建并保存！` : `Project "${name}" created and saved!`);
   };
@@ -7515,10 +7523,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   if (document.getElementById('pageHome') && !document.getElementById('pageHome').classList.contains('hidden')) {
     document.getElementById('agentFab').classList.remove('show');
   }
-  document.getElementById('agentSend')?.addEventListener('click', function() {
-    var msg = document.getElementById('agentMsg').value.trim();
-    if (typeof agentChatMode !== 'undefined' && agentChatMode) { sendChatMessage(msg); } else { applyAgentAnswers(); }
-  });
+  // NOTE: #agentSend listener is bound once above (see "Send / apply"); duplicate binding removed.
   
   document.querySelectorAll('.modes button').forEach(function(b) {
     b.addEventListener('click', function() {

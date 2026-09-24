@@ -17,7 +17,7 @@ const EF = {
   ureaPerKgN: 1.8,
   sspPerKgP: 0.4,
   kclPerKgK: 0.3,
-  dieselPerMJ: 0.8 / 35.9 + 2.68 / 35.9, // production + combustion per MJ
+  dieselPerMJ: (0.8 + 2.68) / 35.9, // production + combustion, per MJ (combustion NOT added again below)
   seedPerKg: 1.5,
   herbPerKg: 8.0,
   pestPerKg: 10.0,
@@ -59,8 +59,7 @@ export function climateModel(inp: UncertInput, p: Record<string, number>): { fos
     seed * EF.seedPerKg +
     herb * EF.herbPerKg +
     pest * EF.pestPerKg +
-    n2o * EF.fieldN2OPerKg +
-    dieselL * 2.68 // direct combustion
+    n2o * EF.fieldN2OPerKg
   const cultPerT = cultPerHa * areaHaPerT
 
   // biogenic uptake per t ethanol

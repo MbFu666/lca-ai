@@ -69,12 +69,9 @@ async function checkAuth() {
     // Load user data from Supabase
     await loadUserData();
   } else {
-    // Check localStorage for cached session
-    const cachedUser = localStorage.getItem('supabase_user');
-    if (cachedUser) {
-      currentUser = JSON.parse(cachedUser);
-      updateAuthUI(true);
-    }
+    // No session: stay logged out. Do NOT trust localStorage (fake-auth pattern removed).
+    currentUser = null;
+    updateAuthUI(false);
   }
 }
 
@@ -4639,7 +4636,17 @@ async function apiCall(messages, opts = {}) {
 
   const t0 = Date.now();
   const { data: { session } } = await supabaseClient.auth.getSession();
-  const token = session?.access_token || SUPABASE_ANON_KEY;
+  if (!session) {
+    const msg = currentLang === 'ru'
+      ? 'Для AI-функций войдите в аккаунт (кнопка «Войти»).'
+      : currentLang === 'zh'
+        ? 'AI 功能需要登录账号。'
+        : 'Please sign in to use AI features.';
+    const e = new Error(msg);
+    e.code = 'AUTH_REQUIRED';
+    throw e;
+  }
+  const token = session.access_token;
   const headers = { 
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${token}`
@@ -4661,7 +4668,9 @@ async function apiCall(messages, opts = {}) {
   if (!res.ok) {
     const upstream = data.upstream_body || data.error || raw.slice(0, 200);
     let hint = '';
-    if (res.status === 401 || /insufficient|balance|payment/i.test(upstream)) {
+    if (res.status === 401) {
+      hint = ' — сессия истекла или отсутствует доступ: войдите снова.';
+    } else if (/insufficient|balance|payment/i.test(upstream)) {
       hint = ' — возможно, закончился баланс на DeepSeek.';
     } else if (res.status === 504 || /timeout/i.test(upstream)) {
       hint = ' — попробуйте более короткое описание.';
@@ -7319,13 +7328,9 @@ function showNewProjectModalForSave() {
       input.focus();
       return;
     }
-    const project = createProject(name);
+    const project = await createProject(name);
     addToProject(project.id, lastReport);
-    // Also save to Supabase if logged in
-    if (currentUser) {
-      const sbProject = await saveProject(name);
-      if (sbProject) await saveToProject(sbProject.id, lastReport);
-    }
+    // createProject() already persists to Supabase when logged in — do NOT saveProject() again (duplicate).
     closeModal('modalNewProjectSave');
     showToast(currentLang === 'ru' ? `Проект «${name}» создан и расчёт сохранён!` : currentLang === 'zh' ? `项目「${name}」已创建并保存！` : `Project "${name}" created and saved!`);
   };
@@ -7373,9 +7378,6 @@ function showWordPreview(d) {
       <tr style="background:#F8FAFA"><th style="border:1px solid #D6D2CB;padding:6px 8px;text-align:left">${t.ft_process || 'Stage'}</th><th style="border:1px solid #D6D2CB;padding:6px 8px;text-align:right">${t.ft_co2 || 'CO₂-eq'}</th><th style="border:1px solid #D6D2CB;padding:6px 8px;text-align:right">${t.ft_share || 'Share'}</th></tr>
       ${stages.map(s => `<tr><td style="border:1px solid #D6D2CB;padding:6px 8px">${escape(s.name)}</td><td style="border:1px solid #D6D2CB;padding:6px 8px;text-align:right;font-family:monospace">${fmtNum(s.co2eq)}</td><td style="border:1px solid #D6D2CB;padding:6px 8px;text-align:right;font-family:monospace">${fmtNum(s.share_pct)}%</td></tr>`).join('')}
       <tr style="background:#ECFAF4;font-weight:700"><td style="border:1px solid #D6D2CB;padding:6px 8px">${t.ft_total || 'Total'}</td><td style="border:1px solid #D6D2CB;padding:6px 8px;text-align:right;font-family:monospace">${fmtNum(d.total_co2eq)}</td><td style="border:1px solid #D6D2CB;padding:6px 8px;text-align:right;font-family:monospace">100%</td></tr>
-    </table>
-      ${stages.map(s => `<tr><td style="border:1px solid #D6D2CB;padding:6px 8px">${escape(s.name)}</td><td style="border:1px solid #D6D2CB;padding:6px 8px;text-align:right;font-family:monospace">${fmtNum(s.co2eq)}</td><td style="border:1px solid #D6D2CB;padding:6px 8px;text-align:right;font-family:monospace">${fmtNum(s.share_pct)}%</td></tr>`).join('')}
-      <tr style="background:#ECFAF4;font-weight:700"><td style="border:1px solid #D6D2CB;padding:6px 8px">Total</td><td style="border:1px solid #D6D2CB;padding:6px 8px;text-align:right;font-family:monospace">${fmtNum(d.total_co2eq)}</td><td style="border:1px solid #D6D2CB;padding:6px 8px;text-align:right;font-family:monospace">100%</td></tr>
     </table>
     
     ${d.total_description ? `<h2 style="color:#1C1B19;font-size:16px;border-bottom:1px solid #D6D2CB;padding-bottom:6px;margin-top:20px">AI Analysis</h2><p style="font-size:12px;color:#6B6862">${escape(d.total_description)}</p>` : ''}
