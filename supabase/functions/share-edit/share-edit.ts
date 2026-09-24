@@ -53,6 +53,16 @@ Deno.serve(async (req) => {
     const { token, report_data, calc_id } = body;
     if (!token || !report_data) return json({ error: "missing_fields" }, 400);
 
+    // ── 1b. Schema + size guard (review #19): reject blobs & non-objects.
+    if (typeof report_data !== "object" || Array.isArray(report_data)) {
+      return json({ error: "bad_schema" }, 400);
+    }
+    const serialized = JSON.stringify(report_data);
+    if (serialized.length > 2_000_000) return json({ error: "payload_too_large" }, 413);
+
+    // ── 1c. Optimistic locking: client may send expected_updated_at.
+    const expectedUpdatedAt = (body as any).expected_updated_at as string | undefined;
+
     // ── 2. Ссылка: существует, не отозвана, не истекла, даёт право записи
     const { data: share } = await admin
       .from("share_links")
@@ -98,7 +108,7 @@ Deno.serve(async (req) => {
 
     // ── 5. Запись — в зависимости от того, что расшарено
     if (share.kind === "history") {
-      const { error: wErr } = await admin
+      let q = admin
         .from("user_history")
         .update({
           report_data,
@@ -106,7 +116,12 @@ Deno.serve(async (req) => {
           product_title: (report_data as any).product_title ?? undefined,
         })
         .eq("id", share.target_id);
-      if (wErr) return json({ error: wErr.message }, 500);
+      if (expectedUpdatedAt) q = q.eq("updated_at", expectedUpdatedAt);
+      const { data, error: wErr } = await q.select("id");
+      if (wErr) return json({ error: "write_failed" }, 500);
+      if (expectedUpdatedAt && (!data || data.length === 0)) {
+        return json({ error: "conflict_stale_version" }, 409);
+      }
 
     } else if (share.kind === "project") {
       // Правим КОНКРЕТНЫЙ расчёт внутри проекта, а не проект целиком.
@@ -125,11 +140,16 @@ Deno.serve(async (req) => {
         return json({ error: "calc_not_in_project" }, 403);
       }
 
-      const { error: wErr } = await admin
+      let q2 = admin
         .from("project_calculations")
         .update({ report_data })
         .eq("id", calc_id);
-      if (wErr) return json({ error: wErr.message }, 500);
+      if (expectedUpdatedAt) q2 = q2.eq("updated_at", expectedUpdatedAt);
+      const { data: d2, error: wErr } = await q2.select("id");
+      if (wErr) return json({ error: "write_failed" }, 500);
+      if (expectedUpdatedAt && (!d2 || d2.length === 0)) {
+        return json({ error: "conflict_stale_version" }, 409);
+      }
 
     } else {
       return json({ error: "unsupported_kind" }, 400);
@@ -155,6 +175,7 @@ Deno.serve(async (req) => {
 
     return json({ ok: true, total_co2eq: total });
   } catch (e) {
-    return json({ error: "internal", detail: String((e as Error)?.message || e) }, 500);
+    // Do not leak internal error details (review #19).
+    return json({ error: "internal" }, 500);
   }
 });

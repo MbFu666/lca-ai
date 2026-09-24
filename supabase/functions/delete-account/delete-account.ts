@@ -35,14 +35,19 @@ Deno.serve(async (req) => {
   const { data: { user }, error } = await admin.auth.getUser(token);
   if (error || !user) return json({ error: "unauthorized" }, 401);
 
-  // Данные (на случай, если клиент не успел / упал на полпути)
-  await admin.from("share_links").delete().eq("owner_id", user.id);
-  await admin.from("project_calculations").delete().eq("user_id", user.id);
-  await admin.from("user_projects").delete().eq("user_id", user.id);
-  await admin.from("user_history").delete().eq("user_id", user.id);
+  try {
+    // Auth user FIRST: if this fails we haven't touched data (no "account without
+    // data" state). Orphaned rows after a later failure are retryable/harmless.
+    const { error: delErr } = await admin.auth.admin.deleteUser(user.id);
+    if (delErr) return json({ error: delErr.message }, 500);
 
-  const { error: delErr } = await admin.auth.admin.deleteUser(user.id);
-  if (delErr) return json({ error: delErr.message }, 500);
+    await admin.from("share_links").delete().eq("owner_id", user.id);
+    await admin.from("project_calculations").delete().eq("user_id", user.id);
+    await admin.from("user_projects").delete().eq("user_id", user.id);
+    await admin.from("user_history").delete().eq("user_id", user.id);
 
-  return json({ ok: true });
+    return json({ ok: true });
+  } catch (_e) {
+    return json({ error: "internal" }, 500);
+  }
 });

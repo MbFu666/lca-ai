@@ -25,7 +25,7 @@ function esc(s: string) {
   ));
 }
 
-Deno.serve(async (req) => {
+async function handle(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
 
   const json = (body: unknown, status = 200) =>
@@ -62,26 +62,49 @@ Deno.serve(async (req) => {
     .from(table).select("id, user_id").eq("id", target_id).maybeSingle();
   if (!owned || owned.user_id !== user.id) return json({ error: "forbidden" }, 403);
 
+  // ── Rate-limit: ≤10 share emails per user per hour (review #19) ──
+  const hourAgo = new Date(Date.now() - 3600e3).toISOString();
+  const { count } = await admin
+    .from("share_links").select("id", { count: "exact", head: true })
+    .eq("owner_id", user.id).gte("created_at", hourAgo);
+  if ((count ?? 0) >= 10) return json({ error: "rate_limited" }, 429);
+
+  // ── Dedup: reuse an active link for the same target+email; throttle re-sends ──
+  const nowIso = new Date().toISOString();
+  const { data: existing } = await admin
+    .from("share_links").select("token, created_at, expires_at")
+    .eq("target_id", target_id).eq("shared_email", email).gt("expires_at", nowIso)
+    .order("created_at", { ascending: false }).limit(1).maybeSingle();
+  if (existing) {
+    const ageMin = (Date.now() - new Date(existing.created_at).getTime()) / 60000;
+    const link = `${SITE}/share.html#t=${existing.token}`;
+    if (ageMin < 10) return json({ ok: true, link, dedup: true, expires_at: existing.expires_at });
+    // fall through to re-send using the existing token
+    var token = existing.token as string;
+    var days = Math.min(Math.max(Number(body.expires_days) || 30, 1), 365);
+    var expires = existing.expires_at as string;
+    var role = "view";
+  }
+
   const title = kind === "project"
     ? (await admin.from("user_projects").select("name").eq("id", target_id).maybeSingle()).data?.name
     : (await admin.from("user_history").select("product_title").eq("id", target_id).maybeSingle()).data?.product_title;
 
-  // ── Токен ──
-  const token = crypto.randomUUID();
-  const days = Math.min(Math.max(Number(body.expires_days) || 30, 1), 365);
-  const expires = new Date(Date.now() + days * 864e5).toISOString();
+  // ── Токен: новый, если дедупликация не переиспользовала активную ссылку ──
+  if (!token) token = crypto.randomUUID();
+  if (!days) days = Math.min(Math.max(Number(body.expires_days) || 30, 1), 365);
+  if (!expires) expires = new Date(Date.now() + days * 864e5).toISOString();
+  if (!role) role = body.role === "edit" ? "edit" : "view";
 
-  // Право записи выдаётся только явно. Работает и для расчётов, и для проектов
-  // (внутри проекта правится каждый расчёт по отдельности).
-  const role = body.role === "edit" ? "edit" : "view";
+  if (!existing) {
+    const { error: insErr } = await admin.from("share_links").insert({
+      token, kind, target_id, owner_id: user.id,
+      shared_email: email, expires_at: expires, role,
+    });
+    if (insErr) return json({ error: insErr.message }, 500);
+  }
 
-  const { error: insErr } = await admin.from("share_links").insert({
-    token, kind, target_id, owner_id: user.id,
-    shared_email: email, expires_at: expires, role,
-  });
-  if (insErr) return json({ error: insErr.message }, 500);
-
-  const link = `${SITE}/share.html?token=${token}`;
+  const link = `${SITE}/share.html#t=${token}`;
   const sender = user.user_metadata?.full_name || user.email;
 
   // ── Письмо ──
@@ -124,4 +147,16 @@ Deno.serve(async (req) => {
   }
 
   return json({ ok: true, link, expires_at: expires });
+}
+
+Deno.serve(async (req) => {
+  try {
+    return await handle(req);
+  } catch (_e) {
+    // Always include CORS headers, even on unexpected 500 (review #19).
+    return new Response(JSON.stringify({ error: "internal" }), {
+      status: 500,
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
+  }
 });

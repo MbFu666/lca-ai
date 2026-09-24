@@ -26,3 +26,7 @@ Thumbs.db
 
 # Stray git artifacts
 .git/objects/**/tmp_obj_*
+
+# supabase CLI temp
+supabase/supabase/.temp/
+supabase/.temp/

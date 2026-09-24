@@ -152,3 +152,16 @@ alter table public.share_links
 -- Если бы мы вместо этого написали RLS-политику «можно писать, если есть
 -- share_link с role=edit», то любой владелец anon-ключа мог бы писать
 -- в чужие строки, зная лишь id — а id утекает в самой ссылке.
+
+-- Atomic share-view counter (fixes lost-update race, review #19).
+create or replace function increment_share_views(link_id uuid)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update share_links
+     set views = coalesce(views,0) + 1,
+         last_viewed_at = now()
+   where id = link_id;
+$$;

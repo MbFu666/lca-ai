@@ -21,7 +21,8 @@ Deno.serve(async (req) => {
 
   try {
 
-  const token = new URL(req.url).searchParams.get("token");
+  // Token via header preferred (keeps it out of URLs/logs); query as legacy fallback.
+  const token = req.headers.get("x-share-token") || new URL(req.url).searchParams.get("token");
   if (!token) {
     return new Response(JSON.stringify({ error: "token required" }), {
       status: 400, headers: { ...cors, "Content-Type": "application/json" },
@@ -94,11 +95,8 @@ Deno.serve(async (req) => {
     });
   }
 
-  // 3) Счётчик просмотров (не блокируем ответ, если не записалось)
-  admin.from("share_links")
-    .update({ views: (share.views || 0) + 1, last_viewed_at: new Date().toISOString() })
-    .eq("id", share.id)
-    .then(() => {});
+  // 3) Счётчик просмотров: атомарный UPDATE через RPC (без lost-update гонки, review #19)
+  admin.rpc("increment_share_views", { link_id: share.id }).then(() => {});
 
   return new Response(JSON.stringify(payload), {
     headers: { ...cors, "Content-Type": "application/json" },

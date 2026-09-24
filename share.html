@@ -650,7 +650,13 @@ $('saveBtn').addEventListener('click', saveEdit);
 
 (async function () {
   applyLang();
-  token = new URLSearchParams(location.search).get('token');
+  // Prefer fragment token (#t=...) so it never lands in history/referer/logs;
+  // fall back to legacy ?token= but strip it from the URL immediately.
+  token = (location.hash.match(/[#&]t=([^&]+)/) || [])[1] || null;
+  if (!token) {
+    token = new URLSearchParams(location.search).get('token');
+    if (token) history.replaceState(null, '', location.pathname + location.hash);
+  }
   if (!token) return setState(T().e_token, true);
   setState(T().loading, false);
 
@@ -663,8 +669,8 @@ $('saveBtn').addEventListener('click', saveEdit);
   } catch (e) { sb = null; me = null; }
 
   try {
-    const res = await fetch(SB_URL + '/functions/v1/share-view?token=' + encodeURIComponent(token), {
-      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+    const res = await fetch(SB_URL + '/functions/v1/share-view', {
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'x-share-token': token }
     });
     const t = T();
     if (res.status === 401) return setState(t.e_401, true);
