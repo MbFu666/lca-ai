@@ -16,9 +16,9 @@
   --color-e-5: #C22A06;
   --color-e-ink: #7A2E10;
   --color-ok: #2F6B4F;
-  --color-accent: #0F6B4F;
-  --color-pos: #2F6B4F;
-  --color-neg: #C25406;
+  --color-accent: #1C1B19;
+  --color-pos: #1C1B19;
+  --color-neg: #F03B0C;
   --color-warn: #B3740E;
   --font-serif: "Source Serif 4", "Noto Sans SC", Georgia, serif;
   --font-sans: "Oswald", "Noto Sans SC", system-ui, sans-serif;
@@ -35,9 +35,9 @@ html.dark {
   --color-line: #2E2C29;
   --color-e-4: #FF6B2C;
   --color-e-ink: #FF8A50;
-  --color-accent: #4FB08A;
-  --color-pos: #4FB08A;
-  --color-neg: #FF8A50;
+  --color-accent: #EDEAE4;
+  --color-pos: #EDEAE4;
+  --color-neg: #FF6B2C;
   --color-warn: #E0A33C;
 }
 
@@ -58,7 +58,11 @@ body {
 
 /* ---- design system components ---- */
 .num { font-variant-numeric: tabular-nums; }
-:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+/* Site-like focus: subtle graphite ring, no colored outline (review/user feedback). */
+:focus-visible { outline: 1px solid var(--color-graphite-mid); outline-offset: 1px; }
+
+/* Theme indicator: half-filled circle (site design-system original), no emoji/SVG sun-moon. */
+.theme-dot { display: inline-block; width: 12px; height: 12px; border: 1px solid currentColor; background: linear-gradient(90deg, currentColor 50%, transparent 50%); vertical-align: -2px; }
 
 .kpi-grid { display: flex; gap: 12px; flex-wrap: wrap; }
 .kpi-card {

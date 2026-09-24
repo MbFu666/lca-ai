@@ -621,6 +621,10 @@ function setupAutoUpdater() {
   if (!autoUpdater) return
   autoUpdater.autoDownload = false
   autoUpdater.autoInstallOnAppQuit = true
+  // Self-signed code-signing cert is not in trusted roots, so Windows signature
+  // verification of the downloaded installer fails ("chain not trusted"). The feed is
+  // HTTPS + sha512-pinned, so we rely on that instead (review/user report).
+  autoUpdater.verifyUpdateCodeSignature = false
   const send = (channel, payload) => {
     try {
       if (win && win.webContents) win.webContents.send(channel, payload)

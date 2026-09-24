@@ -126,7 +126,7 @@ export default function App() {
           title={themeDark ? 'Light theme' : 'Dark theme'}
           className="text-[13px] text-graphite-soft hover:text-graphite cursor-pointer border border-line px-2 py-1"
         >
-          {themeDark ? '☀' : '🌙'}
+          <span className="theme-dot" aria-hidden="true" />
         </button>
         {window.desktop && <DbBadge onClick={() => setShowDbManager(true)} />}
         <EngineBadge />
