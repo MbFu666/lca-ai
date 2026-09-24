@@ -1079,6 +1079,7 @@
                 "xstats_by_month": "CO₂ по месяцам",
                 "xstats_top5": "Топ-5 по следу",
                 "xstats_avg": "Среднее",
+      "xstats_fu_note": "Сумма и среднее по kg CO₂-eq сопоставимы только для расчётов с одинаковой функциональной единицей; сравнение разных FU ориентировочное.",
                 "portfolio_title": "Где углерод в вашем портфеле",
                 "pf_verdict": "В {n} из {total} расчётов доминирует «{stage}» — в среднем {pct}% следа. Начинайте снижение отсюда.",
                 "spark_empty": "Нужно минимум два расчёта, чтобы увидеть тренд",
@@ -1330,6 +1331,7 @@
                 "xstats_by_month": "CO₂ by month",
                 "xstats_top5": "Top 5 by footprint",
                 "xstats_avg": "Average",
+      "xstats_fu_note": "Totals and averages in kg CO2-eq are comparable only across calculations with the same functional unit; cross-FU comparison is indicative.",
                 "portfolio_title": "Where the carbon is across your portfolio",
                 "pf_verdict": "“{stage}” dominates in {n} of {total} calculations — {pct}% of the footprint on average. Start reducing here.",
                 "spark_empty": "At least two calculations are needed to see a trend",
@@ -1581,6 +1583,7 @@
                 "xstats_by_month": "各月 CO₂",
                 "xstats_top5": "碳足迹前五",
                 "xstats_avg": "平均值",
+      "xstats_fu_note": "以 kg CO2-eq 计的总量与平均值仅在功能单位相同的计算之间可比；跨功能单位比较仅供参考。",
                 "portfolio_title": "碳集中在您的哪些环节",
                 "pf_verdict": "在 {total} 次计算中有 {n} 次以「{stage}」为主导 — 平均占足迹的 {pct}%。减排应从这里入手。",
                 "spark_empty": "至少需要两次计算才能看出趋势",
@@ -1962,11 +1965,25 @@
             else avatarEl.textContent = String(name).charAt(0).toUpperCase();
         }
 
+        // Single cached fetch of user_history rows (review #31: was 3 overlapping queries per init).
+        let _histCache = null, _histTs = 0;
+        async function fetchHistoryRows(force) {
+            if (!currentUser || !db) return [];
+            if (!force && _histCache && (Date.now() - _histTs) < 15000) return _histCache;
+            const { data } = await db.from('user_history')
+                .select('id, total_co2eq, created_at, product_title, archived_at')
+                .eq('user_id', currentUser.id);
+            _histCache = data || [];
+            _histTs = Date.now();
+            return _histCache;
+        }
+
         async function loadStats() {
             if (!currentUser || !db) return;
             try {
                 // архивные не считаем — иначе счётчик в сайдбаре разойдётся с KPI в Обзоре
-                const { count: c } = await db.from('user_history').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id).is('archived_at', null);
+                const rows = await fetchHistoryRows();
+                const c = rows.filter(r => !r.archived_at).length;
                 const { count: p } = await db.from('user_projects').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
                 document.getElementById('statCalcs').textContent = c || 0;
                 document.getElementById('statProjects').textContent = p || 0;
@@ -1978,7 +1995,7 @@
         async function loadExtendedStats() {
           if (!currentUser || !db) return null;
           try {
-            const { data } = await db.from('user_history').select('total_co2eq, created_at, product_title').eq('user_id', currentUser.id);
+            const data = await fetchHistoryRows();
             if (!data || !data.length) return null;
             const byMonth = {};
             data.forEach(d => {
@@ -2028,6 +2045,7 @@
               '<span>' + esc(t('xstats_avg')) + '</span>' +
               '<span class="xstat-val">' + stats.avg.toFixed(1) + ' kg</span>' +
             '</div>';
+            html += '<p class="session-note" style="margin-top:8px">' + esc(t('xstats_fu_note')) + '</p>';
             html += '</div>';
 
             const overview = document.getElementById('tab-overview');
