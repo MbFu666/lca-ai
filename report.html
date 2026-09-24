@@ -6,6 +6,8 @@
 <meta name="theme-color" content="#F2F0EC">
 <meta name="description" content="LCA·AI — Оценка жизненного цикла продукта с помощью ИИ">
 <script>
+function lsSet(k,v){ try { localStorage.setItem(k,v); return true; } catch(e){ console.warn('localStorage full, skip', k); return false; } }
+
 (function(){
   var t = localStorage.getItem('lca-theme');
   if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -26,6 +28,8 @@
 <script src="assets/esc.js"></script>
 <script src="assets/supabase-init.js"></script>
 <script>
+/* lsSet deduped */
+
 // Register Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -161,7 +165,7 @@ async function loadUserData() {
     
     if (history && history.length > 0) {
       // Cache in localStorage for fast access
-      localStorage.setItem('lca-history', JSON.stringify(history.map(h => ({
+      lsSet('lca-history', JSON.stringify(history.map(h => ({
         id: h.id,
         date: h.created_at,
         product: h.product_title,
@@ -209,7 +213,7 @@ async function loadUserData() {
       }));
       
       // Cache in localStorage for fast access
-      localStorage.setItem('lca-projects', JSON.stringify(projectsWithCalcs));
+      lsSet('lca-projects', JSON.stringify(projectsWithCalcs));
       console.log('[LCA] Projects cached:', projectsWithCalcs.length, 'projects');
     } else {
       // Clear localStorage if Supabase is empty
@@ -3607,6 +3611,8 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
 </div>
 
 <script>
+/* lsSet deduped */
+
 /* ============================================================
    LCA·AI — расчёт LCA через DeepSeek API (через прокси-бэкенд)
    ------------------------------------------------------------
@@ -4411,7 +4417,7 @@ async function saveToHistory(report) {
   };
   history.unshift(entry);
   if (history.length > MAX_HISTORY) history.pop();
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  lsSet(HISTORY_KEY, JSON.stringify(history));
   
   if (!currentUser) {
     console.log('[saveToHistory] No currentUser, saved to localStorage only');
@@ -4475,7 +4481,7 @@ function setCache(text, data) {
     if (keys.length > 50) {
       delete cache[keys[0]];
     }
-    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+    lsSet(CACHE_KEY, JSON.stringify(cache));
   } catch {}
 }
 
@@ -4690,7 +4696,7 @@ async function apiCall(messages, opts = {}) {
     } else if (res.status === 404 || /model.*not.*found/i.test(upstream)) {
       hint = ' — модель не найдена.';
     }
-    throw new Error(`API ${res.status}${hint}<br><small style="font-family:monospace;opacity:0.7">${escape(upstream).slice(0, 300)}</small>`);
+    throw new Error(`API ${res.status}${hint}<br><small style="font-family:monospace;opacity:0.7">${escHtml(upstream).slice(0, 300)}</small>`);
   }
 
   const text = data?.choices?.[0]?.message?.content || '';
@@ -5086,8 +5092,8 @@ function renderSensitivity(d) {
 
   list.innerHTML = rows.map(function (r) {
     return '<div class="sens-row">' +
-      '<div class="sens-name" title="' + escape(r.stage) + '">' + escape(r.name) +
-        '<span class="confidence-badge confidence-' + escape(r.conf) + '">' +
+      '<div class="sens-name" title="' + escHtml(r.stage) + '">' + escHtml(r.name) +
+        '<span class="confidence-badge confidence-' + escHtml(r.conf) + '">' +
         (r.conf === 'high' ? '●' : r.conf === 'medium' ? '◐' : '○') + '</span>' +
       '</div>' +
       '<div class="sens-bar"><div class="sens-fill" style="width:' + (r.elasticity / max * 100).toFixed(1) + '%"></div></div>' +
@@ -5133,16 +5139,16 @@ function renderPathways(d) {
     if (r.co2 < needKg) {
       const covers = r.co2 / needKg * 100;
       return '<div class="path-row">' +
-        '<div class="path-lever"><b>' + escape(r.name) + '</b> — ' +
-          escape((T.path_not_enough || '').replace('{pct}', covers.toFixed(0))) + '</div>' +
-        '<div class="path-need path-impossible">' + escape(T.path_insufficient || '') + '</div>' +
+        '<div class="path-lever"><b>' + escHtml(r.name) + '</b> — ' +
+          escHtml((T.path_not_enough || '').replace('{pct}', covers.toFixed(0))) + '</div>' +
+        '<div class="path-need path-impossible">' + escHtml(T.path_insufficient || '') + '</div>' +
       '</div>';
     }
     const cutFrac = needKg / r.co2;
     const newAmount = r.amount * (1 - cutFrac);
     return '<div class="path-row">' +
-      '<div class="path-lever"><b>' + escape(r.name) + '</b> — ' +
-        escape((T.path_reduce_to || '')
+      '<div class="path-lever"><b>' + escHtml(r.name) + '</b> — ' +
+        escHtml((T.path_reduce_to || '')
           .replace('{from}', fmtNum(r.amount) + ' ' + r.unit)
           .replace('{to}', fmtNum(newAmount) + ' ' + r.unit)) + '</div>' +
       '<div class="path-need">−' + (cutFrac * 100).toFixed(0) + '%</div>' +
@@ -5247,15 +5253,15 @@ function renderFlow(d, t) {
     <div class="flow-root-left">
       <div class="name">
         <span class="icon">1</span>
-        ${escape(d.functional_unit || '1')} ${escape(d.product_title || '—')}
+        ${escHtml(d.functional_unit || '1')} ${escHtml(d.product_title || '—')}
       </div>
       <div class="scope">
-        <span class="pill">${escape(d.system_boundary || '—')}</span>
+        <span class="pill">${escHtml(d.system_boundary || '—')}</span>
       </div>
-      <div class="cycle">${escape(formatCycle(d))}</div>
+      <div class="cycle">${escHtml(formatCycle(d))}</div>
     </div>
     <div class="flow-root-right">
-      <div class="label">${escape(t.res_label_short || 'Total emissions (kgCO₂e)')}</div>
+      <div class="label">${escHtml(t.res_label_short || 'Total emissions (kgCO₂e)')}</div>
       <div class="value">${fmtNum(d.total_co2eq)}</div>
     </div>
   `;
@@ -5278,7 +5284,7 @@ function renderFlow(d, t) {
     card.innerHTML = `
       <div class="stage-card-head">
         <span class="dot">${i + 1}</span>
-        <span class="name">${escape(s.name)}</span>
+        <span class="name">${escHtml(s.name)}</span>
         <span class="pct">${fmtNum(s.share_pct)}%</span>
       </div>
       <div class="value">${fmtNum(s.co2eq)}<span class="unit">kgCO₂e</span></div>
@@ -5308,7 +5314,7 @@ function renderFlow(d, t) {
       card.dataset.sub = j;
       card.innerHTML = `
         <div class="proc-card-head">
-          <span class="name">${escape(p.name)}</span><span class="confidence-badge confidence-${p.confidence || 'low'}" title="${p.confidence || 'low'}">${p.confidence === 'high' ? '●' : p.confidence === 'medium' ? '◐' : '○'}</span>
+          <span class="name">${escHtml(p.name)}</span><span class="confidence-badge confidence-${p.confidence || 'low'}" title="${p.confidence || 'low'}">${p.confidence === 'high' ? '●' : p.confidence === 'medium' ? '◐' : '○'}</span>
           <span class="pct">${fmtNum(pshare)}%</span>
         </div>
         <div class="value">${fmtNum(p.co2eq)}<span class="unit">kgCO₂e</span></div>
@@ -5416,7 +5422,7 @@ function showNodeDetail(o, cardEl) {
   const t = I18N[currentLang];
   const rowsHtml = (o.rows || [])
     .filter(r => r[1] !== undefined && r[1] !== null && String(r[1]).trim() !== '')
-    .map(r => `<tr><td>${escape(r[0])}</td><td>${escape(r[1])}</td></tr>`)
+    .map(r => `<tr><td>${escHtml(r[0])}</td><td>${escHtml(r[1])}</td></tr>`)
     .join('');
   
   const editHtml = o.editable && o.editData ? `
@@ -5443,14 +5449,14 @@ function showNodeDetail(o, cardEl) {
   const detailBody = $('#detailBody');
   if (!detailBody) return;
   detailBody.innerHTML = `
-    <div class="detail-eyebrow">${escape(o.typeLbl)}</div>
-    <div class="detail-name">${escape(o.name || '—')}</div>
+    <div class="detail-eyebrow">${escHtml(o.typeLbl)}</div>
+    <div class="detail-name">${escHtml(o.name || '—')}</div>
     <div class="detail-co2">${fmtNum(o.co2)} <span class="u">kg CO₂-eq</span></div>
     <div class="detail-share-row">
       <span class="detail-share-num">${fmtNum(o.share)}%</span>
-      <span class="detail-share-lbl">${escape(t.d_share)}</span>
+      <span class="detail-share-lbl">${escHtml(t.d_share)}</span>
     </div>
-    ${o.desc ? `<div class="detail-desc">${escape(o.desc)}</div>` : ''}
+    ${o.desc ? `<div class="detail-desc">${escHtml(o.desc)}</div>` : ''}
     ${rowsHtml ? `<table class="detail-table"><tbody>${rowsHtml}</tbody></table>` : ''}
     ${editHtml}
   `;
@@ -5570,22 +5576,22 @@ function renderFlowTable(d, t) {
   const tot = total(d);
   let html = `
     <thead><tr>
-      <th>${escape(t.ft_process)}</th>
-      <th class="num">${escape(t.ft_amount)}</th>
-      <th class="num">${escape(t.ft_factor)}</th>
-      <th>${escape(t.ft_source)}</th>
-      <th class="num">${escape(t.ft_co2)}</th>
-      <th class="num">${escape(t.ft_share)}</th>
+      <th>${escHtml(t.ft_process)}</th>
+      <th class="num">${escHtml(t.ft_amount)}</th>
+      <th class="num">${escHtml(t.ft_factor)}</th>
+      <th>${escHtml(t.ft_source)}</th>
+      <th class="num">${escHtml(t.ft_co2)}</th>
+      <th class="num">${escHtml(t.ft_share)}</th>
     </tr></thead><tbody>
   `;
   (d.stages || []).forEach((s, i) => {
     const color = STAGE_COLORS[i % STAGE_COLORS.length];
     html += `
       <tr class="stage-row">
-        <td><span class="stage-dot" style="background:${color}"></span>${escape(s.name)}</td>
+        <td><span class="stage-dot" style="background:${color}"></span>${escHtml(s.name)}</td>
         <td class="num">—</td>
         <td class="num">—</td>
-        <td class="src">${escape(s.factor_source || '—')}</td>
+        <td class="src">${escHtml(s.factor_source || '—')}</td>
         <td class="num">${fmtNum(s.co2eq)}</td>
         <td class="num">${fmtNum(s.share_pct)}%</td>
       </tr>
@@ -5594,10 +5600,10 @@ function renderFlowTable(d, t) {
       const pshare = tot ? (p.co2eq / tot) * 100 : 0;
       html += `
         <tr class="proc-row">
-          <td>${escape(p.name)}</td>
-          <td class="num">${fmtNum(p.amount)} ${escape(p.unit || '')}</td>
-          <td class="num">${fmtNum(p.factor)} ${escape(p.factor_unit || '')}</td>
-          <td class="src">${escape(p.factor_source || '—')}</td>
+          <td>${escHtml(p.name)}</td>
+          <td class="num">${fmtNum(p.amount)} ${escHtml(p.unit || '')}</td>
+          <td class="num">${fmtNum(p.factor)} ${escHtml(p.factor_unit || '')}</td>
+          <td class="src">${escHtml(p.factor_source || '—')}</td>
           <td class="num">${fmtNum(p.co2eq)}</td>
           <td class="num">${fmtNum(pshare)}%</td>
         </tr>
@@ -5606,7 +5612,7 @@ function renderFlowTable(d, t) {
   });
   html += `
     <tr class="total-row">
-      <td>${escape(t.ft_total)}</td>
+      <td>${escHtml(t.ft_total)}</td>
       <td class="num">—</td>
       <td class="num">—</td>
       <td class="src">—</td>
@@ -5685,7 +5691,7 @@ function renderRanking(d) {
     const row = document.createElement('div');
     row.className = 'rank-row';
     row.innerHTML = `
-      <div class="lbl">${escape(item.name)}</div>
+      <div class="lbl">${escHtml(item.name)}</div>
       <div class="rank-bar"><div class="rank-bar-fill" style="width:0%;background:${item.color}"></div></div>
       <div class="val">${fmtNum(item.value)}</div>
     `;
@@ -5759,7 +5765,7 @@ function renderDonut(d) {
     row.className = 'donut-legend-row';
     row.innerHTML = `
       <span class="sw" style="background:${item.color}"></span>
-      <span class="lbl">${escape(item.name)}</span>
+      <span class="lbl">${escHtml(item.name)}</span>
       <span class="pct">${fmtNum(item.pct)}%</span>
     `;
     leg.appendChild(row);
@@ -5873,8 +5879,8 @@ function showAnalysisError(msg) {
   }
   sec.innerHTML = `
     <div class="step2-cta" style="border-color:var(--c-rust)">
-      <p style="color:var(--c-rust)">${escape(msg)}</p>
-      <button id="retryAnalysis">↻ ${escape(I18N[currentLang].step2_cta_btn)}</button>
+      <p style="color:var(--c-rust)">${escHtml(msg)}</p>
+      <button id="retryAnalysis">↻ ${escHtml(I18N[currentLang].step2_cta_btn)}</button>
     </div>` + sec.innerHTML;
   const r = $('#retryAnalysis');
   if (r) r.onclick = () => { showAnalysisError(''); loadAnalysis(); };
@@ -5965,7 +5971,7 @@ async function showPdfPreview() {
   if (!preview) return;
 
   const T = I18N[currentLang] || I18N.ru;
-  preview.innerHTML = `<div style="font-family:var(--mono);font-size:12px;color:var(--ink-mute);letter-spacing:.05em">${escape(T.pdf_generating || 'Формируем документ…')}</div>`;
+  preview.innerHTML = `<div style="font-family:var(--mono);font-size:12px;color:var(--ink-mute);letter-spacing:.05em">${escHtml(T.pdf_generating || 'Формируем документ…')}</div>`;
   showModal('modalPdf');
 
   try {
@@ -5978,7 +5984,7 @@ async function showPdfPreview() {
 
     preview.innerHTML = `<iframe src="${previewPdfUrl}" title="PDF preview" style="width:100%;height:100%;border:none;display:block"></iframe>`;
   } catch (e) {
-    preview.innerHTML = `<div style="padding:40px;text-align:center;color:var(--ink-mute)">${escape(T.pdf_error || 'Не удалось сформировать документ')}</div>`;
+    preview.innerHTML = `<div style="padding:40px;text-align:center;color:var(--ink-mute)">${escHtml(T.pdf_error || 'Не удалось сформировать документ')}</div>`;
   }
 
 }
@@ -6094,7 +6100,7 @@ function buildPdfTemplate(d) {
     sections.push(sec);
   };
 
-  // escape() и fmtNum() уже объявлены в этом файле (function-декларации, hoisted) —
+  // escHtml() и fmtNum() уже объявлены в этом файле (function-декларации, hoisted) —
   // используем их напрямую. НЕ window.escape: это встроенная функция URL-кодирования,
   // а не HTML-экранирование, подстановка привела бы к XSS в сгенерированном PDF-шаблоне.
   const esc = escape;
@@ -6323,7 +6329,7 @@ function countUp(el, target, duration) {
   requestAnimationFrame(tick);
 }
 
-function escape(s) {
+function escHtml(s) {
   return String(s == null ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -6383,7 +6389,7 @@ Each question ≤ 12 words. Each option ≤ 6 words. Last option = "Другое
   } catch (e) {
     console.warn('[LCA] agent failed', e);
     $('#agentBody').innerHTML =
-      `<div class="agent-empty" style="color:var(--c-rust)">— ${escape(e.message || e)} —</div>`;
+      `<div class="agent-empty" style="color:var(--c-rust)">— ${escHtml(e.message || e)} —</div>`;
   }
 }
 
@@ -6398,7 +6404,7 @@ function renderAgent() {
       body.innerHTML = `
         <div class="agent-empty" style="padding-top:30px">
           ${t.agent_cta_hint}
-          <button id="agentGenBtn" class="agent-gen-btn">${escape(t.agent_cta_btn)}</button>
+          <button id="agentGenBtn" class="agent-gen-btn">${escHtml(t.agent_cta_btn)}</button>
         </div>`;
       $('#agentGenBtn').onclick = () => generateAgentQuestions(lastReport);
     }
@@ -6408,11 +6414,11 @@ function renderAgent() {
   body.innerHTML = agentQuestions.map((q, i) => {
     const opts = q.options.map((o, j) => `
       <button class="agent-opt ${q.selectedIdx === j ? 'selected' : ''}"
-              data-q="${i}" data-o="${j}">${escape(o)}</button>
+              data-q="${i}" data-o="${j}">${escHtml(o)}</button>
     `).join('');
     return `
       <div class="agent-q">
-        <div class="agent-q-text"><span class="idx">${i + 1}.</span>${escape(q.text)}</div>
+        <div class="agent-q-text"><span class="idx">${i + 1}.</span>${escHtml(q.text)}</div>
         <div class="agent-opts">${opts}</div>
       </div>
     `;
@@ -6458,7 +6464,7 @@ function renderChatHistory() {
     html += `
       <div class="chat-msg ${isUser ? 'chat-user' : 'chat-ai'}">
         <div class="chat-avatar">${isUser ? '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:16px;height:16px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' : 'AI'}</div>
-        <div class="chat-bubble">${escape(msg.text)}</div>
+        <div class="chat-bubble">${escHtml(msg.text)}</div>
       </div>
     `;
   });
@@ -6552,7 +6558,7 @@ async function applyAgentAnswers() {
       <div class="agent-processing-spinner"></div>
       <div class="agent-processing-text">${t.agent_recalc || 'Пересчёт с учётом ваших ответов…'}</div>
       <div class="agent-processing-details">
-        ${answered.map(q => `<div class="agent-processing-item"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M20 6L9 17l-5-5"/></svg> ${escape(q.text)}</div>`).join('')}
+        ${answered.map(q => `<div class="agent-processing-item"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M20 6L9 17l-5-5"/></svg> ${escHtml(q.text)}</div>`).join('')}
       </div>
     </div>
   `;
@@ -6753,18 +6759,18 @@ function renderCompare() {
   
   html += `<div class="compare-card">
     <button class="compare-card-remove" data-idx="0" title="${currentLang === 'ru' ? 'Удалить' : 'Remove'}">×</button>
-    <h3>${escape(a.product_title || '-')}</h3>
+    <h3>${escHtml(a.product_title || '-')}</h3>
     <div class="compare-label">${I18N[currentLang].res_label_short || 'Total emissions'}</div>
     <div class="compare-value">${fmtNum(a.total_co2eq)} <span style="font-size:14px;color:var(--ink-mute)">kgCO₂e</span></div>
-    <div style="font-size:12px;color:var(--ink-mute);margin-top:4px">${escape(a.functional_unit || '')}</div>
+    <div style="font-size:12px;color:var(--ink-mute);margin-top:4px">${escHtml(a.functional_unit || '')}</div>
   </div>`;
   
   html += `<div class="compare-card">
     <button class="compare-card-remove" data-idx="1" title="${currentLang === 'ru' ? 'Удалить' : 'Remove'}">×</button>
-    <h3>${escape(b.product_title || '-')}</h3>
+    <h3>${escHtml(b.product_title || '-')}</h3>
     <div class="compare-label">${I18N[currentLang].res_label_short || 'Total emissions'}</div>
     <div class="compare-value">${fmtNum(b.total_co2eq)} <span style="font-size:14px;color:var(--ink-mute)">kgCO₂e</span></div>
-    <div style="font-size:12px;color:var(--ink-mute);margin-top:4px">${escape(b.functional_unit || '')}</div>
+    <div style="font-size:12px;color:var(--ink-mute);margin-top:4px">${escHtml(b.functional_unit || '')}</div>
   </div>`;
   
   html += `</div>`;
@@ -6778,8 +6784,8 @@ function renderCompare() {
     <table class="flow-table">
       <thead><tr>
         <th>${currentLang === 'ru' ? 'Стадия' : currentLang === 'zh' ? '阶段' : 'Stage'}</th>
-        <th class="num">${escape(a.product_title || 'A')}</th>
-        <th class="num">${escape(b.product_title || 'B')}</th>
+        <th class="num">${escHtml(a.product_title || 'A')}</th>
+        <th class="num">${escHtml(b.product_title || 'B')}</th>
         <th class="num">Δ</th>
       </tr></thead><tbody>`;
   
@@ -6792,7 +6798,7 @@ function renderCompare() {
     const deltaPct = co2a ? ((delta / co2a) * 100).toFixed(1) : '—';
     const color = delta > 0 ? 'var(--c-rust)' : delta < 0 ? 'var(--jade)' : 'var(--ink-mute)';
     html += `<tr>
-      <td>${escape(sa.name || sb.name || '—')}</td>
+      <td>${escHtml(sa.name || sb.name || '—')}</td>
       <td class="num">${fmtNum(co2a)}</td>
       <td class="num">${fmtNum(co2b)}</td>
       <td class="num" style="color:${color}">${delta > 0 ? '+' : ''}${fmtNum(delta)} (${deltaPct}${deltaPct !== '—' ? '%' : ''})</td>
@@ -6854,8 +6860,8 @@ function renderHistory() {
   list.innerHTML = history.map(h => `
     <div class="history-item" data-id="${h.id}">
       <div class="history-info">
-        <div class="history-product">${escape(h.product || '-')}</div>
-        <div class="history-meta">${escape(h.fu || '')}</div>
+        <div class="history-product">${escHtml(h.product || '-')}</div>
+        <div class="history-meta">${escHtml(h.fu || '')}</div>
       </div>
       <div class="history-value">${fmtNum(h.total)}</div>
       <div class="history-date">${new Date(h.date).toLocaleDateString()}</div>
@@ -6902,7 +6908,7 @@ function saveProjectLocal(project) {
   } else {
     projects.push(project);
   }
-  localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+  lsSet(PROJECTS_KEY, JSON.stringify(projects));
 }
 
 async function createProject(name) {
@@ -6987,7 +6993,7 @@ function deleteProject(projectId) {
   
   // Delete from localStorage (always, regardless of ID format)
   const projects = getProjects().filter(p => p.id !== projectId);
-  localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+  lsSet(PROJECTS_KEY, JSON.stringify(projects));
   console.log('deleteProject: Deleted from localStorage');
   
   // Delete from Supabase only if logged in AND projectId is a valid UUID
@@ -7062,7 +7068,7 @@ function renderProjects() {
     <div class="project-group" data-id="${p.id}">
       <div class="project-header">
         <div class="project-info">
-          <div class="project-name">${escape(p.name)}</div>
+          <div class="project-name">${escHtml(p.name)}</div>
           <div class="project-meta">${p.calculations.length} ${currentLang === 'ru' ? 'расчётов' : currentLang === 'zh' ? '个计算' : 'calculations'} · ${new Date(p.createdAt).toLocaleDateString()}</div>
         </div>
         <div class="project-actions">
@@ -7075,7 +7081,7 @@ function renderProjects() {
         ${p.calculations.map(c => `
           <div class="project-calc-item" data-project="${p.id}" data-calc="${c.id}">
             <div class="project-calc-info">
-              <div class="project-calc-name">${escape(c.product || '-')}</div>
+              <div class="project-calc-name">${escHtml(c.product || '-')}</div>
               <div class="project-calc-date">${new Date(c.addedAt).toLocaleDateString()}</div>
             </div>
             <div class="project-calc-value">${fmtNum(c.total)} kgCO₂e</div>
@@ -7246,7 +7252,7 @@ function showProjectSelectModal() {
   const list = document.getElementById('selectProjectList');
   list.innerHTML = projects.map(p => `
     <div class="select-project-item" data-id="${p.id}">
-      <div class="select-project-name">${escape(p.name)}</div>
+      <div class="select-project-name">${escHtml(p.name)}</div>
       <div class="select-project-meta">${p.calculations.length} ${currentLang === 'ru' ? 'расчётов' : 'calculations'}</div>
     </div>
   `).join('');
@@ -7371,29 +7377,29 @@ function showWordPreview(d) {
   const t = I18N[currentLang];
   
   preview.innerHTML = `
-    <h1 style="font-size:20px;margin-bottom:12px">${t.word_title || 'LCA Report'}: ${escape(d.product_title || '-')}</h1>
-    <p style="color:#6B6862;font-size:12px"><strong>${t.ft_amount || 'Functional unit'}:</strong> ${escape(d.functional_unit || '-')}</p>
-    <p style="color:#6B6862;font-size:12px"><strong>${t.word_boundary || 'System boundary'}:</strong> ${escape(d.system_boundary || '-')}</p>
-    <p style="color:#6B6862;font-size:12px"><strong>${t.word_method || 'Method'}:</strong> ${escape(d.method || '-')}</p>
-    <p style="color:#6B6862;font-size:12px"><strong>${t.word_region || 'Region'}:</strong> ${escape(d.region || '-')}</p>
+    <h1 style="font-size:20px;margin-bottom:12px">${t.word_title || 'LCA Report'}: ${escHtml(d.product_title || '-')}</h1>
+    <p style="color:#6B6862;font-size:12px"><strong>${t.ft_amount || 'Functional unit'}:</strong> ${escHtml(d.functional_unit || '-')}</p>
+    <p style="color:#6B6862;font-size:12px"><strong>${t.word_boundary || 'System boundary'}:</strong> ${escHtml(d.system_boundary || '-')}</p>
+    <p style="color:#6B6862;font-size:12px"><strong>${t.word_method || 'Method'}:</strong> ${escHtml(d.method || '-')}</p>
+    <p style="color:#6B6862;font-size:12px"><strong>${t.word_region || 'Region'}:</strong> ${escHtml(d.region || '-')}</p>
     <p style="font-size:14px;font-weight:600;margin:12px 0">${t.word_total || 'Total CO₂-eq'}: ${fmtNum(d.total_co2eq)} kgCO₂e</p>
     
     <h2 style="color:#1C1B19;font-size:16px;border-bottom:1px solid #D6D2CB;padding-bottom:6px;margin-top:20px">${t.word_emission || 'Emission Composition'}</h2>
     <div style="display:flex;align-items:flex-start;gap:20px;margin:12px 0">
       <img src="${donutImg}" width="150" height="150" alt="Donut">
       <div style="font-size:12px">
-        ${stages.map((s, i) => `<div style="margin:4px 0"><span style="display:inline-block;width:10px;height:10px;background:${STAGE_COLORS[i % STAGE_COLORS.length]};margin-right:6px"></span>${escape(s.name)} — ${fmtNum(s.share_pct)}%</div>`).join('')}
+        ${stages.map((s, i) => `<div style="margin:4px 0"><span style="display:inline-block;width:10px;height:10px;background:${STAGE_COLORS[i % STAGE_COLORS.length]};margin-right:6px"></span>${escHtml(s.name)} — ${fmtNum(s.share_pct)}%</div>`).join('')}
       </div>
     </div>
     
     <h2 style="color:#1C1B19;font-size:16px;border-bottom:1px solid #D6D2CB;padding-bottom:6px;margin-top:20px">${t.word_breakdown || 'Stage Breakdown'}</h2>
     <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:8px">
       <tr style="background:#F8FAFA"><th style="border:1px solid #D6D2CB;padding:6px 8px;text-align:left">${t.ft_process || 'Stage'}</th><th style="border:1px solid #D6D2CB;padding:6px 8px;text-align:right">${t.ft_co2 || 'CO₂-eq'}</th><th style="border:1px solid #D6D2CB;padding:6px 8px;text-align:right">${t.ft_share || 'Share'}</th></tr>
-      ${stages.map(s => `<tr><td style="border:1px solid #D6D2CB;padding:6px 8px">${escape(s.name)}</td><td style="border:1px solid #D6D2CB;padding:6px 8px;text-align:right;font-family:monospace">${fmtNum(s.co2eq)}</td><td style="border:1px solid #D6D2CB;padding:6px 8px;text-align:right;font-family:monospace">${fmtNum(s.share_pct)}%</td></tr>`).join('')}
+      ${stages.map(s => `<tr><td style="border:1px solid #D6D2CB;padding:6px 8px">${escHtml(s.name)}</td><td style="border:1px solid #D6D2CB;padding:6px 8px;text-align:right;font-family:monospace">${fmtNum(s.co2eq)}</td><td style="border:1px solid #D6D2CB;padding:6px 8px;text-align:right;font-family:monospace">${fmtNum(s.share_pct)}%</td></tr>`).join('')}
       <tr style="background:#ECFAF4;font-weight:700"><td style="border:1px solid #D6D2CB;padding:6px 8px">${t.ft_total || 'Total'}</td><td style="border:1px solid #D6D2CB;padding:6px 8px;text-align:right;font-family:monospace">${fmtNum(d.total_co2eq)}</td><td style="border:1px solid #D6D2CB;padding:6px 8px;text-align:right;font-family:monospace">100%</td></tr>
     </table>
     
-    ${d.total_description ? `<h2 style="color:#1C1B19;font-size:16px;border-bottom:1px solid #D6D2CB;padding-bottom:6px;margin-top:20px">AI Analysis</h2><p style="font-size:12px;color:#6B6862">${escape(d.total_description)}</p>` : ''}
+    ${d.total_description ? `<h2 style="color:#1C1B19;font-size:16px;border-bottom:1px solid #D6D2CB;padding-bottom:6px;margin-top:20px">AI Analysis</h2><p style="font-size:12px;color:#6B6862">${escHtml(d.total_description)}</p>` : ''}
   `;
   
   showModal('modalWord');
@@ -7448,7 +7454,7 @@ function buildExcelPreview(d) {
       const v = r[j];
       if (v === undefined || v === null || v === '') return '<td></td>';
       const isNum = typeof v === 'number';
-      return `<td style="${isNum ? 'text-align:right' : ''}">${escape(isNum ? fmtNum(v) : String(v))}</td>`;
+      return `<td style="${isNum ? 'text-align:right' : ''}">${escHtml(isNum ? fmtNum(v) : String(v))}</td>`;
     }).join('');
     html += `<tr class="${cls}"><td>${idx}</td>${cells}</tr>`;
   });
@@ -7569,6 +7575,8 @@ async function downloadWord(d) {
       ${d.recommendations && d.recommendations.length ? `<h3>${t.recommendations}</h3><ul>${d.recommendations.map(r => `<li>${escW(r)}</li>`).join('')}</ul>` : ''}
       <div class="footer">Generated by LCA·AI on ${new Date().toLocaleDateString()}</div>
     <script>
+/* lsSet deduped */
+
 // a11y (review #28): ensure a single <main> landmark exists.
 (function(){
   var m = document.querySelector('main') || document.querySelector('.frame') || document.querySelector('#app');
@@ -7578,6 +7586,8 @@ async function downloadWord(d) {
 })();
 </script>
 <script>
+/* lsSet deduped */
+
 // a11y (review #28): tablist/tab semantics + aria-selected
 (function(){
   function decorate(){
@@ -7739,7 +7749,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       document.documentElement.classList.toggle('dark');
       var isDark = document.documentElement.classList.contains('dark');
       // theme icon handled by CSS ::after
-      localStorage.setItem('lca-theme', isDark ? 'dark' : 'light');
+      lsSet('lca-theme', isDark ? 'dark' : 'light');
     });
   }
 
@@ -7759,7 +7769,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   document.querySelectorAll('.lang button').forEach(function(b) {
     b.addEventListener('click', function() {
       applyLanguage(b.dataset.lang);
-      localStorage.setItem('lca-lang', b.dataset.lang);
+      lsSet('lca-lang', b.dataset.lang);
     });
   });
   
@@ -7884,6 +7894,8 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 
 <script>
+/* lsSet deduped */
+
 // a11y (review #28): ensure a single <main> landmark exists.
 (function(){
   var m = document.querySelector('main') || document.querySelector('.frame') || document.querySelector('#app');
@@ -7893,6 +7905,8 @@ document.addEventListener('DOMContentLoaded', async function() {
 })();
 </script>
 <script>
+/* lsSet deduped */
+
 // a11y (review #28): tablist/tab semantics + aria-selected
 (function(){
   function decorate(){

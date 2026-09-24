@@ -81,7 +81,7 @@ export function Histogram({ buckets, unit }: { buckets: Array<{ x0: number; x1: 
 export function Toasts() {
   const { toasts, dismiss } = useToasts()
   return (
-    <div className="toast-wrap">
+    <div className="toast-wrap" aria-live="polite" aria-atomic="false">
       {toasts.map((t) => (
         <div key={t.id} className={`toast ${t.kind === 'ok' ? '' : t.kind}`} onClick={() => dismiss(t.id)} role="status">
           {t.text}
