@@ -27,6 +27,8 @@ function lsSet(k,v){ try { localStorage.setItem(k,v); return true; } catch(e){ c
 <link rel="stylesheet" href="assets/tokens.css">
 <script src="assets/esc.js"></script>
 <script src="assets/supabase-init.js"></script>
+<script src="assets/i18n.js"></script>
+<script src="assets/api.js"></script>
 <script>
 /* lsSet deduped */
 
@@ -4652,6 +4654,9 @@ async function apiCall(messages, opts = {}) {
   if (opts.json !== false) {
     body.response_format = { type: 'json_object' };
   }
+
+  // Delegate to shared assets/api.js when available (review #15).
+  if (window.lcaApiCall) return await window.lcaApiCall(body, { lang: currentLang, label: opts.label });
 
   const t0 = Date.now();
   const { data: { session } } = await supabaseClient.auth.getSession();

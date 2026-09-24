@@ -27,6 +27,8 @@ function lsSet(k,v){ try { localStorage.setItem(k,v); return true; } catch(e){ c
 <link rel="stylesheet" href="assets/tokens.css">
 <script src="assets/esc.js"></script>
 <script src="assets/supabase-init.js"></script>
+<script src="assets/i18n.js"></script>
+<script src="assets/api.js"></script>
 <script>
 /* lsSet deduped */
 
@@ -5050,6 +5052,9 @@ async function apiCall(messages, opts = {}) {
     body.response_format = { type: 'json_object' };
   }
 
+  // Delegate to shared assets/api.js when available (review #15): single auth-gate + error mapping.
+  if (window.lcaApiCall) return await window.lcaApiCall(body, { lang: currentLang, label: opts.label });
+
   const t0 = Date.now();
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (!session) {
@@ -7505,26 +7510,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
-  // Автоопределение языка: браузерный > localStorage > ru по умолчанию
-  var browserLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
-  var savedLang = localStorage.getItem('lca-lang');
-  if (savedLang && I18N[savedLang]) {
-    // Honor any saved language, including zh (review #29).
-    applyLanguage(savedLang);
-  } else if (browserLang.startsWith('zh')) {
-    applyLanguage('zh');
-  } else if (browserLang.startsWith('ru')) {
-    applyLanguage('ru');
-  } else if (browserLang.startsWith('en')) {
-    applyLanguage('en');
-  } else {
-    applyLanguage('ru');
-  }
+  // Language choice owned by shared assets/i18n.js (review #29).
+  applyLanguage(window.LcaLang ? window.LcaLang.get(['ru', 'en', 'zh']) : 'ru');
 
   document.querySelectorAll('.lang button').forEach(function(b) {
     b.addEventListener('click', function() {
       applyLanguage(b.dataset.lang);
-      lsSet('lca-lang', b.dataset.lang);
+      if (window.LcaLang) window.LcaLang.set(b.dataset.lang); else lsSet('lca-lang', b.dataset.lang);
     });
   });
   
