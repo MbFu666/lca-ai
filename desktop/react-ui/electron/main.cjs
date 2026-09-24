@@ -328,8 +328,15 @@ async function startEngine() {
         { windowsHide: true },
       )
       weSpawned = true
-      engine.stdout.on('data', () => {})
-      engine.stderr.on('data', () => {})
+      // Capture engine stdio to a log file for diagnostics (review minor: was discarded).
+      const engineLog = path.join(app.getPath('userData'), 'engine.log')
+      const logStream = fs.createWriteStream(engineLog, { flags: 'a' })
+      engine.stdout.on('data', (d) => {
+        try { logStream.write(d) } catch {}
+      })
+      engine.stderr.on('data', (d) => {
+        try { logStream.write(d) } catch {}
+      })
       engine.on('exit', (code) => {
         engine = null
         weSpawned = false

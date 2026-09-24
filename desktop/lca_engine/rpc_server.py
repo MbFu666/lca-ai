@@ -2,6 +2,7 @@
 import sys
 import json
 import os
+import logging
 from typing import Any
 from .engine import LcaEngine
 from .importer import ZolcaImporter
@@ -147,7 +148,15 @@ def main():
                 "error": {"code": -1, "message": "Invalid JSON"},
             }
         else:
-            response = server.handle(request)
+            try:
+                response = server.handle(request)
+            except Exception as e:  # never crash the RPC loop on a bad request
+                logging.exception("handle() failed")
+                response = {
+                    "jsonrpc": "2.0",
+                    "id": request.get("id") if isinstance(request, dict) else None,
+                    "error": {"code": -32603, "message": "Internal error"},
+                }
 
         sys.stdout.write(json.dumps(response) + "\n")
         sys.stdout.flush()
