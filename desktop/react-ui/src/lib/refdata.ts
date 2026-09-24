@@ -95,7 +95,15 @@ export const GEO: GeoEntry[] = [
     cornYield: { value: 6.8, unit: 't/ha', year: 2022, source: NBSC },
     sorghumYield: { value: 40, unit: 't/ha fresh', year: 2021, source: SSF_LIT },
     transportRadiusKm: { value: 80, unit: 'km', year: 2022, source: LIQ_LIT },
-    cities: [],
+    cities: [
+      {
+        id: 'Changchun',
+        label: { ru: 'Чанчунь', en: 'Changchun', zh: '长春' },
+        cornYield: { value: 7.0, unit: 't/ha', year: 2022, source: { ...NBSC, title: 'Changchun Statistical Yearbook 2023 (maize yield, city estimate)' } },
+        sorghumYield: { value: 40, unit: 't/ha fresh', year: 2021, source: SSF_LIT },
+        transportRadiusKm: { value: 70, unit: 'km', year: 2022, source: LIQ_LIT },
+      },
+    ],
   },
   {
     province: 'Henan',
@@ -105,7 +113,15 @@ export const GEO: GeoEntry[] = [
     cornYield: { value: 6.0, unit: 't/ha', year: 2022, source: NBSC },
     sorghumYield: { value: 38, unit: 't/ha fresh', year: 2021, source: SSF_LIT },
     transportRadiusKm: { value: 70, unit: 'km', year: 2022, source: LIQ_LIT },
-    cities: [],
+    cities: [
+      {
+        id: 'Zhengzhou',
+        label: { ru: 'Чжэнчжоу', en: 'Zhengzhou', zh: '郑州' },
+        cornYield: { value: 6.2, unit: 't/ha', year: 2022, source: { ...NBSC, title: 'Zhengzhou Statistical Yearbook 2023 (maize yield, city estimate)' } },
+        sorghumYield: { value: 38, unit: 't/ha fresh', year: 2021, source: SSF_LIT },
+        transportRadiusKm: { value: 60, unit: 'km', year: 2022, source: LIQ_LIT },
+      },
+    ],
   },
   {
     province: 'Shandong',
@@ -115,7 +131,15 @@ export const GEO: GeoEntry[] = [
     cornYield: { value: 6.4, unit: 't/ha', year: 2022, source: NBSC },
     sorghumYield: { value: 40, unit: 't/ha fresh', year: 2021, source: SSF_LIT },
     transportRadiusKm: { value: 60, unit: 'km', year: 2022, source: LIQ_LIT },
-    cities: [],
+    cities: [
+      {
+        id: 'Jinan',
+        label: { ru: 'Цзинань', en: 'Jinan', zh: '济南' },
+        cornYield: { value: 6.6, unit: 't/ha', year: 2022, source: { ...NBSC, title: 'Jinan Statistical Yearbook 2023 (maize yield, city estimate)' } },
+        sorghumYield: { value: 40, unit: 't/ha fresh', year: 2021, source: SSF_LIT },
+        transportRadiusKm: { value: 55, unit: 'km', year: 2022, source: LIQ_LIT },
+      },
+    ],
   },
   {
     province: 'Inner Mongolia',
@@ -125,7 +149,15 @@ export const GEO: GeoEntry[] = [
     cornYield: { value: 6.5, unit: 't/ha', year: 2022, source: NBSC },
     sorghumYield: { value: 35, unit: 't/ha fresh', year: 2021, source: SSF_LIT },
     transportRadiusKm: { value: 100, unit: 'km', year: 2022, source: LIQ_LIT },
-    cities: [],
+    cities: [
+      {
+        id: 'Hohhot',
+        label: { ru: 'Хух-Хото', en: 'Hohhot', zh: '呼和浩特' },
+        cornYield: { value: 6.8, unit: 't/ha', year: 2022, source: { ...NBSC, title: 'Hohhot Statistical Yearbook 2023 (maize yield, city estimate)' } },
+        sorghumYield: { value: 35, unit: 't/ha fresh', year: 2021, source: SSF_LIT },
+        transportRadiusKm: { value: 90, unit: 'km', year: 2022, source: LIQ_LIT },
+      },
+    ],
   },
 ]
 
