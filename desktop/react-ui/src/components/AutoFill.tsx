@@ -34,6 +34,8 @@ export function AutoFill({ open, onClose }: { open: boolean; onClose: () => void
   const t = useI18n((s) => s.t)
   const lang = useI18n((s) => s.lang) as Lang
   const [text, setText] = useState('')
+  const [fileName, setFileName] = useState('')
+  const [busyFile, setBusyFile] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [extracted, setExtracted] = useState<Record<string, any> | null>(null)
@@ -89,6 +91,35 @@ export function AutoFill({ open, onClose }: { open: boolean; onClose: () => void
         </div>
         <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3">
           <div className="text-[12px] text-graphite-soft">{t('af_hint')}</div>
+          <div className="flex items-center gap-2">
+            <label className="px-2.5 py-1 text-[12px] border border-line hover:bg-paper-2 cursor-pointer">
+              📄 {t('af_file')}
+              <input
+                type="file"
+                accept=".docx,.pdf,.xlsx,.xls,.csv,.txt,.md"
+                className="hidden"
+                onChange={async (e) => {
+                  const f = e.target.files?.[0]
+                  if (!f) return
+                  setBusyFile(true)
+                  setError('')
+                  try {
+                    const p = (f as any).path as string
+                    const r = await window.desktop!.extractText(p)
+                    setText(r.text)
+                    setFileName(`${f.name} (${r.chars} chars)`)
+                  } catch (err) {
+                    setError(String(err instanceof Error ? err.message : err))
+                  } finally {
+                    setBusyFile(false)
+                    e.target.value = ''
+                  }
+                }}
+              />
+            </label>
+            {busyFile && <Spinner label={t('af_file_working')} />}
+            {fileName && <span className="text-[11px] text-graphite-soft">{fileName}</span>}
+          </div>
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}

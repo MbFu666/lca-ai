@@ -85,6 +85,7 @@ export interface DesktopApi {
     recommendations?: string[]
   }>
   aiExtractInventory: (text: string, lang: string) => Promise<Record<string, any>>
+  extractText: (path: string) => Promise<{ text: string; chars: number }>
   cloudReportSave: (reportData: Record<string, unknown>) => Promise<{ id: string | null; projectId: string | null }>
   cloudReportsList: () => Promise<
     Array<{

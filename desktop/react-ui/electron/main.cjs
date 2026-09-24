@@ -1145,6 +1145,37 @@ if (!app.requestSingleInstanceLock()) {
       return JSON.parse(text.slice(f, l + 1))
     }
 
+    ipcMain.handle('file:extract-text', async (_e, { path }) => {
+      const fs = require('fs')
+      const ext = String(path.split('.').pop() || '').toLowerCase()
+      let text = ''
+      if (ext === 'docx') {
+        const mammoth = require('mammoth')
+        const r = await mammoth.extractRawText({ path })
+        text = r.value || ''
+      } else if (ext === 'xlsx' || ext === 'xls' || ext === 'csv') {
+        const XLSX = require('xlsx')
+        const wb = XLSX.readFile(path)
+        const parts = []
+        for (const name of wb.SheetNames) {
+          parts.push('=== ' + name + ' ===\n' + XLSX.utils.sheet_to_csv(wb.Sheets[name]))
+        }
+        text = parts.join('\n\n')
+      } else if (ext === 'pdf') {
+        const { PDFParse } = require('pdf-parse')
+        const buf = fs.readFileSync(path)
+        const parser = new PDFParse({ data: new Uint8Array(buf) })
+        const r = await parser.getText()
+        text = r.text || ''
+        try {
+          await parser.destroy()
+        } catch {}
+      } else {
+        text = fs.readFileSync(path, 'utf8')
+      }
+      return { text: String(text).slice(0, 60000), chars: String(text).length }
+    })
+
     ipcMain.handle('ai:extract-inventory', async (_e, { text, lang }) => {
       const systemPrompt = [
         'You are an expert LCA inventory data-extraction assistant.',

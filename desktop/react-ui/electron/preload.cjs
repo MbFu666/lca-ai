@@ -47,6 +47,7 @@ contextBridge.exposeInMainWorld('desktop', {
   cloudProjectsMove: (projectId, folderId) => ipcRenderer.invoke('cloud:projects-move', { projectId, folderId }),
   aiReportNarrative: (payload) => ipcRenderer.invoke('ai:report-narrative', { payload }),
   aiExtractInventory: (text, lang) => ipcRenderer.invoke('ai:extract-inventory', { text, lang }),
+  extractText: (path) => ipcRenderer.invoke('file:extract-text', { path }),
   cloudReportSave: (reportData) => ipcRenderer.invoke('cloud:report-save', { reportData }),
   cloudReportsList: () => ipcRenderer.invoke('cloud:reports-list'),
   authLogin: (email, password) => ipcRenderer.invoke('auth:login', { email, password }),
