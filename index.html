@@ -7495,9 +7495,11 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Автоопределение языка: браузерный > localStorage > ru по умолчанию
   var browserLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
   var savedLang = localStorage.getItem('lca-lang');
-  if (savedLang && savedLang !== 'zh') {
-    // Используем сохранённый язык, кроме zh (китайский не по умолчанию)
+  if (savedLang && I18N[savedLang]) {
+    // Honor any saved language, including zh (review #29).
     applyLanguage(savedLang);
+  } else if (browserLang.startsWith('zh')) {
+    applyLanguage('zh');
   } else if (browserLang.startsWith('ru')) {
     applyLanguage('ru');
   } else if (browserLang.startsWith('en')) {

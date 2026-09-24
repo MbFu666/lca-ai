@@ -278,7 +278,7 @@ const I18N = {
 };
 
 let lang = (function () {
-  try { const s = localStorage.getItem('lca_lang'); if (s && I18N[s]) return s; } catch (e) {}
+  try { const s = localStorage.getItem('lca-lang') || localStorage.getItem('lca_lang'); if (s && I18N[s]) return s; } catch (e) {}
   const n = (navigator.language || 'ru').slice(0, 2);
   return I18N[n] ? n : 'ru';
 })();
@@ -336,7 +336,7 @@ function applyLang() {
 document.querySelectorAll('.lang button').forEach(function (b) {
   b.addEventListener('click', function () {
     lang = b.dataset.lang;
-    try { localStorage.setItem('lca_lang', lang); } catch (e) {}
+    try { localStorage.setItem('lca-lang', lang); } catch (e) {}
     applyLang();
   });
 });
