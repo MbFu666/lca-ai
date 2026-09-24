@@ -4,12 +4,13 @@
 #   .\sign-release.ps1 -PfxPath C:\path\to\ev-cert.pfx -Password 'secret'   # purchased EV/OV cert
 param(
   [string]$PfxPath = 'buildResources\lcaai-codesign.pfx',
-  [string]$Password = 'LcaAi2026!',
+  [string]$Password = $env:PFX_PASSWORD,   # NEVER hardcode; set $env:PFX_PASSWORD
   [string]$ReleaseDir = 'release',
   [string]$Timestamp = 'http://timestamp.sectigo.com'
 )
 
 $ErrorActionPreference = 'Stop'
+if (-not $Password) { Write-Error 'Set $env:PFX_PASSWORD (certificate password) before signing.'; exit 1 }
 $targets = Get-ChildItem -Path $ReleaseDir -Filter '*.exe' -ErrorAction SilentlyContinue
 if (-not $targets) { Write-Error "No .exe found in $ReleaseDir"; exit 1 }
 

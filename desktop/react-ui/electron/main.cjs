@@ -5,6 +5,29 @@ try {
 } catch {
   autoUpdater = null
 }
+
+// ---- Path sandbox for file IPC: only user data dirs, no system paths ----
+function safeRoots() {
+  return [
+    app.getPath('desktop'),
+    app.getPath('documents'),
+    app.getPath('downloads'),
+    app.getPath('userData'),
+    app.getPath('appData'),
+  ].map((r) => r.toLowerCase())
+}
+function assertSafePath(p, exts = null) {
+  if (typeof p !== 'string' || !p) throw new Error('NO_PATH')
+  const resolved = path.resolve(p)
+  const low = resolved.toLowerCase()
+  const ok = safeRoots().some((r) => low === r || low.startsWith(r + path.sep))
+  if (!ok) throw new Error('PATH_NOT_ALLOWED')
+  if (exts) {
+    const e = '.' + String(resolved.split('.').pop() || '').toLowerCase()
+    if (!exts.includes(e)) throw new Error('EXT_NOT_ALLOWED')
+  }
+  return resolved
+}
 const { spawn, spawnSync } = require('child_process')
 const path = require('path')
 const os = require('os')
@@ -645,6 +668,7 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
       nodeIntegration: false,
+      sandbox: true,
     },
   })
   Menu.setApplicationMenu(null)
@@ -655,7 +679,8 @@ function createWindow() {
     win.loadFile(path.join(__dirname, '..', 'dist', 'index.html'))
   }
   win.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url)
+    // Only http/https may leave the app; block file:, javascript:, ms-, etc.
+    if (/^https?:\/\//i.test(url)) shell.openExternal(url)
     return { action: 'deny' }
   })
   win.on('closed', () => {
@@ -791,13 +816,13 @@ if (!app.requestSingleInstanceLock()) {
 
     ipcMain.handle('file:write', (_e, { path: p, content }) => {
       if (typeof p !== 'string' || typeof content !== 'string') throw new Error('invalid args')
-      fs.writeFileSync(p, content, 'utf8')
+      fs.writeFileSync(assertSafePath(p), content, 'utf8')
       return { ok: true }
     })
 
     ipcMain.handle('file:write-base64', (_e, { path: p, base64 }) => {
       if (typeof p !== 'string' || typeof base64 !== 'string') throw new Error('invalid args')
-      fs.writeFileSync(p, Buffer.from(base64, 'base64'))
+      fs.writeFileSync(assertSafePath(p), Buffer.from(base64, 'base64'))
       return { ok: true }
     })
 
@@ -1145,18 +1170,18 @@ if (!app.requestSingleInstanceLock()) {
       return JSON.parse(text.slice(f, l + 1))
     }
 
-    ipcMain.handle('file:extract-text', async (_e, { path }) => {
-      if (typeof path !== 'string' || !path) throw new Error('NO_FILE_PATH')
+    ipcMain.handle('file:extract-text', async (_e, { path: p }) => {
+      const safe = assertSafePath(p, ['.docx', '.pdf', '.xlsx', '.xls', '.csv', '.txt', '.md'])
       const fs = require('fs')
-      const ext = String(path.split('.').pop() || '').toLowerCase()
+      const ext = String(safe.split('.').pop() || '').toLowerCase()
       let text = ''
       if (ext === 'docx') {
         const mammoth = require('mammoth')
-        const r = await mammoth.extractRawText({ path })
+        const r = await mammoth.extractRawText({ path: safe })
         text = r.value || ''
       } else if (ext === 'xlsx' || ext === 'xls' || ext === 'csv') {
         const XLSX = require('xlsx')
-        const wb = XLSX.readFile(path)
+        const wb = XLSX.readFile(safe)
         const parts = []
         for (const name of wb.SheetNames) {
           parts.push('=== ' + name + ' ===\n' + XLSX.utils.sheet_to_csv(wb.Sheets[name]))
@@ -1164,7 +1189,7 @@ if (!app.requestSingleInstanceLock()) {
         text = parts.join('\n\n')
       } else if (ext === 'pdf') {
         const { PDFParse } = require('pdf-parse')
-        const buf = fs.readFileSync(path)
+        const buf = fs.readFileSync(safe)
         const parser = new PDFParse({ data: new Uint8Array(buf) })
         const r = await parser.getText()
         text = r.text || ''
@@ -1172,7 +1197,7 @@ if (!app.requestSingleInstanceLock()) {
           await parser.destroy()
         } catch {}
       } else {
-        text = fs.readFileSync(path, 'utf8')
+        text = fs.readFileSync(safe, 'utf8')
       }
       return { text: String(text).slice(0, 60000), chars: String(text).length }
     })

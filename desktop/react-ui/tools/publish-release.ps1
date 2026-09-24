@@ -14,7 +14,7 @@ param(
   [string]$Prefix = 'win',
   [string]$ReleaseDir = 'release',
   [string]$PfxPath = 'buildResources\lcaai-codesign.pfx',
-  [string]$Password = 'LcaAi2026!',
+  [string]$Password = $env:PFX_PASSWORD,   # NEVER hardcode; set $env:PFX_PASSWORD
   [string]$Signtool = "$env:LOCALAPPDATA\electron-builder\Cache\winCodeSign-2.6.0\winCodeSign-2.6.0-5puky\windows-10\x64\signtool.exe"
 )
 $ErrorActionPreference = 'Stop'

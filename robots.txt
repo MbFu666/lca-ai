@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /supabase/
+Disallow: /deploy/
+Disallow: /server/
+Disallow: /desktop/
+
+Sitemap: https://lca-ai.ru/sitemap.xml

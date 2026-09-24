@@ -7,12 +7,12 @@ services:
       dockerfile: Dockerfile.olca
     container_name: lca-openlca
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     volumes:
       - lca-data:/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      test: ["CMD", "curl", "-sf", "-X", "POST", "-H", "Content-Type: application/json", "-d", "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"data/get/descriptors\",\"params\":{\"@type\":\"UnitGroup\"}}", "http://localhost:8080"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -23,7 +23,7 @@ services:
       dockerfile: Dockerfile
     container_name: lca-api
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     environment:
       - OPENLCA_URL=http://openlca:8080
       - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
@@ -41,8 +41,8 @@ services:
       - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - certbot-etc:/etc/letsencrypt
-      - certbot-var:/var/lib/letsencrypt
+      - /etc/letsencrypt:/etc/letsencrypt
+      - /var/lib/letsencrypt:/var/lib/letsencrypt
     depends_on:
       - api
     restart: unless-stopped
@@ -50,5 +50,3 @@ services:
 volumes:
   lca-data:
     driver: local
-  certbot-etc:
-  certbot-var:
