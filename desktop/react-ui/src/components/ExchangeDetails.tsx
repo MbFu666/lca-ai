@@ -48,7 +48,8 @@ export function ExchangeDetails({
       <input
         type="number"
         step="any"
-        value={typeof u[key] === 'number' ? (u[key] as number) : 0}
+        value={typeof u[key] === 'number' ? (u[key] as number) : ''}
+        placeholder="—"
         onChange={(e) => patchUnc({ [key]: Number(e.target.value) })}
         className={INPUT_CLASS}
       />

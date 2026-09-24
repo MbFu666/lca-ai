@@ -3227,9 +3227,12 @@
             const box = document.getElementById('sessionInfo');
             if (!box) return;
             const last = currentUser?.last_sign_in_at;
+            const ua = navigator.userAgentData;
+            const platform = (ua && ua.platform) ||
+              (navigator.userAgent.match(/(Windows|macOS|Mac OS X|Linux|Android|iOS)/) || [])[0] || '—';
             box.innerHTML =
                 '<div class="session-row"><span>' + esc(t('sess_current')) + '</span>' +
-                '<span class="session-val">' + esc(navigator.platform || '—') + '</span></div>' +
+                '<span class="session-val">' + esc(platform) + '</span></div>' +
                 (last ? '<div class="session-row"><span>' + esc(t('sess_last')) + '</span>' +
                         '<span class="session-val">' + fmtDate(last) + '</span></div>' : '') +
                 '<p class="session-note">' + esc(t('sess_note')) + '</p>';
