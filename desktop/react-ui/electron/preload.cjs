@@ -52,6 +52,7 @@ contextBridge.exposeInMainWorld('desktop', {
   cloudReportsList: () => ipcRenderer.invoke('cloud:reports-list'),
   authLogin: (email, password) => ipcRenderer.invoke('auth:login', { email, password }),
   checkUpdates: () => ipcRenderer.invoke('app:check-updates'),
+  appVersion: () => ipcRenderer.invoke('app:version'),
   downloadUpdates: () => ipcRenderer.invoke('app:download-updates'),
   installUpdates: () => ipcRenderer.invoke('app:install-updates'),
   onUpdateEvent: (cb) => {

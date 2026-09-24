@@ -629,6 +629,8 @@ function setupAutoUpdater() {
   autoUpdater.on('error', (e) => send('update:error', { message: String(e && e.message ? e.message : e) }))
 }
 
+ipcMain.handle('app:version', () => app.getVersion())
+
 ipcMain.handle('app:check-updates', async () => {
   if (!autoUpdater) return { ok: false, reason: 'NO_UPDATER' }
   try {

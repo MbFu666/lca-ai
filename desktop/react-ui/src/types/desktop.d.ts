@@ -101,6 +101,7 @@ export interface DesktopApi {
   aiCalculate: (description: string, lang: string) => Promise<Record<string, unknown>>
   authLogin: (email: string, password: string) => Promise<{ email: string; user_id?: string }>
   checkUpdates: () => Promise<{ ok: boolean; version?: string | null; reason?: string }>
+  appVersion: () => Promise<string>
   downloadUpdates: () => Promise<{ ok: boolean; reason?: string }>
   installUpdates: () => Promise<{ ok: boolean }>
   onUpdateEvent: (cb: (e: { type: string; payload: any }) => void) => () => void

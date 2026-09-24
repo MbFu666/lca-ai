@@ -305,10 +305,11 @@ export default function App() {
               }
               setUpd('check')
               const r = await d.checkUpdates()
-              if (r && r.ok) await d.downloadUpdates()
+              if (r && r.ok && r.version) await d.downloadUpdates()
               else {
                 setUpd('')
-                toast.ok(t('up_latest'))
+                const v = await d.appVersion().catch(() => '')
+                toast.ok(`${t('up_latest')}: ${v}`)
               }
             },
           },
