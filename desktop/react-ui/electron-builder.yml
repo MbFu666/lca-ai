@@ -8,6 +8,7 @@ publish:
 directories:
   output: release
   buildResources: buildResources
+npmRebuild: false
 files:
   - dist/**
   - electron/**
