@@ -46,8 +46,22 @@ contextBridge.exposeInMainWorld('desktop', {
   cloudFoldersDelete: (id) => ipcRenderer.invoke('cloud:folders-delete', id),
   cloudProjectsMove: (projectId, folderId) => ipcRenderer.invoke('cloud:projects-move', { projectId, folderId }),
   aiReportNarrative: (payload) => ipcRenderer.invoke('ai:report-narrative', { payload }),
+  aiExtractInventory: (text, lang) => ipcRenderer.invoke('ai:extract-inventory', { text, lang }),
   cloudReportSave: (reportData) => ipcRenderer.invoke('cloud:report-save', { reportData }),
+  cloudReportsList: () => ipcRenderer.invoke('cloud:reports-list'),
   authLogin: (email, password) => ipcRenderer.invoke('auth:login', { email, password }),
+  checkUpdates: () => ipcRenderer.invoke('app:check-updates'),
+  downloadUpdates: () => ipcRenderer.invoke('app:download-updates'),
+  installUpdates: () => ipcRenderer.invoke('app:install-updates'),
+  onUpdateEvent: (cb) => {
+    const chans = ['update:checking', 'update:available', 'update:not-available', 'update:progress', 'update:downloaded', 'update:error']
+    const listeners = chans.map((c) => {
+      const l = (_e, payload) => cb({ type: c.replace('update:', ''), payload })
+      ipcRenderer.on(c, l)
+      return [c, l]
+    })
+    return () => listeners.forEach(([c, l]) => ipcRenderer.removeListener(c, l))
+  },
   authGet: () => ipcRenderer.invoke('auth:get'),
   authLogout: () => ipcRenderer.invoke('auth:logout'),
 })

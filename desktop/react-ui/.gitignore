@@ -1,0 +1,22 @@
+# Build artifacts
+dist/
+release/
+build.log
+derby.log
+*.log
+
+# Dependencies
+node_modules/
+
+# Secrets — never commit
+buildResources/*.pfx
+buildResources/*.p12
+.env
+.env.production
+.env.local
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

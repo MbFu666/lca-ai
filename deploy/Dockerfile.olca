@@ -1,0 +1,30 @@
+FROM eclipse-temurin:21-jre
+
+# Install curl for healthcheck
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy openLCA IPC server files
+# These files need to be built from olca-modules first:
+#   cd olca-modules/olca-ipc && mvn package -P server-app
+# Then copy the JAR and libs here.
+COPY olca-server/server.jar ./server.jar
+COPY olca-server/libs/ ./libs/
+
+# Copy database (mounted as volume in production)
+# The Derby database folder should be placed at /data/databases/<db-name>
+VOLUME /data
+
+EXPOSE 8080
+
+# Start openLCA IPC server
+CMD ["java", \
+     "-Xmx3584M", \
+     "-cp", "server.jar:libs/*", \
+     "org.openlca.ipc.Server", \
+     "-data", "/data", \
+     "-db", "tiangong", \
+     "-port", "8080", \
+     "-threads", "4", \
+     "-timeout", "30"]

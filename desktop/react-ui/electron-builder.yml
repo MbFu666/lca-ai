@@ -1,0 +1,33 @@
+appId: ru.lca-ai.studio
+productName: LCA AI Studio
+publish:
+  provider: github
+  owner: MbFu666
+  repo: lca-ai-releases
+  releaseType: release
+directories:
+  output: release
+  buildResources: buildResources
+files:
+  - dist/**
+  - electron/**
+  - package.json
+asar: true
+extraResources:
+  - from: 'D:/openLCA/jre'
+    to: 'engine/jre'
+  - from: 'D:/openLCA/plugins/olca-app_2.6.1/libs'
+    to: 'engine/libs'
+win:
+  icon: buildResources/icon.ico
+  target:
+    - nsis
+    - portable
+  artifactName: ${productName}-${version}-${arch}.${ext}
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  shortcutName: LCA AI Studio
+portable:
+  artifactName: ${productName}-${version}-portable.${ext}

@@ -21,7 +21,7 @@ export const EXPORT_TYPES = [
   'Result',
 ] as const
 
-type Ent = Record<string, any>
+export type Ent = Record<string, any>
 
 const refId = (r: any): string | null => (r && typeof r === 'object' ? r['@id'] || r.id || null : null)
 const refName = (r: any): string => (r && typeof r === 'object' ? r.name || r['@id'] || '' : typeof r === 'string' ? r : '')

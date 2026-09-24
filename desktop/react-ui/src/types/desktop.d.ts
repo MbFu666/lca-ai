@@ -84,11 +84,25 @@ export interface DesktopApi {
     limitations?: string[]
     recommendations?: string[]
   }>
+  aiExtractInventory: (text: string, lang: string) => Promise<Record<string, any>>
   cloudReportSave: (reportData: Record<string, unknown>) => Promise<{ id: string | null; projectId: string | null }>
+  cloudReportsList: () => Promise<
+    Array<{
+      id: string
+      product_title: string | null
+      total_co2eq: number | null
+      report_data: Record<string, unknown> | null
+      created_at: string | null
+    }>
+  >
   fileWrite: (path: string, content: string) => Promise<{ ok: boolean }>
   fileWriteBase64: (path: string, base64: string) => Promise<{ ok: boolean }>
   aiCalculate: (description: string, lang: string) => Promise<Record<string, unknown>>
   authLogin: (email: string, password: string) => Promise<{ email: string; user_id?: string }>
+  checkUpdates: () => Promise<{ ok: boolean; version?: string | null; reason?: string }>
+  downloadUpdates: () => Promise<{ ok: boolean; reason?: string }>
+  installUpdates: () => Promise<{ ok: boolean }>
+  onUpdateEvent: (cb: (e: { type: string; payload: any }) => void) => () => void
   authGet: () => Promise<{ email: string; access_token: string; user_id?: string; expires_at?: number } | null>
   authLogout: () => Promise<boolean>
 }

@@ -1,4 +1,10 @@
 const { app, BrowserWindow, ipcMain, Menu, shell, dialog, safeStorage } = require('electron')
+let autoUpdater = null
+try {
+  autoUpdater = require('electron-updater').autoUpdater
+} catch {
+  autoUpdater = null
+}
 const { spawn, spawnSync } = require('child_process')
 const path = require('path')
 const os = require('os')
@@ -36,9 +42,33 @@ function loadAuth() {
 const SUPABASE_URL = 'https://pbisngkepszwzzjivxus.supabase.co'
 const SUPABASE_APIKEY = 'sb_publishable_FzDhBqHiQfygA-L695gIPg_R1vnjhS2'
 
-function requireAuth() {
+async function refreshAuthToken() {
   const auth = loadAuth()
+  if (!auth?.refresh_token) throw new Error('LOGIN_REQUIRED')
+  const resp = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', apikey: SUPABASE_APIKEY },
+    body: JSON.stringify({ refresh_token: auth.refresh_token }),
+  })
+  if (!resp.ok) throw new Error('REFRESH_FAILED')
+  const data = await resp.json()
+  saveAuth({
+    email: auth.email,
+    user_id: auth.user_id,
+    access_token: data.access_token,
+    refresh_token: data.refresh_token,
+    expires_at: Date.now() + (data.expires_in ?? 3600) * 1000,
+  })
+  return loadAuth()
+}
+
+async function requireAuth() {
+  let auth = loadAuth()
   if (!auth?.access_token) throw new Error('LOGIN_REQUIRED')
+  const fiveMin = 5 * 60 * 1000
+  if (auth.expires_at && Date.now() > auth.expires_at - fiveMin) {
+    auth = await refreshAuthToken()
+  }
   return auth
 }
 
@@ -52,7 +82,15 @@ function sbHeaders(auth, extra) {
 }
 
 async function sbFetch(url, auth, opts) {
-  const r = await fetch(url, { ...opts, headers: sbHeaders(auth, opts?.headers) })
+  let r = await fetch(url, { ...opts, headers: sbHeaders(auth, opts?.headers) })
+  if (r.status === 401 && auth.refresh_token) {
+    try {
+      const newAuth = await refreshAuthToken()
+      r = await fetch(url, { ...opts, headers: sbHeaders(newAuth, opts?.headers) })
+    } catch {
+      throw new Error('TOKEN_EXPIRED')
+    }
+  }
   if (r.status === 401) throw new Error('TOKEN_EXPIRED')
   if (!r.ok) throw new Error(`Supabase HTTP ${r.status}: ${(await r.text().catch(() => '')).slice(0, 200)}`)
   return r
@@ -380,6 +418,37 @@ function listDatabases() {
   }))
 }
 
+function cloudMapPath() {
+  return path.join(databasesDir(), '.lcaai-cloud-map.json')
+}
+
+function readCloudMap() {
+  try {
+    return JSON.parse(fs.readFileSync(cloudMapPath(), 'utf8')) ?? {}
+  } catch {
+    return {}
+  }
+}
+
+function writeCloudMap(map) {
+  fs.writeFileSync(cloudMapPath(), JSON.stringify(map, null, 2))
+}
+
+function resolveCloudDb(base, projectId) {
+  const map = readCloudMap()
+  const exists = (n) => fs.existsSync(path.join(databasesDir(), n))
+  const candidates = [base, `${base}_${projectId.slice(0, 8)}`.slice(0, 40)]
+  for (const c of candidates) {
+    if (!exists(c) || map[c] === projectId) return c
+  }
+  let i = 2
+  for (;;) {
+    const c = `${base}_${i}`.slice(0, 40)
+    if (!exists(c) || map[c] === projectId) return c
+    i++
+  }
+}
+
 async function requireManagedEngine() {
   if (!weSpawned) {
     if (await pingEngine()) {
@@ -517,6 +586,50 @@ async function importDb(zipPath, name) {
   return { total, failed, failures }
 }
 
+// ---- Auto-update (electron-updater, generic feed on Supabase Storage) ----
+function setupAutoUpdater() {
+  if (!autoUpdater) return
+  autoUpdater.autoDownload = false
+  autoUpdater.autoInstallOnAppQuit = true
+  const send = (channel, payload) => {
+    try {
+      if (win && win.webContents) win.webContents.send(channel, payload)
+    } catch {}
+  }
+  autoUpdater.on('checking-for-update', () => send('update:checking', {}))
+  autoUpdater.on('update-available', (info) => send('update:available', { version: info && info.version }))
+  autoUpdater.on('update-not-available', () => send('update:not-available', {}))
+  autoUpdater.on('download-progress', (p) =>
+    send('update:progress', { percent: p && p.percent, transferred: p && p.transferred, total: p && p.total }),
+  )
+  autoUpdater.on('update-downloaded', (info) => send('update:downloaded', { version: info && info.version }))
+  autoUpdater.on('error', (e) => send('update:error', { message: String(e && e.message ? e.message : e) }))
+}
+
+ipcMain.handle('app:check-updates', async () => {
+  if (!autoUpdater) return { ok: false, reason: 'NO_UPDATER' }
+  try {
+    const r = await autoUpdater.checkForUpdates()
+    return { ok: true, version: r && r.updateInfo ? r.updateInfo.version : null }
+  } catch (e) {
+    return { ok: false, reason: String(e && e.message ? e.message : e) }
+  }
+})
+ipcMain.handle('app:download-updates', async () => {
+  if (!autoUpdater) return { ok: false }
+  try {
+    await autoUpdater.downloadUpdate()
+    return { ok: true }
+  } catch (e) {
+    return { ok: false, reason: String(e && e.message ? e.message : e) }
+  }
+})
+ipcMain.handle('app:install-updates', async () => {
+  if (!autoUpdater) return { ok: false }
+  autoUpdater.quitAndInstall()
+  return { ok: true }
+})
+
 function createWindow() {
   win = new BrowserWindow({
     width: 1440,
@@ -562,6 +675,13 @@ if (!app.requestSingleInstanceLock()) {
 
   app.whenReady().then(() => {
     createWindow()
+    setupAutoUpdater()
+    // silent background check shortly after launch
+    setTimeout(() => {
+      try {
+        if (autoUpdater) autoUpdater.checkForUpdates().catch(() => {})
+      } catch {}
+    }, 15000)
 
     ipcMain.handle('engine:start', () => startEngine())
     ipcMain.handle('engine:stop', () => stopEngine())
@@ -715,8 +835,7 @@ if (!app.requestSingleInstanceLock()) {
     })
 
     ipcMain.handle('ai:calculate', async (_e, { description, lang }) => {
-      const auth = loadAuth()
-      if (!auth?.access_token) throw new Error('LOGIN_REQUIRED')
+      const auth = await requireAuth()
 
       const langName = lang === 'ru' ? 'Russian' : lang === 'zh' ? 'Chinese' : 'English'
       const systemPrompt = `LCA expert (ISO 14067). Reply with VALID JSON ONLY in ${langName}. Be concise, minimal reasoning. If input is not a product/material/process -> {"error":"not_lca","message":"..."}. Else schema: {"product_title":str,"functional_unit":str,"system_boundary":str,"method":str,"region":str,"total_co2eq":num,"stages":[{"name":str,"co2eq":num,"share_pct":num,"description":str,"key_inputs":[str],"factor_source":str,"sub_processes":[{"name":str,"amount":num,"unit":str,"factor":num,"factor_unit":str,"factor_source":str,"co2eq":num}]}]}. 5 stages, 2 sub_processes each, share_pct sums to 100, strings single-line, fit 8000 tokens.`
@@ -739,7 +858,36 @@ if (!app.requestSingleInstanceLock()) {
           response_format: { type: 'json_object' },
         }),
       })
-      if (resp.status === 401) throw new Error('TOKEN_EXPIRED')
+      if (resp.status === 401) {
+        try {
+          const newAuth = await refreshAuthToken()
+          const retry = await fetch('https://pbisngkepszwzzjivxus.supabase.co/functions/v1/lca-proxy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${newAuth.access_token}` },
+            body: JSON.stringify({
+              model: 'deepseek-v4-flash',
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: description },
+              ],
+              max_tokens: 16000,
+              temperature: 0.2,
+              stream: false,
+              response_format: { type: 'json_object' },
+            }),
+          })
+          if (retry.status === 401) throw new Error('TOKEN_EXPIRED')
+          if (!retry.ok) throw new Error(`proxy HTTP ${retry.status}`)
+          const retryData = await retry.json()
+          const retryText = retryData?.choices?.[0]?.message?.content ?? ''
+          if (!retryText) throw new Error('EMPTY_RESPONSE')
+          const rf = retryText.indexOf('{'), rl = retryText.lastIndexOf('}')
+          if (rf < 0 || rl < 0) throw new Error('BAD_JSON')
+          return JSON.parse(retryText.slice(rf, rl + 1))
+        } catch {
+          throw new Error('TOKEN_EXPIRED')
+        }
+      }
       if (resp.status === 429) throw new Error('RATE_LIMIT')
       if (!resp.ok) throw new Error(`proxy HTTP ${resp.status}`)
       const data = await resp.json()
@@ -761,7 +909,7 @@ if (!app.requestSingleInstanceLock()) {
     })
 
     ipcMain.handle('cloud:projects-list', async () => {
-      const auth = requireAuth()
+      const auth = await requireAuth()
       const projects = await sbJson(
         `${SUPABASE_URL}/rest/v1/user_projects?select=*&order=created_at.desc`,
         auth,
@@ -778,7 +926,7 @@ if (!app.requestSingleInstanceLock()) {
     })
 
     ipcMain.handle('cloud:projects-save', async (_e, { name, note }) => {
-      const auth = requireAuth()
+      const auth = await requireAuth()
       if (engineState !== 'online') throw new Error('Движок не подключён')
       const cfg = loadConfig()
       const entities = {}
@@ -836,7 +984,7 @@ if (!app.requestSingleInstanceLock()) {
     })
 
     ipcMain.handle('cloud:projects-open', async (_e, { projectId, dbName }) => {
-      const auth = requireAuth()
+      const auth = await requireAuth()
       if (busy) throw new Error('Уже выполняется операция с БД')
       const snaps = await sbJson(
         `${SUPABASE_URL}/rest/v1/project_snapshots?select=entities,stats&project_id=eq.${projectId}&order=version.desc&limit=1`,
@@ -846,9 +994,18 @@ if (!app.requestSingleInstanceLock()) {
       const snap = snaps[0]
       const entities = snap.entities ?? {}
 
-      const name = String(dbName ?? '').trim()
-      if (!validDbName(name)) throw new Error('Недопустимое имя БД (A-Z, a-z, 0-9, _, -)')
-      if (fs.existsSync(path.join(databasesDir(), name))) throw new Error(`База "${name}" уже существует`)
+      const base = String(dbName ?? '').trim()
+      if (!validDbName(base)) throw new Error('Недопустимое имя БД (A-Z, a-z, 0-9, _, -)')
+      const name = resolveCloudDb(base, projectId)
+      const targetDir = path.join(databasesDir(), name)
+      if (fs.existsSync(targetDir)) {
+        if (loadConfig().db === name) {
+          const fallback = listDatabases().find((d) => d.name !== name)
+          if (!fallback) throw new Error('Нельзя перезаписать активную БД')
+          await switchDb(fallback.name)
+        }
+        fs.rmSync(targetDir, { recursive: true, force: true })
+      }
 
       busy = true
       try {
@@ -889,6 +1046,9 @@ if (!app.requestSingleInstanceLock()) {
         }
         await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()))
         dbProgress({ phase: 'done', done: total, total, note: `imported ${total - failed}/${total}` })
+        const map = readCloudMap()
+        map[name] = projectId
+        writeCloudMap(map)
         dbChanged()
         return { db: name, total, failed, failures }
       } finally {
@@ -897,7 +1057,7 @@ if (!app.requestSingleInstanceLock()) {
     })
 
     ipcMain.handle('cloud:projects-delete', async (_e, projectId) => {
-      const auth = requireAuth()
+      const auth = await requireAuth()
       await sbFetch(`${SUPABASE_URL}/rest/v1/user_projects?id=eq.${projectId}`, auth, {
         method: 'DELETE',
       })
@@ -905,7 +1065,7 @@ if (!app.requestSingleInstanceLock()) {
     })
 
     ipcMain.handle('cloud:folders-list', async () => {
-      const auth = requireAuth()
+      const auth = await requireAuth()
       return await sbJson(
         `${SUPABASE_URL}/rest/v1/project_folders?select=*&order=created_at`,
         auth,
@@ -913,7 +1073,7 @@ if (!app.requestSingleInstanceLock()) {
     })
 
     ipcMain.handle('cloud:folders-create', async (_e, { name }) => {
-      const auth = requireAuth()
+      const auth = await requireAuth()
       const r = await sbJson(`${SUPABASE_URL}/rest/v1/project_folders`, auth, {
         method: 'POST',
         headers: { Prefer: 'return=representation' },
@@ -923,7 +1083,7 @@ if (!app.requestSingleInstanceLock()) {
     })
 
     ipcMain.handle('cloud:folders-rename', async (_e, { id, name }) => {
-      const auth = requireAuth()
+      const auth = await requireAuth()
       await sbFetch(`${SUPABASE_URL}/rest/v1/project_folders?id=eq.${id}`, auth, {
         method: 'PATCH',
         headers: { Prefer: 'return=minimal' },
@@ -933,7 +1093,7 @@ if (!app.requestSingleInstanceLock()) {
     })
 
     ipcMain.handle('cloud:folders-delete', async (_e, id) => {
-      const auth = requireAuth()
+      const auth = await requireAuth()
       await sbFetch(`${SUPABASE_URL}/rest/v1/project_folders?id=eq.${id}`, auth, {
         method: 'DELETE',
       })
@@ -941,7 +1101,7 @@ if (!app.requestSingleInstanceLock()) {
     })
 
     ipcMain.handle('cloud:projects-move', async (_e, { projectId, folderId }) => {
-      const auth = requireAuth()
+      const auth = await requireAuth()
       await sbFetch(`${SUPABASE_URL}/rest/v1/user_projects?id=eq.${projectId}`, auth, {
         method: 'PATCH',
         headers: { Prefer: 'return=minimal' },
@@ -950,9 +1110,61 @@ if (!app.requestSingleInstanceLock()) {
       return { ok: true }
     })
 
+    // Reusable AI JSON helper (deepseek via Supabase lca-proxy, with 401 refresh retry)
+    async function aiJson(systemPrompt, userContent, maxTokens = 3000) {
+      const doCall = async (token) => {
+        const resp = await fetch('https://pbisngkepszwzzjivxus.supabase.co/functions/v1/lca-proxy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            model: 'deepseek-chat',
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userContent },
+            ],
+            max_tokens: maxTokens,
+            temperature: 0.1,
+            stream: false,
+            response_format: { type: 'json_object' },
+          }),
+        })
+        return resp
+      }
+      let auth = await requireAuth()
+      let resp = await doCall(auth.access_token)
+      if (resp.status === 401) {
+        auth = await refreshAuthToken()
+        resp = await doCall(auth.access_token)
+      }
+      if (!resp.ok) throw new Error(`proxy HTTP ${resp.status}`)
+      const data = await resp.json()
+      const text = data?.choices?.[0]?.message?.content ?? ''
+      if (!text) throw new Error('EMPTY_RESPONSE')
+      const f = text.indexOf('{'), l = text.lastIndexOf('}')
+      if (f < 0 || l < 0) throw new Error('BAD_JSON')
+      return JSON.parse(text.slice(f, l + 1))
+    }
+
+    ipcMain.handle('ai:extract-inventory', async (_e, { text, lang }) => {
+      const systemPrompt = [
+        'You are an expert LCA inventory data-extraction assistant.',
+        'The user pastes text from a scientific paper / report about bioethanol or biomass production.',
+        'Extract ONLY numbers explicitly present in the text into a fixed JSON schema. Never invent values.',
+        'Return ONLY a JSON object with these optional keys (omit any not found):',
+        '{"feed":"corn|sorghum|cassava|sugarcane|miscanthus|switchgrass|null",',
+        '"cultivation":{"n_kg_ha":num,"p_kg_ha":num,"k_kg_ha":num,"diesel_l_ha":num,"seed_kg_ha":num,"herbicide_kg_ha":num,"pesticide_kg_ha":num,"irrig_water_m3_ha":num,"irrig_elec_kwh_ha":num,"yield_t_ha":num,"n2o_kg_ha":num,"nh3_kg_ha":num,"no3_kg_ha":num,"po4_kg_ha":num},',
+        '"tech":{"feed_per_t":num,"steam_per_t":num,"elec_per_t":num,"water_per_t":num,"enzyme_per_t":num,"yeast_per_t":num},',
+        '"transport_km":num,"grid_ef_kg_co2_kwh":num,"ethanol_price_yuan_t":num,"coprod_per_t":num,',
+        '"emissions_per_t_ethanol":{"co2_fossil_kg":num,"co2_total_kg":num},',
+        '"source_note":string}',
+        'Convert units to the schema units when the text gives equivalents (e.g. g/kg -> kg/ha only if area basis is clear; otherwise omit).',
+        'If a value is per hectare vs per tonne is ambiguous, omit it.',
+      ].join(' ')
+      return await aiJson(systemPrompt, JSON.stringify({ lang, text }), 3000)
+    })
+
     ipcMain.handle('ai:report-narrative', async (_e, { payload }) => {
-      const auth = loadAuth()
-      if (!auth?.access_token) throw new Error('LOGIN_REQUIRED')
+      const auth = await requireAuth()
       const systemPrompt = [
         'You are a senior LCA consultant writing the narrative sections of a technical report for a life cycle study.',
         'You receive JSON with: the chosen impact category and method, computed stage results (screening LCIA over direct elementary flows), an inventory summary and database metadata.',
@@ -979,7 +1191,36 @@ if (!app.requestSingleInstanceLock()) {
           response_format: { type: 'json_object' },
         }),
       })
-      if (resp.status === 401) throw new Error('TOKEN_EXPIRED')
+      if (resp.status === 401) {
+        try {
+          const newAuth = await refreshAuthToken()
+          const retry = await fetch('https://pbisngkepszwzzjivxus.supabase.co/functions/v1/lca-proxy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${newAuth.access_token}` },
+            body: JSON.stringify({
+              model: 'deepseek-chat',
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: JSON.stringify(payload) },
+              ],
+              max_tokens: 4000,
+              temperature: 0.3,
+              stream: false,
+              response_format: { type: 'json_object' },
+            }),
+          })
+          if (retry.status === 401) throw new Error('TOKEN_EXPIRED')
+          if (!retry.ok) throw new Error(`proxy HTTP ${retry.status}`)
+          const retryData = await retry.json()
+          const retryText = retryData?.choices?.[0]?.message?.content ?? ''
+          if (!retryText) throw new Error('EMPTY_RESPONSE')
+          const rf = retryText.indexOf('{'), rl = retryText.lastIndexOf('}')
+          if (rf < 0 || rl < 0) throw new Error('BAD_JSON')
+          return JSON.parse(retryText.slice(rf, rl + 1))
+        } catch {
+          throw new Error('TOKEN_EXPIRED')
+        }
+      }
       if (resp.status === 429) throw new Error('RATE_LIMIT')
       if (!resp.ok) throw new Error(`proxy HTTP ${resp.status}`)
       const data = await resp.json()
@@ -991,8 +1232,16 @@ if (!app.requestSingleInstanceLock()) {
       return JSON.parse(text.slice(first, last + 1))
     })
 
+    ipcMain.handle('cloud:reports-list', async () => {
+      const auth = await requireAuth()
+      return await sbJson(
+        `${SUPABASE_URL}/rest/v1/user_history?select=id,product_title,total_co2eq,report_data,created_at&user_id=eq.${auth.user_id}&order=created_at.desc&limit=50`,
+        auth,
+      )
+    })
+
     ipcMain.handle('cloud:report-save', async (_e, { reportData }) => {
-      const auth = requireAuth()
+      const auth = await requireAuth()
       const hist = await sbJson(`${SUPABASE_URL}/rest/v1/user_history`, auth, {
         method: 'POST',
         headers: { Prefer: 'return=representation' },

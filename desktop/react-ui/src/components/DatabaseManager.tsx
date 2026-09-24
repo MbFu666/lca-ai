@@ -106,7 +106,7 @@ export function DatabaseManager({ onClose }: { onClose: () => void }) {
   }
 
   const openCloud = async (p: CloudProject) => {
-    const dbName = `${p.name.replace(/[^A-Za-z0-9_-]/g, '_')}_${Date.now().toString(36)}`.slice(0, 40)
+    const dbName = p.name.replace(/[^A-Za-z0-9_-]/g, '_').slice(0, 40)
     setCloudBusy('open:' + p.id)
     setError('')
     setImportMsg('')
