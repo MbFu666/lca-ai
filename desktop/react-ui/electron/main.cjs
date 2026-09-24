@@ -1179,14 +1179,22 @@ if (!app.requestSingleInstanceLock()) {
         const mammoth = require('mammoth')
         const r = await mammoth.extractRawText({ path: safe })
         text = r.value || ''
-      } else if (ext === 'xlsx' || ext === 'xls' || ext === 'csv') {
-        const XLSX = require('xlsx')
-        const wb = XLSX.readFile(safe)
+      } else if (ext === 'xlsx' || ext === 'xls') {
+        // exceljs (maintained) instead of vulnerable xlsx@0.18.x
+        const ExcelJS = require('exceljs')
+        const wb = new ExcelJS.Workbook()
+        await wb.xlsx.readFile(safe)
         const parts = []
-        for (const name of wb.SheetNames) {
-          parts.push('=== ' + name + ' ===\n' + XLSX.utils.sheet_to_csv(wb.Sheets[name]))
-        }
+        wb.eachSheet((ws) => {
+          const lines = []
+          ws.eachRow((row) => {
+            lines.push(row.values.slice(1).map((v) => (v == null ? '' : String(v))).join(','))
+          })
+          parts.push('=== ' + ws.name + ' ===\n' + lines.join('\n'))
+        })
         text = parts.join('\n\n')
+      } else if (ext === 'csv') {
+        text = fs.readFileSync(safe, 'utf8')
       } else if (ext === 'pdf') {
         const { PDFParse } = require('pdf-parse')
         const buf = fs.readFileSync(safe)
