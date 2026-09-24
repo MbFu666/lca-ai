@@ -30,8 +30,9 @@ function lsSet(k,v){ try { localStorage.setItem(k,v); return true; } catch(e){ c
 <script src="assets/supabase-init.js"></script>
 <script src="assets/i18n.js"></script>
 <script src="assets/api.js"></script>
+<script src="assets/export.js"></script>
 <script>
-/* lsSet deduped */
+
 
 // Register Service Worker
 if ('serviceWorker' in navigator) {
@@ -3637,7 +3638,7 @@ footer a:hover { color: var(--e-ink); border-color: var(--e-3); }
 
 <script defer src="lca-food-examples.js"></script>
 <script>
-/* lsSet deduped */
+
 
 /* ============================================================
    LCA·AI — расчёт LCA через DeepSeek API (через прокси-бэкенд)
@@ -7334,111 +7335,12 @@ async function downloadExcel(d) {
    WORD EXPORT
    ════════════════════════════════════════════════════════ */
 async function downloadWord(d) {
-  const donutImg = (typeof getDonutImage === 'function') ? getDonutImage(d) : '';
-  const stages = d.stages || [];
-  const lang = currentLang;
-  const t = {
-    fu: lang === 'ru' ? 'Функциональная единица' : lang === 'zh' ? '功能单位' : 'Functional unit',
-    sb: lang === 'ru' ? 'Границы системы' : lang === 'zh' ? '系统边界' : 'System boundary',
-    method: lang === 'ru' ? 'Метод' : lang === 'zh' ? '方法' : 'Method',
-    region: lang === 'ru' ? 'Регион' : lang === 'zh' ? '地区' : 'Region',
-    total: lang === 'ru' ? 'Итого выбросы' : lang === 'zh' ? '总排放' : 'Total emissions',
-    breakdown: lang === 'ru' ? 'Разбивка по стадиям' : lang === 'zh' ? '阶段分解' : 'Stage Breakdown',
-    stage: lang === 'ru' ? 'Стадия' : lang === 'zh' ? '阶段' : 'Stage',
-    co2: lang === 'ru' ? 'CO₂-экв' : lang === 'zh' ? 'CO₂当量' : 'CO₂-eq',
-    share: lang === 'ru' ? 'Доля' : lang === 'zh' ? '占比' : 'Share',
-    process: lang === 'ru' ? 'Процесс' : lang === 'zh' ? '过程' : 'Process',
-    amount: lang === 'ru' ? 'Кол-во' : lang === 'zh' ? '数量' : 'Amount',
-    factor: lang === 'ru' ? 'Фактор' : lang === 'zh' ? '因子' : 'Factor',
-    source: lang === 'ru' ? 'Источник' : lang === 'zh' ? '来源' : 'Source',
-    analysis: lang === 'ru' ? 'Анализ ИИ' : lang === 'zh' ? 'AI分析' : 'AI Analysis',
-    assumptions: lang === 'ru' ? 'Ключевые допущения' : lang === 'zh' ? '关键假设' : 'Key Assumptions',
-    limitations: lang === 'ru' ? 'Ограничения' : lang === 'zh' ? '局限性' : 'Limitations',
-    recommendations: lang === 'ru' ? 'Рекомендации' : lang === 'zh' ? '建议' : 'Recommendations',
-    composition: lang === 'ru' ? 'Состав выбросов' : lang === 'zh' ? '排放组成' : 'Emission Composition'
-  };
-  const escW = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const colors = ['#2C4A3E','#5B7860','#B8753C','#8B6F47','#3D5A6C','#7A3B2D'];
-  const fn = (typeof fmtNum === 'function') ? fmtNum : (n => (n == null || isNaN(n) ? '—' : Number(n).toFixed(2)));
-
-  const html = `
-    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-    <head>
-<script>/* prod: silence console.log to avoid PII in devtools (review minor) */if(!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)&&location.protocol!=="file:"){console.log=function(){};}</script>
-      <meta charset="utf-8">
-      <style>
-        body { font-family: Arial, sans-serif; color: #0E2E27; }
-        h1 { color: #0E2E27; font-size: 24px; }
-        h2 { color: #1C1B19; border-bottom: 1px solid #D6D2CB; padding-bottom: 8px; font-size: 18px; }
-        h3 { color: #0E2E27; font-size: 14px; margin-top: 20px; }
-        table { border-collapse: collapse; width: 100%; margin: 16px 0; }
-        th, td { border: 1px solid #D6D2CB; padding: 8px 12px; text-align: left; }
-        th { background: #F8FAFA; font-weight: 600; font-size: 11px; text-transform: uppercase; }
-        .total { background: #ECFAF4; font-weight: 700; }
-        .value { font-family: 'Courier New', monospace; text-align: right; }
-        .meta { color: #6B6862; font-size: 13px; }
-        .meta strong { color: #0E2E27; }
-        .donut-section { margin: 20px 0; }
-        .legend-item { margin: 6px 0; font-size: 12px; }
-        .legend-color { width: 12px; height: 12px; display: inline-block; margin-right: 8px; vertical-align: middle; }
-        .footer { color: #93A0A6; font-size: 10px; margin-top: 30px; border-top: 1px solid #D6D2CB; padding-top: 10px; }
-
-      </style>
-    </head>
-    <body>
-      <h1>LCA Report: ${escW(d.product_title || '-')}</h1>
-      <div class="meta">
-        <p><strong>${t.fu}:</strong> ${escW(d.functional_unit || '-')}</p>
-        <p><strong>${t.sb}:</strong> ${escW(d.system_boundary || '-')}</p>
-        <p><strong>${t.method}:</strong> ${escW(d.method || '-')}</p>
-        <p><strong>${t.region}:</strong> ${escW(d.region || '-')}</p>
-        <p><strong>${t.total}:</strong> <span class="value">${fn(d.total_co2eq)} kgCO₂e</span></p>
-      </div>
-      ${donutImg ? `<div class="donut-section"><img src="${donutImg}" width="220" height="220" alt="Donut chart"></div>` : ''}
-      <h2>${t.composition}</h2>
-      ${stages.map((s, i) => `<div class="legend-item"><span class="legend-color" style="background:${colors[i % colors.length]}"></span>${escW(s.name)} — ${fn(s.share_pct)}%</div>`).join('')}
-      <h2>${t.breakdown}</h2>
-      <table>
-        <tr><th>${t.stage}</th><th>${t.co2}</th><th>${t.share}</th></tr>
-        ${stages.map(s => `<tr><td>${escW(s.name)}</td><td class="value">${fn(s.co2eq)}</td><td class="value">${fn(s.share_pct)}%</td></tr>`).join('')}
-        <tr class="total"><td>${t.total}</td><td class="value">${fn(d.total_co2eq)}</td><td class="value">100%</td></tr>
-      </table>
-      ${stages.map(s => `
-        <h3>${escW(s.name)}</h3>
-        <table>
-          <tr><th>${t.process}</th><th>${t.amount}</th><th>${t.factor}</th><th>${t.source}</th><th>${t.co2}</th></tr>
-          ${(s.sub_processes || []).map(p => `<tr><td>${escW(p.name)}</td><td>${fn(p.amount)} ${escW(p.unit || '')}</td><td>${fn(p.factor)} ${escW(p.factor_unit || '')}</td><td>${escW(p.factor_source || '-')}</td><td class="value">${fn(p.co2eq)}</td></tr>`).join('')}
-        </table>
-      `).join('')}
-      ${d.total_description ? `<h2>${t.analysis}</h2><p>${escW(d.total_description)}</p>` : ''}
-      ${d.assumptions && d.assumptions.length ? `<h3>${t.assumptions}</h3><ul>${d.assumptions.map(a => `<li>${escW(a)}</li>`).join('')}</ul>` : ''}
-      ${d.limitations && d.limitations.length ? `<h3>${t.limitations}</h3><ul>${d.limitations.map(l => `<li>${escW(l)}</li>`).join('')}</ul>` : ''}
-      ${d.recommendations && d.recommendations.length ? `<h3>${t.recommendations}</h3><ul>${d.recommendations.map(r => `<li>${escW(r)}</li>`).join('')}</ul>` : ''}
-      <div class="footer">Generated by LCA·AI on ${new Date().toLocaleDateString()}</div>
-    <script>
-/* lsSet deduped */
-
-// a11y (review #28): ensure a single <main> landmark exists.
-(function(){
-  var m = document.querySelector('main') || document.querySelector('.frame') || document.querySelector('#app');
-  if (!m) { m = document.createElement('main'); while (document.body.firstChild) m.appendChild(document.body.firstChild); document.body.appendChild(m); }
-  if (m.tagName !== 'MAIN') { m.setAttribute('role','main'); }
-  if (!m.id) m.id = 'main';
-})();
-</script>
-</body>
-    </html>
-  `;
-
-  const blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = (d.product_title || 'lca-report').replace(/[^\w\-\u0400-\u04FF\u4e00-\u9fff]+/g, '_') + '.doc';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  // Delegated to shared assets/export.js (review #15).
+  window.LcaExport.downloadWord(d, {
+    lang: currentLang,
+    fmtNum: (typeof fmtNum === 'function' ? fmtNum : undefined),
+    getDonutImage: (typeof getDonutImage === 'function' ? getDonutImage : undefined)
+  });
 }
 
 /* ============================================================
@@ -7575,7 +7477,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 
 <script>
-/* lsSet deduped */
+
 
 /* ═══════════════════════════════════════════════════════════════
    HERO FLOW — live canvas.
@@ -7895,7 +7797,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 </script>
 
 <script>
-/* lsSet deduped */
+
 
 /* ═══════════════════════════════════════════════════════════════
    MOTION SYSTEM
@@ -7990,15 +7892,34 @@ document.addEventListener('DOMContentLoaded', async function() {
 })();
 </script>
 
-<script>
-/* lsSet deduped */
 
+<script>
 // a11y (review #28): ensure a single <main> landmark exists.
 (function(){
   var m = document.querySelector('main') || document.querySelector('.frame') || document.querySelector('#app');
   if (!m) { m = document.createElement('main'); while (document.body.firstChild) m.appendChild(document.body.firstChild); document.body.appendChild(m); }
   if (m.tagName !== 'MAIN') { m.setAttribute('role','main'); }
   if (!m.id) m.id = 'main';
+})();
+</script>
+<script>
+// a11y (review #28): tablist/tab semantics + aria-selected
+(function(){
+  function decorate(){
+    document.querySelectorAll('.tabs').forEach(function(list){
+      var tabs = list.querySelectorAll('button');
+      if(!tabs.length) return;
+      list.setAttribute('role','tablist');
+      tabs.forEach(function(b){
+        b.setAttribute('role','tab');
+        b.setAttribute('aria-selected', b.classList.contains('active') ? 'true' : 'false');
+        b.addEventListener('click', function(){
+          tabs.forEach(function(x){ x.setAttribute('aria-selected', x===b ? 'true':'false'); });
+        });
+      });
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate); else decorate();
 })();
 </script>
 </body>
