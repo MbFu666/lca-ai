@@ -24,13 +24,9 @@
         }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script>
-        if (!window.supabase) {
-            var s = document.createElement('script');
-            s.src = 'https://unpkg.com/@supabase/supabase-js@2';
-            document.head.appendChild(s);
-        }
-    </script>
+    <link rel="stylesheet" href="assets/tokens.css">
+    <script src="assets/esc.js"></script>
+    <script src="assets/supabase-init.js"></script>
     <style>
         :root {
             --paper: #F2F0EC; --paper-sunk: #E9E6E0; --paper-raised: #F8F7F4;
@@ -277,8 +273,8 @@
     <div id="toast"></div>
 
 <script>
-    const SB_URL = 'https://pbisngkepszwzzjivxus.supabase.co';
-    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiaXNuZ2tlcHN6d3p6aml2eHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDQzMjQsImV4cCI6MjA5OTAyMDMyNH0.RV7GaTA7Wo2JIPMChh8j4ro7eXqZA9g_vCOnfjJ1bJY';
+    const SB_URL = window.SB_URL || 'https://pbisngkepszwzzjivxus.supabase.co';
+    const SB_KEY = window.SB_KEY || '';
 
     /* ── i18n ── */
     const PV_I18N = {
@@ -915,7 +911,7 @@
        ══════════════════════════════════════════════════ */
     async function init() {
         if (!(window.supabase && window.supabase.createClient)) { showToast(t('err_sb')); return; }
-        db = window.supabase.createClient(SB_URL, SB_KEY);
+        db = window.sb || window.supabase.createClient(SB_URL, SB_KEY);
         const { data: { session } } = await db.auth.getSession();
         if (!session) { window.location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search); return; }
         currentUser = session.user;
