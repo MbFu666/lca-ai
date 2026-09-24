@@ -376,6 +376,10 @@ const DICT: Record<string, Record<Lang, string>> = {
   af_db_done: { ru: 'Добавлено/обновлено в БД:', en: 'Created/updated in DB:', zh: '数据库新建/更新：' },
   up_title: { ru: 'Проверить обновления', en: 'Check for updates', zh: '检查更新' },
   up_install: { ru: 'Установить обновление', en: 'Install update', zh: '安装更新' },
+  up_available: { ru: 'Доступна новая версия', en: 'Update available', zh: '有新版本' },
+  up_downloaded: { ru: 'Обновление загружено', en: 'Update downloaded', zh: '更新已下载' },
+  up_install_now: { ru: 'Установить обновление сейчас? Приложение перезапустится.', en: 'Install update now? The app will restart.', zh: '现在安装更新？应用将重启。' },
+  up_latest: { ru: 'У вас последняя версия', en: 'You are on the latest version', zh: '已是最新版本' },
 }
 
 interface I18nState {

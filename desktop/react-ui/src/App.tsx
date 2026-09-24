@@ -21,6 +21,7 @@ import { ReportStudio } from './components/ReportStudio'
 import { AutoFill } from './components/AutoFill'
 import { CommandPalette } from './components/CommandPalette'
 import { Toasts } from './components/ui/charts'
+import { toast } from './lib/toast'
 import { useCloud } from './stores/cloud'
 import { useTabs, tabKey, type Tab } from './stores/tabs'
 import { useEngine } from './stores/engine'
@@ -65,13 +66,16 @@ export default function App() {
     const d = window.desktop
     if (!d || !d.onUpdateEvent) return
     const off = d.onUpdateEvent((e) => {
-      if (e.type === 'available') setUpd(String(e.payload?.version ?? ''))
+      if (e.type === 'available') toast.ok(`${t('up_available')}: ${e.payload?.version ?? ''}`)
       else if (e.type === 'progress') setUpd(`${Math.round(e.payload?.percent ?? 0)}%`)
-      else if (e.type === 'downloaded') setUpd('ready')
-      else if (e.type === 'not-available' || e.type === 'error') setUpd('')
+      else if (e.type === 'downloaded') {
+        setUpd('ready')
+        toast.ok(t('up_downloaded'))
+        if (window.confirm(t('up_install_now'))) void d.installUpdates()
+      } else if (e.type === 'error') toast.warn(`${t('up_title')}: ${e.payload?.message ?? ''}`)
     })
     return off
-  }, [])
+  }, [t])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -172,24 +176,6 @@ export default function App() {
               {m.label}
             </button>
           ))}
-          <button
-            onClick={async () => {
-              const d = window.desktop!
-              if (upd === 'ready') {
-                await d.installUpdates()
-                return
-              }
-              setUpd('check')
-              const r = await d.checkUpdates()
-              if (r && r.ok) await d.downloadUpdates()
-              else setUpd('')
-            }}
-            className="ml-auto flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-sans uppercase tracking-wide text-graphite-mid hover:text-graphite hover:bg-paper-2 border border-transparent hover:border-line rounded cursor-pointer whitespace-nowrap"
-          >
-            <span className="ico">{upd === 'ready' ? '⬇' : '⟳'}</span>
-            {upd === 'ready' ? t('up_install') : t('up_title')}
-            {upd && upd !== 'check' && upd !== 'ready' ? ` ${upd}` : ''}
-          </button>
         </nav>
       )}
 
@@ -307,6 +293,25 @@ export default function App() {
           { id: 'report', label: t('rs_title'), run: () => setShowReport(true) },
           { id: 'autofill', label: t('af_title'), run: () => setShowAutoFill(true) },
           { id: 'cloud', label: t('cloud'), run: () => useCloud.getState().setOpen(true) },
+          {
+            id: 'updates',
+            label: t('up_title'),
+            hint: upd === 'ready' ? t('up_install') : upd,
+            run: async () => {
+              const d = window.desktop!
+              if (upd === 'ready') {
+                await d.installUpdates()
+                return
+              }
+              setUpd('check')
+              const r = await d.checkUpdates()
+              if (r && r.ok) await d.downloadUpdates()
+              else {
+                setUpd('')
+                toast.ok(t('up_latest'))
+              }
+            },
+          },
           { id: 'db', label: t('db_manager'), run: () => setShowDbManager(true) },
           { id: 'gp', label: t('nav_global_params'), run: () => setShowGP(true) },
           {
