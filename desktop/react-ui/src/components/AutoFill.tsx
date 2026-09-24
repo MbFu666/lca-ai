@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useI18n, type Lang } from '../i18n'
-import { setPendingAutofill } from '../lib/autofillStore'
+import { FEEDS, GEO } from '../lib/refdata'
+import { applyInventoryToDb } from '../lib/litfill'
+import { toast } from '../lib/toast'
 import { Button, ErrorBox, Spinner } from './ui/primitives'
 
 const FIELDS: Array<{ path: string; overrideKey: string; label: { ru: string; en: string; zh: string } }> = [
@@ -42,8 +44,19 @@ export function AutoFill({ open, onClose }: { open: boolean; onClose: () => void
   const [values, setValues] = useState<Record<string, string>>({})
   const [feed, setFeed] = useState<string | null>(null)
   const [applied, setApplied] = useState(false)
+  const [province, setProvince] = useState('Heilongjiang')
 
   if (!open) return null
+
+  const setPath = (obj: Record<string, any>, path: string, v: number) => {
+    const parts = path.split('.')
+    let cur = obj
+    for (let i = 0; i < parts.length - 1; i++) {
+      cur[parts[i]] = cur[parts[i]] ?? {}
+      cur = cur[parts[i]]
+    }
+    cur[parts[parts.length - 1]] = v
+  }
 
   const extract = async () => {
     setBusy(true)
@@ -66,15 +79,30 @@ export function AutoFill({ open, onClose }: { open: boolean; onClose: () => void
     }
   }
 
-  const apply = () => {
-    const overrides: Record<string, number> = {}
-    for (const f of FIELDS) {
-      const s = values[f.overrideKey]
-      if (s !== undefined && s !== '' && isFinite(Number(s))) overrides[f.overrideKey] = Number(s)
+  const apply = async () => {
+    setBusy(true)
+    setError('')
+    try {
+      const x: Record<string, any> = {}
+      for (const f of FIELDS) {
+        const s = values[f.overrideKey]
+        if (s !== undefined && s !== '' && isFinite(Number(s))) setPath(x, f.path, Number(s))
+      }
+      if (feed) x.feed = feed
+      const sum = await applyInventoryToDb(x, {
+        province,
+        feed: feed ?? undefined,
+        techLabel: feed ? (FEEDS[feed]?.label.en ?? feed) : 'Literature',
+      })
+      setApplied(true)
+      toast.ok(`${t('af_db_done')} +${sum.created.length} / ~${sum.updated.length}`)
+    } catch (e) {
+      const msg = String(e instanceof Error ? e.message : e)
+      setError(msg)
+      toast.err(msg)
+    } finally {
+      setBusy(false)
     }
-    setPendingAutofill(overrides, feed)
-    setApplied(true)
-    onClose()
   }
 
   return (
@@ -128,6 +156,16 @@ export function AutoFill({ open, onClose }: { open: boolean; onClose: () => void
             className="w-full px-2.5 py-1.5 bg-paper border border-line text-[12px] font-mono outline-none focus:border-graphite-mid"
           />
           <div className="flex items-center gap-3">
+            <label className="text-[12px] text-graphite-mid">
+              {t('af_province')}{' '}
+              <select value={province} onChange={(e) => setProvince(e.target.value)} className="px-2 py-1 bg-paper border border-line text-[12px] outline-none cursor-pointer">
+                {GEO.map((g) => (
+                  <option key={g.province} value={g.province}>
+                    {g.label[lang] ?? g.label.en}
+                  </option>
+                ))}
+              </select>
+            </label>
             <Button onClick={() => void extract()} disabled={busy || !text.trim()}>
               {busy ? t('loading') : t('af_extract')}
             </Button>
@@ -162,8 +200,10 @@ export function AutoFill({ open, onClose }: { open: boolean; onClose: () => void
                 <div className="text-[11px] text-graphite-soft">{String(extracted.source_note)}</div>
               )}
               <div className="flex items-center gap-3">
-                <Button onClick={apply}>{t('af_apply')}</Button>
-                {applied && <span className="text-[12px] text-graphite-soft">{t('af_applied')}</span>}
+                <Button onClick={() => void apply()} disabled={busy}>
+                  {busy ? t('loading') : t('af_apply_db')}
+                </Button>
+                {applied && <span className="text-[12px] text-graphite-soft">{t('af_applied_db')}</span>}
               </div>
             </div>
           )}

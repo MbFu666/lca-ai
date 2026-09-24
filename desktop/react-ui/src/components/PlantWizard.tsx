@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useI18n, type Lang } from '../i18n'
 import { getDescriptors } from '../api/ipc'
-import { takePendingAutofill } from '../lib/autofillStore'
 import { buildPlant, type CoprodMode, type PlantResult } from '../lib/plant'
 import { CULT_NORMS, FEEDS, GEO, TECHS, feedYield, resolveParams } from '../lib/refdata'
 import { monteCarlo, sensitivity, type UncertInput } from '../lib/uncertainty'
@@ -52,17 +51,6 @@ export function PlantWizard({
       })
       .catch(() => undefined)
   }, [result])
-
-  // Consume AI Auto-Fill pending overrides when the wizard opens
-  useEffect(() => {
-    if (!open) return
-    const { overrides: pend, feed } = takePendingAutofill()
-    if (Object.keys(pend).length > 0) setOverrides((o) => ({ ...o, ...pend }))
-    if (feed) {
-      const match = TECHS.find((x) => x.feed === feed)
-      if (match) setTechId(match.id)
-    }
-  }, [open])
 
   const geo = GEO.find((g) => g.province === province) ?? GEO[0]
   const tech = TECHS.find((x) => x.id === techId) ?? TECHS[0]

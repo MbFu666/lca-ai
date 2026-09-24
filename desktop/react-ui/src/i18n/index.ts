@@ -370,6 +370,10 @@ const DICT: Record<string, Record<Lang, string>> = {
   af_result: { ru: 'Извлечённые параметры', en: 'Extracted parameters', zh: '提取的参数' },
   af_apply: { ru: 'Применить в Plant Wizard', en: 'Apply to Plant Wizard', zh: '应用到 Plant Wizard' },
   af_applied: { ru: 'Применено — откройте ⌂', en: 'Applied — open ⌂', zh: '已应用—打开 ⌂' },
+  af_province: { ru: 'Провинция для записи', en: 'Province to write', zh: '写入省份' },
+  af_apply_db: { ru: '💾 Записать в базу', en: '💾 Write to database', zh: '💾 写入数据库' },
+  af_applied_db: { ru: 'Записано в БД (процессы | LIT)', en: 'Written to DB (| LIT processes)', zh: '已写入数据库（| LIT）' },
+  af_db_done: { ru: 'Добавлено/обновлено в БД:', en: 'Created/updated in DB:', zh: '数据库新建/更新：' },
   up_title: { ru: 'Проверить обновления', en: 'Check for updates', zh: '检查更新' },
   up_install: { ru: 'Установить обновление', en: 'Install update', zh: '安装更新' },
 }
