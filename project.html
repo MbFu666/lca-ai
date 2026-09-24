@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -209,6 +209,22 @@
             .container { max-width: none; }
         }
     </style>
+<style>
+/* Responsive pass (review #30) */
+@media (max-width: 900px) {
+  .frame, .wrap, .container { padding-left: 16px; padding-right: 16px; }
+  table { display: block; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+  .tabs, .toolbar, .actions, .nav { flex-wrap: wrap; }
+  .grid-2, .two-col { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  body { font-size: 13px; }
+  h1, .hero h1, .title { font-size: 22px; }
+  input, select, button, .btn { min-height: 36px; }
+  .modal, .modal-box, [class*="modal"] > div { width: 94vw !important; max-width: 94vw !important; }
+  .hide-sm { display: none !important; }
+}
+</style>
 </head>
 <body>
     <header>
@@ -1584,7 +1600,23 @@
         h += '<div class="footer">LCA·AI Studio — ' + esc(new Date().toLocaleDateString()) + '</div>';
         return h;
     }
-    const reportDoc = rep => '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><style>' + REPORT_CSS + '</style></head><body>' + reportBody(rep) + '</body></html>';
+    const reportDoc = rep => '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><style>' + REPORT_CSS + '</style><style>
+/* Responsive pass (review #30) */
+@media (max-width: 900px) {
+  .frame, .wrap, .container { padding-left: 16px; padding-right: 16px; }
+  table { display: block; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+  .tabs, .toolbar, .actions, .nav { flex-wrap: wrap; }
+  .grid-2, .two-col { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  body { font-size: 13px; }
+  h1, .hero h1, .title { font-size: 22px; }
+  input, select, button, .btn { min-height: 36px; }
+  .modal, .modal-box, [class*="modal"] > div { width: 94vw !important; max-width: 94vw !important; }
+  .hide-sm { display: none !important; }
+}
+</style>
+</head><body>' + reportBody(rep) + '</body></html>';
 
     async function downloadWord() {
         showToast(t('ai_generating'));

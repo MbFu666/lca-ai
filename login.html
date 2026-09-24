@@ -125,6 +125,22 @@ html.dark .lang-switch button.active { background: var(--graphite); color: var(-
 .skip-link { position: absolute; left: -9999px; top: 0; z-index: 9999; padding: 8px 16px; background: var(--graphite); color: var(--paper); font-family: var(--mono); font-size: 12px; text-decoration: none; }
 .skip-link:focus { left: 8px; top: 8px; }
 </style>
+<style>
+/* Responsive pass (review #30) */
+@media (max-width: 900px) {
+  .frame, .wrap, .container { padding-left: 16px; padding-right: 16px; }
+  table { display: block; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+  .tabs, .toolbar, .actions, .nav { flex-wrap: wrap; }
+  .grid-2, .two-col { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  body { font-size: 13px; }
+  h1, .hero h1, .title { font-size: 22px; }
+  input, select, button, .btn { min-height: 36px; }
+  .modal, .modal-box, [class*="modal"] > div { width: 94vw !important; max-width: 94vw !important; }
+  .hide-sm { display: none !important; }
+}
+</style>
 </head>
 <body>
     <a class="skip-link" href="#loginForm">Skip to content</a>

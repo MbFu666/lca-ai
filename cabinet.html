@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -567,6 +567,22 @@
         .prow .prow-val { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
         .prow-none { color: var(--ink-mute); font-size: 12px; padding: 4px 10px; }
     </style>
+<style>
+/* Responsive pass (review #30) */
+@media (max-width: 900px) {
+  .frame, .wrap, .container { padding-left: 16px; padding-right: 16px; }
+  table { display: block; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+  .tabs, .toolbar, .actions, .nav { flex-wrap: wrap; }
+  .grid-2, .two-col { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  body { font-size: 13px; }
+  h1, .hero h1, .title { font-size: 22px; }
+  input, select, button, .btn { min-height: 36px; }
+  .modal, .modal-box, [class*="modal"] > div { width: 94vw !important; max-width: 94vw !important; }
+  .hide-sm { display: none !important; }
+}
+</style>
 </head>
 <body>
     <a class="skip-link" href="#main">Skip to content</a>>
