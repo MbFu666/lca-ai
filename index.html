@@ -1,6 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
+<script>/* prod: silence console.log to avoid PII in devtools (review minor) */if(!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)&&location.protocol!=="file:"){console.log=function(){};}</script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#F2F0EC">
@@ -7362,6 +7363,7 @@ async function downloadWord(d) {
   const html = `
     <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
     <head>
+<script>/* prod: silence console.log to avoid PII in devtools (review minor) */if(!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)&&location.protocol!=="file:"){console.log=function(){};}</script>
       <meta charset="utf-8">
       <style>
         body { font-family: Arial, sans-serif; color: #0E2E27; }
