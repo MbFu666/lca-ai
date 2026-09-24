@@ -1,0 +1,28 @@
+# Logs
+*.log
+opencode.log
+derby.log
+
+# Build / deps
+node_modules/
+desktop/react-ui/dist/
+desktop/react-ui/release/
+__pycache__/
+*.pyc
+.venv/
+
+# Secrets / certs
+*.pfx
+*.p12
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Stray git artifacts
+.git/objects/**/tmp_obj_*

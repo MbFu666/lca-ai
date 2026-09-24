@@ -44,16 +44,16 @@ lca-ai.ru (фронтенд, Supabase, Cloudflare Pages)
 │  └────────────────────────────────────┘  │
 └──────────────────────────────────────────┘
 
-Desktop-приложение (LCA·AI Desktop, Тайри 2.x + Python)
+Desktop-приложение (LCA·AI Studio, Electron + openLCA)
   ┌──────────────────────────────┐
-  │  Tauri 2.x (Rust shell)      │
+  │  Electron (Node shell)       │
   │  └─ React 19 + TypeScript    │
   └──────────────┬───────────────┘
-                 │ JSON-RPC over stdio
+                 │ JSON-RPC over HTTP :8080
   ┌──────────────▼───────────────┐
-  │  Python LCA engine           │
-  │  (numpy/scipy матрицы)       │
-  │  SQLite ~/.lca-app/lca.db    │
+  │  openLCA engine (Java, JRE)  │
+  │  bundled in resources/engine │
+  │  Derby DB ~/openLCA-data-1.4 │
   └──────────────────────────────┘
 ```
 
@@ -101,7 +101,7 @@ Desktop-приложение (LCA·AI Desktop, Тайри 2.x + Python)
 | `desktop/lca_engine/rpc_server.py` | ✅ | JSON-RPC сервер (stdin/stdout) |
 | `desktop/lca_engine/schema.sql` | ✅ | SQLite-схема |
 | `desktop/react-ui/` | ✅ | React 19 + Vite + TS фронтенд |
-| `desktop/tauri/` | ✅ | Tauri 2.x каркас (Cargo.toml, main.rs) |
+| `desktop/react-ui/electron/` | ✅ | Electron shell (main.cjs + preload.cjs), бандл openLCA-движка |
 | `desktop/run.py` | ✅ | Резервный лаунчер (Python RPC + React dev server) |
 | `desktop/import_full.py` + `test_*.py` | ✅ | Импорт и тесты движка |
 
@@ -129,8 +129,8 @@ Desktop-приложение (LCA·AI Desktop, Тайри 2.x + Python)
 
 - [ ] **Веб**: проверить end-to-end расчёт `POST /api/calculate` против живого openLCA IPC
 - [ ] **Веб**: добавить `factor_source` («TianGong LCA») в отчёт, пометить AI-fallback процессы
-- [ ] **Десктоп**: собрать рабочий билд Tauri после установки Rust
-- [ ] **Десктоп**: JSON-RPC интеграция Tauri ↔ Python engine
+- [x] **Десктоп**: собран рабочий билд Electron (electron-builder, NSIS + portable, подпись)
+- [x] **Десктоп**: JSON-RPC интеграция Electron ↔ openLCA engine (HTTP :8080)
 - [ ] **Десктоп**: браузер базы данных (поиск по FTS5 среди 4133 процессов)
 - [ ] **Десктоп**: редактор product system (drag-drop), визуализация потоков
 - [ ] **Десктоп**: облачная синхронизация проектов с Supabase
@@ -152,9 +152,9 @@ Desktop-приложение (LCA·AI Desktop, Тайри 2.x + Python)
 | Backend (web) | Python 3.12 + FastAPI |
 | LCA-расчёты (web) | openLCA 2.6.1 IPC (Java 21 headless) |
 | База данных | TianGong LCA (бесплатно, Китай) + SQLite |
-| Desktop shell | Tauri 2.x (Rust) |
+| Desktop shell | Electron (Node) + electron-builder |
 | Desktop frontend | React 19 + TypeScript + Vite |
-| Desktop движок | Python 3.12, numpy, scipy |
+| Desktop движок | openLCA 2.6.1 (Java, headless) в resources/engine |
 | Облако | Cloudflare Pages, Supabase (Auth + Postgres + Edge Functions) |
 | ИИ | DeepSeek (интерпретация текста, НЕ расчёт) |
 
