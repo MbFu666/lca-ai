@@ -380,6 +380,10 @@ const DICT: Record<string, Record<Lang, string>> = {
   up_downloaded: { ru: 'Обновление загружено', en: 'Update downloaded', zh: '更新已下载' },
   up_install_now: { ru: 'Установить обновление сейчас? Приложение перезапустится.', en: 'Install update now? The app will restart.', zh: '现在安装更新？应用将重启。' },
   up_latest: { ru: 'У вас последняя версия', en: 'You are on the latest version', zh: '已是最新版本' },
+  up_downloading: { ru: 'Загрузка обновления…', en: 'Downloading update…', zh: '正在下载更新…' },
+  up_error: { ru: 'Ошибка обновления', en: 'Update error', zh: '更新错误' },
+  up_hide: { ru: 'Скрыть', en: 'Hide', zh: '隐藏' },
+  up_later: { ru: 'Позже', en: 'Later', zh: '稍后' },
 }
 
 interface I18nState {

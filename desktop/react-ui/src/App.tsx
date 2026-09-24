@@ -20,6 +20,7 @@ import { PlantWizard } from './components/PlantWizard'
 import { ReportStudio } from './components/ReportStudio'
 import { AutoFill } from './components/AutoFill'
 import { CommandPalette } from './components/CommandPalette'
+import { UpdateOverlay } from './components/UpdateOverlay'
 import { Toasts } from './components/ui/charts'
 import { toast } from './lib/toast'
 import { useCloud } from './stores/cloud'
@@ -43,7 +44,6 @@ export default function App() {
   const [showPlant, setShowPlant] = useState(false)
   const [showReport, setShowReport] = useState(false)
   const [showAutoFill, setShowAutoFill] = useState(false)
-  const [upd, setUpd] = useState('')
   const [themeDark, setThemeDark] = useState(() => localStorage.getItem('lcaai-theme') === 'dark')
   const [paletteOpen, setPaletteOpen] = useState(false)
 
@@ -61,21 +61,6 @@ export default function App() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
-
-  useEffect(() => {
-    const d = window.desktop
-    if (!d || !d.onUpdateEvent) return
-    const off = d.onUpdateEvent((e) => {
-      if (e.type === 'available') toast.ok(`${t('up_available')}: ${e.payload?.version ?? ''}`)
-      else if (e.type === 'progress') setUpd(`${Math.round(e.payload?.percent ?? 0)}%`)
-      else if (e.type === 'downloaded') {
-        setUpd('ready')
-        toast.ok(t('up_downloaded'))
-        if (window.confirm(t('up_install_now'))) void d.installUpdates()
-      } else if (e.type === 'error') toast.warn(`${t('up_title')}: ${e.payload?.message ?? ''}`)
-    })
-    return off
-  }, [t])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -296,22 +281,15 @@ export default function App() {
           {
             id: 'updates',
             label: t('up_title'),
-            hint: upd === 'ready' ? t('up_install') : upd,
             run: async () => {
               const d = window.desktop!
-              if (upd === 'ready') {
-                await d.installUpdates()
-                return
-              }
-              setUpd('check')
               const r = await d.checkUpdates()
               if (r && r.ok && r.version) {
-                await d.downloadUpdates()
+                // overlay picks up 'available' and shows the download popup
               } else if (r && r.ok) {
                 const v = await d.appVersion().catch(() => '')
                 toast.ok(`${t('up_latest')}: ${v}`)
               } else {
-                setUpd('')
                 toast.warn(`${t('up_title')}: ${r?.reason ?? 'error'}`)
               }
             },
@@ -326,6 +304,7 @@ export default function App() {
         ]}
       />
       <Toasts />
+      <UpdateOverlay />
     </div>
   )
 }
