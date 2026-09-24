@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -691,6 +691,15 @@ $('saveBtn').addEventListener('click', saveEdit);
   } catch (e) {
     setState(T().e_net, true);
   }
+})();
+</script>
+<script>
+// a11y (review #28): ensure a single <main> landmark exists.
+(function(){
+  var m = document.querySelector('main') || document.querySelector('.frame') || document.querySelector('#app');
+  if (!m) { m = document.createElement('main'); while (document.body.firstChild) m.appendChild(document.body.firstChild); document.body.appendChild(m); }
+  if (m.tagName !== 'MAIN') { m.setAttribute('role','main'); }
+  if (!m.id) m.id = 'main';
 })();
 </script>
 </body>
