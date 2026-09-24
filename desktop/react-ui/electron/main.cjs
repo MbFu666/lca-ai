@@ -1146,6 +1146,7 @@ if (!app.requestSingleInstanceLock()) {
     }
 
     ipcMain.handle('file:extract-text', async (_e, { path }) => {
+      if (typeof path !== 'string' || !path) throw new Error('NO_FILE_PATH')
       const fs = require('fs')
       const ext = String(path.split('.').pop() || '').toLowerCase()
       let text = ''
