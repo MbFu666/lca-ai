@@ -14,7 +14,7 @@
     </script>
     <title>LCA·AI — Личный кабинет</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
@@ -3524,5 +3524,25 @@
 
         init();
     </script>
+<script>
+// a11y (review #28): tablist/tab semantics + aria-selected
+(function(){
+  function decorate(){
+    document.querySelectorAll('.tabs').forEach(function(list){
+      var tabs = list.querySelectorAll('button');
+      if(!tabs.length) return;
+      list.setAttribute('role','tablist');
+      tabs.forEach(function(b){
+        b.setAttribute('role','tab');
+        b.setAttribute('aria-selected', b.classList.contains('active') ? 'true' : 'false');
+        b.addEventListener('click', function(){
+          tabs.forEach(function(x){ x.setAttribute('aria-selected', x===b ? 'true':'false'); });
+        });
+      });
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate); else decorate();
+})();
+</script>
 </body>
 </html>
