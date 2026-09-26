@@ -14,10 +14,8 @@ function dayLabel(ts: number): 'today' | 'earlier' {
 
 /** OpenCode-style home: DB list (like projects) + DB-open history (like sessions). */
 export function HomeView({
-  onSearch,
   onCreateDb,
 }: {
-  onSearch: () => void
   onCreateDb: () => void
 }) {
   const t = useI18n((s) => s.t)
@@ -54,14 +52,6 @@ export function HomeView({
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto max-w-[980px] px-6 py-6">
-        <button
-          onClick={onSearch}
-          className="w-full flex items-center gap-2 px-3 py-2 mb-6 bg-paper-2 border border-line rounded-md text-[13px] text-graphite-soft hover:border-graphite-mid cursor-pointer"
-        >
-          <span>⌕</span>
-          <span>{t('home_search')}</span>
-        </button>
-
         <div className="grid grid-cols-[260px_1fr] gap-8">
           {/* databases (like OpenCode projects) */}
           <div>

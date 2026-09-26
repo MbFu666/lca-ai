@@ -261,6 +261,9 @@ export default function App() {
       id: 'edit',
       label: t('menu_edit'),
       items: [
+        { id: 'search', label: t('search_all'), hint: 'Ctrl+K', run: () => runAction('search') },
+        { id: 'palette', label: t('menu_palette'), hint: 'Ctrl+Shift+P', run: () => runAction('palette') },
+        { id: 'sep-0', label: '', separator: true },
         { id: 'undo', label: t('edit_undo'), hint: 'Ctrl+Z', run: () => runAction('undo') },
         { id: 'redo', label: t('edit_redo'), hint: 'Ctrl+Y', run: () => runAction('redo') },
         { id: 'sep-1', label: '', separator: true },
@@ -343,21 +346,13 @@ export default function App() {
         {!sidebarHidden && window.desktop && <Navigator />}
         <main className="flex-1 flex min-w-0">
           <div className="flex-1 min-w-0 overflow-hidden">
-            <EditorPane
-              tab={activeTab}
-              onSearch={() => setShowSearch(true)}
-              onCreateDb={() => setDbPicker('create')}
-            />
+            <EditorPane tab={activeTab} onCreateDb={() => setDbPicker('create')} />
           </div>
           {split && (
             <div className="flex-1 min-w-0 overflow-hidden border-l border-line flex flex-col">
               {secondTab ? (
                 <div className="flex-1 min-h-0">
-                  <EditorPane
-                    tab={secondTab}
-                    onSearch={() => setShowSearch(true)}
-                    onCreateDb={() => setDbPicker('create')}
-                  />
+                  <EditorPane tab={secondTab} onCreateDb={() => setDbPicker('create')} />
                 </div>
               ) : (
                 <div className="flex-1 overflow-y-auto p-3 space-y-1">
@@ -484,16 +479,14 @@ export default function App() {
 
 function EditorPane({
   tab,
-  onSearch,
   onCreateDb,
 }: {
   tab: Tab | null
-  onSearch: () => void
   onCreateDb: () => void
 }) {
   const t = useI18n((s) => s.t)
   if (!tab) {
-    if (window.desktop) return <HomeView onSearch={onSearch} onCreateDb={onCreateDb} />
+    if (window.desktop) return <HomeView onCreateDb={onCreateDb} />
     return (
       <EmptyState>
         <div className="text-center">

@@ -49,6 +49,9 @@ export function TitleTabs({
       {/* row 1: hamburger menu + modules + cluster + window controls (drag region) */}
       <div className="titlebar h-[36px] flex items-stretch">
         <HamburgerMenu columns={columns} title="LCA·AI" />
+        <button onClick={onSearch} title={`${t('search_all')} (Ctrl+K)`} className="ham-btn no-drag ml-1.5">
+          ⌕
+        </button>
 
         <div className="no-drag flex items-stretch border-l border-line overflow-x-auto">
           {modules.map((m) => (
