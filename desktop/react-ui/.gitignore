@@ -20,3 +20,5 @@ buildResources/*.p12
 Thumbs.db
 .vscode/
 .idea/
+
+electron-dist/

@@ -1,4 +1,4 @@
-appId: ru.lca-ai.studio
+﻿appId: ru.lca-ai.studio
 productName: LCA AI Studio
 publish:
   provider: github
@@ -32,3 +32,5 @@ nsis:
   shortcutName: LCA AI Studio
 portable:
   artifactName: ${productName}-${version}-portable.${ext}
+
+electronDist: electron-dist
