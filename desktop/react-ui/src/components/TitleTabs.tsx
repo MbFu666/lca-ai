@@ -17,6 +17,8 @@ export function TitleTabs({
   themeDark,
   onToggleTheme,
   onSearch,
+  onHome,
+  homeOn,
   onHistory,
   onToggleSplit,
   onToggleSidebar,
@@ -27,6 +29,8 @@ export function TitleTabs({
   themeDark: boolean
   onToggleTheme: () => void
   onSearch: () => void
+  onHome: () => void
+  homeOn: boolean
   onHistory: () => void
   onToggleSplit: () => void
   onToggleSidebar: () => void
@@ -49,8 +53,12 @@ export function TitleTabs({
       {/* row 1: hamburger menu + modules + cluster + window controls (drag region) */}
       <div className="titlebar h-[36px] flex items-stretch">
         <HamburgerMenu columns={columns} title="LCA·AI" />
-        <button onClick={onSearch} title={`${t('search_all')} (Ctrl+K)`} className="ham-btn no-drag ml-1.5">
-          ⌕
+        <button
+          onClick={onHome}
+          title={t('home_title')}
+          className={`ham-btn no-drag ml-1.5 ${homeOn ? 'ham-btn-on' : ''}`}
+        >
+          ⊞
         </button>
 
         <div className="no-drag flex items-stretch border-l border-line overflow-x-auto">

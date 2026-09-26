@@ -53,6 +53,7 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
   const [dbPicker, setDbPicker] = useState<'create' | 'open' | null>(null)
+  const [home, setHome] = useState(true)
   const [sidebarHidden, setSidebarHidden] = useState(() => localStorage.getItem('lcaai-sidebar') === 'hidden')
   const [themeDark, setThemeDark] = useState(() => localStorage.getItem('lcaai-theme') === 'dark')
   const [paletteOpen, setPaletteOpen] = useState(false)
@@ -82,6 +83,13 @@ export default function App() {
       off?.()
     }
   }, [])
+
+  // Home view (OpenCode-style) is a toggleable main-area view:
+  // opening any tab leaves it, closing all tabs returns to it.
+  useEffect(() => {
+    if (active) setHome(false)
+    else setHome(true)
+  }, [active])
 
   const checkUpdates = async () => {
     const d = window.desktop!
@@ -336,6 +344,8 @@ export default function App() {
         themeDark={themeDark}
         onToggleTheme={() => setThemeDark((d) => !d)}
         onSearch={() => setShowSearch(true)}
+        onHome={() => setHome((h) => !h)}
+        homeOn={home}
         onHistory={() => setShowHistory(true)}
         onToggleSplit={() => toggleSplit()}
         onToggleSidebar={() => setSidebarHidden((h) => !h)}
@@ -346,13 +356,17 @@ export default function App() {
         {!sidebarHidden && window.desktop && <Navigator />}
         <main className="flex-1 flex min-w-0">
           <div className="flex-1 min-w-0 overflow-hidden">
-            <EditorPane tab={activeTab} onCreateDb={() => setDbPicker('create')} />
+            {home ? (
+              <HomeView onSearch={() => setShowSearch(true)} onCreateDb={() => setDbPicker('create')} />
+            ) : (
+              <EditorPane tab={activeTab} />
+            )}
           </div>
           {split && (
             <div className="flex-1 min-w-0 overflow-hidden border-l border-line flex flex-col">
               {secondTab ? (
                 <div className="flex-1 min-h-0">
-                  <EditorPane tab={secondTab} onCreateDb={() => setDbPicker('create')} />
+                  <EditorPane tab={secondTab} />
                 </div>
               ) : (
                 <div className="flex-1 overflow-y-auto p-3 space-y-1">
@@ -477,16 +491,9 @@ export default function App() {
   )
 }
 
-function EditorPane({
-  tab,
-  onCreateDb,
-}: {
-  tab: Tab | null
-  onCreateDb: () => void
-}) {
+function EditorPane({ tab }: { tab: Tab | null }) {
   const t = useI18n((s) => s.t)
   if (!tab) {
-    if (window.desktop) return <HomeView onCreateDb={onCreateDb} />
     return (
       <EmptyState>
         <div className="text-center">

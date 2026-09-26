@@ -440,6 +440,7 @@ const DICT: Record<string, Record<Lang, string>> = {
   yes: { ru: 'Да', en: 'Yes', zh: '是' },
   no: { ru: 'Нет', en: 'No', zh: '否' },
   home_search: { ru: 'Поиск сущностей…', en: 'Search entities…', zh: '搜索实体…' },
+  home_title: { ru: 'Домашний экран: базы и история', en: 'Home: databases and history', zh: '主页：数据库与历史' },
   home_dbs: { ru: 'Базы данных', en: 'Databases', zh: '数据库' },
   home_history: { ru: 'История открытий БД', en: 'Database open history', zh: '数据库打开历史' },
   home_new_session: { ru: 'Новая сессия', en: 'New session', zh: '新会话' },
