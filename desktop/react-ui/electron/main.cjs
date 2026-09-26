@@ -687,6 +687,139 @@ function purgeStaleUpdateCache() {
   } catch {}
 }
 
+function wireWinEvents(bw) {
+  bw.on('maximize', () => {
+    try {
+      bw.webContents.send('win:maximized', true)
+    } catch {}
+  })
+  bw.on('unmaximize', () => {
+    try {
+      bw.webContents.send('win:maximized', false)
+    } catch {}
+  })
+}
+
+function spawnAdditionalWindow() {
+  const bw = new BrowserWindow({
+    width: 1280,
+    height: 800,
+    minWidth: 1024,
+    minHeight: 640,
+    title: 'LCA·AI Studio',
+    icon: path.join(__dirname, '..', 'buildResources', 'icon.ico'),
+    backgroundColor: '#17191c',
+    autoHideMenuBar: true,
+    show: false,
+    titleBarStyle: 'hidden',
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true,
+    },
+  })
+  bw.once('ready-to-show', () => bw.show())
+  wireWinEvents(bw)
+  if (DEV_URL) bw.loadURL(DEV_URL)
+  else bw.loadFile(path.join(__dirname, '..', 'dist', 'index.html'))
+  bw.webContents.setWindowOpenHandler(({ url }) => {
+    if (/^https?:\/\//i.test(url)) shell.openExternal(url)
+    return { action: 'deny' }
+  })
+  return bw
+}
+
+// Native menu mirrors the in-renderer hamburger (OpenCode-style structure).
+// Custom items forward to the focused window; hotkeys stay renderer-side to
+// avoid double-firing with native accelerators.
+function buildAppMenu() {
+  const send = (id) => {
+    const target = BrowserWindow.getFocusedWindow() || win
+    if (target && !target.isDestroyed()) target.webContents.send('menu:action', id)
+  }
+  const template = [
+    {
+      label: 'Файл',
+      submenu: [
+        { label: 'Новая сессия', click: () => send('new-session') },
+        { label: 'Закрыть все вкладки', click: () => send('close-all-tabs') },
+        { label: 'Открыть проект…', click: () => send('open-project') },
+        { type: 'separator' },
+        { label: 'Настройки', click: () => send('settings') },
+        { label: 'Новое окно', click: () => spawnAdditionalWindow() },
+        { label: 'Закрыть окно', click: () => { const w = BrowserWindow.getFocusedWindow(); if (w) w.close() } },
+      ],
+    },
+    {
+      label: 'Правка',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'selectAll' },
+        { type: 'separator' },
+        { label: 'Поиск', click: () => send('search') },
+        { label: 'Палитра команд', click: () => send('palette') },
+      ],
+    },
+    {
+      label: 'Вид',
+      submenu: [
+        { label: 'История', click: () => send('history') },
+        { label: 'Разделение экрана', click: () => send('split') },
+        { label: 'Показать/скрыть навигатор', click: () => send('sidebar') },
+        { label: 'Переключить тему', click: () => send('theme') },
+        { type: 'separator' },
+        { role: 'reload' },
+        { role: 'forceReload' },
+        { role: 'toggleDevTools' },
+        { type: 'separator' },
+        { role: 'resetZoom' },
+        { role: 'zoomIn' },
+        { role: 'zoomOut' },
+        { type: 'separator' },
+        { role: 'togglefullscreen' },
+      ],
+    },
+    {
+      label: 'Переход',
+      submenu: [
+        { label: 'AI-оценка', click: () => send('ai') },
+        { label: 'Сценарии', click: () => send('scenario') },
+        { label: 'Plant Wizard', click: () => send('plant') },
+        { label: 'Отчёты', click: () => send('report') },
+        { label: 'Auto-Fill', click: () => send('autofill') },
+        { label: 'Облако', click: () => send('cloud') },
+        { type: 'separator' },
+        { label: 'Менеджер БД', click: () => send('db') },
+        { label: 'Глобальные параметры', click: () => send('gp') },
+      ],
+    },
+    {
+      label: 'Окно',
+      submenu: [
+        { role: 'minimize' },
+        { role: 'zoom' },
+        { type: 'separator' },
+        { label: 'Закрыть все вкладки', click: () => send('close-all-tabs') },
+      ],
+    },
+    {
+      label: 'Справка',
+      submenu: [
+        { label: 'О приложении…', click: () => send('about') },
+        { label: 'Проверить обновления', click: () => send('updates') },
+        { label: 'Сайт lca-ai.ru', click: () => shell.openExternal('https://lca-ai.ru') },
+      ],
+    },
+  ]
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
+}
+
 function createWindow() {
   win = new BrowserWindow({
     width: 1440,
@@ -708,48 +841,8 @@ function createWindow() {
       sandbox: true,
     },
   })
-  // Native menu with standard roles (clipboard/zoom/devtools accelerators) —
-  // the in-renderer hamburger menu is the localized app menu.
-  const template = [
-    { label: 'File', submenu: [{ role: 'quit' }] },
-    {
-      label: 'Edit',
-      submenu: [
-        { role: 'undo' },
-        { role: 'redo' },
-        { type: 'separator' },
-        { role: 'cut' },
-        { role: 'copy' },
-        { role: 'paste' },
-        { role: 'selectAll' },
-      ],
-    },
-    {
-      label: 'View',
-      submenu: [
-        { role: 'reload' },
-        { role: 'forceReload' },
-        { role: 'toggleDevTools' },
-        { type: 'separator' },
-        { role: 'resetZoom' },
-        { role: 'zoomIn' },
-        { role: 'zoomOut' },
-        { type: 'separator' },
-        { role: 'togglefullscreen' },
-      ],
-    },
-  ]
-  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
-  win.on('maximize', () => {
-    try {
-      win.webContents.send('win:maximized', true)
-    } catch {}
-  })
-  win.on('unmaximize', () => {
-    try {
-      win.webContents.send('win:maximized', false)
-    } catch {}
-  })
+  // Native app menu is built once in whenReady (buildAppMenu).
+  wireWinEvents(win)
   win.once('ready-to-show', () => win.show())
   if (DEV_URL) {
     win.loadURL(DEV_URL)
@@ -778,6 +871,7 @@ if (!app.requestSingleInstanceLock()) {
 
   app.whenReady().then(() => {
     createWindow()
+    buildAppMenu()
     setupAutoUpdater()
     setTimeout(purgeStaleUpdateCache, 30000)
     // silent background check shortly after launch
@@ -790,18 +884,27 @@ if (!app.requestSingleInstanceLock()) {
     ipcMain.handle('engine:start', () => startEngine())
     ipcMain.handle('engine:stop', () => stopEngine())
     ipcMain.handle('engine:status', () => ({ state: engineState, message: engineMessage, managed: weSpawned }))
-    ipcMain.handle('win:minimize', () => {
-      if (win) win.minimize()
+    ipcMain.handle('win:minimize', (e) => {
+      const w = BrowserWindow.fromWebContents(e.sender)
+      if (w) w.minimize()
     })
-    ipcMain.handle('win:maximize', () => {
-      if (!win) return
-      if (win.isMaximized()) win.unmaximize()
-      else win.maximize()
+    ipcMain.handle('win:maximize', (e) => {
+      const w = BrowserWindow.fromWebContents(e.sender)
+      if (!w) return
+      if (w.isMaximized()) w.unmaximize()
+      else w.maximize()
     })
-    ipcMain.handle('win:close', () => {
-      if (win) win.close()
+    ipcMain.handle('win:close', (e) => {
+      const w = BrowserWindow.fromWebContents(e.sender)
+      if (w) w.close()
     })
-    ipcMain.handle('win:is-maximized', () => !!win && win.isMaximized())
+    ipcMain.handle('win:new', () => {
+      spawnAdditionalWindow()
+    })
+    ipcMain.handle('win:is-maximized', (e) => {
+      const w = BrowserWindow.fromWebContents(e.sender)
+      return !!w && w.isMaximized()
+    })
     ipcMain.handle('engine:config', () => loadConfig())
     ipcMain.handle('engine:config-set', (_e, patch) => {
       const cfg = { ...loadConfig(), ...patch }

@@ -70,9 +70,15 @@ contextBridge.exposeInMainWorld('desktop', {
   winMaximize: () => ipcRenderer.invoke('win:maximize'),
   winClose: () => ipcRenderer.invoke('win:close'),
   winIsMaximized: () => ipcRenderer.invoke('win:is-maximized'),
+  newWindow: () => ipcRenderer.invoke('win:new'),
   onWinMaximized: (cb) => {
     const listener = (_e, v) => cb(v)
     ipcRenderer.on('win:maximized', listener)
     return () => ipcRenderer.removeListener('win:maximized', listener)
+  },
+  onMenuAction: (cb) => {
+    const listener = (_e, id) => cb(id)
+    ipcRenderer.on('menu:action', listener)
+    return () => ipcRenderer.removeListener('menu:action', listener)
   },
 })

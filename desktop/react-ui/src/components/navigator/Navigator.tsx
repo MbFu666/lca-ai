@@ -3,6 +3,7 @@ import type { DbInfo } from '../../types/desktop'
 import type { Descriptor, EntityType } from '../../api/types'
 import { getDescriptorsCached, invalidateDescriptors } from '../../api/entityCache'
 import { getGlobalParameters, updateEntity } from '../../api/ipc'
+import { createProjectSession } from '../../lib/session'
 import { useTabs, tabKey } from '../../stores/tabs'
 import { useEngine } from '../../stores/engine'
 import { useI18n } from '../../i18n'
@@ -108,12 +109,9 @@ export function Navigator() {
   const activeDb = dbs.find((d) => d.active)
 
   const createProject = async () => {
-    const id = crypto.randomUUID()
-    const name = 'New project'
+    setError('')
     try {
-      await updateEntity('Project', { '@type': 'Project', '@id': id, name, variants: [] })
-      invalidateDescriptors('Project')
-      openTab({ key: tabKey('Project', id), type: 'Project', id, name })
+      await createProjectSession()
     } catch (e) {
       setError(String(e instanceof Error ? e.message : e))
     }

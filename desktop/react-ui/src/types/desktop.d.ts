@@ -111,7 +111,9 @@ export interface DesktopApi {
   winMaximize: () => Promise<void>
   winClose: () => Promise<void>
   winIsMaximized: () => Promise<boolean>
+  newWindow: () => Promise<void>
   onWinMaximized: (cb: (maximized: boolean) => void) => () => void
+  onMenuAction: (cb: (actionId: string) => void) => () => void
 }
 
 declare global {

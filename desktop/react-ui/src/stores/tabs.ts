@@ -20,6 +20,7 @@ interface TabsState {
   setActive: (key: string) => void
   rename: (key: string, name: string) => void
   reorder: (from: string, to: string) => void
+  closeAll: () => void
   toggleSplit: () => void
   setSecond: (key: string | null) => void
 }
@@ -48,6 +49,7 @@ export const useTabs = create<TabsState>()(
         })
       },
       setActive: (key) => set({ active: key }),
+      closeAll: () => set({ tabs: [], active: null, second: null }),
       rename: (key, name) =>
         set((s) => ({ tabs: s.tabs.map((t) => (t.key === key ? { ...t, name } : t)) })),
       reorder: (from, to) =>

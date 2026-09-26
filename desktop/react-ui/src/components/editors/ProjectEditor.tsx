@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Descriptor, ImpactResult, Ref } from '../../api/types'
 import {
   calculate,
@@ -182,15 +182,6 @@ export function ProjectEditor({ id }: { id: string }) {
       setCalcRunning(false)
     }
   }
-
-  // Composer command bus: trigger variant comparison from the bottom composer.
-  const calcRef = useRef(calcVariants)
-  calcRef.current = calcVariants
-  useEffect(() => {
-    const onCalc = () => void calcRef.current()
-    window.addEventListener('lcaai:run-calc', onCalc)
-    return () => window.removeEventListener('lcaai:run-calc', onCalc)
-  }, [])
 
   const exportComparison = () => {
     if (!comparison) return
