@@ -440,6 +440,7 @@ const DICT: Record<string, Record<Lang, string>> = {
   yes: { ru: 'Да', en: 'Yes', zh: '是' },
   no: { ru: 'Нет', en: 'No', zh: '否' },
   home_search: { ru: 'Поиск сущностей…', en: 'Search entities…', zh: '搜索实体…' },
+  home_tab: { ru: 'Домой', en: 'Home', zh: '主页' },
   home_title: { ru: 'Базы и история', en: 'Databases & history', zh: '数据库与历史' },
   home_docs_btn: { ru: 'Документация о приложении', en: 'Application documentation', zh: '应用文档' },
   home_site: { ru: 'Сайт lca-ai.ru', en: 'Website lca-ai.ru', zh: '网站 lca-ai.ru' },

@@ -28,7 +28,8 @@ import { TitleTabs, type ModuleButton } from './components/TitleTabs'
 import { type MenuBarColumn } from './components/MenuBar'
 import { DbPickerDialog } from './components/DbPickerDialog'
 import { HistoryPanel } from './components/HistoryPanel'
-import { HomeView } from './components/HomeView'
+import { DbHistoryDialog } from './components/DbHistoryDialog'
+import { WelcomeView } from './components/WelcomeView'
 import { IconAi, IconAutoFill, IconCloud, IconDb, IconParams, IconReport, IconScenario, IconWizard } from './components/icons'
 import { Toasts } from './components/ui/charts'
 import { toast } from './lib/toast'
@@ -36,6 +37,7 @@ import { createProjectSession } from './lib/session'
 import { useCloud } from './stores/cloud'
 import { useHistory } from './stores/history'
 import { useTabs, tabKey, type Tab } from './stores/tabs'
+import type { EntityType } from './api/types'
 import { useI18n } from './i18n'
 import { EmptyState } from './components/ui/primitives'
 
@@ -56,7 +58,7 @@ export default function App() {
   const [showAbout, setShowAbout] = useState(false)
   const [dbPicker, setDbPicker] = useState<'create' | 'open' | null>(null)
   const [showDocs, setShowDocs] = useState(false)
-  const [home, setHome] = useState(true)
+  const [showDbHistory, setShowDbHistory] = useState(false)
   const [sidebarHidden, setSidebarHidden] = useState(() => localStorage.getItem('lcaai-sidebar') === 'hidden')
   const [themeDark, setThemeDark] = useState(() => localStorage.getItem('lcaai-theme') === 'dark')
   const [paletteOpen, setPaletteOpen] = useState(false)
@@ -87,12 +89,19 @@ export default function App() {
     }
   }, [])
 
-  // Home view (OpenCode-style) is a toggleable main-area view:
-  // opening any tab leaves it, closing all tabs returns to it.
+  // Welcome page opens as a closable tab on first launch (like process tabs).
   useEffect(() => {
-    if (active) setHome(false)
-    else setHome(true)
-  }, [active])
+    if (useTabs.getState().tabs.length === 0) {
+      openTab({ key: 'home:welcome', type: 'Home', id: 'welcome', name: useI18n.getState().t('home_tab') })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    const onDocs = () => setShowDocs(true)
+    window.addEventListener('lcaai:docs', onDocs)
+    return () => window.removeEventListener('lcaai:docs', onDocs)
+  }, [])
 
   const checkUpdates = async () => {
     const d = window.desktop!
@@ -180,6 +189,12 @@ export default function App() {
       case 'docs':
         setShowDocs(true)
         break
+      case 'dbhist':
+        setShowDbHistory(true)
+        break
+      case 'welcome':
+        openTab({ key: 'home:welcome', type: 'Home', id: 'welcome', name: t('home_tab') })
+        break
       case 'create-db':
         setDbPicker('create')
         break
@@ -261,6 +276,7 @@ export default function App() {
       label: t('menu_file'),
       items: [
         { id: 'new-session', label: t('file_new_session'), hint: 'Ctrl+Shift+S', run: () => runAction('new-session') },
+        { id: 'welcome', label: t('home_tab'), run: () => runAction('welcome') },
         { id: 'close-all-tabs', label: t('file_close_all_tabs'), run: () => runAction('close-all-tabs') },
         { id: 'sep-1', label: '', separator: true },
         { id: 'create-db', label: t('file_create_db'), run: () => runAction('create-db') },
@@ -293,6 +309,7 @@ export default function App() {
       label: t('menu_view'),
       items: [
         { id: 'sidebar', label: t('sidebar_toggle'), hint: 'Ctrl+B', run: () => runAction('sidebar') },
+        { id: 'dbhist', label: t('home_title'), run: () => runAction('dbhist') },
         { id: 'split', label: t('split_toggle'), run: () => runAction('split') },
         { id: 'history', label: t('hist_title'), run: () => runAction('history') },
         { id: 'theme', label: themeDark ? t('theme_light') : t('theme_dark'), run: () => runAction('theme') },
@@ -351,8 +368,8 @@ export default function App() {
         themeDark={themeDark}
         onToggleTheme={() => setThemeDark((d) => !d)}
         onSearch={() => setShowSearch(true)}
-        onHome={() => setHome((h) => !h)}
-        homeOn={home}
+        onHome={() => setShowDbHistory((v) => !v)}
+        homeOn={showDbHistory}
         onHistory={() => setShowHistory(true)}
         onToggleSplit={() => toggleSplit()}
         onToggleSidebar={() => setSidebarHidden((h) => !h)}
@@ -363,15 +380,7 @@ export default function App() {
         {!sidebarHidden && window.desktop && <Navigator />}
         <main className="flex-1 flex min-w-0">
           <div className="flex-1 min-w-0 overflow-hidden">
-            {home ? (
-              <HomeView
-                onSearch={() => setShowSearch(true)}
-                onCreateDb={() => setDbPicker('create')}
-                onDocs={() => setShowDocs(true)}
-              />
-            ) : (
-              <EditorPane tab={activeTab} />
-            )}
+            <EditorPane tab={activeTab} />
           </div>
           {split && (
             <div className="flex-1 min-w-0 overflow-hidden border-l border-line flex flex-col">
@@ -463,6 +472,18 @@ export default function App() {
         />
       )}
       <HistoryPanel open={showHistory} onClose={() => setShowHistory(false)} />
+      <DbHistoryDialog
+        open={showDbHistory}
+        onClose={() => setShowDbHistory(false)}
+        onSearch={() => {
+          setShowDbHistory(false)
+          setShowSearch(true)
+        }}
+        onCreateDb={() => {
+          setShowDbHistory(false)
+          setDbPicker('create')
+        }}
+      />
       {dbPicker && <DbPickerDialog mode={dbPicker} onClose={() => setDbPicker(null)} />}
       <SettingsDialog
         open={showSettings}
@@ -515,6 +536,9 @@ function EditorPane({ tab }: { tab: Tab | null }) {
       </EmptyState>
     )
   }
+  if (tab.type === 'Home') {
+    return <WelcomeView onDocs={() => window.dispatchEvent(new CustomEvent('lcaai:docs'))} />
+  }
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto max-w-[1200px] min-h-full">
@@ -524,7 +548,7 @@ function EditorPane({ tab }: { tab: Tab | null }) {
   )
 }
 
-function EditorFor({ type, id }: { type: Tab['type']; id: string }) {
+function EditorFor({ type, id }: { type: EntityType; id: string }) {
   switch (type) {
     case 'Process':
       return <ProcessEditor id={id} />

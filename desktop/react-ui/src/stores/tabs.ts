@@ -4,7 +4,7 @@ import type { EntityType } from '../api/types'
 
 export interface Tab {
   key: string
-  type: EntityType
+  type: EntityType | 'Home'
   id: string
   name: string
 }
