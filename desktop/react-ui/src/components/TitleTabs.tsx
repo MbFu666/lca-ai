@@ -53,14 +53,16 @@ export function TitleTabs({
     <div className="shrink-0 border-b border-line bg-paper-2">
       {/* row 1: hamburger menu + modules + cluster + window controls (drag region) */}
       <div className="titlebar h-[36px] flex items-stretch">
-        <HamburgerMenu columns={columns} title="LCA·AI" />
-        <button
-          onClick={onHome}
-          title={t('home_title')}
-          className={`ham-btn no-drag ml-1.5 ${homeOn ? 'ham-btn-on' : ''}`}
-        >
-          <IconGridPlus />
-        </button>
+        <div className="no-drag flex items-center gap-1 px-1.5 h-full">
+          <HamburgerMenu columns={columns} title="LCA·AI" />
+          <button
+            onClick={onHome}
+            title={t('home_title')}
+            className={`ham-btn ${homeOn ? 'ham-btn-on' : ''}`}
+          >
+            <IconGridPlus />
+          </button>
+        </div>
 
         <div className="no-drag flex items-stretch border-l border-line overflow-x-auto">
           {modules.map((m) => (

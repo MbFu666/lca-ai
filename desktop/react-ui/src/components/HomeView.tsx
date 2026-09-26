@@ -16,9 +16,11 @@ function dayLabel(ts: number): 'today' | 'earlier' {
 export function HomeView({
   onSearch,
   onCreateDb,
+  onDocs,
 }: {
   onSearch: () => void
   onCreateDb: () => void
+  onDocs: () => void
 }) {
   const t = useI18n((s) => s.t)
   const [dbs, setDbs] = useState<DbInfo[] | null>(null)
@@ -54,6 +56,24 @@ export function HomeView({
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto max-w-[980px] px-6 py-6">
+        {/* welcome block (openLCA Welcome style) */}
+        <div className="grid grid-cols-[260px_1fr] gap-8 mb-8">
+          <div className="space-y-2.5">
+            <button onClick={onDocs} className="home-link">
+              {t('home_docs_btn')}
+            </button>
+            <a href="https://lca-ai.ru" target="_blank" rel="noreferrer" className="home-link">
+              {t('home_site')}
+            </a>
+            <a href="https://github.com/MbFu666/lca-ai-releases" target="_blank" rel="noreferrer" className="home-link">
+              {t('home_repo')}
+            </a>
+          </div>
+          <div className="text-[13px] text-graphite-mid leading-relaxed pt-0.5 whitespace-pre-line">
+            {t('home_welcome')}
+          </div>
+        </div>
+
         <button
           onClick={onSearch}
           className="w-full flex items-center gap-2 px-3 py-2 mb-6 bg-paper-2 border border-line rounded-md text-[13px] text-graphite-soft hover:border-graphite-mid cursor-pointer"

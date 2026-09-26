@@ -23,6 +23,7 @@ import { CommandPalette } from './components/CommandPalette'
 import { UpdateOverlay } from './components/UpdateOverlay'
 import { SettingsDialog } from './components/SettingsDialog'
 import { AboutDialog } from './components/AboutDialog'
+import { DocsDialog } from './components/DocsDialog'
 import { TitleTabs, type ModuleButton } from './components/TitleTabs'
 import { type MenuBarColumn } from './components/MenuBar'
 import { DbPickerDialog } from './components/DbPickerDialog'
@@ -54,6 +55,7 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
   const [dbPicker, setDbPicker] = useState<'create' | 'open' | null>(null)
+  const [showDocs, setShowDocs] = useState(false)
   const [home, setHome] = useState(true)
   const [sidebarHidden, setSidebarHidden] = useState(() => localStorage.getItem('lcaai-sidebar') === 'hidden')
   const [themeDark, setThemeDark] = useState(() => localStorage.getItem('lcaai-theme') === 'dark')
@@ -174,6 +176,9 @@ export default function App() {
         break
       case 'about':
         setShowAbout(true)
+        break
+      case 'docs':
+        setShowDocs(true)
         break
       case 'create-db':
         setDbPicker('create')
@@ -317,6 +322,7 @@ export default function App() {
       id: 'help',
       label: t('menu_help'),
       items: [
+        { id: 'docs', label: t('help_docs'), run: () => runAction('docs') },
         { id: 'about', label: t('about_title'), run: () => runAction('about') },
         { id: 'updates', label: t('up_title'), run: () => runAction('updates') },
       ],
@@ -358,7 +364,11 @@ export default function App() {
         <main className="flex-1 flex min-w-0">
           <div className="flex-1 min-w-0 overflow-hidden">
             {home ? (
-              <HomeView onSearch={() => setShowSearch(true)} onCreateDb={() => setDbPicker('create')} />
+              <HomeView
+                onSearch={() => setShowSearch(true)}
+                onCreateDb={() => setDbPicker('create')}
+                onDocs={() => setShowDocs(true)}
+              />
             ) : (
               <EditorPane tab={activeTab} />
             )}
@@ -461,6 +471,7 @@ export default function App() {
         onToggleTheme={() => setThemeDark((d) => !d)}
       />
       <AboutDialog open={showAbout} onClose={() => setShowAbout(false)} />
+      <DocsDialog open={showDocs} onClose={() => setShowDocs(false)} />
       <CommandPalette
         open={paletteOpen}
         onClose={() => setPaletteOpen(false)}

@@ -116,7 +116,7 @@ body {
 .wc-btn { width: 42px; display: flex; align-items: center; justify-content: center; background: none; border: none; color: var(--color-graphite-mid); font-size: 12px; cursor: pointer; }
 .wc-btn:hover { background: var(--color-paper-3); color: var(--color-graphite); }
 .wc-btn.wc-close:hover { background: var(--color-e-4); color: #fff; }
-.ic-btn { width: 34px; display: flex; align-items: center; justify-content: center; background: none; border: none; color: var(--color-graphite); font-size: 14px; font-weight: 700; cursor: pointer; }
+.ic-btn { width: 34px; display: flex; align-items: center; justify-content: center; background: none; border: none; color: var(--color-graphite); font-size: 14px; font-weight: 500; cursor: pointer; }
 .ic-btn:hover { background: var(--color-paper-3); }
 .ic-btn .ico { font-weight: 700; }
 .ic-btn-on { background: var(--color-paper-3); }
@@ -133,6 +133,8 @@ body {
 .appmenu-head { padding: 4px 10px; font-size: 10px; font-family: var(--font-sans); text-transform: uppercase; letter-spacing: .08em; color: var(--color-graphite-soft); }
 .appmenu-item { display: flex; gap: 10px; width: 100%; padding: 6px 10px; font-size: 12px; background: none; border: none; border-radius: 5px; color: var(--color-graphite); cursor: pointer; text-align: left; }
 .appmenu-item:hover { background: var(--color-paper-2); }
+.home-link { display: block; text-align: left; color: var(--color-e-ink); text-decoration: underline; font-size: 13px; background: none; border: none; cursor: pointer; padding: 0; }
+.home-link:hover { color: var(--color-e-4); }
 .appmenu-hint { color: var(--color-graphite-soft); font-size: 10px; }
 .appmenu-sep { height: 1px; background: var(--color-line); margin: 4px 6px; }
 .ham-btn { width: 30px; height: 28px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--color-line); border-radius: 6px; background: var(--color-paper-3); color: var(--color-graphite); cursor: pointer; }

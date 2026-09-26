@@ -35,7 +35,7 @@ export function HamburgerMenu({ columns, title }: { columns: MenuBarColumn[]; ti
   }
 
   return (
-    <div className="no-drag relative h-full flex items-center px-1.5" onMouseLeave={scheduleClose} onMouseEnter={cancelClose}>
+    <div className="relative h-full flex items-center" onMouseLeave={scheduleClose} onMouseEnter={cancelClose}>
       <button
         className="ham-btn"
         title={title}
