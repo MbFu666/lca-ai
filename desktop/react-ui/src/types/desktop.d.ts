@@ -112,6 +112,8 @@ export interface DesktopApi {
   winClose: () => Promise<void>
   winIsMaximized: () => Promise<boolean>
   newWindow: () => Promise<void>
+  editAction: (op: 'undo' | 'redo' | 'cut' | 'copy' | 'paste' | 'delete' | 'selectall') => Promise<void>
+  viewAction: (op: 'reload' | 'devtools' | 'zoomin' | 'zoomout' | 'zoom0' | 'fullscreen') => Promise<void>
   onWinMaximized: (cb: (maximized: boolean) => void) => () => void
   onMenuAction: (cb: (actionId: string) => void) => () => void
 }

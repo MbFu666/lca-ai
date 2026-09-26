@@ -71,6 +71,8 @@ contextBridge.exposeInMainWorld('desktop', {
   winClose: () => ipcRenderer.invoke('win:close'),
   winIsMaximized: () => ipcRenderer.invoke('win:is-maximized'),
   newWindow: () => ipcRenderer.invoke('win:new'),
+  editAction: (op) => ipcRenderer.invoke('edit:action', op),
+  viewAction: (op) => ipcRenderer.invoke('win:view', op),
   onWinMaximized: (cb) => {
     const listener = (_e, v) => cb(v)
     ipcRenderer.on('win:maximized', listener)

@@ -60,7 +60,11 @@ export function HistoryPanel({ open, onClose }: { open: boolean; onClose: () => 
                 <button
                   key={`${e.type}:${e.id}-${i}`}
                   onClick={() => {
-                    openTab({ key: tabKey(e.type, e.id), type: e.type, id: e.id, name: e.name })
+                    if (e.type === 'DB') {
+                      window.desktop?.dbSwitch(e.name).catch(() => undefined)
+                    } else {
+                      openTab({ key: tabKey(e.type as never, e.id), type: e.type as never, id: e.id, name: e.name })
+                    }
                     onClose()
                   }}
                   className="w-full flex items-center gap-2 px-3 py-1.5 text-left text-[12px] text-graphite-mid hover:text-graphite hover:bg-paper-3 cursor-pointer"

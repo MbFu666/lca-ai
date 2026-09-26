@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { EntityType } from '../api/types'
-import { useHistory } from './history'
 
 export interface Tab {
   key: string
@@ -38,7 +37,6 @@ export const useTabs = create<TabsState>()(
           tabs: exists ? s.tabs : [...s.tabs, tab],
           active: tab.key,
         }))
-        useHistory.getState().push({ type: tab.type, id: tab.id, name: tab.name })
       },
       close: (key) => {
         set((s) => {

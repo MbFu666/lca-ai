@@ -23,19 +23,21 @@ import { CommandPalette } from './components/CommandPalette'
 import { UpdateOverlay } from './components/UpdateOverlay'
 import { SettingsDialog } from './components/SettingsDialog'
 import { AboutDialog } from './components/AboutDialog'
-import { TitleTabs, type MenuGroup } from './components/TitleTabs'
+import { TitleTabs, type ModuleButton } from './components/TitleTabs'
+import { type MenuBarColumn } from './components/MenuBar'
+import { DbPickerDialog } from './components/DbPickerDialog'
 import { HistoryPanel } from './components/HistoryPanel'
 import { Toasts } from './components/ui/charts'
 import { toast } from './lib/toast'
 import { createProjectSession } from './lib/session'
 import { useCloud } from './stores/cloud'
+import { useHistory } from './stores/history'
 import { useTabs, tabKey, type Tab } from './stores/tabs'
-import { useI18n, type Lang } from './i18n'
+import { useI18n } from './i18n'
 import { EmptyState } from './components/ui/primitives'
 
 export default function App() {
   const t = useI18n((s) => s.t)
-  const setLang = useI18n((s) => s.setLang)
   const { tabs, active, second, split, close, closeAll, setActive, toggleSplit, setSecond } = useTabs()
   const openTab = useTabs((s) => s.open)
   const [showDbManager, setShowDbManager] = useState(false)
@@ -49,6 +51,7 @@ export default function App() {
   const [showHistory, setShowHistory] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
+  const [dbPicker, setDbPicker] = useState<'create' | 'open' | null>(null)
   const [sidebarHidden, setSidebarHidden] = useState(() => localStorage.getItem('lcaai-sidebar') === 'hidden')
   const [themeDark, setThemeDark] = useState(() => localStorage.getItem('lcaai-theme') === 'dark')
   const [paletteOpen, setPaletteOpen] = useState(false)
@@ -60,6 +63,24 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('lcaai-sidebar', sidebarHidden ? 'hidden' : 'shown')
   }, [sidebarHidden])
+
+  // History = database-open history (user requirement).
+  useEffect(() => {
+    if (!window.desktop) return
+    let mounted = true
+    const record = (name: string) => {
+      if (name) useHistory.getState().push({ type: 'DB', id: name, name })
+    }
+    window.desktop
+      .dbList()
+      .then((r) => mounted && record(r.current))
+      .catch(() => undefined)
+    const off = window.desktop.onDbChanged((d) => record(d.db))
+    return () => {
+      mounted = false
+      off?.()
+    }
+  }, [])
 
   const checkUpdates = async () => {
     const d = window.desktop!
@@ -144,6 +165,35 @@ export default function App() {
       case 'about':
         setShowAbout(true)
         break
+      case 'create-db':
+        setDbPicker('create')
+        break
+      case 'open-db':
+        setDbPicker('open')
+        break
+      case 'undo':
+      case 'redo':
+      case 'cut':
+      case 'copy':
+      case 'paste':
+      case 'delete':
+      case 'selectall':
+        window.desktop?.editAction(id)
+        break
+      case 'reload':
+      case 'devtools':
+      case 'zoomin':
+      case 'zoomout':
+      case 'zoom0':
+      case 'fullscreen':
+        window.desktop?.viewAction(id)
+        break
+      case 'minimize':
+        window.desktop?.winMinimize()
+        break
+      case 'maximize':
+        window.desktop?.winMaximize()
+        break
       default:
         break
     }
@@ -190,62 +240,85 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey)
   })
 
-  const menu: MenuGroup[] = [
+  const columns: MenuBarColumn[] = [
     {
-      group: t('menu_file'),
+      id: 'file',
+      label: t('menu_file'),
       items: [
         { id: 'new-session', label: t('file_new_session'), hint: 'Ctrl+Shift+S', run: () => runAction('new-session') },
         { id: 'close-all-tabs', label: t('file_close_all_tabs'), run: () => runAction('close-all-tabs') },
-        { id: 'open-project', label: t('file_open_project'), run: () => runAction('open-project') },
+        { id: 'sep-1', label: '', separator: true },
+        { id: 'create-db', label: t('file_create_db'), run: () => runAction('create-db') },
+        { id: 'open-db', label: t('file_open_db'), run: () => runAction('open-db') },
+        { id: 'sep-2', label: '', separator: true },
         { id: 'settings', label: t('file_settings'), hint: 'Ctrl+,', run: () => runAction('settings') },
         { id: 'new-window', label: t('file_new_window'), hint: 'Ctrl+Shift+N', run: () => runAction('new-window') },
         { id: 'close-window', label: t('file_close_window'), run: () => runAction('close-window') },
       ],
     },
     {
-      group: t('menu_edit'),
+      id: 'edit',
+      label: t('menu_edit'),
       items: [
-        { id: 'search', label: t('search_all'), hint: 'Ctrl+K', run: () => runAction('search') },
-        { id: 'palette', label: t('menu_palette'), hint: 'Ctrl+Shift+P', run: () => runAction('palette') },
+        { id: 'undo', label: t('edit_undo'), hint: 'Ctrl+Z', run: () => runAction('undo') },
+        { id: 'redo', label: t('edit_redo'), hint: 'Ctrl+Y', run: () => runAction('redo') },
+        { id: 'sep-1', label: '', separator: true },
+        { id: 'cut', label: t('edit_cut'), hint: 'Ctrl+X', run: () => runAction('cut') },
+        { id: 'copy', label: t('edit_copy'), hint: 'Ctrl+C', run: () => runAction('copy') },
+        { id: 'paste', label: t('edit_paste'), hint: 'Ctrl+V', run: () => runAction('paste') },
+        { id: 'delete', label: t('edit_delete'), run: () => runAction('delete') },
+        { id: 'selectall', label: t('edit_select_all'), hint: 'Ctrl+A', run: () => runAction('selectall') },
       ],
     },
     {
-      group: t('menu_view'),
+      id: 'view',
+      label: t('menu_view'),
       items: [
-        { id: 'history', label: t('hist_title'), run: () => runAction('history') },
-        { id: 'split', label: t('split_toggle'), run: () => runAction('split') },
         { id: 'sidebar', label: t('sidebar_toggle'), hint: 'Ctrl+B', run: () => runAction('sidebar') },
+        { id: 'split', label: t('split_toggle'), run: () => runAction('split') },
+        { id: 'history', label: t('hist_title'), run: () => runAction('history') },
         { id: 'theme', label: themeDark ? t('theme_light') : t('theme_dark'), run: () => runAction('theme') },
+        { id: 'sep-1', label: '', separator: true },
+        { id: 'reload', label: t('view_reload'), run: () => runAction('reload') },
+        { id: 'devtools', label: t('view_devtools'), run: () => runAction('devtools') },
+        { id: 'sep-2', label: '', separator: true },
+        { id: 'zoom0', label: t('view_zoom0'), hint: 'Ctrl+0', run: () => runAction('zoom0') },
+        { id: 'zoomin', label: t('view_zoomin'), hint: 'Ctrl++', run: () => runAction('zoomin') },
+        { id: 'zoomout', label: t('view_zoomout'), hint: 'Ctrl+-', run: () => runAction('zoomout') },
+        { id: 'sep-3', label: '', separator: true },
+        { id: 'fullscreen', label: t('view_fullscreen'), run: () => runAction('fullscreen') },
       ],
     },
     {
-      group: t('menu_go'),
+      id: 'window',
+      label: t('menu_window'),
       items: [
-        { id: 'ai', label: `✦ ${t('ai_title')}`, run: () => runAction('ai') },
-        { id: 'scenario', label: `◈ ${t('scenario_title')}`, run: () => runAction('scenario') },
-        { id: 'plant', label: `⌂ ${t('pw_title')}`, run: () => runAction('plant') },
-        { id: 'report', label: `▤ ${t('rs_title')}`, run: () => runAction('report') },
-        { id: 'autofill', label: `📥 ${t('af_title')}`, run: () => runAction('autofill') },
-        { id: 'cloud', label: `☁ ${t('cloud')}`, run: () => runAction('cloud') },
-        { id: 'db', label: t('db_manager'), run: () => runAction('db') },
-        { id: 'gp', label: t('nav_global_params'), run: () => runAction('gp') },
+        { id: 'minimize', label: t('win_minimize'), run: () => runAction('minimize') },
+        { id: 'maximize', label: t('win_maximize'), run: () => runAction('maximize') },
+        { id: 'sep-1', label: '', separator: true },
+        { id: 'close-all-tabs', label: t('file_close_all_tabs'), run: () => runAction('close-all-tabs') },
+        { id: 'close-window', label: t('file_close_window'), run: () => runAction('close-window') },
       ],
     },
     {
-      group: t('menu_lang'),
-      items: (['ru', 'en', 'zh'] as Lang[]).map((l) => ({
-        id: `lang-${l}`,
-        label: l === 'ru' ? 'Русский' : l === 'en' ? 'English' : '中文',
-        run: () => setLang(l),
-      })),
-    },
-    {
-      group: t('menu_help'),
+      id: 'help',
+      label: t('menu_help'),
       items: [
         { id: 'about', label: t('about_title'), run: () => runAction('about') },
         { id: 'updates', label: t('up_title'), run: () => runAction('updates') },
       ],
     },
+  ]
+
+  const modules: ModuleButton[] = [
+    { id: 'ai', ico: '✦', label: t('ai_title'), run: () => runAction('ai') },
+    { id: 'scenario', ico: '◈', label: t('scenario_title'), run: () => runAction('scenario') },
+    { id: 'plant', ico: '⌂', label: t('pw_title'), run: () => runAction('plant') },
+    { id: 'report', ico: '▤', label: t('rs_title'), run: () => runAction('report') },
+    { id: 'autofill', ico: '📥', label: t('af_title'), run: () => runAction('autofill') },
+    { id: 'cloud', ico: '☁', label: t('cloud'), run: () => runAction('cloud') },
+    { id: 'db', ico: '🗄', label: t('db_manager'), run: () => runAction('db') },
+    { id: 'gp', ico: 'ƒ', label: t('nav_global_params'), run: () => runAction('gp') },
   ]
 
   const activeTab = tabs.find((tb) => tb.key === active) ?? null
@@ -254,6 +327,8 @@ export default function App() {
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <TitleTabs
+        columns={columns}
+        modules={modules}
         themeDark={themeDark}
         onToggleTheme={() => setThemeDark((d) => !d)}
         onSearch={() => setShowSearch(true)}
@@ -261,7 +336,6 @@ export default function App() {
         onToggleSplit={() => toggleSplit()}
         onToggleSidebar={() => setSidebarHidden((h) => !h)}
         sidebarHidden={sidebarHidden}
-        menu={menu}
       />
 
       <div className="flex-1 flex min-h-0">
@@ -360,6 +434,7 @@ export default function App() {
         />
       )}
       <HistoryPanel open={showHistory} onClose={() => setShowHistory(false)} />
+      {dbPicker && <DbPickerDialog mode={dbPicker} onClose={() => setDbPicker(null)} />}
       <SettingsDialog
         open={showSettings}
         onClose={() => setShowSettings(false)}

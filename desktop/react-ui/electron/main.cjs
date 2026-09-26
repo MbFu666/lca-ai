@@ -744,7 +744,9 @@ function buildAppMenu() {
       submenu: [
         { label: 'Новая сессия', click: () => send('new-session') },
         { label: 'Закрыть все вкладки', click: () => send('close-all-tabs') },
-        { label: 'Открыть проект…', click: () => send('open-project') },
+        { type: 'separator' },
+        { label: 'Создать БД…', click: () => send('create-db') },
+        { label: 'Открыть БД…', click: () => send('open-db') },
         { type: 'separator' },
         { label: 'Настройки', click: () => send('settings') },
         { label: 'Новое окно', click: () => spawnAdditionalWindow() },
@@ -754,49 +756,32 @@ function buildAppMenu() {
     {
       label: 'Правка',
       submenu: [
-        { role: 'undo' },
-        { role: 'redo' },
+        { label: 'Отменить', click: (_m, w) => w && w.webContents.undo() },
+        { label: 'Повторить', click: (_m, w) => w && w.webContents.redo() },
         { type: 'separator' },
-        { role: 'cut' },
-        { role: 'copy' },
-        { role: 'paste' },
-        { role: 'selectAll' },
-        { type: 'separator' },
-        { label: 'Поиск', click: () => send('search') },
-        { label: 'Палитра команд', click: () => send('palette') },
+        { label: 'Вырезать', click: (_m, w) => w && w.webContents.cut() },
+        { label: 'Копировать', click: (_m, w) => w && w.webContents.copy() },
+        { label: 'Вставить', click: (_m, w) => w && w.webContents.paste() },
+        { label: 'Удалить', click: (_m, w) => w && w.webContents.delete() },
+        { label: 'Выбрать всё', click: (_m, w) => w && w.webContents.selectAll() },
       ],
     },
     {
       label: 'Вид',
       submenu: [
-        { label: 'История', click: () => send('history') },
+        { label: 'Переключить боковую панель', click: () => send('sidebar') },
         { label: 'Разделение экрана', click: () => send('split') },
-        { label: 'Показать/скрыть навигатор', click: () => send('sidebar') },
+        { label: 'История открытий БД', click: () => send('history') },
         { label: 'Переключить тему', click: () => send('theme') },
         { type: 'separator' },
         { role: 'reload' },
-        { role: 'forceReload' },
         { role: 'toggleDevTools' },
         { type: 'separator' },
-        { role: 'resetZoom' },
-        { role: 'zoomIn' },
-        { role: 'zoomOut' },
+        { label: 'Фактический размер', click: (_m, w) => w && w.webContents.setZoomLevel(0) },
+        { label: 'Увеличить', click: (_m, w) => w && w.webContents.setZoomLevel(w.webContents.getZoomLevel() + 0.5) },
+        { label: 'Уменьшить', click: (_m, w) => w && w.webContents.setZoomLevel(w.webContents.getZoomLevel() - 0.5) },
         { type: 'separator' },
         { role: 'togglefullscreen' },
-      ],
-    },
-    {
-      label: 'Переход',
-      submenu: [
-        { label: 'AI-оценка', click: () => send('ai') },
-        { label: 'Сценарии', click: () => send('scenario') },
-        { label: 'Plant Wizard', click: () => send('plant') },
-        { label: 'Отчёты', click: () => send('report') },
-        { label: 'Auto-Fill', click: () => send('autofill') },
-        { label: 'Облако', click: () => send('cloud') },
-        { type: 'separator' },
-        { label: 'Менеджер БД', click: () => send('db') },
-        { label: 'Глобальные параметры', click: () => send('gp') },
       ],
     },
     {
@@ -900,6 +885,29 @@ if (!app.requestSingleInstanceLock()) {
     })
     ipcMain.handle('win:new', () => {
       spawnAdditionalWindow()
+    })
+    ipcMain.handle('edit:action', (e, op) => {
+      const w = BrowserWindow.fromWebContents(e.sender)
+      if (!w) return
+      const wc = w.webContents
+      if (op === 'undo') wc.undo()
+      else if (op === 'redo') wc.redo()
+      else if (op === 'cut') wc.cut()
+      else if (op === 'copy') wc.copy()
+      else if (op === 'paste') wc.paste()
+      else if (op === 'delete') wc.delete()
+      else if (op === 'selectall') wc.selectAll()
+    })
+    ipcMain.handle('win:view', (e, op) => {
+      const w = BrowserWindow.fromWebContents(e.sender)
+      if (!w) return
+      const wc = w.webContents
+      if (op === 'reload') wc.reload()
+      else if (op === 'devtools') wc.toggleDevTools()
+      else if (op === 'zoomin') wc.setZoomLevel(wc.getZoomLevel() + 0.5)
+      else if (op === 'zoomout') wc.setZoomLevel(wc.getZoomLevel() - 0.5)
+      else if (op === 'zoom0') wc.setZoomLevel(0)
+      else if (op === 'fullscreen') w.setFullScreen(!w.isFullScreen())
     })
     ipcMain.handle('win:is-maximized', (e) => {
       const w = BrowserWindow.fromWebContents(e.sender)

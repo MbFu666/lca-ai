@@ -1,9 +1,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { EntityType } from '../api/types'
 
 export interface HistoryEntry {
-  type: EntityType
+  /** 'DB' for database-open history (current semantics); legacy entity types may persist. */
+  type: string
   id: string
   name: string
   ts: number
@@ -11,7 +11,7 @@ export interface HistoryEntry {
 
 interface HistoryState {
   entries: HistoryEntry[]
-  push: (e: { type: EntityType; id: string; name: string }) => void
+  push: (e: { type: string; id: string; name: string }) => void
   clear: () => void
 }
 
