@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { IconMenu } from './icons'
 
 export interface MenuBarItem {
   id: string
@@ -43,7 +44,7 @@ export function HamburgerMenu({ columns, title }: { columns: MenuBarColumn[]; ti
           setSub(null)
         }}
       >
-        ☰
+        <IconMenu />
       </button>
       {open && (
         <div className="ham-menu" onMouseEnter={cancelClose}>

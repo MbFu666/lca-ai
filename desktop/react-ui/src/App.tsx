@@ -28,6 +28,7 @@ import { type MenuBarColumn } from './components/MenuBar'
 import { DbPickerDialog } from './components/DbPickerDialog'
 import { HistoryPanel } from './components/HistoryPanel'
 import { HomeView } from './components/HomeView'
+import { IconAi, IconAutoFill, IconCloud, IconDb, IconParams, IconReport, IconScenario, IconWizard } from './components/icons'
 import { Toasts } from './components/ui/charts'
 import { toast } from './lib/toast'
 import { createProjectSession } from './lib/session'
@@ -323,14 +324,14 @@ export default function App() {
   ]
 
   const modules: ModuleButton[] = [
-    { id: 'ai', ico: '✦', label: t('ai_title'), run: () => runAction('ai') },
-    { id: 'scenario', ico: '◈', label: t('scenario_title'), run: () => runAction('scenario') },
-    { id: 'plant', ico: '⌂', label: t('pw_title'), run: () => runAction('plant') },
-    { id: 'report', ico: '▤', label: t('rs_title'), run: () => runAction('report') },
-    { id: 'autofill', ico: '📥', label: t('af_title'), run: () => runAction('autofill') },
-    { id: 'cloud', ico: '☁', label: t('cloud'), run: () => runAction('cloud') },
-    { id: 'db', ico: '🗄', label: t('db_manager'), run: () => runAction('db') },
-    { id: 'gp', ico: 'ƒ', label: t('nav_global_params'), run: () => runAction('gp') },
+    { id: 'ai', ico: <IconAi />, label: t('ai_title'), run: () => runAction('ai') },
+    { id: 'scenario', ico: <IconScenario />, label: t('scenario_title'), run: () => runAction('scenario') },
+    { id: 'plant', ico: <IconWizard />, label: t('pw_title'), run: () => runAction('plant') },
+    { id: 'report', ico: <IconReport />, label: t('rs_title'), run: () => runAction('report') },
+    { id: 'autofill', ico: <IconAutoFill />, label: t('af_title'), run: () => runAction('autofill') },
+    { id: 'cloud', ico: <IconCloud />, label: t('cloud'), run: () => runAction('cloud') },
+    { id: 'db', ico: <IconDb />, label: t('db_manager'), run: () => runAction('db') },
+    { id: 'gp', ico: <IconParams />, label: t('nav_global_params'), run: () => runAction('gp') },
   ]
 
   const activeTab = tabs.find((tb) => tb.key === active) ?? null

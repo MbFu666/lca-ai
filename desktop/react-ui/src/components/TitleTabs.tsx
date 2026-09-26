@@ -1,12 +1,13 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import { useTabs } from '../stores/tabs'
 import { WindowControls } from './WindowControls'
 import { HamburgerMenu, type MenuBarColumn } from './MenuBar'
+import { IconGridPlus, IconHistory, IconSearch, IconSidebar, IconSplit } from './icons'
 import { useI18n } from '../i18n'
 
 export interface ModuleButton {
   id: string
-  ico: string
+  ico: ReactNode
   label: string
   run: () => void
 }
@@ -58,7 +59,7 @@ export function TitleTabs({
           title={t('home_title')}
           className={`ham-btn no-drag ml-1.5 ${homeOn ? 'ham-btn-on' : ''}`}
         >
-          ⊞
+          <IconGridPlus />
         </button>
 
         <div className="no-drag flex items-stretch border-l border-line overflow-x-auto">
@@ -77,20 +78,20 @@ export function TitleTabs({
 
         <div className="no-drag flex items-stretch border-l border-line">
           <button onClick={onSearch} title={`${t('search_all')} (Ctrl+K)`} className="ic-btn">
-            ⌕
+            <IconSearch />
           </button>
           <button onClick={onHistory} title={t('hist_title')} className="ic-btn">
-            ↺
+            <IconHistory />
           </button>
           <button onClick={onToggleSplit} title={t('split_toggle')} className={`ic-btn ${split ? 'ic-btn-on' : ''}`}>
-            ◫
+            <IconSplit />
           </button>
           <button
             onClick={onToggleSidebar}
             title={t('sidebar_toggle')}
             className={`ic-btn ${sidebarHidden ? 'ic-btn-on' : ''}`}
           >
-            ◧
+            <IconSidebar />
           </button>
           <button onClick={onToggleTheme} title={themeDark ? t('theme_light') : t('theme_dark')} className="ic-btn">
             <span className="theme-dot" aria-hidden="true" />
