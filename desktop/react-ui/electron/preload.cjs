@@ -66,4 +66,13 @@ contextBridge.exposeInMainWorld('desktop', {
   },
   authGet: () => ipcRenderer.invoke('auth:get'),
   authLogout: () => ipcRenderer.invoke('auth:logout'),
+  winMinimize: () => ipcRenderer.invoke('win:minimize'),
+  winMaximize: () => ipcRenderer.invoke('win:maximize'),
+  winClose: () => ipcRenderer.invoke('win:close'),
+  winIsMaximized: () => ipcRenderer.invoke('win:is-maximized'),
+  onWinMaximized: (cb) => {
+    const listener = (_e, v) => cb(v)
+    ipcRenderer.on('win:maximized', listener)
+    return () => ipcRenderer.removeListener('win:maximized', listener)
+  },
 })

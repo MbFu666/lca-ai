@@ -698,6 +698,9 @@ function createWindow() {
     backgroundColor: '#17191c',
     autoHideMenuBar: true,
     show: false,
+    // OpenCode-GUI style shell: renderer draws the tab strip + window buttons,
+    // native frame edges/shadow/resize are kept by 'hidden' titleBarStyle.
+    titleBarStyle: 'hidden',
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
@@ -705,7 +708,48 @@ function createWindow() {
       sandbox: true,
     },
   })
-  Menu.setApplicationMenu(null)
+  // Native menu with standard roles (clipboard/zoom/devtools accelerators) —
+  // the in-renderer hamburger menu is the localized app menu.
+  const template = [
+    { label: 'File', submenu: [{ role: 'quit' }] },
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'selectAll' },
+      ],
+    },
+    {
+      label: 'View',
+      submenu: [
+        { role: 'reload' },
+        { role: 'forceReload' },
+        { role: 'toggleDevTools' },
+        { type: 'separator' },
+        { role: 'resetZoom' },
+        { role: 'zoomIn' },
+        { role: 'zoomOut' },
+        { type: 'separator' },
+        { role: 'togglefullscreen' },
+      ],
+    },
+  ]
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
+  win.on('maximize', () => {
+    try {
+      win.webContents.send('win:maximized', true)
+    } catch {}
+  })
+  win.on('unmaximize', () => {
+    try {
+      win.webContents.send('win:maximized', false)
+    } catch {}
+  })
   win.once('ready-to-show', () => win.show())
   if (DEV_URL) {
     win.loadURL(DEV_URL)
@@ -746,6 +790,18 @@ if (!app.requestSingleInstanceLock()) {
     ipcMain.handle('engine:start', () => startEngine())
     ipcMain.handle('engine:stop', () => stopEngine())
     ipcMain.handle('engine:status', () => ({ state: engineState, message: engineMessage, managed: weSpawned }))
+    ipcMain.handle('win:minimize', () => {
+      if (win) win.minimize()
+    })
+    ipcMain.handle('win:maximize', () => {
+      if (!win) return
+      if (win.isMaximized()) win.unmaximize()
+      else win.maximize()
+    })
+    ipcMain.handle('win:close', () => {
+      if (win) win.close()
+    })
+    ipcMain.handle('win:is-maximized', () => !!win && win.isMaximized())
     ipcMain.handle('engine:config', () => loadConfig())
     ipcMain.handle('engine:config-set', (_e, patch) => {
       const cfg = { ...loadConfig(), ...patch }

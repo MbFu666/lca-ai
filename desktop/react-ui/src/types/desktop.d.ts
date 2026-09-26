@@ -107,6 +107,11 @@ export interface DesktopApi {
   onUpdateEvent: (cb: (e: { type: string; payload: any }) => void) => () => void
   authGet: () => Promise<{ email: string; access_token: string; user_id?: string; expires_at?: number } | null>
   authLogout: () => Promise<boolean>
+  winMinimize: () => Promise<void>
+  winMaximize: () => Promise<void>
+  winClose: () => Promise<void>
+  winIsMaximized: () => Promise<boolean>
+  onWinMaximized: (cb: (maximized: boolean) => void) => () => void
 }
 
 declare global {

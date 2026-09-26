@@ -109,3 +109,56 @@ body {
 .palette button.item { display: flex; justify-content: space-between; gap: 12px; width: 100%; padding: 10px 14px; font-size: 13px; background: none; border: none; border-bottom: 1px solid var(--color-line); color: var(--color-graphite); cursor: pointer; text-align: left; }
 .palette button.item:hover, .palette button.item.sel { background: var(--color-paper-2); }
 .palette .hint { color: var(--color-graphite-soft); font-size: 11px; }
+
+/* ---- OpenCode-GUI shell geometry (palette untouched: existing vars only) ---- */
+.titlebar { -webkit-app-region: drag; }
+.no-drag, .no-drag * { -webkit-app-region: no-drag; }
+.wc-btn { width: 42px; display: flex; align-items: center; justify-content: center; background: none; border: none; color: var(--color-graphite-mid); font-size: 12px; cursor: pointer; }
+.wc-btn:hover { background: var(--color-paper-3); color: var(--color-graphite); }
+.wc-btn.wc-close:hover { background: var(--color-e-4); color: #fff; }
+.ic-btn { width: 34px; display: flex; align-items: center; justify-content: center; background: none; border: none; color: var(--color-graphite-mid); font-size: 13px; cursor: pointer; }
+.ic-btn:hover { color: var(--color-graphite); background: var(--color-paper-3); }
+.ic-btn-on { color: var(--color-graphite); background: var(--color-paper-3); }
+.tabitem { display: flex; align-items: center; gap: 6px; padding: 0 10px; max-width: 200px; min-width: 70px; font-size: 12px; color: var(--color-graphite-mid); border-right: 1px solid var(--color-line); cursor: pointer; }
+.tabitem:hover { background: var(--color-paper-3); }
+.tabitem-active { background: var(--color-paper); color: var(--color-graphite); }
+.tabitem-close { background: none; border: none; color: var(--color-graphite-soft); cursor: pointer; font-size: 13px; line-height: 1; }
+.tabitem-close:hover { color: var(--color-e-4); }
+.tabitem-input { flex: 1; min-width: 0; background: var(--color-paper); border: 1px solid var(--color-line); font-size: 12px; padding: 1px 4px; outline: none; color: var(--color-graphite); }
+.tabitem-add { width: 32px; display: flex; align-items: center; justify-content: center; background: none; border: none; color: var(--color-graphite-mid); font-size: 15px; cursor: pointer; }
+.tabitem-add:hover { color: var(--color-graphite); background: var(--color-paper-3); }
+.appmenu { position: absolute; top: 100%; left: 0; z-index: 80; width: 280px; max-height: 70vh; overflow: auto; background: var(--color-paper); border: 1px solid var(--color-line); border-radius: 8px; box-shadow: 0 16px 48px rgb(0 0 0 / .25); padding: 4px; }
+.appmenu-group + .appmenu-group { border-top: 1px solid var(--color-line); margin-top: 4px; padding-top: 4px; }
+.appmenu-head { padding: 4px 10px; font-size: 10px; font-family: var(--font-sans); text-transform: uppercase; letter-spacing: .08em; color: var(--color-graphite-soft); }
+.appmenu-item { display: flex; gap: 10px; width: 100%; padding: 6px 10px; font-size: 12px; background: none; border: none; border-radius: 5px; color: var(--color-graphite); cursor: pointer; text-align: left; }
+.appmenu-item:hover { background: var(--color-paper-2); }
+.appmenu-hint { color: var(--color-graphite-soft); font-size: 10px; }
+.composer-box { border: 1px solid var(--color-line); border-radius: 10px; background: var(--color-paper); }
+.composer-plus { width: 22px; height: 22px; border: 1px solid var(--color-line); border-radius: 6px; background: none; color: var(--color-graphite-mid); cursor: pointer; font-size: 13px; line-height: 1; }
+.composer-plus:hover { color: var(--color-graphite); border-color: var(--color-graphite-mid); }
+.composer-select { background: var(--color-paper-2); border: 1px solid var(--color-line); border-radius: 6px; font-size: 11px; padding: 2px 6px; color: var(--color-graphite-mid); outline: none; cursor: pointer; }
+.composer-send { width: 26px; height: 26px; border-radius: 8px; border: 1px solid var(--color-line); background: var(--color-paper-2); color: var(--color-graphite); cursor: pointer; font-size: 13px; }
+.composer-send:hover:not(:disabled) { background: var(--color-paper-3); }
+.composer-send:disabled { opacity: .4; cursor: default; }
+.composer-quick { margin-bottom: 4px; border: 1px solid var(--color-line); border-radius: 8px; background: var(--color-paper); overflow: hidden; }
+.hist-panel { position: absolute; top: 0; right: 0; height: 100%; width: 320px; display: flex; flex-direction: column; background: var(--color-paper-2); border-left: 1px solid var(--color-line); box-shadow: -12px 0 40px rgb(0 0 0 / .15); }
+.stepgroup { border: 1px solid var(--color-line); border-radius: 6px; background: var(--color-paper-2); margin-bottom: 6px; }
+.stepgroup-head { display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 10px; background: none; border: none; font-size: 12px; color: var(--color-graphite-mid); cursor: pointer; }
+.stepgroup-head:hover { color: var(--color-graphite); }
+.stepgroup-caret { width: 10px; font-size: 10px; }
+.stepgroup-count { font-size: 10px; background: var(--color-paper-3); border-radius: 4px; padding: 1px 6px; color: var(--color-graphite-mid); }
+.stepgroup-body { border-top: 1px solid var(--color-line); padding: 8px 10px; }
+/* markdown typography (palette from vars) */
+.md { font-size: 13px; line-height: 1.65; }
+.md h1, .md h2, .md h3, .md h4 { font-family: var(--font-sans); letter-spacing: .02em; margin: .8em 0 .4em; }
+.md h1 { font-size: 20px; } .md h2 { font-size: 17px; } .md h3 { font-size: 15px; } .md h4 { font-size: 13px; }
+.md p { margin: .5em 0; }
+.md ul, .md ol { padding-left: 1.3em; margin: .5em 0; }
+.md code { font-family: var(--font-mono); font-size: 12px; background: var(--color-paper-3); border-radius: 4px; padding: 1px 5px; }
+.md pre { background: var(--color-paper-3); border: 1px solid var(--color-line); border-radius: 6px; padding: 10px; overflow: auto; }
+.md pre code { background: none; padding: 0; }
+.md table { border-collapse: collapse; width: 100%; margin: .6em 0; font-size: 12px; }
+.md th, .md td { border: 1px solid var(--color-line); padding: 4px 8px; text-align: left; }
+.md th { background: var(--color-paper-2); font-family: var(--font-sans); text-transform: uppercase; font-size: 10px; letter-spacing: .06em; }
+.md blockquote { border-left: 3px solid var(--color-line); padding-left: 10px; color: var(--color-graphite-mid); margin: .6em 0; }
+.md a { color: var(--color-e-ink); text-decoration: underline; }

@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useCloud } from '../stores/cloud'
 import { useI18n } from '../i18n'
 import { Button, ErrorBox, Spinner } from './ui/primitives'
+import { StepGroup } from './StepGroup'
+import { Markdown } from './Markdown'
 
 interface AiReport {
   error?: string
@@ -22,13 +24,17 @@ interface AiReport {
   }>
 }
 
-export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function AiPanel({ open, onClose, seed }: { open: boolean; onClose: () => void; seed?: string }) {
   const t = useI18n((s) => s.t)
   const lang = useI18n((s) => s.lang)
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [report, setReport] = useState<AiReport | null>(null)
+
+  useEffect(() => {
+    if (open && seed) setText(seed)
+  }, [open, seed])
 
   if (!open) return null
 
@@ -101,13 +107,17 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
                 <b>{report.total_co2eq} kg CO2-eq</b>
               </div>
               {(report.stages ?? []).map((s, i) => (
-                <div key={i} className="border border-line mb-2">
-                  <div className="flex justify-between px-3 py-1.5 bg-paper-2 text-[12px]">
-                    <span>{s.name}</span>
-                    <span className="font-mono">
-                      {s.co2eq} ({s.share_pct}%)
-                    </span>
-                  </div>
+                <StepGroup key={i} label={s.name} count={Number(s.share_pct)} defaultOpen={i === 0}>
+                  {s.description && <Markdown text={s.description} />}
+                  {(s.key_inputs ?? []).length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {(s.key_inputs ?? []).map((k, j) => (
+                        <span key={j} className="text-[10px] font-mono bg-paper-3 border border-line rounded px-1.5 py-0.5">
+                          {k}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <table className="w-full text-[12px] border-collapse">
                     <tbody>
                       {(s.sub_processes ?? []).map((sp, j) => (
@@ -121,7 +131,10 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
                       ))}
                     </tbody>
                   </table>
-                </div>
+                  <div className="text-right text-[11px] font-mono text-graphite-mid mt-1">
+                    {s.co2eq} kg CO2-eq · {s.share_pct}%
+                  </div>
+                </StepGroup>
               ))}
             </div>
           )}

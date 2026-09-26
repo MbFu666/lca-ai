@@ -41,6 +41,7 @@ import { ExchangeDetails } from '../ExchangeDetails'
 import { AnalysisPanel } from '../AnalysisPanel'
 import { MonteCarloPanel } from '../MonteCarloPanel'
 import { useCloud } from '../../stores/cloud'
+import { toast } from '../../lib/toast'
 import { saveResultsXlsx } from '../../lib/xlsx'
 
 const systemCache = new Map<string, string>()
@@ -594,6 +595,25 @@ function CalcPanel({ processId, processName }: { processId: string; processName:
       setRunning(false)
     }
   }
+
+  // Composer command bus: run calculation / open Monte-Carlo from the bottom composer.
+  const runRef = useRef(run)
+  runRef.current = run
+  const mcReadyRef = useRef({ results, mcSetup })
+  mcReadyRef.current = { results, mcSetup }
+  useEffect(() => {
+    const onCalc = () => void runRef.current()
+    const onMc = () => {
+      if (mcReadyRef.current.results && mcReadyRef.current.mcSetup) setShowMC(true)
+      else toast.warn(t('composer_calc_first'))
+    }
+    window.addEventListener('lcaai:run-calc', onCalc)
+    window.addEventListener('lcaai:run-mc', onMc)
+    return () => {
+      window.removeEventListener('lcaai:run-calc', onCalc)
+      window.removeEventListener('lcaai:run-mc', onMc)
+    }
+  }, [t])
 
   return (
     <section className="mb-8 border border-line bg-paper-2 p-4">

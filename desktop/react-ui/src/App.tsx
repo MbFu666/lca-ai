@@ -21,6 +21,9 @@ import { ReportStudio } from './components/ReportStudio'
 import { AutoFill } from './components/AutoFill'
 import { CommandPalette } from './components/CommandPalette'
 import { UpdateOverlay } from './components/UpdateOverlay'
+import { TitleTabs, type MenuGroup } from './components/TitleTabs'
+import { Composer, type QuickCmd } from './components/Composer'
+import { HistoryPanel } from './components/HistoryPanel'
 import { Toasts } from './components/ui/charts'
 import { toast } from './lib/toast'
 import { useCloud } from './stores/cloud'
@@ -31,19 +34,21 @@ import { EmptyState } from './components/ui/primitives'
 
 export default function App() {
   const t = useI18n((s) => s.t)
-  const lang = useI18n((s) => s.lang)
   const setLang = useI18n((s) => s.setLang)
-  const { tabs, active, close, setActive } = useTabs()
+  const { tabs, active, second, split, close, setActive, toggleSplit, setSecond } = useTabs()
   const openTab = useTabs((s) => s.open)
-  const { status, check, summary } = useEngine()
+  const { status, check } = useEngine()
   const [showDbManager, setShowDbManager] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const [showGP, setShowGP] = useState(false)
   const [showAI, setShowAI] = useState(false)
+  const [aiSeed, setAiSeed] = useState('')
   const [showScenario, setShowScenario] = useState(false)
   const [showPlant, setShowPlant] = useState(false)
   const [showReport, setShowReport] = useState(false)
   const [showAutoFill, setShowAutoFill] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
+  const [sidebarHidden, setSidebarHidden] = useState(() => localStorage.getItem('lcaai-sidebar') === 'hidden')
   const [themeDark, setThemeDark] = useState(() => localStorage.getItem('lcaai-theme') === 'dark')
   const [paletteOpen, setPaletteOpen] = useState(false)
 
@@ -52,26 +57,35 @@ export default function App() {
   }, [themeDark])
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'p') {
-        e.preventDefault()
-        setPaletteOpen((o) => !o)
-      }
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [])
+    localStorage.setItem('lcaai-sidebar', sidebarHidden ? 'hidden' : 'shown')
+  }, [sidebarHidden])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      const mod = e.ctrlKey || e.metaKey
+      if (mod && e.shiftKey && e.key.toLowerCase() === 'p') {
+        e.preventDefault()
+        setPaletteOpen((o) => !o)
+      } else if (mod && !e.shiftKey && e.key.toLowerCase() === 'k') {
         e.preventDefault()
         setShowSearch(true)
+      } else if (mod && !e.shiftKey && e.key.toLowerCase() === 'w') {
+        e.preventDefault()
+        if (active) close(active)
+      } else if (mod && !e.shiftKey && e.key === 'Tab') {
+        e.preventDefault()
+        if (tabs.length > 1) {
+          const i = tabs.findIndex((x) => x.key === active)
+          setActive(tabs[(i + 1) % tabs.length].key)
+        }
+      } else if (mod && !e.shiftKey && e.key.toLowerCase() === 'b') {
+        e.preventDefault()
+        setSidebarHidden((h) => !h)
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [])
+  }, [active, tabs, close, setActive])
 
   useEffect(() => {
     check()
@@ -85,148 +99,183 @@ export default function App() {
     }
   }, [check])
 
+  const checkUpdates = async () => {
+    const d = window.desktop!
+    const r = await d.checkUpdates()
+    if (r && r.ok && r.version) {
+      // overlay picks up 'available' and shows the download popup
+    } else if (r && r.ok) {
+      const v = await d.appVersion().catch(() => '')
+      toast.ok(`${t('up_latest')}: ${v}`)
+    } else {
+      toast.warn(`${t('up_title')}: ${r?.reason ?? 'error'}`)
+    }
+  }
+
+  const menu: MenuGroup[] = [
+    {
+      group: t('menu_modules'),
+      items: [
+        { id: 'ai', label: `✦ ${t('ai_title')}`, run: () => setShowAI(true) },
+        { id: 'scenario', label: `◈ ${t('scenario_title')}`, run: () => setShowScenario(true) },
+        { id: 'plant', label: ` ${t('pw_title')}`, run: () => setShowPlant(true) },
+        { id: 'report', label: `▤ ${t('rs_title')}`, run: () => setShowReport(true) },
+        { id: 'autofill', label: `📥 ${t('af_title')}`, run: () => setShowAutoFill(true) },
+        { id: 'cloud', label: `☁ ${t('cloud')}`, run: () => useCloud.getState().setOpen(true) },
+      ],
+    },
+    {
+      group: t('menu_view'),
+      items: [
+        { id: 'search', label: t('search_all'), hint: 'Ctrl+K', run: () => setShowSearch(true) },
+        { id: 'palette', label: t('menu_palette'), hint: 'Ctrl+Shift+P', run: () => setPaletteOpen(true) },
+        { id: 'history', label: t('hist_title'), run: () => setShowHistory(true) },
+        { id: 'split', label: t('split_toggle'), run: () => toggleSplit() },
+        { id: 'sidebar', label: t('sidebar_toggle'), hint: 'Ctrl+B', run: () => setSidebarHidden((h) => !h) },
+        {
+          id: 'theme',
+          label: themeDark ? t('theme_light') : t('theme_dark'),
+          run: () => setThemeDark((d) => !d),
+        },
+      ],
+    },
+    {
+      group: t('menu_data'),
+      items: [
+        { id: 'db', label: t('db_manager'), run: () => setShowDbManager(true) },
+        { id: 'gp', label: t('nav_global_params'), run: () => setShowGP(true) },
+        {
+          id: 'engine-start',
+          label: `▶ ${t('engine_start')}`,
+          run: () => {
+            window.desktop?.startEngine()
+          },
+        },
+        {
+          id: 'engine-stop',
+          label: `■ ${t('engine_stop')}`,
+          run: () => {
+            window.desktop?.stopEngine()
+          },
+        },
+      ],
+    },
+    {
+      group: t('menu_lang'),
+      items: (['ru', 'en', 'zh'] as Lang[]).map((l) => ({
+        id: `lang-${l}`,
+        label: l === 'ru' ? 'Русский' : l === 'en' ? 'English' : '中文',
+        run: () => setLang(l),
+      })),
+    },
+    {
+      group: t('menu_help'),
+      items: [
+        { id: 'updates', label: t('up_title'), run: () => void checkUpdates() },
+        {
+          id: 'about',
+          label: t('menu_about'),
+          run: () => {
+            window.desktop?.appVersion().then((v) => toast.ok(`LCA·AI Studio ${v}`))
+          },
+        },
+      ],
+    },
+  ]
+
+  const quick: QuickCmd[] = [
+    { id: 'ai', label: t('ai_title'), run: () => setShowAI(true) },
+    { id: 'scenario', label: t('scenario_title'), run: () => setShowScenario(true) },
+    { id: 'plant', label: t('pw_title'), run: () => setShowPlant(true) },
+    { id: 'report', label: t('rs_title'), run: () => setShowReport(true) },
+    { id: 'autofill', label: t('af_title'), run: () => setShowAutoFill(true) },
+    { id: 'cloud', label: t('cloud'), run: () => useCloud.getState().setOpen(true) },
+    { id: 'db', label: t('db_manager'), run: () => setShowDbManager(true) },
+    { id: 'search', label: t('search_all'), run: () => setShowSearch(true) },
+  ]
+
   const activeTab = tabs.find((tb) => tb.key === active) ?? null
+  const secondTab = split ? (tabs.find((tb) => tb.key === second) ?? null) : null
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <header className="h-[46px] shrink-0 border-b border-line bg-paper-2 flex items-center px-4 gap-4">
-        <div className="flex items-baseline gap-2">
-          <span className="font-sans font-semibold text-[15px] uppercase tracking-widest">LCA·AI</span>
-          <span className="text-[12px] text-graphite-soft font-sans uppercase tracking-wide">Studio</span>
-        </div>
-        <div className="flex-1" />
-        <button
-          onClick={() => setShowSearch(true)}
-          title={`${t('search_all')} (Ctrl+K)`}
-          className="text-[13px] text-graphite-soft hover:text-graphite cursor-pointer border border-line px-2 py-1"
-        >
-          ⌕
-        </button>
-        <button
-          onClick={() => setShowGP(true)}
-          title={t('nav_global_params')}
-          className="text-[13px] text-graphite-soft hover:text-graphite cursor-pointer border border-line px-2 py-1 font-mono"
-        >
-          ƒ
-        </button>
-        <button
-          onClick={() => setPaletteOpen(true)}
-          title="Command palette (Ctrl+Shift+P)"
-          className="text-[13px] text-graphite-soft hover:text-graphite cursor-pointer border border-line px-2 py-1"
-        >
-          ⌘
-        </button>
-        <button
-          onClick={() => {
-            const dark = !document.documentElement.classList.contains('dark')
-            document.documentElement.classList.toggle('dark', dark)
-            localStorage.setItem('lcaai-theme', dark ? 'dark' : 'light')
-            setThemeDark(dark)
-          }}
-          title={themeDark ? 'Light theme' : 'Dark theme'}
-          className="text-[13px] text-graphite-soft hover:text-graphite cursor-pointer border border-line px-2 py-1"
-        >
-          <span className="theme-dot" aria-hidden="true" />
-        </button>
-        {window.desktop && <DbBadge onClick={() => setShowDbManager(true)} />}
-        <EngineBadge />
-        <select
-          value={lang}
-          onChange={(e) => setLang(e.target.value as Lang)}
-          className="px-2 py-1 bg-paper border border-line text-[12px] outline-none cursor-pointer"
-        >
-          <option value="ru">RU</option>
-          <option value="en">EN</option>
-          <option value="zh">中文</option>
-        </select>
-      </header>
-      {window.desktop && (
-        <nav className="shrink-0 border-b border-line bg-paper flex items-center gap-1 px-3 py-1.5 overflow-x-auto">
-          {(
-            [
-              { ico: '✦', label: t('ai_title'), run: () => setShowAI(true) },
-              { ico: '◈', label: t('scenario_title'), run: () => setShowScenario(true) },
-              { ico: '⌂', label: t('pw_title'), run: () => setShowPlant(true) },
-              { ico: '▤', label: t('rs_title'), run: () => setShowReport(true) },
-              { ico: '📥', label: t('af_title'), run: () => setShowAutoFill(true) },
-              { ico: '☁', label: t('cloud'), run: () => useCloud.getState().setOpen(true) },
-            ] as Array<{ ico: string; label: string; run: () => void }>
-          ).map((m) => (
-            <button
-              key={m.label}
-              onClick={m.run}
-              className="flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-sans uppercase tracking-wide text-graphite-mid hover:text-graphite hover:bg-paper-2 border border-transparent hover:border-line rounded cursor-pointer whitespace-nowrap"
-            >
-              <span className="ico">{m.ico}</span>
-              {m.label}
-            </button>
-          ))}
-        </nav>
-      )}
+      <TitleTabs
+        themeDark={themeDark}
+        onToggleTheme={() => setThemeDark((d) => !d)}
+        onSearch={() => setShowSearch(true)}
+        onHistory={() => setShowHistory(true)}
+        onToggleSplit={() => toggleSplit()}
+        onToggleSidebar={() => setSidebarHidden((h) => !h)}
+        sidebarHidden={sidebarHidden}
+        menu={menu}
+      />
 
       <div className="flex-1 flex min-h-0">
-        <Navigator />
-        <main className="flex-1 flex flex-col min-w-0">
-          {tabs.length > 0 && (
-            <div className="h-[36px] shrink-0 border-b border-line bg-paper-2 flex items-stretch overflow-x-auto">
-              {tabs.map((tb) => (
-                <div
-                  key={tb.key}
-                  onClick={() => setActive(tb.key)}
-                  className={`flex items-center gap-2 px-3 text-[12px] cursor-pointer border-r border-line max-w-[220px] ${
-                    tb.key === active ? 'bg-paper text-graphite' : 'text-graphite-mid hover:bg-paper-3'
-                  }`}
-                >
-                  <span className="truncate" title={tb.name}>{tb.name}</span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      close(tb.key)
-                    }}
-                    className="text-graphite-soft hover:text-e-4 shrink-0"
+        {!sidebarHidden && window.desktop && <Navigator />}
+        <main className="flex-1 flex min-w-0">
+          <div className="flex-1 min-w-0 overflow-hidden">
+            <EditorPane tab={activeTab} engineOffline={status !== 'online'} />
+          </div>
+          {split && (
+            <div className="flex-1 min-w-0 overflow-hidden border-l border-line flex flex-col">
+              {secondTab ? (
+                <div className="flex-1 min-h-0">
+                  <EditorPane tab={secondTab} engineOffline={status !== 'online'} />
+                </div>
+              ) : (
+                <div className="flex-1 overflow-y-auto p-3 space-y-1">
+                  <div className="text-[11px] font-sans uppercase tracking-widest text-graphite-soft mb-2">
+                    {t('split_pick')}
+                  </div>
+                  {tabs
+                    .filter((x) => x.key !== active)
+                    .map((x) => (
+                      <button
+                        key={x.key}
+                        onClick={() => setSecond(x.key)}
+                        className="w-full px-2 py-1 text-left text-[12px] text-graphite-mid hover:text-graphite hover:bg-paper-3 cursor-pointer truncate"
+                      >
+                        {x.name}
+                      </button>
+                    ))}
+                </div>
+              )}
+              {secondTab && (
+                <div className="shrink-0 border-t border-line px-2 py-1 flex items-center gap-2">
+                  <select
+                    value={second ?? ''}
+                    onChange={(e) => setSecond(e.target.value || null)}
+                    className="flex-1 min-w-0 bg-paper border border-line text-[11px] px-1 py-0.5 outline-none"
                   >
+                    <option value="">—</option>
+                    {tabs
+                      .filter((x) => x.key !== active)
+                      .map((x) => (
+                        <option key={x.key} value={x.key}>
+                          {x.name}
+                        </option>
+                      ))}
+                  </select>
+                  <button onClick={() => toggleSplit()} className="text-[11px] text-graphite-soft hover:text-e-4 cursor-pointer">
                     ×
                   </button>
                 </div>
-              ))}
+              )}
             </div>
           )}
-
-          <div className="flex-1 min-h-0">
-            {!activeTab ? (
-              <EmptyState>
-                <div className="text-center">
-                  <div className="text-[40px] mb-3 font-sans">∅</div>
-                  <div>{t('empty_editor')}</div>
-                  {status !== 'online' && (
-                    <div className="mt-4 text-[12px] text-graphite-soft font-mono">{t('engine_hint')}</div>
-                  )}
-                </div>
-              </EmptyState>
-            ) : (
-              <EditorFor type={activeTab.type} id={activeTab.id} />
-            )}
-          </div>
         </main>
       </div>
 
-      <footer className="h-[26px] shrink-0 border-t border-line bg-paper-2 flex items-center px-4 gap-3 text-[11px] text-graphite-soft font-mono">
-        <span className={`inline-block w-2 h-2 rounded-full ${status === 'online' ? 'bg-ok' : status === 'checking' ? 'bg-e-2' : 'bg-e-4'}`} />
-        <span>
-          {status === 'online' ? t('engine_online') : status === 'checking' ? t('engine_checking') : t('engine_offline')}
-        </span>
-        {summary && (
-          <span>
-            · {summary.processes.toLocaleString()} {t('nav_processes').toLowerCase()}
-            {' · '}
-            {summary.flows.toLocaleString()} {t('nav_flows').toLowerCase()}
-            {' · '}
-            {summary.impactCategories} LCIA
-          </span>
-        )}
-        <div className="flex-1" />
-        <span>openLCA IPC · JSON-RPC</span>
-      </footer>
+      <Composer
+        onAi={(p) => {
+          setAiSeed(p)
+          setShowAI(true)
+        }}
+        onAutoFill={() => setShowAutoFill(true)}
+        onReport={() => setShowReport(true)}
+        onOpenDb={() => setShowDbManager(true)}
+        quick={quick}
+      />
 
       {showDbManager && window.desktop && <DatabaseManager onClose={() => setShowDbManager(false)} />}
 
@@ -234,7 +283,7 @@ export default function App() {
 
       {window.desktop && <CloudPanel />}
 
-      {window.desktop && <AiPanel open={showAI} onClose={() => setShowAI(false)} />}
+      {window.desktop && <AiPanel open={showAI} seed={aiSeed} onClose={() => setShowAI(false)} />}
       {window.desktop && (
         <ScenarioBuilder
           open={showScenario}
@@ -267,6 +316,7 @@ export default function App() {
           }}
         />
       )}
+      <HistoryPanel open={showHistory} onClose={() => setShowHistory(false)} />
       <CommandPalette
         open={paletteOpen}
         onClose={() => setPaletteOpen(false)}
@@ -278,27 +328,12 @@ export default function App() {
           { id: 'report', label: t('rs_title'), run: () => setShowReport(true) },
           { id: 'autofill', label: t('af_title'), run: () => setShowAutoFill(true) },
           { id: 'cloud', label: t('cloud'), run: () => useCloud.getState().setOpen(true) },
-          {
-            id: 'updates',
-            label: t('up_title'),
-            run: async () => {
-              const d = window.desktop!
-              const r = await d.checkUpdates()
-              if (r && r.ok && r.version) {
-                // overlay picks up 'available' and shows the download popup
-              } else if (r && r.ok) {
-                const v = await d.appVersion().catch(() => '')
-                toast.ok(`${t('up_latest')}: ${v}`)
-              } else {
-                toast.warn(`${t('up_title')}: ${r?.reason ?? 'error'}`)
-              }
-            },
-          },
+          { id: 'updates', label: t('up_title'), run: () => void checkUpdates() },
           { id: 'db', label: t('db_manager'), run: () => setShowDbManager(true) },
           { id: 'gp', label: t('nav_global_params'), run: () => setShowGP(true) },
           {
             id: 'theme',
-            label: themeDark ? 'Switch to light theme' : 'Switch to dark theme',
+            label: themeDark ? t('theme_light') : t('theme_dark'),
             run: () => setThemeDark((d) => !d),
           },
         ]}
@@ -309,28 +344,25 @@ export default function App() {
   )
 }
 
-function DbBadge({ onClick }: { onClick: () => void }) {
+function EditorPane({ tab, engineOffline }: { tab: Tab | null; engineOffline: boolean }) {
   const t = useI18n((s) => s.t)
-  const [db, setDb] = useState('')
-  useEffect(() => {
-    let mounted = true
-    const load = () => window.desktop?.dbList().then((r) => mounted && setDb(r.current)).catch(() => undefined)
-    load()
-    const off = window.desktop?.onDbChanged((d) => setDb(d.db))
-    return () => {
-      mounted = false
-      off?.()
-    }
-  }, [])
+  if (!tab) {
+    return (
+      <EmptyState>
+        <div className="text-center">
+          <div className="text-[40px] mb-3 font-sans">∅</div>
+          <div>{t('empty_editor')}</div>
+          {engineOffline && <div className="mt-4 text-[12px] text-graphite-soft font-mono">{t('engine_hint')}</div>}
+        </div>
+      </EmptyState>
+    )
+  }
   return (
-    <button
-      onClick={onClick}
-      title={t('db_manager')}
-      className="flex items-center gap-1.5 text-[11px] font-sans uppercase tracking-wide text-graphite-mid hover:text-graphite cursor-pointer border border-line px-2 py-1"
-    >
-      <span className="text-graphite-soft">▤</span>
-      <span className="font-mono normal-case">{db || '…'}</span>
-    </button>
+    <div className="h-full overflow-y-auto">
+      <div className="mx-auto max-w-[1200px] min-h-full">
+        <EditorFor type={tab.type} id={tab.id} />
+      </div>
+    </div>
   )
 }
 
@@ -360,47 +392,4 @@ function EditorFor({ type, id }: { type: Tab['type']; id: string }) {
     default:
       return <GenericEditor type={type} id={id} />
   }
-}
-
-function EngineBadge() {
-  const status = useEngine((s) => s.status)
-  const check = useEngine((s) => s.check)
-  const t = useI18n((s) => s.t)
-  const desktop = window.desktop
-  if (status === 'online') {
-    return (
-      <span className="flex items-center gap-2">
-        <span className="text-[11px] font-sans uppercase tracking-wide text-ok">● {t('engine_online')}</span>
-        {desktop && (
-          <button
-            onClick={() => desktop.stopEngine()}
-            className="text-[11px] font-sans text-graphite-soft hover:text-e-4 cursor-pointer"
-            title={t('engine_stop')}
-          >
-            ■
-          </button>
-        )}
-      </span>
-    )
-  }
-  return (
-    <span className="flex items-center gap-2">
-      <button
-        onClick={check}
-        className="text-[11px] font-sans uppercase tracking-wide text-e-ink hover:text-e-4 cursor-pointer"
-        title={t('engine_hint')}
-      >
-        ● {status === 'checking' ? t('engine_checking') : t('engine_offline')}
-      </button>
-      {desktop && status === 'offline' && (
-        <button
-          onClick={() => desktop.startEngine()}
-          className="text-[11px] font-sans uppercase tracking-wide text-ok hover:text-graphite cursor-pointer"
-          title={t('engine_start')}
-        >
-          ▶ {t('engine_start')}
-        </button>
-      )}
-    </span>
-  )
 }
