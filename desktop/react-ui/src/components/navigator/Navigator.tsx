@@ -252,25 +252,6 @@ export function Navigator() {
         {renderGroup('background', t('group_background'), BACKGROUND)}
       </div>
 
-      {window.desktop && dbs.filter((d) => !d.active).length > 0 && (
-        <div className="border-t border-line">
-          {dbs
-            .filter((d) => !d.active)
-            .map((d) => (
-              <button
-                key={d.name}
-                onClick={() => window.desktop!.dbSwitch(d.name)}
-                title={`${t('db_switch')}: ${d.name}`}
-                className="w-full flex items-center gap-2 px-2 py-2 text-left text-[12px] font-mono text-graphite-mid hover:text-graphite hover:bg-paper-3 cursor-pointer"
-              >
-                <span className="text-graphite-soft">🗄</span>
-                <span className="flex-1 truncate">{d.name}</span>
-                {d.isBase && <span className="text-[9px] font-sans uppercase text-ok">{t('db_base')}</span>}
-              </button>
-            ))}
-        </div>
-      )}
-
       {creating === 'Process' && (
         <ProcessCreateDialog
           onClose={() => setCreating(null)}

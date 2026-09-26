@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { useTabs } from '../stores/tabs'
 import { WindowControls } from './WindowControls'
-import { MenuBar, type MenuBarColumn } from './MenuBar'
+import { HamburgerMenu, type MenuBarColumn } from './MenuBar'
 import { useI18n } from '../i18n'
 
 export interface ModuleButton {
@@ -46,9 +46,9 @@ export function TitleTabs({
 
   return (
     <div className="shrink-0 border-b border-line bg-paper-2">
-      {/* row 1: menu bar + modules + cluster + window controls (drag region) */}
+      {/* row 1: hamburger menu + modules + cluster + window controls (drag region) */}
       <div className="titlebar h-[36px] flex items-stretch">
-        <MenuBar columns={columns} />
+        <HamburgerMenu columns={columns} title="LCA·AI" />
 
         <div className="no-drag flex items-stretch border-l border-line overflow-x-auto">
           {modules.map((m) => (
@@ -79,7 +79,7 @@ export function TitleTabs({
             title={t('sidebar_toggle')}
             className={`ic-btn ${sidebarHidden ? 'ic-btn-on' : ''}`}
           >
-            
+            ◧
           </button>
           <button onClick={onToggleTheme} title={themeDark ? t('theme_light') : t('theme_dark')} className="ic-btn">
             <span className="theme-dot" aria-hidden="true" />

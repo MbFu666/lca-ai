@@ -22,6 +22,13 @@ interface HistoryRow {
   created_at: string
 }
 
+interface CloudDbRow {
+  id: string
+  name: string
+  db_name?: string | null
+  snapshot: { saved_at: string; stats?: { total?: number; sizeMb?: number; db?: string } | null } | null
+}
+
 export function CloudPanel() {
   const t = useI18n((s) => s.t)
   const { open, pendingReport, setOpen, setPendingReport } = useCloud()
@@ -32,6 +39,8 @@ export function CloudPanel() {
   const [error, setError] = useState('')
   const [rows, setRows] = useState<HistoryRow[] | null>(null)
   const [view, setView] = useState<HistoryRow | null>(null)
+  const [projects, setProjects] = useState<CloudDbRow[] | null>(null)
+  const [confirm, setConfirm] = useState<{ id: string; op: 'open' | 'save' | 'delete' } | null>(null)
 
   useEffect(() => {
     if (open) {
@@ -58,6 +67,51 @@ export function CloudPanel() {
   useEffect(() => {
     if (open && auth?.access_token) loadHistory(auth.access_token)
   }, [open, auth, loadHistory])
+
+  const loadProjects = useCallback(async () => {
+    setProjects(null)
+    try {
+      const r = await window.desktop?.cloudProjectsList()
+      setProjects((r ?? []) as CloudDbRow[])
+    } catch (e) {
+      setError(String(e instanceof Error ? e.message : e))
+      setProjects([])
+    }
+  }, [])
+
+  useEffect(() => {
+    if (open && auth?.access_token) void loadProjects()
+  }, [open, auth, loadProjects])
+
+  const cloudDbAction = async (p: CloudDbRow, op: 'open' | 'save' | 'delete') => {
+    setBusy(true)
+    setError('')
+    try {
+      if (op === 'open') await window.desktop!.cloudProjectsOpen(p.id, p.db_name || p.name)
+      else if (op === 'save') await window.desktop!.cloudProjectsSave(p.name)
+      else await window.desktop!.cloudProjectsDelete(p.id)
+      setConfirm(null)
+      await loadProjects()
+    } catch (e) {
+      setError(String(e instanceof Error ? e.message : e))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const saveCurrentDb = async () => {
+    setBusy(true)
+    setError('')
+    try {
+      const list = await window.desktop!.dbList()
+      await window.desktop!.cloudProjectsSave(list.current)
+      await loadProjects()
+    } catch (e) {
+      setError(String(e instanceof Error ? e.message : e))
+    } finally {
+      setBusy(false)
+    }
+  }
 
   if (!open) return null
 
@@ -218,6 +272,61 @@ export function CloudPanel() {
                     {busy ? t('loading') : t('save')}
                   </Button>
                 </div>
+              )}
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-[11px] font-sans uppercase tracking-wide text-graphite-soft">
+                  {t('cloud_my_dbs')}
+                </div>
+                <Button onClick={saveCurrentDb} disabled={busy}>
+                  {t('cloud_db_save_current')}
+                </Button>
+              </div>
+              {projects === null ? (
+                <Spinner label={t('loading')} />
+              ) : projects.length === 0 ? (
+                <div className="text-[12px] text-graphite-soft mb-4">{t('cloud_db_empty')}</div>
+              ) : (
+                <table className="w-full text-[12px] border-collapse mb-6">
+                  <tbody>
+                    {projects.map((p) => (
+                      <tr key={p.id} className="border-t border-line">
+                        <td className="py-1.5 pr-3 truncate max-w-[200px] font-mono">{p.name}</td>
+                        <td className="py-1.5 pr-3 text-graphite-soft whitespace-nowrap">
+                          {p.snapshot?.stats?.total ?? 0} · {p.snapshot?.stats?.sizeMb ?? 0} MB ·{' '}
+                          {String(p.snapshot?.saved_at ?? '').slice(0, 10)}
+                        </td>
+                        <td className="py-1.5 text-right whitespace-nowrap">
+                          {confirm?.id === p.id ? (
+                            <span className="flex items-center gap-2 justify-end">
+                              <span className="text-[11px] text-e-ink">{t('cloud_db_confirm')}</span>
+                              <button
+                                className="text-[11px] text-ok hover:underline cursor-pointer"
+                                onClick={() => cloudDbAction(p, confirm.op)}
+                              >
+                                {t('yes')}
+                              </button>
+                              <button className="text-[11px] text-graphite-soft hover:underline cursor-pointer" onClick={() => setConfirm(null)}>
+                                {t('no')}
+                              </button>
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-2 justify-end">
+                              <button className="text-[11px] text-graphite-mid hover:text-graphite cursor-pointer" onClick={() => setConfirm({ id: p.id, op: 'open' })}>
+                                {t('cloud_db_open')}
+                              </button>
+                              <button className="text-[11px] text-graphite-mid hover:text-graphite cursor-pointer" onClick={() => setConfirm({ id: p.id, op: 'save' })}>
+                                {t('cloud_db_save')}
+                              </button>
+                              <button className="text-[11px] text-graphite-mid hover:text-e-4 cursor-pointer" onClick={() => setConfirm({ id: p.id, op: 'delete' })}>
+                                {t('cloud_db_delete')}
+                              </button>
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               )}
               <div className="text-[11px] font-sans uppercase tracking-wide text-graphite-soft mb-2">
                 {t('my_reports')}

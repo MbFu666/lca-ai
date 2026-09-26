@@ -13,50 +13,73 @@ export interface MenuBarColumn {
   items: MenuBarItem[]
 }
 
-/** Classic menu bar: hovering a top-level item opens its submenu (OpenCode-style). */
-export function MenuBar({ columns }: { columns: MenuBarColumn[] }) {
-  const [open, setOpen] = useState<string | null>(null)
-  const closeTimer = useRef<number | null>(null)
+/** OpenCode-style: three-stripes button opens a vertical menu; hovering a column flies its submenu out to the right. */
+export function HamburgerMenu({ columns, title }: { columns: MenuBarColumn[]; title: string }) {
+  const [open, setOpen] = useState(false)
+  const [sub, setSub] = useState<string | null>(null)
+  const timer = useRef<number | null>(null)
 
-  const enter = (id: string) => {
-    if (closeTimer.current !== null) {
-      window.clearTimeout(closeTimer.current)
-      closeTimer.current = null
+  const cancelClose = () => {
+    if (timer.current !== null) {
+      window.clearTimeout(timer.current)
+      timer.current = null
     }
-    setOpen(id)
   }
-  const leave = () => {
-    closeTimer.current = window.setTimeout(() => setOpen(null), 160)
+  const scheduleClose = () => {
+    cancelClose()
+    timer.current = window.setTimeout(() => {
+      setOpen(false)
+      setSub(null)
+    }, 160)
   }
 
   return (
-    <div className="menubar no-drag" onMouseLeave={leave}>
-      {columns.map((col) => (
-        <div key={col.id} className="relative h-full" onMouseEnter={() => enter(col.id)}>
-          <button className={`menubar-item ${open === col.id ? 'menubar-item-on' : ''}`}>{col.label}</button>
-          {open === col.id && (
-            <div className="appmenu" onMouseEnter={() => enter(col.id)}>
-              {col.items.map((it, i) =>
-                it.separator ? (
-                  <div key={`sep-${i}`} className="appmenu-sep" />
-                ) : (
-                  <button
-                    key={it.id}
-                    className="appmenu-item"
-                    onClick={() => {
-                      setOpen(null)
-                      it.run?.()
-                    }}
-                  >
-                    <span className="flex-1 truncate text-left">{it.label}</span>
-                    {it.hint && <span className="appmenu-hint font-mono">{it.hint}</span>}
-                  </button>
-                ),
+    <div className="no-drag relative h-full flex items-center px-1.5" onMouseLeave={scheduleClose} onMouseEnter={cancelClose}>
+      <button
+        className="ham-btn"
+        title={title}
+        onClick={() => {
+          setOpen((o) => !o)
+          setSub(null)
+        }}
+      >
+        ☰
+      </button>
+      {open && (
+        <div className="ham-menu" onMouseEnter={cancelClose}>
+          <div className="ham-head">{title}</div>
+          {columns.map((col) => (
+            <div key={col.id} className="relative" onMouseEnter={() => setSub(col.id)}>
+              <button className={`ham-item ${sub === col.id ? 'ham-item-on' : ''}`}>
+                <span className="flex-1 truncate text-left">{col.label}</span>
+                <span className="ham-arrow">▸</span>
+              </button>
+              {sub === col.id && (
+                <div className="ham-sub">
+                  {col.items.map((it, i) =>
+                    it.separator ? (
+                      <div key={`sep-${i}`} className="appmenu-sep" />
+                    ) : (
+                      <button
+                        key={it.id}
+                        className="appmenu-item"
+                        onClick={() => {
+                          setOpen(false)
+                          setSub(null)
+                          it.run?.()
+                        }}
+                      >
+                        <span className="flex-1 truncate text-left">{it.label}</span>
+                        {it.hint && <span className="appmenu-hint font-mono">{it.hint}</span>}
+                      </button>
+                    ),
+                  )}
+                </div>
               )}
             </div>
-          )}
+          ))}
         </div>
-      ))}
+      )}
     </div>
   )
 }

@@ -436,6 +436,20 @@ const DICT: Record<string, Record<Lang, string>> = {
   hist_empty: { ru: 'Пока пусто — открывайте сущности, и они появятся здесь.', en: 'Empty for now — open entities and they will appear here.', zh: '暂无记录—打开实体后会显示在这里。' },
   hist_today: { ru: 'Сегодня', en: 'Today', zh: '今天' },
   hist_yesterday: { ru: 'Вчера', en: 'Yesterday', zh: '昨天' },
+  hist_earlier: { ru: 'Ранее', en: 'Earlier', zh: '更早' },
+  yes: { ru: 'Да', en: 'Yes', zh: '是' },
+  no: { ru: 'Нет', en: 'No', zh: '否' },
+  home_search: { ru: 'Поиск сущностей…', en: 'Search entities…', zh: '搜索实体…' },
+  home_dbs: { ru: 'Базы данных', en: 'Databases', zh: '数据库' },
+  home_history: { ru: 'История открытий БД', en: 'Database open history', zh: '数据库打开历史' },
+  home_new_session: { ru: 'Новая сессия', en: 'New session', zh: '新会话' },
+  cloud_my_dbs: { ru: 'Мои БД в облаке', en: 'My databases in cloud', zh: '我的云数据库' },
+  cloud_db_open: { ru: 'Открыть', en: 'Open', zh: '打开' },
+  cloud_db_save: { ru: 'Сохранить', en: 'Save', zh: '保存' },
+  cloud_db_delete: { ru: 'Удалить', en: 'Delete', zh: '删除' },
+  cloud_db_save_current: { ru: 'Сохранить текущую БД', en: 'Save current DB', zh: '保存当前数据库' },
+  cloud_db_empty: { ru: 'В облаке пока нет баз данных.', en: 'No databases in the cloud yet.', zh: '云端暂无数据库。' },
+  cloud_db_confirm: { ru: 'Подтвердить?', en: 'Confirm?', zh: '确认？' },
 }
 
 interface I18nState {

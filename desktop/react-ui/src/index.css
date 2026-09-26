@@ -116,9 +116,10 @@ body {
 .wc-btn { width: 42px; display: flex; align-items: center; justify-content: center; background: none; border: none; color: var(--color-graphite-mid); font-size: 12px; cursor: pointer; }
 .wc-btn:hover { background: var(--color-paper-3); color: var(--color-graphite); }
 .wc-btn.wc-close:hover { background: var(--color-e-4); color: #fff; }
-.ic-btn { width: 34px; display: flex; align-items: center; justify-content: center; background: none; border: none; color: var(--color-graphite-mid); font-size: 13px; cursor: pointer; }
-.ic-btn:hover { color: var(--color-graphite); background: var(--color-paper-3); }
-.ic-btn-on { color: var(--color-graphite); background: var(--color-paper-3); }
+.ic-btn { width: 34px; display: flex; align-items: center; justify-content: center; background: none; border: none; color: var(--color-graphite); font-size: 14px; font-weight: 700; cursor: pointer; }
+.ic-btn:hover { background: var(--color-paper-3); }
+.ic-btn .ico { font-weight: 700; }
+.ic-btn-on { background: var(--color-paper-3); }
 .tabitem { display: flex; align-items: center; gap: 6px; padding: 0 10px; max-width: 200px; min-width: 70px; font-size: 12px; color: var(--color-graphite-mid); border-right: 1px solid var(--color-line); cursor: pointer; }
 .tabitem:hover { background: var(--color-paper-3); }
 .tabitem-active { background: var(--color-paper); color: var(--color-graphite); }
@@ -134,10 +135,14 @@ body {
 .appmenu-item:hover { background: var(--color-paper-2); }
 .appmenu-hint { color: var(--color-graphite-soft); font-size: 10px; }
 .appmenu-sep { height: 1px; background: var(--color-line); margin: 4px 6px; }
-.menubar { display: flex; align-items: stretch; height: 100%; }
-.menubar-item { padding: 0 10px; background: none; border: none; font-size: 12px; color: var(--color-graphite-mid); cursor: pointer; white-space: nowrap; }
-.menubar-item:hover { color: var(--color-graphite); }
-.menubar-item-on { background: var(--color-paper-3); color: var(--color-graphite); }
+.ham-btn { width: 30px; height: 26px; border: 1px solid var(--color-line); border-radius: 6px; background: var(--color-paper-3); color: var(--color-graphite); font-size: 14px; font-weight: 700; cursor: pointer; line-height: 1; }
+.ham-btn:hover { background: var(--color-line); }
+.ham-menu { position: absolute; top: calc(100% + 2px); left: 4px; z-index: 85; width: 200px; background: var(--color-paper); border: 1px solid var(--color-line); border-radius: 8px; box-shadow: 0 16px 48px rgb(0 0 0 / .25); padding: 4px; }
+.ham-head { padding: 6px 10px 4px; font-family: var(--font-sans); font-weight: 600; font-size: 13px; letter-spacing: .04em; }
+.ham-item { display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 10px; font-size: 12px; font-weight: 600; color: var(--color-graphite); background: none; border: none; border-radius: 5px; cursor: pointer; }
+.ham-item-on { background: var(--color-paper-2); }
+.ham-arrow { color: var(--color-graphite-soft); font-size: 10px; }
+.ham-sub { position: absolute; left: 100%; top: -5px; min-width: 250px; background: var(--color-paper); border: 1px solid var(--color-line); border-radius: 8px; box-shadow: 0 16px 48px rgb(0 0 0 / .25); padding: 4px; margin-left: 2px; }
 .composer-box { border: 1px solid var(--color-line); border-radius: 10px; background: var(--color-paper); }
 .composer-plus { width: 22px; height: 22px; border: 1px solid var(--color-line); border-radius: 6px; background: none; color: var(--color-graphite-mid); cursor: pointer; font-size: 13px; line-height: 1; }
 .composer-plus:hover { color: var(--color-graphite); border-color: var(--color-graphite-mid); }

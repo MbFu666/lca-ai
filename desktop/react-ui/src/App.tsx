@@ -27,6 +27,7 @@ import { TitleTabs, type ModuleButton } from './components/TitleTabs'
 import { type MenuBarColumn } from './components/MenuBar'
 import { DbPickerDialog } from './components/DbPickerDialog'
 import { HistoryPanel } from './components/HistoryPanel'
+import { HomeView } from './components/HomeView'
 import { Toasts } from './components/ui/charts'
 import { toast } from './lib/toast'
 import { createProjectSession } from './lib/session'
@@ -342,13 +343,21 @@ export default function App() {
         {!sidebarHidden && window.desktop && <Navigator />}
         <main className="flex-1 flex min-w-0">
           <div className="flex-1 min-w-0 overflow-hidden">
-            <EditorPane tab={activeTab} />
+            <EditorPane
+              tab={activeTab}
+              onSearch={() => setShowSearch(true)}
+              onCreateDb={() => setDbPicker('create')}
+            />
           </div>
           {split && (
             <div className="flex-1 min-w-0 overflow-hidden border-l border-line flex flex-col">
               {secondTab ? (
                 <div className="flex-1 min-h-0">
-                  <EditorPane tab={secondTab} />
+                  <EditorPane
+                    tab={secondTab}
+                    onSearch={() => setShowSearch(true)}
+                    onCreateDb={() => setDbPicker('create')}
+                  />
                 </div>
               ) : (
                 <div className="flex-1 overflow-y-auto p-3 space-y-1">
@@ -473,9 +482,18 @@ export default function App() {
   )
 }
 
-function EditorPane({ tab }: { tab: Tab | null }) {
+function EditorPane({
+  tab,
+  onSearch,
+  onCreateDb,
+}: {
+  tab: Tab | null
+  onSearch: () => void
+  onCreateDb: () => void
+}) {
   const t = useI18n((s) => s.t)
   if (!tab) {
+    if (window.desktop) return <HomeView onSearch={onSearch} onCreateDb={onCreateDb} />
     return (
       <EmptyState>
         <div className="text-center">
